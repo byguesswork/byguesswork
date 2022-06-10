@@ -81,7 +81,7 @@ const btnKeyRandomDirection = document.querySelector('.button-random');
 const btnsRandomnessLevel = document.querySelectorAll('#randomness-level p');
 // const btnsSteeringType = document.querySelectorAll('.steering-type');            // legacy, se ne uporablja
 const btnSubmitSize = document.getElementById('size-form-submit');
-const btnTestButton2 = document.getElementById('button-2');
+// const btnTestButton2 = document.getElementById('button-2');
 const btnResetHighScores = document.querySelector('.button-1');
 const boxStartGame = document.getElementById('start-game-box');
 const boxIntervalSpeed = document.getElementById('box-interval-speed');
@@ -1674,7 +1674,7 @@ btnsRandomnessLevel.forEach(btn => btn.addEventListener('click', () => {
 }));
 divBckgndGrid.addEventListener('click', () => { if (!controlsTemporarilyOff) bckgndGridBtnAction() });
 divGreenMode.addEventListener('click', () => { if (!controlsTemporarilyOff) greenModeBtnAction() });
-btnTestButton2.addEventListener('click', testButton2Operation);
+// btnTestButton2.addEventListener('click', testButton2Operation);  // v live različici listener ne smebiti aktiven
 btnResetHighScores.addEventListener('click', btnResetHighScoresOperation);
 // spodnje samo zato, da onesposobiš tipko enter, ki bi sicer sprožila igro;
 inputPlayingFieldSize.forEach(input => input.addEventListener('click', () => { controlsTemporarilyOff = true; }));
