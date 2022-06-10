@@ -1,0 +1,479 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: Helvetica, Arial, sans-serif;
+    color: #f0fff0;
+    background-color: #808080;
+}
+
+/*barve: 
+siva:hover              #808080;        (ozadje menijev,sicer grey)
+svetlejša temno siva: 	#757575;
+flourescentna zelena: 	#9cfa9c		(ozadje, ko hover pri izbiri elementa)
+temno zelena: 			#3c523c					(ozadje izbranega elementa)
+temno sivo ozadje:      #313131
+
+*/
+
+/* levi panel */
+#meniji {
+    position: absolute;
+    width: 310px;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    padding: 20px 0 0 20px;
+}
+
+#start-game-box {
+    display: flex;
+    flex-direction: column;
+    height: 90px;
+    background-color: #2a93f5;
+    margin: 0 20px 7px 0;
+    color: whitesmoke;
+    font-size: xx-large;
+    align-items: center;
+    justify-content: center;
+}
+
+#start-game-box p {
+    background-color: inherit;
+}
+
+#start-game-box-overlay {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    left: 20px;
+    top: 72px;
+    background: grey;
+    opacity: 100%;
+}
+
+#window-overlay-for-alert {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    left: 1px;
+    top: 1px;
+    background: linear-gradient(45deg, #e66465, #9198e5);
+    opacity: 0%;
+}
+
+#interval-box-overlay {
+    position: absolute;
+    /* width: 1px;
+    height: 1px;
+    left: 20px;
+    top: 196px; */
+    background: #808080;
+    opacity: 60%;
+}
+
+#randomness-div-overlay {
+    position: absolute;
+    background: grey;
+    opacity: 100%;
+}
+
+#size-div-overlay {
+    position: absolute;
+    background: grey;
+    opacity: 60%;
+}
+
+.button-key,
+.button-random {
+    width: 30px;
+}
+
+.button-key-selected {
+    color: #2ef82e;
+    background: #2e6d2e;
+}
+
+.button-random-selected {
+    color: #ff893a;
+    background: #a34646;
+}
+
+.interval-speed,
+.steering-type {
+    accent-color: #2e6d2e;
+    /* kot ozadje pri izbranem gumbu za smer
+    /* accent-color: #178017;            /*  na isti višini kot svetlo siva na ozadju, samo da je zelena  */
+    /* accent-color: #1ea71e;            /* kot barva fluorescentno zeene pisave */
+}
+
+.bottom-fat-td {
+    padding: 0 0 5px;
+}
+
+#randomness-level {
+    position: relative;
+    left: 44px;
+    width: 250px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+#randomness-level p {
+    margin-top: 2px;
+    margin-right: 10px;
+    padding: 1px 0 2px 5px;
+    border-top: 1px solid #757575;
+    border-right: 2px solid #565756;
+    border-bottom: 1px solid #565756;
+    border-left: 1px solid #757575;
+}
+
+#randomness-level p:hover {
+    border-right: 2px solid #ff893a;
+    border-bottom: 1px solid #ff893a;
+}
+
+#randomness-level p.selected {
+    margin-top: 2px;
+    margin-right: 10px;
+    padding: 2px 0 1px 5px;
+    background: #a34646;
+    border-top: 1px solid #d84e4e;
+    border-right: 1px solid #a34646;
+    border-bottom: 1px solid #a34646;
+    border-left: 2px solid #d84e4e;
+    color: #ff893a;
+}
+
+#graphic-opts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.green-mode-btn-unselected,
+.background-grid-btn-unselected {
+    margin-top: 2px;
+    margin-right: 18px;
+    padding: 1px 0 2px 5px;
+    background: #757575;
+    border-top: 1px solid #757575;
+    border-right: 2px solid #565756;
+    border-bottom: 1px solid #565756;
+    border-left: 1px solid #757575;
+}
+
+.green-mode-btn-unselected:hover,
+.background-grid-btn-unselected:hover {
+    border-right: 2px solid #4afd32;
+    border-bottom: 1px solid #4afd32;
+    /* border-top: 1px solid #4afd32;
+    border-left: 1px solid #4afd32; */
+}
+
+.green-mode-btn-selected,
+.background-grid-btn-selected {
+    margin-top: 2px;
+    margin-right: 18px;
+    padding: 2px 0 1px 5px;
+    background: #2e6d2e;
+    border-top: 1px solid #27c027;
+    border-right: 1px solid #2e6d2e;
+    border-bottom: 1px solid #2e6d2e;
+    border-left: 2px solid #27c027;
+}
+
+.green-mode-btn-selected:hover,
+.background-grid-btn-selected:hover {
+    border-top: 1px solid #4afd32;
+    border-left: 2px solid #4afd32;
+}
+
+#green-mode-div p,
+#background-grid-div p {
+    background: inherit;
+}
+
+#size-div {
+    overflow: hidden;
+}
+
+.size-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.size-form-input {
+    background-color: #d6dee0;
+    color: #313131;
+    border: none;
+    width: 130px;
+}
+
+#size-form-submit {
+    float: right;
+    /* margin-top: 5px; */
+    margin-right: 10px;
+    /* margin-bottom: 5px; */
+}
+
+.pause-label {
+    position: absolute;
+    top: 70px;
+    height: 40px;
+    line-height: 40px;
+    /* ta line height je trik da ti vertikalno poravna*/
+    width: 230px;
+    padding: 20px;
+    font-size: x-large;
+    text-align: center;
+    background-color: #eb1d1d;
+}
+
+#button-2 {
+    position: absolute;
+    bottom: 20px;
+}
+
+#info {
+    padding: 0px 20px;
+}
+
+#reset-highscores {
+    position: absolute;
+    bottom: 20px;
+    width: 310px;
+    height: 80px;
+    padding: 20px 10px;
+    border: 1px solid #f0fff0;
+    background: #313131;
+}
+
+#reset-highscores button:hover {
+    border-right: 2px solid #2ef82e;
+    border-bottom: 2px solid #2ef82e;
+    border-top: 2px solid #f0fff0;
+    border-left: 2px solid #f0fff0;
+    color: #313131;
+    /* ena alternativa pa je par barv spodaj: */
+    /* color: #8f9b8f;
+    background: #5c5f5c; */
+}
+
+#not-now,
+#eyes-on-the-game {
+    position: absolute;
+    left: 250px;
+    width: -moz-fit-content;
+    width: fit-content;
+    border: 1px solid #f0fff0;
+}
+
+#not-now {
+    bottom: 50px;
+}
+
+#eyes-on-the-game {
+    bottom: 20px;
+}
+
+#not-now p,
+#eyes-on-the-game p {
+    background: #313131;
+}
+
+/* --------    srednji stolpec      ------------------  */
+#game-over {
+    position: absolute;
+    font-size: xx-large;
+    left: 480px;
+    top: 300px;
+    padding: 20px;
+    /*  širina je 300px, višina 80px (točneje 77)  */
+    /*  levi meniji: širina = 330px */
+}
+
+#delovna {
+    position: absolute;
+    top: 0px;
+    left: 400px;
+    width: 703px;
+    /* prej  nastavitve height ni bilo in višina delovne je bila samodejno 707 (upoštevajoč paddinge seveda); zakaj toliko? */
+    height: 703px;
+    background: #313131;
+}
+
+#canvas {
+    position: absolute;
+    top: 0;
+    left: 331px;
+    border: 1px solid #bdbdbd;
+    background: #5a5a5a;
+    /* background: #bdbdbd; */
+}
+
+/* --------    desna stran      ------------------  */
+
+#desni {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 1033px;
+}
+
+#lang-flag {
+    float: right;
+    width: 115px;
+    height: 19px;
+    margin: 5px 0 0 0;
+}
+
+#home {
+    margin: 0 10px 0 0;
+}
+
+#div-score {
+    font-size: x-large;
+    margin: 80px 0 20px 30px;
+}
+
+#messages-container {
+    width: 330px;
+    height: 200px;
+    /* border: 1px solid #f0fff0; */
+}
+
+#messages {
+    width: 288px;
+    height: 158px;
+    margin: 0 0 0 20px;
+    padding: 20px;
+    color: white;
+}
+
+#high-scores-all {
+    position: absolute;
+    bottom: 0;
+}
+
+#high-scores {
+    width: 330px;
+    height: 180px;
+    border: 1px solid #f0fff0;
+    margin: 0 0 0 20px;
+    padding: 10px 0 10px 10px;
+}
+
+/* ta je za gumb Počisti tabelo zmagovalcev  */
+.button-1 {
+    margin: 10px 0 0 20px;
+}
+
+#high-score-initials {
+    position: absolute;
+    top: 200px;
+    left: 15px;
+    width: 350px;
+    height: 200px;
+    border: 1px solid grey;
+    background: #313131;
+    color: white;
+}
+
+#high-score-initials p {
+    background: #313131;
+    font-style: italic;
+    font-size: large;
+    padding: 10px 10px 0px;
+}
+
+#high-score-initials form {
+    background: #313131;
+    padding: 0px 10px;
+}
+
+#high-score-initials input {
+    width: 300px;
+    background: #313131;
+    font-size: xx-large;
+    padding: 20px 10px;
+}
+
+#test {
+    color: #410101;
+    color: #3d2801;
+    color: #3d3d01;
+    color: #b89561;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: small;
+    color: #252525 rgb(128, 128, 128) #707070 #4e8a4e
+}
+
+/* tipografija*/
+p,
+table {
+    font-size: 14px;
+}
+
+label {
+    font-size: 13px;
+    color: black;
+}
+
+#navodila td {
+    padding: 1px 3px 2px 4px;
+    font-size: 14px;
+    font-style: italic;
+}
+
+.comment {
+    font-size: 11px;
+    color: #313131;
+}
+
+.paragraph-end {
+    padding: 0 0 20px;
+}
+
+.paragraph-end-half {
+    padding: 0 0 12px;
+}
+
+.paragraph-end-quarter {
+    padding: 0 0 2px;
+}
+
+td {
+    padding-right: 10px;
+}
+
+#messages p {
+    font-size: xx-large;
+}
+
+#lang-flag a {
+    text-decoration: none;
+}
+
+.hidden {
+    display: none;
+    color: #eb1d1d;
+    color: #313131;
+    color: #313131;
+    color: #2a93f5 #25cafa #01ebfe #1b1bff
+        /* piramida*/
+        #2addf5
+        /* dolga */
+        #0e0e7a
+        /* kocka */
+        grey
+        /* zamaknjena 1 */
+        #f8fc16
+        /* zamaknjena 2 */
+        #eb1d1d
+        /* kljuka 1 */
+        #008000
+        /* kljuka 2*/
+        #8d8989
+        /* lineColor */
+        #2addf5
+}

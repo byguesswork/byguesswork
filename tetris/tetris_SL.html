@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="sl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leftris in klapa</title>
+    <link href="tetris.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="meniji">
+        <p>LEFTRIS, UPTRIS, RIGHTRIS ... TETRIS!</span></p>
+        <p class="paragraph-end">Razl. 5.0</p>
+        <div id="start-game-box">
+            Zaženi igro<br>
+            <p>klikni tukaj ali pritisni enter</p>
+        </div>
+        <div id="start-game-box-overlay"></div>
+
+        <!-- <p>KEYS</p> -->
+        <table id="navodila">
+            <tr>
+                <td>NAVODILA</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>premik vstran</td>
+                <td>ustrezna smerna tipka<br>(← / → / ↑ / ↓)</td>
+            </tr>
+            <tr>
+                <td>premik v smeri gibanja igre</td>
+                <td>smerna tipka, ki kaže v smer gibanja igre</td>
+            </tr>
+            <tr>
+                <td>vrtenje lika</td>
+                <td>enter ali smerna tipka, nasprotna od gibanja igre</td>
+            </tr>
+            <tr>
+                <td>padec lika</td>
+                <td>space ali Ctrl&nbsp;(desni)</td>
+            </tr>
+            <tr>
+                <td>pavza</td>
+                <td>ESC</td>
+            </tr>
+        </table>
+        <p class="paragraph-end"></p>
+
+        <div id="box-interval-speed">
+            <p>Interval premikov med spuščanjem likov:</p>
+            <form>
+                <input type="radio" id="interval-speed-shrinking" class="interval-speed" name="interval-speed"
+                    value="shrinking" checked>
+                <label for="interval-speed-shrinking" class="interval-speed-label">vse
+                    krajši&nbsp;&nbsp;</label>&nbsp;&nbsp;
+                <input type="radio" id="interval-speed-constant" class="interval-speed" name="interval-speed"
+                    value="constant">
+                <label for="interval-speed-constant" class="interval-speed-label">konstanten&nbsp;&nbsp;</label>
+            </form>
+        </div>
+        <div id="interval-box-overlay"></div>
+
+        <p class="paragraph-end-half"></p>
+        <p>Smer igranja:</p>
+        <table>
+            <tr>
+                <td><button class="button-key button-key-selected" value="down">Q</button></td>
+                <td>dol</td>
+            </tr>
+            <tr>
+                <td><button class="button-key" value="up">W</button></td>
+                <td>gor</td>
+            </tr>
+            <tr>
+                <td><button class="button-key" value="left">E</button></td>
+                <td>levo</td>
+            </tr>
+            <tr>
+                <td class="bottom-fat-td"><button class="button-key" value="right">R</button></td>
+                <td class="bottom-fat-td">desno</td>
+            </tr>
+        </table>
+        <table>
+            <tr>
+                <td><button class="button-random" value="random">T</button></td>
+                <td>malo tko, malo tko</td>
+            </tr>
+        </table>
+
+        <div id="randomness-level">
+            <p data-level="1" data-shortcut="J" title="bližnjica: J" class="selected">Krotko</p>
+            <p data-level="2" data-shortcut="K" title="bližnjica: K">Živahno</p>
+            <p data-level="3" data-shortcut="L" title="bližnjica: L">Divje</p>
+        </div>
+        <div id="randomness-div-overlay"></div>
+        <p class="paragraph-end-half"></p>
+
+        <p>Grafične možnosti</p>
+        <div id="graphic-opts">
+            <div id="background-grid-div" class="background-grid-btn-unselected">
+                <p>Prikaz mreže (M)</p>
+            </div>
+            <div id="green-mode-div" class="green-mode-btn-unselected">
+                <p>Zeleni način (G)</p>
+            </div>
+        </div>
+        <p class="paragraph-end"></p>
+
+        <!-- spodnji div se ne uporablja -->
+        <!-- <div class="hidden">
+            <p>Usmerjanje gibanja likov: <span class="comment">(funkcija še ni aktivna)</span></p>
+            <form>
+                <input type="radio" id="steering-type-relative" name="steering-type" class="steering-type"
+                    value="relative" checked>
+                <label for="steering-type-relative"
+                    class="steering-type-label">relativno&nbsp;&nbsp;</label>&nbsp;&nbsp;
+                <input type="radio" id="steering-type-absolute" name="steering-type" class="steering-type"
+                    value="absolute">
+                <label for="steering-type-absolute" class="steering-type-label">absolutno&nbsp;&nbsp;</label>
+            </form>
+            <p class="paragraph-end"></p>
+        </div> -->
+
+        <div id="size-div">
+            <p>Lahko izbereš velikost igralnega polja</p>
+            <form class="size-form">
+                <div>
+                    <label>Št. vrstic</label>
+                    <input type="number" min="8" max="16" class="size-form-input" tabindex="-1" placeholder="16" />
+                </div>
+                <div>
+                    <label>Št. stolpcev</label>
+                    <input type="number" min="8" max="10" class="size-form-input" tabindex="-1" placeholder="10" />
+                </div>
+            </form>
+            <p class="comment"><span id="size-info">max 16 x 10 ali pa 10 x 16</span> </p>
+            <input id="size-form-submit" type="submit" value="Potrdi">
+            <p class="paragraph-end-half"></p>
+        </div>
+        <div id="size-div-overlay"></div>
+
+        <div class="pause-label hidden">IGRA PAVZIRANA</div>
+
+        <!-- <div id="info">
+            <p id="explosion-number"></p>
+            <p id="interval-number"></p>
+        </div> -->
+
+        <button id="button-2">&nbsp;TESTNI GUMB&nbsp;</button><br>
+
+
+        <div id="reset-highscores" class="hidden">
+            Ali si prepričan(a), da želiš izbrisat seznam najboljših rezultatov?<br><br>
+            &nbsp;&nbsp;<button id="btn-reset-hscores-yes">&nbsp;DA&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
+            <button id="btn-reset-hscores-no">&nbsp;NE, PREMISLIL(A) SEM SI&nbsp;</button>
+        </div>
+        <div id="not-now" class="hidden">
+            <p>&nbsp;&nbsp;Ne zdaj!&nbsp;&nbsp;</p>
+        </div>
+        <div id="eyes-on-the-game" class="hidden">
+            <p>&nbsp;&nbsp;Rajši glej igro!&nbsp;&nbsp;</p>
+        </div>
+    </div> <!-- konec menijev -->
+
+    <!-- srednji stolpec -->
+    <canvas id="canvas" width="700" height="700">kamela, posodobi browser</canvas>
+
+    <div id="game-over" class="hidden">G A M E . O V E R</div>
+
+    <!-- desni stolpec -->
+
+    <div id="desni">
+
+        <div id="lang-flag">
+            <a id="home" href="../index.html" title="Nazaj na By Guesswork"><img src="../images/home2.PNG"
+                    alt="home"></a>
+            <img src="../images/flag_sl.PNG" alt="SL" title="The currently set language, Slovenian">
+            <a href="tetris_EN.html"
+                title="Changing language aborts current game / Spremeni jezik na angleščino; sprememba jezika zapusti igro v teku">
+                <img src="../images/flag_usuk.PNG" alt="EN">
+            </a>
+        </div>
+
+        <div id="div-score">
+            ŠT. TOČK: <span id="score">_ _ _</span><br>
+            <p id="explosion-number"></p>
+        </div>
+
+        <div id="messages-container">
+            <div id="messages">
+            </div>
+        </div>
+
+        <div id="high-score-initials" class="hidden">
+            <p>Bravo! Uvrstil/a si se na seznam slavnih</p>
+            <p>Vnesi svoje ime (največ 8 znakov):</p><br>
+            <form id="initials-form">
+                <input id="initials-input" type="text" maxlength="8">
+            </form>
+        </div>
+
+        <div id="high-scores-all">
+            <div id="high-scores">
+                <table id="high-scores-table">
+                    <tr>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </table>
+            </div>
+            <button class="button-1">&nbsp;Počisti tabelo najboljših rezultatov&nbsp;</button>
+        </div>
+    </div>
+    <!-- ta mora bit na koncu, ker sicer ne pokrije drugih absolutno pozicioniranih elementov -->
+    <div id="window-overlay-for-alert"></div>
+    <script src="tetris.js"></script>
+
+    <!-- coded with love and, well, by guesswork by Ivo Makuc, 2022 -->
+    <!-- byguesswork@gmail.com -->
+
+</body>
+
+</html>

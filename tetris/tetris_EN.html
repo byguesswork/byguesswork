@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leftris and the lot</title>
+    <link href="tetris.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="meniji">
+        <p>LEFTRIS, UPTRIS, RIGHTRIS ... TETRIS!</span></p>
+        <p class="paragraph-end">Ver.5.0</p>
+        <div id="start-game-box">
+            Start game<br>
+            <p>click here or press enter</p>
+        </div>
+        <div id="start-game-box-overlay"></div>
+        <!-- <p>KEYS</p> -->
+        <table id="navodila">
+            <tr>
+                <td>KEYS</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>move sideways</td>
+                <td>appropriate arrow key<br>(← / → / ↑ / ↓)</td>
+            </tr>
+            <tr>
+                <td>faster movement in game direction</td>
+                <td>arrow key in game direction</td>
+            </tr>
+            <tr>
+                <td>rotate</td>
+                <td>enter or arrow key, opposite of falling</td>
+            </tr>
+            <tr>
+                <td>drop to bottom</td>
+                <td>space or Ctrl&nbsp;(right)</td>
+            </tr>
+            <tr>
+                <td>pause</td>
+                <td>ESC</td>
+            </tr>
+        </table>
+        <p class="paragraph-end"></p>
+
+        <div id="box-interval-speed">
+            <p>Interval of descent of shapes:</p>
+            <form>
+                <input type="radio" id="interval-speed-shrinking" class="interval-speed" name="interval-speed"
+                    value="shrinking" checked>
+                <label for="interval-speed-shrinking"
+                    class="interval-speed-label">shrinking&nbsp;&nbsp;</label>&nbsp;&nbsp;
+                <input type="radio" id="interval-speed-constant" class="interval-speed" name="interval-speed"
+                    value="constant">
+                <label for="interval-speed-constant" class="interval-speed-label">constant&nbsp;&nbsp;</label>
+            </form>
+        </div>
+        <div id="interval-box-overlay"></div>
+
+        <p class="paragraph-end-half"></p>
+        <p>Gameplay direction:</p>
+        <table>
+            <tr>
+                <td><button class="button-key button-key-selected" value="down">Q</button></td>
+                <td>down</td>
+            </tr>
+            <tr>
+                <td><button class="button-key" value="up">W</button></td>
+                <td>up</td>
+            </tr>
+            <tr>
+                <td><button class="button-key" value="left">E</button></td>
+                <td>left</td>
+            </tr>
+            <tr>
+                <td class="bottom-fat-td"><button class="button-key" value="right">R</button></td>
+                <td class="bottom-fat-td">right</td>
+            </tr>
+        </table>
+        <table>
+            <tr>
+                <td><button class="button-random" value="random">T</button></td>
+                <td>random surprise</td>
+            </tr>
+        </table>
+
+        <div id="randomness-level">
+            <p data-level="1" data-shortcut="J" title="Shortcut: J" class="selected">Docile</p>
+            <p data-level="2" data-shortcut="K" title="Shortcut: K">Semi-wild</p>
+            <p data-level="3" data-shortcut="L" title="Shortcut: L">Wild</p>
+        </div>
+        <div id="randomness-div-overlay"></div>
+        <p class="paragraph-end-half"></p>
+
+        <p>Graphic options</p>
+        <div id="graphic-opts">
+            <div id="background-grid-div" class="background-grid-btn-unselected"
+                title="displays a mesh on the background of the playing field for easier orientation">
+                <p>Bckgnd mesh (M)</p>
+            </div>
+            <div id="green-mode-div" class="green-mode-btn-unselected" title="all blocks in green color only">
+                <p>Green mode (G)</p>
+            </div>
+        </div>
+        <p class="paragraph-end"></p>
+
+        <!-- spodnji div se ne uporablja -->
+        <!-- <div class="hidden">
+            <p>Usmerjanje gibanja likov: <span class="comment">(funkcija še ni aktivna)</span></p>
+            <form>
+                <input type="radio" id="steering-type-relative" name="steering-type" class="steering-type"
+                    value="relative" checked>
+                <label for="steering-type-relative"
+                    class="steering-type-label">relativno&nbsp;&nbsp;</label>&nbsp;&nbsp;
+                <input type="radio" id="steering-type-absolute" name="steering-type" class="steering-type"
+                    value="absolute">
+                <label for="steering-type-absolute" class="steering-type-label">absolutno&nbsp;&nbsp;</label>
+            </form>
+            <p class="paragraph-end"></p>
+        </div> -->
+
+        <div id="size-div">
+            <p>Playing field size</p>
+            <form class="size-form">
+                <div>
+                    <label>Rows</label>
+                    <input type="number" min="8" max="16" class="size-form-input" tabindex="-1" placeholder="16" />
+                </div>
+                <div>
+                    <label>Columns</label>
+                    <input type="number" min="8" max="10" class="size-form-input" tabindex="-1" placeholder="10" />
+                </div>
+            </form>
+            <p class="comment"><span id="size-info">max 16 x 10 or 10 x 16</span> </p>
+            <input id="size-form-submit" type="submit" value="Confirm">
+            <p class="paragraph-end-half"></p>
+        </div>
+        <div id="size-div-overlay"></div>
+
+        <div class="pause-label hidden">GAME PAUSED</div>
+
+        <!-- <div id="info">
+            <p id="explosion-number"></p>
+            <p id="interval-number"></p>
+        </div> -->
+
+        <button id="button-2">&nbsp;TEST BUTTON&nbsp;</button><br>
+
+        <div id="reset-highscores" class="hidden">
+            Are you really sure you want to clear the highscores list?<br><br>
+            &nbsp;&nbsp;<button id="btn-reset-hscores-yes">&nbsp;YEP&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;
+            <button id="btn-reset-hscores-no">&nbsp;NO, I'VE CHANGED MY MIND&nbsp;</button>
+        </div>
+        <div id="not-now" class="hidden">
+            <p>&nbsp;&nbsp;Not now!&nbsp;&nbsp;</p>
+        </div>
+        <div id="eyes-on-the-game" class="hidden">
+            <p>&nbsp;&nbsp;Keep your eyes on the game!&nbsp;&nbsp;</p>
+        </div>
+    </div> <!-- konec menijev -->
+
+    <!-- srednji stolpec -->
+    <canvas id="canvas" width="700" height="700">kamela, posodobi browser</canvas>
+
+    <div id="game-over" class="hidden">G A M E . O V E R</div>
+
+    <!-- desni stolpec -->
+
+    <div id="desni">
+
+        <div id="lang-flag">
+            <a id="home" href="../index.html" title="back to By Guesswork"><img src="../images/home2.PNG"
+                    alt="home"></a>
+            <a href="tetris_SL.html"
+                title="S spremembo jezika zapustiš igro v teku / Change to Slovene; Changing language aborts current game">
+                <img src="../images/flag_sl.PNG" alt="SL">
+            </a>
+            <img src="../images/flag_usuk.PNG" alt="EN" title="Trenutni jezik strani: angleščina">
+        </div>
+
+        <div id="div-score">
+            SCORE: <span id="score">_ _ _</span><br>
+            <p id="explosion-number"></p>
+        </div>
+
+        <div id="messages-container">
+            <div id="messages">
+            </div>
+        </div>
+
+        <div id="high-score-initials" class="hidden">
+            <p>Congrats! You made it to high scores list </p>
+            <p>Enter initials (max 8 chars):</p><br>
+            <form id="initials-form">
+                <input id="initials-input" type="text" maxlength="8">
+            </form>
+        </div>
+
+        <div id="high-scores-all">
+            <div id="high-scores">
+                <table id="high-scores-table">
+                    <tr>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </table>
+            </div>
+
+            <button class="button-1">&nbsp;Clear all-time high scores table&nbsp;</button>
+        </div>
+
+    </div>
+
+    <!-- ta mora bit na koncu, ker sicer ne pokrije drugih absolutno pozicioniranih elementov -->
+    <div id="window-overlay-for-alert"></div>
+    <script src="tetris.js"></script>
+
+    <!-- coded with love and, well, by guesswork by Ivo Makuc, 2022 -->
+    <!-- byguesswork@gmail.com -->
+
+</body>
+
+</html>

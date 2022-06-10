@@ -1,0 +1,70 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: Helvetica, Arial, sans-serif;
+    color: #f0fff0;
+    /* honeydew*/
+    background-color: #808080;
+    font-size: 15px;
+
+}
+
+.main {
+    position: absolute;
+    padding: 20px;
+    width: 360px;
+    top: 0;
+    left: 0;
+    bottom: 0;
+}
+
+.main h1 {
+    font-size: 36px;
+    font-style: italic;
+}
+
+p {
+    margin-bottom: 5px;
+    background-color: inherit;
+}
+
+.top-fixed {
+    position: fixed;
+    top: 20px;
+}
+
+.bottom {
+    position: absolute;
+    bottom: 10px;
+}
+
+.right-index {
+    position: absolute;
+    left: 400px;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background: #5a5a5a;
+    /*#313131 pretemna */
+    border-left: solid 1px #f0fff0;
+    padding: 20px;
+}
+
+.right-about {
+    position: absolute;
+    left: 400px;
+    right: 0;
+    top: 0;
+    background: #5a5a5a;
+    /*#313131 pretemna */
+    border-left: solid 1px #f0fff0;
+}
+
+.main-blabber {
+    padding-left: 20px;
+    background-color: inherit;
+    width: 600px;
+    height: 100%;
+    box-sizing: border-box;
+
+}

@@ -1,0 +1,309 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: Helvetica, Arial, sans-serif;
+}
+
+/*barve: 
+siva:hover              #808080;        (ozadje menijev,sicer grey)
+svetlejša temno siva: 	#757575;
+flourescentna zelena: 	#9cfa9c		(ozadje, ko hover pri izbiri elementa)
+temno zelena: 			#3c523c					(ozadje izbranega elementa)
+svetlo vijolična:		rgb(179, 179, 241)		(barva pisave za izbranega element)
+
+*/
+
+/* izbira likov */
+
+#meniji {
+    /* to je v bistvu vsa leva vertikala*/
+    position: absolute;
+    width: 380px;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    background: #808080;
+    padding: 10px 0 20px 20px;
+}
+
+#home-and-lang {
+    position: relative;
+    display: block;
+    width: 380px;
+    height: 23px;
+    background: #808080;
+    padding: 0 0 5px;
+}
+
+#home-and-lang span {
+    position: absolute;
+    right: 10px;
+}
+
+.menu-label {
+    padding: 0 0 5px;
+}
+
+.menu-choice {
+    padding: 2px 0 2px 25px;
+    width: 310px;
+    /* 223px, da se ujema z desnim robom vnosnih polj spodaj*/
+}
+
+.menu-choice:hover {
+    background: #9cfa9c;
+    color: mediumblue;
+}
+
+.selected {
+    background: #3c523c;
+    color: #b3b3f1;
+}
+
+.v-pripravi {
+    padding: 5px 0;
+    width: 300px;
+    color: rgb(199, 204, 199);
+}
+
+.v-pripravi:hover {
+    background: rgb(105, 104, 104);
+    color: #464444;
+    padding: 2px 0 8px 3px;
+}
+
+/* izbira lastnosti lika*/
+
+#properties {
+    position: relative;
+}
+
+#shape-properties {
+    float: left;
+}
+
+.property-label {
+    display: inline-block;
+    width: 90px;
+    text-align: right;
+}
+
+#akcija {
+    position: absolute;
+    bottom: -3px;
+    right: 70px;
+    margin: 0 0 0 15px;
+}
+
+/*   paleta   */
+
+#paleta,
+#paleta-polnila {
+    display: inline-block;
+    width: 222px;
+    border: 1px solid #313131;
+}
+
+.kvadratek-paleta {
+    float: left;
+    width: 40px;
+    height: 40px;
+    border: 2px solid #808080;
+    /* #464444 */
+}
+
+.nr-1 {
+    background: #000000;
+}
+
+.nr-2 {
+    background: #ffffff;
+}
+
+.nr-3 {
+    background: #ff0000;
+}
+
+.nr-4 {
+    background: #008000;
+}
+
+.nr-5 {
+    background: #0000ff;
+}
+
+.nr-6 {
+    background: #ffff00;
+}
+
+.nr-7 {
+    background: #ffa500;
+}
+
+.nr-8 {
+    background: #a52a2a;
+}
+
+/* brown */
+.nr-9 {
+    background: #a11af0;
+}
+
+.nr-10 {
+    background: #ee82ee;
+}
+
+/*violet, videt kot roza   */
+
+#paleta-in-velikost,
+#container-paleta-polnila {
+    position: relative;
+}
+
+.poleg-palete {
+    width: 150px;
+    float: right;
+    text-align: center;
+}
+
+#palette-overlay {
+    position: absolute;
+    width: 224px;
+    height: 92px;
+    background: grey;
+    opacity: 70%;
+}
+
+/* ostalo*/
+
+#clear-canvas-light {
+    position: absolute;
+    left: 195px;
+    bottom: 40px;
+    color: #313131;
+    background: #fffafa;
+    padding: 2px 3px;
+}
+
+#clear-canvas-light:active {
+    position: absolute;
+    left: 195px;
+    bottom: 40px;
+    background: #31153d;
+    color: #9cfa9c;
+    padding: 2px 3px;
+}
+
+#temp {
+    color: violet
+}
+
+#clear-canvas-dark {
+    position: absolute;
+    left: 195px;
+    bottom: 15px;
+    background: #313131;
+    color: snow;
+    padding: 2px 3px;
+    border-top: solid 2px #808080;
+    border-right: solid 1px lightgrey;
+    border-bottom: solid 1px lightgrey;
+    border-left: solid 2px #808080;
+}
+
+#clear-canvas-dark:active {
+    position: absolute;
+    left: 195px;
+    bottom: 15px;
+    background: #9cfa9c;
+    /* #313131 */
+    color: #0000cd;
+    /*  snow */
+    padding: 2px 3px;
+    border-top: solid 2px lightgrey;
+    /* lightgrey */
+    border-right: solid 1px #808080;
+    /* #808080 = grey */
+    border-bottom: solid 1px #808080;
+    border-left: solid 2px lightgrey;
+}
+
+#navodila {
+    position: absolute;
+    left: 20px;
+    bottom: 90px;
+}
+
+#gumb {
+    position: absolute;
+    left: 20px;
+    bottom: 55px;
+    padding: 0 3px;
+}
+
+#save-pic {
+    position: absolute;
+    left: 20px;
+    bottom: 30px;
+}
+
+#save-pic button {
+    padding: 0 3px;
+}
+
+.no-collapse:after {
+    clear: both;
+    content: '';
+    display: block;
+    height: 0;
+    line-height: 0;
+    visibility: hidden;
+}
+
+/* risalna površina*/
+#delovna {
+    position: absolute;
+    left: 400px;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background: #313131;
+    padding: 20px;
+}
+
+canvas {
+    border: 1px solid grey;
+}
+
+.mouse-x-position-info,
+.mouse-y-position-info,
+.mouse-pos-adtnl-info {
+    position: absolute;
+    bottom: 1px;
+    left: 20px;
+    font-size: 12px;
+}
+
+.mouse-y-position-info {
+    left: 145px;
+}
+
+.mouse-pos-adtnl-info {
+    left: 190px;
+}
+
+
+/* tipografija*/
+p {
+    font-size: 14px;
+    color: honeydew;
+}
+
+label {
+    font-size: 13px;
+}
+
+.comment {
+    font-size: 11px;
+    text-align: center;
+}
