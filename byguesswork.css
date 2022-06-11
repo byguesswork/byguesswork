@@ -28,6 +28,11 @@ p {
     background-color: inherit;
 }
 
+p b,
+p a {
+    background-color: inherit;
+}
+
 .top-fixed {
     position: fixed;
     top: 20px;
