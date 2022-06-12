@@ -4,7 +4,6 @@
 
 //      --------- še za naredit ---------
 
-//  OBJAVIT NA NETU
 //  refaktorizirat init
 //  omogočit nastavitev tipk za vsako smer igranja
 //  pogledat "z a  n a r..."
@@ -589,8 +588,9 @@ function canExplodeHuh() {
     return false;
 }
 
+// za naredit: to bi lahko šlo v html, da ni vedno tega if-a
 const refreshExplosionsCountDisplay = () => labelExplosionNumberInfo.innerHTML
-    = `${pageLang === 'sl' ? 'Št. eksplozij: ' : 'Lines blown up: '} ${numberOfExplosions}`;
+    = `${pageLang === 'sl' ? 'Št. dokončanih vrstic: ' : 'Lines cleared: '} ${numberOfExplosions}`;
 
 async function explodeRow() {
 
