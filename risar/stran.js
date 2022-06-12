@@ -55,7 +55,7 @@ const btnTieFighter = document.getElementById('tie-fighter');
 const btnProstoRisanje = document.getElementById('prosto-risanje');
 const btnPrelivnoBarvanje = document.getElementById('prelivno-barvanje');
 let btnAkcija = document.getElementById('akcija');
-const btnGumb = document.getElementById('gumb');
+// const btnGumb = document.getElementById('gumb');
 const btnClearCanvasLight = document.getElementById('clear-canvas-light');
 const btnClearCanvasDark = document.getElementById('clear-canvas-dark');
 
@@ -420,10 +420,10 @@ function prelivnoBarvanje() {
 
         checked.push({ x: toCheck[0].x, y: toCheck[0].y });
         toCheck.shift();
-        if (toCheck.length === 0) {
-            console.log(checked);
-            console.log(pixelByPixelFill.toCheck);
-        }
+        // if (toCheck.length === 0) {  //  samo za testne namene
+        //     console.log(checked);
+        //     console.log(pixelByPixelFill.toCheck);
+        // }
     };   //    --  konc checkPerimeter --
 
 
@@ -924,9 +924,9 @@ radioFillable.forEach(function (curr) {
 
 
 // gumb za testne namene; dodaj not preverjanje, prikaz kake funkcionalnosti (conslo.log, ...) ko moraš kaj testirat
-btnGumb.addEventListener('click', function () {
+// btnGumb.addEventListener('click', function () {
 
-})
+// })
 
 //listener v obliki funkcije
 function download() {     // v bistvu je to kot listener, samo da ga sproži pritisk na <a> v HTML-ju, ne pa listener v JS

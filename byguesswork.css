@@ -24,13 +24,17 @@
 }
 
 p {
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     background-color: inherit;
 }
 
 p b,
 p a {
     background-color: inherit;
+}
+
+.comment {
+    font-size: 0.8rem;
 }
 
 .top-fixed {
