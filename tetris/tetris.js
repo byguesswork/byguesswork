@@ -1698,8 +1698,8 @@ drawEmptyMainGrid();
 standBy();
 
 // temp
-let testSize = document.getElementsByClassName('paragraph-end');
-testSize[0].innerHTML = `Ver.2.0 + testData: širina: ${window.innerWidth}, višina: ${window.innerHeight}`;
+let testSize = document.getElementsByTagName('p');
+testSize[1].innerHTML = `Ver.2.0 + testData: širina: ${window.innerWidth}, višina: ${window.innerHeight}`;
 // konec temp
 
 
