@@ -1691,16 +1691,26 @@ btnSubmitSize.addEventListener('mouseup', submitSizeBtnOperation);    // mouseup
 
 //  ----------------    IZVAJANJE
 
-loadHighScores();   // najprej loadHighScores, ker če ne inicializacija ekrana ni OK, ker ekran brez higScores še nima končnih dimenzij;
-initializeScreenAndSizes();
-colorSelectedMenuChoicesAtInit();
-drawEmptyMainGrid();
-standBy();
-
 // temp
-let testSize = document.getElementsByTagName('p');
-testSize[1].innerHTML = `Ver.2.0 + testData: širina: ${screen.width},${screen.availWidth} višina: ${screen.height}, ${screen.availHeight}`;
+// let testSize = document.getElementsByTagName('p');
+// testSize[1].innerHTML = `Ver.2.0 + testData: širina: ${window.innerWidth} ${screen.width},${screen.availWidth} višina: ${screen.height}, ${screen.availHeight}`;
+
+if (screen.width < 1040 || screen.height < 560) document.body.innerHTML = '<p style="padding-left: 20px;"><br><a href="../index.html" title="back to By Guesswork"><img src="../images/home2.PNG" alt="home"></a><br><br>This game is not fond of small screens.<br><br>Please revisit this page when viewing<br>on a regular desktop or laptop monitor.<br>Min required size: 1040 x 560px<br>Suggested size: 1350 x 700px<br><br>Warmly welcome!</p>';
+else {  // šele če pasa test velikosti, zaženeš igro;
+    loadHighScores();   // najprej loadHighScores, ker če ne inicializacija ekrana ni OK, ker ekran brez higScores še nima končnih dimenzij;
+    initializeScreenAndSizes();
+    colorSelectedMenuChoicesAtInit();
+    drawEmptyMainGrid();
+    standBy();
+}
 // konec temp
+
+// loadHighScores();   // najprej loadHighScores, ker če ne inicializacija ekrana ni OK, ker ekran brez higScores še nima končnih dimenzij;
+// initializeScreenAndSizes();
+// colorSelectedMenuChoicesAtInit();
+// drawEmptyMainGrid();
+// standBy();
+
 
 
 //  -------------------------------------------------------------------------------------------------------------------
