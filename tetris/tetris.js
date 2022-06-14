@@ -1697,6 +1697,11 @@ colorSelectedMenuChoicesAtInit();
 drawEmptyMainGrid();
 standBy();
 
+// temp
+let testSize = document.getElementsByClassName('paragraph-end');
+testSize[0].innerHTML = `Ver.2.0 + testData: širina: ${window.innerWidth}, višina: ${window.innerHeight}`;
+// konec temp
+
 
 //  -------------------------------------------------------------------------------------------------------------------
 //  ------------------  EFEKTI
