@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="sl">
+<!-- izvirno je bilo lang="en" -->
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorta paint</title>
+    <link href="stran.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="meniji">
+        <div id="home-and-lang">
+            <a href="../index.html" title="back to By Guesswork"><img src="../images/home2.PNG" alt="home"></a>
+            <!-- <span>
+                <img src="../images/flag_sl.PNG" alt="SL" title="current interface language: Slovenian">
+                <img src="../images/flag_usuk.PNG" alt="EN" title="language setting not available yet">
+            </span> -->
+        </div>
+        <p class="menu-label">What would you like to draw today? <span class="comment"> . . . (enter data below or
+                simply draw
+                on the drawing board)</span></p>
+        <p id="pravokotnik" class="menu-choice selected">Rectangle</p>
+        <p id="zaobljen-pravokotnik" class="menu-choice">Rectangle with smoothed edges</p>
+        <p id="kvadrat" class="menu-choice">Square</p>
+        <p id="krog-iz-sredisca" class="menu-choice">Circle -- from center</p>
+        <p id="krog-iz-dotikalisca" class="menu-choice">Circle -- from point of contact</p>
+        <p id="ravna-crta" class="menu-choice">Straight line</p>
+        <p id="zvezdica" class="menu-choice">Star / Snowflake</p>
+        <p id="tie-fighter" class="menu-choice">Tie-fighter</p>
+        <p id="prosto-risanje" class="menu-choice">Freehand</p>
+        <p id="prelivno-barvanje" class="menu-choice">Fill with color <span class="comment">(uses color set in line
+                color)</span> </p>
+        <br>
+        <div id="properties" class="no-collapse">
+            <div id="shape-properties">
+            </div>
+            <div id="akcija-btn-container">
+                <input id="akcija" type="submit" value="Nariši">
+            </div>
+        </div>
+        <br><br>
+        <div id="paleta-in-velikost">
+            <div id="paleta">
+                <!--barvna paleta -->
+                <div class="kvadratek-paleta crta nr-1"></div>
+                <div class="kvadratek-paleta crta nr-2"></div>
+                <div class="kvadratek-paleta crta nr-3"></div>
+                <div class="kvadratek-paleta crta nr-4"></div>
+                <div class="kvadratek-paleta crta nr-5"></div>
+                <div class="kvadratek-paleta crta nr-6"></div>
+                <div class="kvadratek-paleta crta nr-7"></div>
+                <div class="kvadratek-paleta crta nr-8"></div>
+                <div class="kvadratek-paleta crta nr-9"></div>
+                <div class="kvadratek-paleta crta nr-10"></div>
+            </div>
+            <div class="poleg-palete">
+                <p style="margin-top: 5px;">LINE COLOR</p><br>
+                <p style="margin-bottom: 3px;">Line width (px)</p>
+                <input id="debelina-vrednost" type="number" style="width: 100px;"><br>
+                <p style="line-height: 8px; color: transparent;"> .</p>
+            </div>
+        </div>
+        <br>
+        <div id="container-paleta-polnila">
+            <div id="paleta-polnila">
+                <!--barvna paleta za polnilo-->
+                <div class="kvadratek-paleta polnilo nr-1"></div>
+                <div class="kvadratek-paleta polnilo nr-2"></div>
+                <div class="kvadratek-paleta polnilo nr-3"></div>
+                <div class="kvadratek-paleta polnilo nr-4"></div>
+                <div class="kvadratek-paleta polnilo nr-5"></div>
+                <div class="kvadratek-paleta polnilo nr-6"></div>
+                <div class="kvadratek-paleta polnilo nr-7"></div>
+                <div class="kvadratek-paleta polnilo nr-8"></div>
+                <div class="kvadratek-paleta polnilo nr-9"></div>
+                <div class="kvadratek-paleta polnilo nr-10"></div>
+            </div>
+            <div class="poleg-palete">
+                <p style="margin: 5px 0 10px;">FILL COLOR</p>
+                <p style="margin-bottom: 3px;">Wanna use fill?</p>
+                <input type="radio" id="fillable-da" name="fillable" value="da">
+                <label for="fillable-da" style="font-size: 14px; color: honeydew;">Yup</label><br>
+                <input type="radio" id="fillable-ne" name="fillable" value="ne" checked>
+                <label for="fillable-ne" style="font-size: 14px; color: honeydew;">Nah</label>
+            </div>
+        </div>
+        <div id="palette-overlay"></div>
+        <br><br>
+        <div id="navodila">
+            <p>Undo: Ctrl + Z<br> Redo: Ctrl + Y</p>
+        </div>
+        <!-- <button id="gumb">Gumb</button> -->
+        <a id="save-pic" download="image.png"><button type="button" title="Saved file goes into your Downloads folder"
+                onClick="download()">&nbsp;Save pic as file&nbsp;</button></a>
+        <input id="clear-canvas-dark" type="submit" value="Clear + set dark background">
+        <input id="clear-canvas-light" type="submit" value="Clear + set light background">
+
+    </div> <!-- konec menijev -->
+
+    <div id="delovna">
+        <canvas id="canvas" width="1480" height="900">kamela, posodobi browser</canvas>
+        <p class="mouse-x-position-info">Položaj miške: x: <span id="mouseXpos"></span></p>
+        <p class="mouse-y-position-info">y: <span id="mouseYpos"></span></p>
+        <p class='mouse-pos-adtnl-info'>(v pikslih, od zg. levega kota risalne površine)</p>
+    </div>
+    <script src="stran.js"></script>
+</body>
+
+</html>
