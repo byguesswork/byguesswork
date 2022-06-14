@@ -1699,7 +1699,7 @@ standBy();
 
 // temp
 let testSize = document.getElementsByTagName('p');
-testSize[1].innerHTML = `Ver.2.0 + testData: širina: ${window.innerWidth}, višina: ${window.innerHeight}`;
+testSize[1].innerHTML = `Ver.2.0 + testData: širina: ${screen.width},${screen.availWidth} višina: ${screen.height}, ${screen.availHeight}`;
 // konec temp
 
 
