@@ -982,8 +982,8 @@ canvas.addEventListener('mousedown', function () {
 
 canvas.addEventListener('mousemove', function (e) {
     getMousePosOnObject(e, canvasFrameLeft, canvasFrameTop)
-    labelMouseX.textContent = mouseX;
-    labelMouseY.textContent = mouseY;
+    labelMouseX.textContent = Math.round(mouseX);
+    labelMouseY.textContent = Math.round(mouseY);
 
     if (mouseIsPressed) {
         if (selectedShape === 'prosto-risanje') {
@@ -1065,11 +1065,23 @@ canvas.addEventListener('mouseleave', function () {
 //  izvajanje
 //  to je obenem tudi init, ki sicer ni pozneje nikoli več klican, zato ni v ločeni funkciji
 
-if (screen.width < 900 || screen.height < 755) {
+if (screen.width < 900 || screen.height < 690) { // to načeloma skensla moblce, ne pa tudi laptopov
     document.body.style.background = '#808080';
     document.body.innerHTML = '<p style="padding-left: 20px;"><br><a href="../index.html" title="back to By Guesswork"><img src="../images/home2.PNG" alt="home"></a><br><br>This program is not fond of small screens.<br>They make it look bad.<br><br>Please revisit this page when viewing<br>on a regular desktop or laptop monitor.<br>Min required size: 900 x 755px<br><br>Warmly welcome!</p>';
 }
 else {
+
+    if (window.innerHeight < 750) { // če je innerHeight manjši kot nekaj, zožaj zadeve (potrebno pri kakih laptopih) 
+        let [...collect] = document.getElementsByTagName('p');
+        collect.forEach(element => element.style.fontSize = '12px');
+        collect = document.querySelectorAll('.menu-choice');
+        collect.forEach(el => el.style.padding = '2px 0 1px 25px');
+        document.getElementById('br').innerHTML = '<br>';
+        const navodila = document.getElementById('navodila');
+        const newString = navodila.innerHTML.replace('<br>', ';');
+        navodila.innerHTML = newString;
+    }
+
     ponastaviNaLikPravokotnik();
     inputDebelina.value = 1;
     spremeniRoboveKvadratkaPalete('crta', 1, 'zelena');

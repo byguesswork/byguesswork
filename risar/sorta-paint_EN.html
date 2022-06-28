@@ -41,7 +41,9 @@
                 <input id="akcija" type="submit" value="Nariši">
             </div>
         </div>
-        <br><br>
+        <div id="br">
+            <br><br>
+        </div>
         <div id="paleta-in-velikost">
             <div id="paleta">
                 <!--barvna paleta -->
@@ -102,9 +104,9 @@
 
     <div id="delovna">
         <canvas id="canvas" width="1480" height="900">kamela, posodobi browser</canvas>
-        <p class="mouse-x-position-info">Položaj miške: x: <span id="mouseXpos"></span></p>
+        <p class="mouse-x-position-info">Mouse position: x: <span id="mouseXpos"></span></p>
         <p class="mouse-y-position-info">y: <span id="mouseYpos"></span></p>
-        <p class='mouse-pos-adtnl-info'>(v pikslih, od zg. levega kota risalne površine)</p>
+        <p class='mouse-pos-adtnl-info'>(in pixels, from upper left corner of the drawing board)</p>
     </div>
     <script src="stran.js"></script>
 </body>
