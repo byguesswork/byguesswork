@@ -1693,7 +1693,7 @@ btnSubmitSize.addEventListener('mouseup', submitSizeBtnOperation);    // mouseup
 
 if (screen.width < 1040 || screen.height < 560) document.body.innerHTML = `<p style="padding-left: 20px;"><br><a href="../index.html" title="back to By Guesswork"><img src="../images/home2.PNG" alt="home"></a><br><br>This game is not fond of small screens.<br>
 A tetris block might fall off the screen and<br>hurt your foot. Not good for you.<br><br>
-Please come back when viewing on a<br>regular desktop or laptop monitor.<br></p>
+Please do revisit when viewing on a<br>regular desktop or laptop monitor.<br></p>
 <p class="comment" style="padding-left: 20px; padding-top:5px">Min required size: 1040 x 560px<br>Suggested size: 1350 x 700px<br>Do not forget to bring a keyboard!</p>
 <p style="padding-left: 20px;"><br>Warmly welcome!</p>`;
 else {  // šele če pasa test velikosti, zaženeš igro;
