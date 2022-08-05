@@ -311,6 +311,22 @@ temno sivo ozadje:      #313131
     /* background: #bdbdbd; */
 }
 
+#invite {
+    position: absolute;
+    left: 332px;
+    bottom: 10px;
+}
+
+#invite p {
+    color: white;
+    background-color: #757575;
+    padding: 5px;
+    border-top: 1px solid #bdbdbd;
+    border-left: 1px solid #bdbdbd;
+    border-right: 1px solid #313131;
+    border-bottom: 1px solid #313131;
+}
+
 /* --------    desna stran      ------------------  */
 
 #desni {
