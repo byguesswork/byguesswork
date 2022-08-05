@@ -71,6 +71,7 @@ const labelsIntervalSpeed = document.querySelectorAll('.interval-speed-label');
 // const labelsSteeringType = document.querySelectorAll('.steering-type-label');    // legacy, se ne uporablja
 const labelSizeInfo = document.getElementById('size-info');
 const labelExplosionNumberInfo = document.getElementById('explosion-number');
+const labelInvite = document.getElementById('invite');
 const labelScore = document.getElementById('score');
 const labelHighScoresTable = document.getElementById('high-scores-table');
 const labelHighScoresInitials = document.getElementById('high-score-initials');
@@ -748,6 +749,7 @@ function submitSizeBtnOperation() {
     console.log(neededCanvasHeight, neededCanvasWidth);
     canvas.height = neededCanvasHeight >= neededCanvasWidth ? neededCanvasHeight : neededCanvasWidth;
     canvas.width = canvas.height;   // s tem je tudi že samodejno narisan canvas z novimi dimenzijami, sicer samo obroba in srednje sivo ozadje;
+	if (window.innerHeight > 800 && (window.innerHeight-canvas.height > 60)) labelInvite.classList.remove('hidden'); else labelInvite.classList.add('hidden');
 
     //  preverjanje, al je morda treba zamaknit prikaz točk, high scores ... zaradi širine igralnega polja
     if (canvas.width !== canvasSizeData.canvasWidthWas) {
@@ -1068,6 +1070,7 @@ function initializeScreenAndSizes() {
     console.log(neededCanvasHeight, neededCanvasWidth);
     canvas.height = neededCanvasHeight >= neededCanvasWidth ? neededCanvasHeight : neededCanvasWidth;
     canvas.width = canvas.height;
+	if (window.innerHeight>800 && (window.innerHeight-canvas.height > 60)) labelInvite.classList.remove('hidden')
 
     // če je canvas manjši kot 620 je treba skrit navodila, sicer štrlijo spodaj 
     if (canvas.width < 620) document.getElementById('navodila').classList.add('hidden');
