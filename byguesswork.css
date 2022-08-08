@@ -3,8 +3,8 @@
     padding: 0;
     font-family: Helvetica, Arial, sans-serif;
     color: #f0fff0;
-    /* honeydew*/
-    background-color: #808080;
+    /* honeydew #f0fff0 */
+    background-color: #313131;
     font-size: 15px;
 
 }
@@ -16,11 +16,13 @@
     top: 0;
     left: 0;
     bottom: 0;
+    background-color: #808080;
 }
 
 .main h1 {
     font-size: 36px;
     font-style: italic;
+    background-color: inherit;
 }
 
 p {
@@ -35,6 +37,7 @@ p a {
 
 .comment {
     font-size: 0.8rem;
+    background-color: inherit;
 }
 
 .top-fixed {
@@ -45,12 +48,19 @@ p a {
 .bottom {
     position: absolute;
     bottom: 10px;
+    background-color: inherit;
+}
+
+.if_mobile {
+    margin-left: 20px;
+    font-size: small;
+    background-color: inherit;
 }
 
 .right-index {
     position: absolute;
     left: 400px;
-    right: 0;
+    width: 600px;
     top: 0;
     bottom: 0;
     background: #5a5a5a;
@@ -64,16 +74,20 @@ p a {
     left: 400px;
     right: 0;
     top: 0;
+    bottom: 0;
     background: #5a5a5a;
     /*#313131 pretemna */
     border-left: solid 1px #f0fff0;
 }
 
 .main-blabber {
-    padding-left: 20px;
+    padding: 20px;
     background-color: inherit;
     width: 600px;
     height: 100%;
     box-sizing: border-box;
+}
 
+.hidden {
+    display: none;
 }
