@@ -9,14 +9,18 @@
 
 }
 
+/* botom (bottom: 0;) ne definiramo, da je zadeva ready za mobilca; če bo prikazano na računalniku, programatično dodamo */
 .main {
     position: absolute;
     padding: 20px;
     width: 360px;
     top: 0;
     left: 0;
-    bottom: 0;
     background-color: #808080;
+}
+
+.main_upper_part {
+    background: inherit;
 }
 
 .main h1 {
@@ -42,11 +46,13 @@ p a {
 
 .top-fixed {
     position: fixed;
+    width: 400px;
+    background: inherit;
     top: 20px;
 }
 
 .bottom {
-    position: absolute;
+    position: relative;
     bottom: 10px;
     background-color: inherit;
 }
@@ -84,8 +90,6 @@ p a {
     padding: 20px;
     background-color: inherit;
     width: 600px;
-    height: 100%;
-    box-sizing: border-box;
 }
 
 .hidden {
