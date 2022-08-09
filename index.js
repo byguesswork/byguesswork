@@ -16,7 +16,8 @@ if (window.innerWidth < 500 || screen.width < 500) {
         p.classList.remove('hidden');
     });
 
-    rightSideIndex?.classList.add('hidden');
+    rightSideIndex?.classList.add('hidden'); // skrije desni del pri indexu
+    aboutRightSide?.classList.add('hidden'); // skrije desni del pri disclaimerju
 
     const width = window.innerWidth > screen.width ? screen.width - 40 : window.innerWidth - 40; // -40 ker je padding 20 levo in desno
     mainLeftSide.style.width = `${width}px`
@@ -27,6 +28,7 @@ if (window.innerWidth < 500 || screen.width < 500) {
         // če pa je to prisotno pri mobilcu, je dno zaklenjeno in ne skrola in spet ni vidno vse besedilo, zato se doda samo na računalniku pri zadostni višini
         mainLeftSide.style.bottom = "0";
         mainleftSideBottomPart.style.position = "absolute";
+        aboutRightSide.style.position = "relative";
     }
 } else if (aboutRightSideBlabber.getBoundingClientRect().height > window.innerHeight) {  // v tem primeru gre za about, ki ima svojo strukturo
     aboutRightSide.style.position = "relative";

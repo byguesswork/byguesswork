@@ -4,7 +4,7 @@ const test = document.getElementById('test');
 const mainDiv = document.querySelector('.main');
 
 if (window.innerWidth > screen.width) {
-    const width = screen.width - 40;
+    const width = screen.width - 35;
     mainDiv.style.width = `${width}px`;
 }
 
