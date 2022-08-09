@@ -16,6 +16,8 @@ if (window.innerWidth < 500 || screen.width < 500) {
     const width = window.innerWidth > screen.width ? screen.width - 40 : window.innerWidth - 40;
     mainLeftSide.style.width = `${width}px`
 
+} else {
+    mainLeftSide.style.bottom = "0";
 }
 
 //  coded with love and by guesswork by Ivo Makuc, 2022
