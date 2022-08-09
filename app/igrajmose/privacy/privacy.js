@@ -4,10 +4,9 @@ const test = document.getElementById('test');
 const mainDiv = document.querySelector('.main');
 
 if (window.innerWidth > screen.width) {
-    const width = screen.width - 35;
+    const width = screen.width - 46;  // toliko sta horiz paddinga
     mainDiv.style.width = `${width}px`;
 }
 
-test.textContent = `window.innerWidth: ${window.innerWidth}, screen.width: ${screen.width}\n
-window.inerHeight: ${window.innerHeight}, screen.height: ${screen.height}`;
+
 
