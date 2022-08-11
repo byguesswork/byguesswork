@@ -1,0 +1,105 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: Helvetica, Arial, sans-serif;
+    color: #f0fff0;
+    background-color: #5a5a5a;
+    font-size: 15px;
+}
+
+
+/*
+klasi, kot so .hide-if-mobile, se uporabljajo za upravljanje postavitve, ne za oblikovanje
+za oblikovanje se dodoa kak drug klas, recimo ".pisan" ali karkoli
+
+color: #f0fff0;             svetla barva pisave, honeydew
+background-color: #808080;  najsvetlejša  siva ozadja
+background-color: #5a5a5a;  srednja siva ozadja
+background-color: #313131;  najtemnejša siva ozadja
+*/
+
+
+/* botom (bottom: 0;) ne definiramo, da je zadeva ready za mobilca; če bo prikazano na računalniku, programatično dodamo */
+#left_container {
+    position: absolute;
+    padding: 20px;
+    width: 360px;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    background-color: #808080;
+    border-right: solid 1px #f0fff0;
+}
+
+#left_upper_content {
+    background: inherit;
+}
+
+#left_lower_content {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    background: inherit;
+}
+
+#right_container {
+    position: absolute;
+    padding: 20px;
+    width: 560px;
+    top: 0;
+    left: 401px;
+    bottom: 0;
+}
+
+/* #right_upper_content */
+
+#right_lower_content {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+}
+
+.main h1 {
+    font-size: 36px;
+    font-style: italic;
+    background-color: inherit;
+}
+
+p {
+    margin-bottom: 8px;
+    background-color: inherit;
+}
+
+p b,
+p a {
+    background-color: inherit;
+}
+
+.comment {
+    font-size: 0.8rem;
+    background-color: inherit;
+}
+
+
+.bottom {
+    position: relative;
+    bottom: 10px;
+    background-color: inherit;
+}
+
+.show_if_mobile {
+    font-size: small;
+    background-color: inherit;
+}
+
+/* 
+pomožni klasi
+    .hide_if_mobile 
+    .unused  (če se nek element ne uporablja)
+*/
+
+
+.hidden {
+    display: none;
+}
