@@ -21,6 +21,8 @@ document.body.scrollHeight: ${document.body.scrollHeight}, document.documentElem
   document.body.offsetHeight: ${document.body.offsetHeight}, document.documentElement.offsetHeight: ${document.documentElement.offsetHeight},
   document.body.clientHeight: ${document.body.clientHeight}, document.documentElement.clientHeight: ${document.documentElement.clientHeight}</p>`;
 
+leftLowerContent.style.bottom = 'initial';
+
 // hideIfMobiles?.forEach((i) => { i.classList.add('hidden') });
 
 
