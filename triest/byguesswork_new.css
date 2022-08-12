@@ -10,12 +10,15 @@
 
 /*
 pomožni klasi:
-- show_if_mobile        
-- hide_if_mobile        (se ne uporablja, če se uporablja move_left_if_mobile)
-- move_left_if_mobile   (se ne uporablja, če se uporablja hide_if_mobile)
-- unused                (nisem še prepričan o tem)
+- postavitveni:
+    - show_if_1col        
+    - hide_if_1col        (se ne uporablja, če se uporablja move_left_if_1col)
+    - move_left_if_1col   (se ne uporablja, če se uporablja hide_if_1col)
+- oblikovni
+    - hide_if_mobile        (samo manjši razmik recimo, če na mobilci; se še ne uporablja)
+- unused                    (nisem še prepričan o tem, kako in zakaj bi ga rabil)
 
-klasi, kot so .hide-if-mobile, se uporabljajo za upravljanje postavitve, ne za oblikovanje
+klasi, kot so .hide-if-1col, se uporabljajo za upravljanje postavitve, ne za oblikovanje
 za oblikovanje se dodoa kak drug klas, recimo ".pisan" ali karkoli
 
 color: #f0fff0;             svetla barva pisave, honeydew
@@ -53,7 +56,7 @@ background-color: #313131;  najtemnejša siva ozadja
     padding: 20px;
     width: 560px;
     top: 0;
-    left: 401px;
+    left: 402px;
     bottom: 0;
 }
 
@@ -64,6 +67,9 @@ background-color: #313131;  najtemnejša siva ozadja
     bottom: 20px;
     left: 20px;
 }
+
+
+/* TIPOGRAFIJA */
 
 h1 {
     font-size: 36px;
@@ -87,7 +93,7 @@ p a {
 }
 
 
-.show_if_mobile {
+.smaller_text {
     font-size: small;
     background-color: inherit;
 }
