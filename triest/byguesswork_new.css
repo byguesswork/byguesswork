@@ -9,6 +9,12 @@
 
 
 /*
+pomožni klasi:
+- show_if_mobile        
+- hide_if_mobile        (se ne uporablja, če se uporablja move_left_if_mobile)
+- move_left_if_mobile   (se ne uporablja, če se uporablja hide_if_mobile)
+- unused                (nisem še prepričan o tem)
+
 klasi, kot so .hide-if-mobile, se uporabljajo za upravljanje postavitve, ne za oblikovanje
 za oblikovanje se dodoa kak drug klas, recimo ".pisan" ali karkoli
 
@@ -19,7 +25,6 @@ background-color: #313131;  najtemnejša siva ozadja
 */
 
 
-/* botom (bottom: 0;) ne definiramo, da je zadeva ready za mobilca; če bo prikazano na računalniku, programatično dodamo */
 #left_container {
     position: absolute;
     padding: 20px;
@@ -60,7 +65,7 @@ background-color: #313131;  najtemnejša siva ozadja
     left: 20px;
 }
 
-.main h1 {
+h1 {
     font-size: 36px;
     font-style: italic;
     background-color: inherit;
@@ -82,22 +87,10 @@ p a {
 }
 
 
-.bottom {
-    position: relative;
-    bottom: 10px;
-    background-color: inherit;
-}
-
 .show_if_mobile {
     font-size: small;
     background-color: inherit;
 }
-
-/* 
-pomožni klasi
-    .hide_if_mobile 
-    .unused  (če se nek element ne uporablja)
-*/
 
 
 .hidden {
