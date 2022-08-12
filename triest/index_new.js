@@ -36,6 +36,10 @@ function doLayout() {
 
   if (lesserWidth < 441) { goForOneColumn() }
 
+  //  TODO dodat za več stolpecv
+
+  checkAbsolutes();
+
 }
 
 function goForOneColumn() {
@@ -52,12 +56,12 @@ function goForOneColumn() {
 
   // TODO treba še dodat za moveLeft
 
-  //  3. potem pogledamo, al je treba umaknit absolute
-  checkAbsolutes();
+  //  3. potem pogledamo, al je treba umaknit absolute, ampak to se naredi s klicem funkcije v doLayout();
 
 }
 
 function checkAbsolutes() {
+
   // poiščemo, koliko največ vidi uporabnik na zaslonu
   let lesserHeight = document.documentElement.clientHeight < screen.height ? document.documentElement.clientHeight : screen.height;
 
@@ -74,42 +78,16 @@ function checkAbsolutes() {
 
   }
 
-  // TODO za desni se verjetno doda preprosto tako, da v if dodaš še ali z isto stvarno jza desni
-
 
 }
 
-// leftLowerContent.style.bottom = 'initial';
+// TODO uredit za oriantationChange
+//  TODO  uredit za resize
 
-// hideIfMobiles?.forEach((i) => { i.classList.add('hidden') });
-
-
-// if (window.innerWidth < 500 || screen.width < 500) {
-//     leftSideIndexIfMobiles.forEach((p) => {
-//         p.classList.remove('hidden');
-//     });
-
-//     rightSideIndex?.classList.add('hidden'); // skrije desni del pri indexu
-//     aboutRightSide?.classList.add('hidden'); // skrije desni del pri disclaimerju
-
-//     const width = window.innerWidth > screen.width ? screen.width - 40 : window.innerWidth - 40; // -40 ker je padding 20 levo in desno
-//     mainLeftSide.style.width = `${width}px`
-
-// } else if (mainleftSideUpperPart != null) { // za index in disclaimer, ki imata tako strukturo
-//     if ((mainleftSideUpperPart.getBoundingClientRect().height + mainleftSideBottomPart.getBoundingClientRect().height + 30) < window.innerHeight) {
-//         // to je zato, ker če ne na računalnku zabije dno gor in del teksta ni videm, če tega ni
-//         // če pa je to prisotno pri mobilcu, je dno zaklenjeno in ne skrola in spet ni vidno vse besedilo, zato se doda samo na računalniku pri zadostni višini
-//         mainLeftSide.style.bottom = "0";
-//         mainleftSideBottomPart.style.position = "absolute";
-//         if (aboutRightSide) aboutRightSide.style.position = "relative";
-//     }
-// } else if (aboutRightSideBlabber.getBoundingClientRect().height > window.innerHeight) {  // v tem primeru gre za about, ki ima svojo strukturo
-//     aboutRightSide.style.position = "relative";
-//     document.getElementsByTagName('body')[0].style.background = "#808080";
-// }
-
+//  - - - - - - - - -  IZVAJANJE  - - - - - -
 
 doLayout();
+
 
 //  coded with love and by guesswork by Ivo Makuc, 2022
 //  byguesswork@gmail.com
