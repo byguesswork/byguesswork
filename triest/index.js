@@ -31,7 +31,7 @@ function doLayout() {
 
   //  najprej izpišemo nekaj podatkov
   testWindow.innerHTML = `<p style="font-size:small">
-  108<br>
+  109<br>
   Širina:<br>document.documentElement.clientWidth: ${document.documentElement.clientWidth},<br>window.innerWidth: ${window.innerWidth},<br>window.outerWidth: ${window.outerWidth},<br>screen.width: ${screen.width}<br><br>
   Višina:<br>document.documentElement.clientHeight: ${document.documentElement.clientHeight},<br>window.innerHeight: ${window.innerHeight},<br>window.outerHeight: ${window.outerHeight},<br>screen.height: ${screen.height}<br><br></p>`;
 
@@ -50,31 +50,31 @@ function doLayout() {
   lesserWidth = document.documentElement.clientWidth < screen.width ? document.documentElement.clientWidth : screen.width;
 
   if (lesserWidth < 441) goForOneColumn();
-  if (lesserWidth >= 441 && lesserWidth <= 730) {  // tle pustimo horizontalni skrol
+  else {
     goForTwoColumns();
-    leftContainer.style.width = `${360 - 40}px`;  // 360, ker je taka ciljna širina 1. stolpca, in 40, ker je tak padding 1. stolpca
-    rightContainer.style.left = `362px`           // ker je ciljna širina 1. stolpca 360 + 1 za border;
-    rightContainer.style.width = `${730 - (360 + 40)}px`;  // širina 2. stolpca je arbitrarna meja 730 - (celotna širina 1. stolpca + padding 2. stolpca);
+
+    if (lesserWidth >= 441 && lesserWidth <= 730) {  // tle pustimo horizontalni skrol
+      leftContainer.style.width = `${360 - 40}px`;  // 360, ker je taka ciljna širina 1. stolpca, in 40, ker je tak padding 1. stolpca
+      rightContainer.style.left = `362px`           // ker je ciljna širina 1. stolpca 360 + 1 za border;
+      rightContainer.style.width = `${730 - (360 + 40 + 1 + 1)}px`;  // širina 2. stolpca je arbitrarna meja 730 - (celotna širina 1. stolpca + padding 2. stolpca + border + rezerva, ker če ne se pojavi Hskrolbar);
+    }
+    if (lesserWidth >= 731 && lesserWidth <= 800) {  // brez horiz. skrola
+      leftContainer.style.width = `${360 - 40}px`;  // 360, ker je taka ciljna širina 1. stolpca, in 40, ker je tak padding 1. stolpca
+      rightContainer.style.left = `362px`           // ker je ciljna širina 1. stolpca 360 + 1 za border;
+      rightContainer.style.width = `${lesserWidth - (360 + 40 + 1 + 1)}px`;  // širina 2. stolpca je razpoložljiva širina - (celotna širina 1. stolpca + padding 2. stolpca + border + rezerva, ker če ne se pojavi Hskrolbar);
+    }
+    if (lesserWidth >= 801 && lesserWidth <= 960) {  // brez horiz. skrola
+      leftContainer.style.width = `${400 - 40}px`;  // 400, ker je taka ciljna širina 1. stolpca, in 40, ker je tak padding 1. stolpca;
+      rightContainer.style.left = `402px`           // ker je ciljna širina 1. stolpca 400 + 1 za border;
+      rightContainer.style.width = `${lesserWidth - (400 + 40 + 1 + 1)}px`;  // širina 2. stolpca je razpoložljiva širina - (celotna širina 1. stolpca + padding 2. stolpca + border + rezerva, ker če ne se pojavi Hskrolbar);
+    }
+    if (lesserWidth >= 961) {  // brez horiz. skrola
+      leftContainer.style.width = `${400 - 40}px`;  // 400, ker je taka ciljna širina 1. stolpca, in 40, ker je tak padding
+      rightContainer.style.left = `402px`           // ker je ciljna širina 1. stolpca 400 + 1 za border;
+      rightContainer.style.width = `${560 - (40 + 1 + 1)}px`;  // širina 2. stolpca je ciljna širina (560) - (padding 2. stolpca + border + rezerva, ker če ne se pojavi Hskrolbar);
+    }
+    // TODO neki ne dela prav po širini: pri 3. in 4. kategoriji kot da clientInner Witdh ne zazna širine vertikalnega skrolbara in potem je deni kontejner nekoliko preozek in zahteva horiz skrolbar, čeprav ni načrtovano
   }
-  if (lesserWidth >= 731 && lesserWidth <= 800) {  // brez horiz. skrola
-    goForTwoColumns();
-    leftContainer.style.width = `${360 - 40}px`;  // 360, ker je taka ciljna širina 1. stolpca, in 40, ker je tak padding 1. stolpca
-    rightContainer.style.left = `362px`           // ker je ciljna širina 1. stolpca 360 + 1 za border;
-    rightContainer.style.width = `${lesserWidth - (360 + 40)}px`;  // širina 2. stolpca je razpoložljiva širina - (celotna širina 1. stolpca + padding 2. stolpca);
-  }
-  if (lesserWidth >= 801 && lesserWidth <= 960) {  // brez horiz. skrola
-    goForTwoColumns();
-    leftContainer.style.width = `${400 - 40}px`;  // 400, ker je taka ciljna širina 1. stolpca, in 40, ker je tak padding 1. stolpca;
-    rightContainer.style.left = `402px`           // ker je ciljna širina 1. stolpca 400 + 1 za border;
-    rightContainer.style.width = `${lesserWidth - (400 + 40)}px`;  // širina 2. stolpca je razpoložljiva širina - (celotna širina 1. stolpca + padding 2. stolpca);
-  }
-  if (lesserWidth >= 961) {  // brez horiz. skrola
-    goForTwoColumns();
-    leftContainer.style.width = `${400 - 40}px`;  // 400, ker je taka ciljna širina 1. stolpca, in 40, ker je tak padding
-    rightContainer.style.left = `402px`           // ker je ciljna širina 1. stolpca 400 + 1 za border;
-    rightContainer.style.width = `${560 - 40}px`;  // širina 2. stolpca je ciljna širina (560) - padding 2. stolpca;
-  }
-  // TODO neki ne dela prav po širini: pri 3. in 4. kategoriji kot da clientInner Witdh ne zazna širine vertikalnega skrolbara in potem je deni kontejner nekoliko preozek in zahteva horiz skrolbar, čeprav ni načrtovano
 
   // potem čekiramo & prilagodimo višino
   checkAbsolutes();
@@ -85,6 +85,7 @@ function goForOneColumn() {
 
   //  1. prilagodimo širino vsebine levega, edinega stolpca
   leftContainer.style.width = lesserWidth > 300 ? `${lesserWidth - 40}px` : '260px';  // -40, ker je padding 40; minimalno mora bit vsebina široka 260px;
+  leftContainer.style.borderRight = 'unset';
 
   //  2. najprej prikažemo, skrijemo, premaknemo vso vsebino
 
@@ -99,6 +100,7 @@ function goForOneColumn() {
 }
 
 function goForTwoColumns() {
+  leftContainer.style.borderRight = 'solid 1px #f0fff0';
   showIf1col?.forEach((i) => i.classList.add('hidden'));  // TODO to bi blo treba ločit, kaj je šou if mobile (en dodaen spejs na dnu) in kaj je šou if one column, ampak to je kompliciranje
   hideIf1col?.forEach((i) => i.classList.remove('hidden'));
 }
@@ -133,7 +135,11 @@ function checkAbsolutes() {
 
 doLayout();
 
-screen.addEventListener("change", () => { location.reload(); });
+screen.addEventListener("change", () => {
+  // location.reload();  // 108: to dela
+  htmlText = `<p style="font-size:small">v listenerju: screen.orientation.type je: ${screen.orientation.type}</p>`;
+  testWindow.insertAdjacentHTML("beforeend", htmlText);
+});
 // todo dodat, da se ta listener kliče samo če se izve, da je mobile
 
 //  coded with love and by guesswork by Ivo Makuc, 2022
