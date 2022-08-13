@@ -132,9 +132,15 @@ testWindow.insertAdjacentHTML("beforeend", htmlText);
 doLayout();
 
 screen.addEventListener("orientationchange", () => {
-  htmlText = `The orientation of the screen is: ${screen.orientation}`;
+  htmlText = `screen - "orientationchange" listener se je sprožil`;
   testWindow.insertAdjacentHTML("beforeend", htmlText);
 });
+
+screen.addEventListener("change", () => {
+  htmlText = `screen - "change" listener se je sprožil`;
+  testWindow.insertAdjacentHTML("beforeend", htmlText);
+});
+
 
 
 //  coded with love and by guesswork by Ivo Makuc, 2022
