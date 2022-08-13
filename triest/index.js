@@ -20,9 +20,10 @@ let lesserWidth;
 let isMobile;
 let htmlText;
 
-testWindow.innerHTML = `<p style="font-size:small">Širina:<br>document.documentElement.clientWidth: ${document.documentElement.clientWidth},<br>window.innerWidth: ${window.innerWidth},<br>window.outerWidth: ${window.outerWidth},<br>screen.width: ${screen.width}<br><br>
-Višina:<br>
-document.documentElement.clientHeight: ${document.documentElement.clientHeight},<br>window.innerHeight: ${window.innerHeight},<br>window.outerHeight: ${window.outerHeight},<br>screen.height: ${screen.height}<br><br></p>`;
+testWindow.innerHTML = `<p style="font-size:small">
+107<br>
+Širina:<br>document.documentElement.clientWidth: ${document.documentElement.clientWidth},<br>window.innerWidth: ${window.innerWidth},<br>window.outerWidth: ${window.outerWidth},<br>screen.width: ${screen.width}<br><br>
+Višina:<br>document.documentElement.clientHeight: ${document.documentElement.clientHeight},<br>window.innerHeight: ${window.innerHeight},<br>window.outerHeight: ${window.outerHeight},<br>screen.height: ${screen.height}<br><br></p>`;
 
 //  če je manj kot 441  : en stolpec
 // če je med 441 in 730 : dva stolpca (360 + 370, vmes je border 1px), horizontalni skrol; 2. stolpec je končno ravno nekoliko večji od prvega
@@ -131,17 +132,8 @@ testWindow.insertAdjacentHTML("beforeend", htmlText);
 
 doLayout();
 
-screen.addEventListener("orientationchange", () => {
-  htmlText = `screen - "orientationchange" listener se je sprožil`;
-  testWindow.insertAdjacentHTML("beforeend", htmlText);
-});
-
-screen.addEventListener("change", () => {
-  htmlText = `screen - "change" listener se je sprožil`;
-  testWindow.insertAdjacentHTML("beforeend", htmlText);
-});
-
-
+screen.addEventListener("change", () => { doLayout(); });
+// todo dodat, da se ta listener kliče samo če se izve, da je mobile
 
 //  coded with love and by guesswork by Ivo Makuc, 2022
 //  byguesswork@gmail.com
