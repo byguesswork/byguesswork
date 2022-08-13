@@ -17,13 +17,12 @@ const moveLeftIfMobiles = document.querySelectorAll('.move_left_if_mobile');
 const testWindow = document.getElementById('za_test');
 
 let lesserWidth;
+let isMobile;
+let htmlText;
 
 testWindow.innerHTML = `<p style="font-size:small">Širina:<br>document.documentElement.clientWidth: ${document.documentElement.clientWidth},<br>window.innerWidth: ${window.innerWidth},<br>window.outerWidth: ${window.outerWidth},<br>screen.width: ${screen.width}<br><br>
 Višina:<br>
-document.documentElement.clientHeight: ${document.documentElement.clientHeight},<br>window.innerHeight: ${window.innerHeight},<br>window.outerHeight: ${window.outerHeight},<br>screen.height: ${screen.height}<br><br>
-document.body.scrollHeight: ${document.body.scrollHeight}, document.documentElement.scrollHeight: ${document.documentElement.scrollHeight},
-document.body.offsetHeight: ${document.body.offsetHeight}, document.documentElement.offsetHeight: ${document.documentElement.offsetHeight},
-document.body.clientHeight: ${document.body.clientHeight}, document.documentElement.clientHeight: ${document.documentElement.clientHeight}</p>`;
+document.documentElement.clientHeight: ${document.documentElement.clientHeight},<br>window.innerHeight: ${window.innerHeight},<br>window.outerHeight: ${window.outerHeight},<br>screen.height: ${screen.height}<br><br></p>`;
 
 //  če je manj kot 441  : en stolpec
 // če je med 441 in 730 : dva stolpca (360 + 370, vmes je border 1px), horizontalni skrol; 2. stolpec je končno ravno nekoliko večji od prvega
@@ -118,7 +117,24 @@ function checkAbsolutes() {
 
 //  - - - - - - - - -  IZVAJANJE  - - - - - -
 
+htmlText = navigator.userAgent.match(/(android|iphone|ipad)/i) != null ? '<p style="font-size:small">UserAgent: je mobile</p>' : '<p style="font-size:small">UserAgent: ni mobile</p>';
+testWindow.insertAdjacentHTML("beforeend", htmlText);
+htmlText = navigator.userAgentData.mobile == true ? '<p style="font-size:small">UserAgentData: je mobile</p>' : '<p style="font-size:small">UserAgentData: ni mobile</p>';
+testWindow.insertAdjacentHTML("beforeend", htmlText);
+htmlText = `<p style="font-size:small">screen.orientation.angle je: ${screen.orientation.angle}</p>`;
+testWindow.insertAdjacentHTML("beforeend", htmlText);
+htmlText = `<p style="font-size:small">screen.orientation.onchange je: ${screen.orientation.onchange}</p>`;
+testWindow.insertAdjacentHTML("beforeend", htmlText);
+htmlText = `<p style="font-size:small">screen.orientation.type je: ${screen.orientation.type}</p>`;
+testWindow.insertAdjacentHTML("beforeend", htmlText);
+
+
 doLayout();
+
+screen.addEventListener("orientationchange", () => {
+  htmlText = `The orientation of the screen is: ${screen.orientation}`;
+  testWindow.insertAdjacentHTML("beforeend", htmlText);
+});
 
 
 //  coded with love and by guesswork by Ivo Makuc, 2022
