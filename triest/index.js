@@ -20,10 +20,6 @@ let lesserWidth;
 let isMobile;
 let htmlText;
 
-testWindow.innerHTML = `<p style="font-size:small">
-107<br>
-Širina:<br>document.documentElement.clientWidth: ${document.documentElement.clientWidth},<br>window.innerWidth: ${window.innerWidth},<br>window.outerWidth: ${window.outerWidth},<br>screen.width: ${screen.width}<br><br>
-Višina:<br>document.documentElement.clientHeight: ${document.documentElement.clientHeight},<br>window.innerHeight: ${window.innerHeight},<br>window.outerHeight: ${window.outerHeight},<br>screen.height: ${screen.height}<br><br></p>`;
 
 //  če je manj kot 441  : en stolpec
 // če je med 441 in 730 : dva stolpca (360 + 370, vmes je border 1px), horizontalni skrol; 2. stolpec je končno ravno nekoliko večji od prvega
@@ -32,6 +28,23 @@ Višina:<br>document.documentElement.clientHeight: ${document.documentElement.cl
 // če je nad 960:       : dva stolpca (400 + 560, vmes je border 1px)
 
 function doLayout() {
+
+  //  najprej izpišemo nekaj podatkov
+  testWindow.innerHTML = `<p style="font-size:small">
+  108<br>
+  Širina:<br>document.documentElement.clientWidth: ${document.documentElement.clientWidth},<br>window.innerWidth: ${window.innerWidth},<br>window.outerWidth: ${window.outerWidth},<br>screen.width: ${screen.width}<br><br>
+  Višina:<br>document.documentElement.clientHeight: ${document.documentElement.clientHeight},<br>window.innerHeight: ${window.innerHeight},<br>window.outerHeight: ${window.outerHeight},<br>screen.height: ${screen.height}<br><br></p>`;
+
+  htmlText = navigator.userAgent.match(/(android|iphone|ipad)/i) != null ? '<p style="font-size:small">UserAgent: je mobile</p>' : '<p style="font-size:small">UserAgent: ni mobile</p>';
+  testWindow.insertAdjacentHTML("beforeend", htmlText);
+  htmlText = navigator.userAgentData.mobile == true ? '<p style="font-size:small">UserAgentData: je mobile</p>' : '<p style="font-size:small">UserAgentData: ni mobile</p>';
+  testWindow.insertAdjacentHTML("beforeend", htmlText);
+  htmlText = `<p style="font-size:small">screen.orientation.angle je: ${screen.orientation.angle}</p>`;
+  testWindow.insertAdjacentHTML("beforeend", htmlText);
+  htmlText = `<p style="font-size:small">screen.orientation.onchange je: ${screen.orientation.onchange}</p>`;
+  testWindow.insertAdjacentHTML("beforeend", htmlText);
+  htmlText = `<p style="font-size:small">screen.orientation.type je: ${screen.orientation.type}</p>`;
+  testWindow.insertAdjacentHTML("beforeend", htmlText);
 
   // najprej čekiramo & prilagodimo širino
   lesserWidth = document.documentElement.clientWidth < screen.width ? document.documentElement.clientWidth : screen.width;
@@ -118,21 +131,9 @@ function checkAbsolutes() {
 
 //  - - - - - - - - -  IZVAJANJE  - - - - - -
 
-htmlText = navigator.userAgent.match(/(android|iphone|ipad)/i) != null ? '<p style="font-size:small">UserAgent: je mobile</p>' : '<p style="font-size:small">UserAgent: ni mobile</p>';
-testWindow.insertAdjacentHTML("beforeend", htmlText);
-htmlText = navigator.userAgentData.mobile == true ? '<p style="font-size:small">UserAgentData: je mobile</p>' : '<p style="font-size:small">UserAgentData: ni mobile</p>';
-testWindow.insertAdjacentHTML("beforeend", htmlText);
-htmlText = `<p style="font-size:small">screen.orientation.angle je: ${screen.orientation.angle}</p>`;
-testWindow.insertAdjacentHTML("beforeend", htmlText);
-htmlText = `<p style="font-size:small">screen.orientation.onchange je: ${screen.orientation.onchange}</p>`;
-testWindow.insertAdjacentHTML("beforeend", htmlText);
-htmlText = `<p style="font-size:small">screen.orientation.type je: ${screen.orientation.type}</p>`;
-testWindow.insertAdjacentHTML("beforeend", htmlText);
-
-
 doLayout();
 
-screen.addEventListener("change", () => { doLayout(); });
+screen.addEventListener("change", () => { location.reload(); });
 // todo dodat, da se ta listener kliče samo če se izve, da je mobile
 
 //  coded with love and by guesswork by Ivo Makuc, 2022
