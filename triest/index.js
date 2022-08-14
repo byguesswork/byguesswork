@@ -37,7 +37,7 @@ function init() {
 function initializeTestField() {
   // inicializiramo testno polje
   testWindow.innerHTML = `<p style="font-size:small"> 
-  različica testa: 114 </p>`;
+  različica testa: 115 </p>`;
   htmlText = navigator.userAgent.match(/(android|iphone|ipad)/i) != null ? '<p style="font-size:small">UserAgent: je mobile</p>' : '<p style="font-size:small">UserAgent: ni mobile</p>';
   testWindow.insertAdjacentHTML("beforeend", htmlText);
   htmlText = navigator.userAgentData.mobile == true ? '<p style="font-size:small">UserAgentData: je mobile</p>' : '<p style="font-size:small">UserAgentData: ni mobile</p>';
@@ -71,7 +71,13 @@ function doLayout() {
 
   // najprej čekiramo & prilagodimo širino
   lesserWidth = document.documentElement.clientWidth < screen.width ? document.documentElement.clientWidth : screen.width;
-  isMobile = true ? hideIfMobiles?.classList.add('hidden') : hideIfMobiles?.classList.remove('hidden');
+  htmlText = `<p style="font-size:small">lesserWidth je: ${lesserWidth}<br>  </p>`;
+  testWindow.insertAdjacentHTML("beforeend", htmlText);
+
+  if (isMobile) {
+    hideIfMobiles?.forEach((el) => el.classList.add('hidden'))
+  } else hideIfMobiles?.forEach((el) => el.classList.remove('hidden'));
+
 
   if (lesserWidth < 441) goForOneColumn();
   else {
@@ -107,7 +113,7 @@ function doLayout() {
     let ratio = ((leftContainer.getBoundingClientRect().width + rightContainer?.getBoundingClientRect().width) / screen.width);
     htmlText = `<p style="font-size:small">ratio je: ${ratio}<br></p>`;
     testWindow.insertAdjacentHTML("beforeend", htmlText);
-    document.body.style.transform = `scale(${ratio})`;
+    document.body.style.transform = `scale(${1 / ratio})`;
   }
 
   // potem čekiramo & prilagodimo višino
