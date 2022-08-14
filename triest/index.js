@@ -37,11 +37,12 @@ function init() {
 function initializeTestField() {
   // inicializiramo testno polje
   testWindow.innerHTML = `<p style="font-size:small"> 
-  različica testa: 113 </p>`;
+  različica testa: 114 </p>`;
   htmlText = navigator.userAgent.match(/(android|iphone|ipad)/i) != null ? '<p style="font-size:small">UserAgent: je mobile</p>' : '<p style="font-size:small">UserAgent: ni mobile</p>';
   testWindow.insertAdjacentHTML("beforeend", htmlText);
   htmlText = navigator.userAgentData.mobile == true ? '<p style="font-size:small">UserAgentData: je mobile</p>' : '<p style="font-size:small">UserAgentData: ni mobile</p>';
   testWindow.insertAdjacentHTML("beforeend", htmlText);
+  if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null || navigator.userAgentData.mobile == true) isMobile = true;  // todo to bi veljalo izboljšat s čeiranjem še širine
 }
 
 function updateTestField() {
@@ -70,6 +71,7 @@ function doLayout() {
 
   // najprej čekiramo & prilagodimo širino
   lesserWidth = document.documentElement.clientWidth < screen.width ? document.documentElement.clientWidth : screen.width;
+  isMobile = true ? hideIfMobiles?.classList.add('hidden') : hideIfMobiles?.classList.remove('hidden');
 
   if (lesserWidth < 441) goForOneColumn();
   else {
@@ -98,9 +100,17 @@ function doLayout() {
     // TODO neki ne dela prav po širini: pri 3. in 4. kategoriji kot da clientInner Witdh ne zazna širine vertikalnega skrolbara in potem je deni kontejner nekoliko preozek in zahteva horiz skrolbar, čeprav ni načrtovano
   }
 
-  // potem čekiramo & prilagodimo višino
 
   updateTestField();
+
+  if (isMobile) {
+    let ratio = ((leftContainer.getBoundingClientRect().width + rightContainer?.getBoundingClientRect().width) / screen.width);
+    htmlText = `<p style="font-size:small">ratio je: ${ratio}<br></p>`;
+    testWindow.insertAdjacentHTML("beforeend", htmlText);
+    document.body.style.transform = `scale(${ratio})`;
+  }
+
+  // potem čekiramo & prilagodimo višino
   checkAbsolutes(); // ta mora bit zadnji, ker če ne se zgodi, da bi update testfield za tem podaljšal vsebino skozi dno
 
 }
@@ -160,10 +170,7 @@ function checkAbsolutes() {
 init();
 doLayout();
 
-screen.orientation.addEventListener("change", () => {
-  doLayout();
-});
-// todo dodat, da se ta listener kliče samo če se izve, da je mobile
+if (isMobile) screen.orientation.addEventListener("change", () => { doLayout(); });
 
 //  coded with love and by guesswork by Ivo Makuc, 2022
 //  byguesswork@gmail.com
