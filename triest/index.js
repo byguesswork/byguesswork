@@ -27,12 +27,29 @@ let htmlText;
 // če je med 801 in 960 : dva stolpca (400 + 400–560, vmes je border 1px), brez H skrola
 // če je nad 960:       : dva stolpca (400 + 560, vmes je border 1px)
 
+function init() {
+  initializeTestField();
+  updateTestField();
+  htmlText = '<p style="font-size:small">  - - - - - - - - - - - -  KONEC zAČETNIH PODATKOV  - - - - - - - - - </p>';
+  testWindow.insertAdjacentHTML("beforeend", htmlText);
+}
+
+function initializeTestField() {
+  // inicializiramo testno polje
+  testWindow.innerHTML = `<p style="font-size:small"> 
+  različica testa: 112 </p>`;
+  htmlText = navigator.userAgent.match(/(android|iphone|ipad)/i) != null ? '<p style="font-size:small">UserAgent: je mobile</p>' : '<p style="font-size:small">UserAgent: ni mobile</p>';
+  testWindow.insertAdjacentHTML("beforeend", htmlText);
+  htmlText = navigator.userAgentData.mobile == true ? '<p style="font-size:small">UserAgentData: je mobile</p>' : '<p style="font-size:small">UserAgentData: ni mobile</p>';
+  testWindow.insertAdjacentHTML("beforeend", htmlText);
+}
+
 function updateTestField() {
 
   //  DOpišemo nekaj podatkov v testno polje
   testWindow.insertAdjacentHTML("beforeend", `<p style="font-size:small">
   Širina:<br>document.documentElement.clientWidth: ${document.documentElement.clientWidth},<br>window.innerWidth: ${window.innerWidth},<br>window.outerWidth: ${window.outerWidth},<br>screen.width: ${screen.width}<br><br>
-  Višina:<br>document.documentElement.clientHeight: ${document.documentElement.clientHeight},<br>window.innerHeight: ${window.innerHeight},<br>window.outerHeight: ${window.outerHeight},<br>screen.height: ${screen.height}<br><br></p>`);
+  Višina:<br>document.documentElement.clientHeight: ${document.documentElement.clientHeight},<br>window.innerHeight: ${window.innerHeight},<br>window.outerHeight: ${window.outerHeight},<br>screen.height: ${screen.height}<br></p>`);
 
   testWindow.insertAdjacentHTML("beforeend", `<p style="font-size:small">document.body.scrollHeight: ${document.body.scrollHeight}, document.documentElement.scrollHeight: ${document.documentElement.scrollHeight},<br>
   document.body.offsetHeight: ${document.body.offsetHeight}, document.documentElement.offsetHeight: ${document.documentElement.offsetHeight},
@@ -41,15 +58,13 @@ function updateTestField() {
   document.body.offsetW: ${document.body.offsetWidth}, document.documentElement.offsetW: ${document.documentElement.offsetWidth},
   document.body.clientW: ${document.body.clientWidth}, document.documentElement.clientW: ${document.documentElement.clientWidth}</p>`);
 
-  htmlText = navigator.userAgent.match(/(android|iphone|ipad)/i) != null ? '<p style="font-size:small">UserAgent: je mobile</p>' : '<p style="font-size:small">UserAgent: ni mobile</p>';
-  testWindow.insertAdjacentHTML("beforeend", htmlText);
-  htmlText = navigator.userAgentData.mobile == true ? '<p style="font-size:small">UserAgentData: je mobile</p>' : '<p style="font-size:small">UserAgentData: ni mobile</p>';
-  testWindow.insertAdjacentHTML("beforeend", htmlText);
-  htmlText = `<p style="font-size:small">screen.orientation.angle je: ${screen.orientation.angle}</p>`;
-  testWindow.insertAdjacentHTML("beforeend", htmlText);
-  htmlText = `<p style="font-size:small">screen.orientation.onchange je: ${screen.orientation.onchange}</p>`;
-  testWindow.insertAdjacentHTML("beforeend", htmlText);
-  htmlText = `<p style="font-size:small">screen.orientation.type je: ${screen.orientation.type}</p>`;
+  htmlText = `<p style="font-size:small">
+  screen.orientation.angle je: ${screen.orientation.angle}<br>
+  screen.orientation.onchange je: ${screen.orientation.onchange}<br>
+  screen.orientation.type je: ${screen.orientation.type}<br> - - - - - - -</p>`;
+
+
+
   testWindow.insertAdjacentHTML("beforeend", htmlText);
 
 }
@@ -87,7 +102,9 @@ function doLayout() {
   }
 
   // potem čekiramo & prilagodimo višino
-  checkAbsolutes();
+
+  updateTestField();
+  checkAbsolutes(); // ta mora bit zadnji, ker če ne se zgodi, da bi update testfield za tem podaljšal vsebino skozi dno
 
 }
 
@@ -143,16 +160,11 @@ function checkAbsolutes() {
 
 //  - - - - - - - - -  IZVAJANJE  - - - - - -
 
-// inicializiramo testno polje
-testWindow.innerHTML = `<p style="font-size:small"> 
-različica testa: 111 </p>`;
-updateTestField();
+init();
 doLayout();
 
 screen.orientation.addEventListener("change", () => {
-
   doLayout();
-
 });
 // todo dodat, da se ta listener kliče samo če se izve, da je mobile
 
