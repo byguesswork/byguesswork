@@ -37,7 +37,7 @@ function init() {
 function initializeTestField() {
   // inicializiramo testno polje
   testWindow.innerHTML = `<p style="font-size:small"> 
-  različica testa: 115 </p>`;
+  različica testa: 116 </p>`;
   htmlText = navigator.userAgent.match(/(android|iphone|ipad)/i) != null ? '<p style="font-size:small">UserAgent: je mobile</p>' : '<p style="font-size:small">UserAgent: ni mobile</p>';
   testWindow.insertAdjacentHTML("beforeend", htmlText);
   htmlText = navigator.userAgentData.mobile == true ? '<p style="font-size:small">UserAgentData: je mobile</p>' : '<p style="font-size:small">UserAgentData: ni mobile</p>';
@@ -113,7 +113,7 @@ function doLayout() {
     let ratio = ((leftContainer.getBoundingClientRect().width + rightContainer?.getBoundingClientRect().width) / screen.width);
     htmlText = `<p style="font-size:small">ratio je: ${ratio}<br></p>`;
     testWindow.insertAdjacentHTML("beforeend", htmlText);
-    document.body.style.transform = `scale(${1 / ratio})`;
+    // document.body.style.transform = `scale(${1 / ratio})`;   115 - to ne dela OK, morda treba kaj dodat
   }
 
   // potem čekiramo & prilagodimo višino
@@ -168,8 +168,6 @@ function checkAbsolutes() {
 
 }
 
-// TODO uredit za oriantationChange
-//  TODO  uredit za resize
 
 //  - - - - - - - - -  IZVAJANJE  - - - - - -
 
