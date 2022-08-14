@@ -58,14 +58,19 @@ background-color: #313131;  najtemnejša siva ozadja
     top: 0;
     left: 402px;
     bottom: 0;
+
+    color: #e8f0eb;
 }
 
-/* #right_upper_content */
+#right_upper_content {
+    color: inherit;
+}
 
 #right_lower_content {
     position: absolute;
     bottom: 20px;
     left: 20px;
+    color: inherit;
 }
 
 
@@ -97,7 +102,6 @@ p a {
     font-size: small;
     background-color: inherit;
 }
-
 
 .hidden {
     display: none;

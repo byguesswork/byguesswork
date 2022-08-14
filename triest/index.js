@@ -37,7 +37,7 @@ function init() {
 function initializeTestField() {
   // inicializiramo testno polje
   testWindow.innerHTML = `<p style="font-size:small"> 
-  različica testa: 112 </p>`;
+  različica testa: 113 </p>`;
   htmlText = navigator.userAgent.match(/(android|iphone|ipad)/i) != null ? '<p style="font-size:small">UserAgent: je mobile</p>' : '<p style="font-size:small">UserAgent: ni mobile</p>';
   testWindow.insertAdjacentHTML("beforeend", htmlText);
   htmlText = navigator.userAgentData.mobile == true ? '<p style="font-size:small">UserAgentData: je mobile</p>' : '<p style="font-size:small">UserAgentData: ni mobile</p>';
@@ -62,9 +62,6 @@ function updateTestField() {
   screen.orientation.angle je: ${screen.orientation.angle}<br>
   screen.orientation.onchange je: ${screen.orientation.onchange}<br>
   screen.orientation.type je: ${screen.orientation.type}<br> - - - - - - -</p>`;
-
-
-
   testWindow.insertAdjacentHTML("beforeend", htmlText);
 
 }
