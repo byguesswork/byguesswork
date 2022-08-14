@@ -27,12 +27,19 @@ let htmlText;
 // če je med 801 in 960 : dva stolpca (400 + 400–560, vmes je border 1px), brez H skrola
 // če je nad 960:       : dva stolpca (400 + 560, vmes je border 1px)
 
-function doLayout() {
+function updateTestField() {
 
-  //  najprej DOpišemo nekaj podatkov v testno polje
-  testWindow.insertAdjacentHTML("beforeend", `
-  <p style="font-size:small">Širina:<br>document.documentElement.clientWidth: ${document.documentElement.clientWidth},<br>window.innerWidth: ${window.innerWidth},<br>window.outerWidth: ${window.outerWidth},<br>screen.width: ${screen.width}<br><br>
+  //  DOpišemo nekaj podatkov v testno polje
+  testWindow.insertAdjacentHTML("beforeend", `<p style="font-size:small">
+  Širina:<br>document.documentElement.clientWidth: ${document.documentElement.clientWidth},<br>window.innerWidth: ${window.innerWidth},<br>window.outerWidth: ${window.outerWidth},<br>screen.width: ${screen.width}<br><br>
   Višina:<br>document.documentElement.clientHeight: ${document.documentElement.clientHeight},<br>window.innerHeight: ${window.innerHeight},<br>window.outerHeight: ${window.outerHeight},<br>screen.height: ${screen.height}<br><br></p>`);
+
+  testWindow.insertAdjacentHTML("beforeend", `<p style="font-size:small">document.body.scrollHeight: ${document.body.scrollHeight}, document.documentElement.scrollHeight: ${document.documentElement.scrollHeight},<br>
+  document.body.offsetHeight: ${document.body.offsetHeight}, document.documentElement.offsetHeight: ${document.documentElement.offsetHeight},
+  document.body.clientHeight: ${document.body.clientHeight}, document.documentElement.clientHeight: ${document.documentElement.clientHeight}<br><br>
+  document.body.scrollWidth: ${document.body.scrollWidth}, document.documentElement.scrollWidth: ${document.documentElement.scrollWidth},<br>
+  document.body.offsetW: ${document.body.offsetWidth}, document.documentElement.offsetW: ${document.documentElement.offsetWidth},
+  document.body.clientW: ${document.body.clientWidth}, document.documentElement.clientW: ${document.documentElement.clientWidth}</p>`);
 
   htmlText = navigator.userAgent.match(/(android|iphone|ipad)/i) != null ? '<p style="font-size:small">UserAgent: je mobile</p>' : '<p style="font-size:small">UserAgent: ni mobile</p>';
   testWindow.insertAdjacentHTML("beforeend", htmlText);
@@ -44,6 +51,10 @@ function doLayout() {
   testWindow.insertAdjacentHTML("beforeend", htmlText);
   htmlText = `<p style="font-size:small">screen.orientation.type je: ${screen.orientation.type}</p>`;
   testWindow.insertAdjacentHTML("beforeend", htmlText);
+
+}
+
+function doLayout() {
 
   // najprej čekiramo & prilagodimo širino
   lesserWidth = document.documentElement.clientWidth < screen.width ? document.documentElement.clientWidth : screen.width;
@@ -134,19 +145,12 @@ function checkAbsolutes() {
 
 // inicializiramo testno polje
 testWindow.innerHTML = `<p style="font-size:small"> 
-različica testa: 110 </p>`;
+različica testa: 111 </p>`;
+updateTestField();
 doLayout();
 
 screen.orientation.addEventListener("change", () => {
-  // location.reload();  // 108: to dela
 
-  // 109
-  // htmlText = `<p style="font-size:small">v listenerju: screen.orientation.type je: ${screen.orientation.type}</p>`;
-  // testWindow.insertAdjacentHTML("beforeend", htmlText);
-
-  // 110 - poslušamo screen.orientation.addEventListener
-  htmlText = `<p style="font-size:small">listener 110 sprožil: screen.orientation.type je: ${screen.orientation.type}</p>`;
-  // testWindow.insertAdjacentHTML("beforeend", htmlText);
   doLayout();
 
 });
