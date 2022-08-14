@@ -29,11 +29,10 @@ let htmlText;
 
 function doLayout() {
 
-  //  najprej izpišemo nekaj podatkov
-  testWindow.innerHTML = `<p style="font-size:small">
-  109<br>
-  Širina:<br>document.documentElement.clientWidth: ${document.documentElement.clientWidth},<br>window.innerWidth: ${window.innerWidth},<br>window.outerWidth: ${window.outerWidth},<br>screen.width: ${screen.width}<br><br>
-  Višina:<br>document.documentElement.clientHeight: ${document.documentElement.clientHeight},<br>window.innerHeight: ${window.innerHeight},<br>window.outerHeight: ${window.outerHeight},<br>screen.height: ${screen.height}<br><br></p>`;
+  //  najprej DOpišemo nekaj podatkov v testno polje
+  testWindow.insertAdjacentHTML("beforeend", `
+  <p style="font-size:small">Širina:<br>document.documentElement.clientWidth: ${document.documentElement.clientWidth},<br>window.innerWidth: ${window.innerWidth},<br>window.outerWidth: ${window.outerWidth},<br>screen.width: ${screen.width}<br><br>
+  Višina:<br>document.documentElement.clientHeight: ${document.documentElement.clientHeight},<br>window.innerHeight: ${window.innerHeight},<br>window.outerHeight: ${window.outerHeight},<br>screen.height: ${screen.height}<br><br></p>`);
 
   htmlText = navigator.userAgent.match(/(android|iphone|ipad)/i) != null ? '<p style="font-size:small">UserAgent: je mobile</p>' : '<p style="font-size:small">UserAgent: ni mobile</p>';
   testWindow.insertAdjacentHTML("beforeend", htmlText);
@@ -133,12 +132,23 @@ function checkAbsolutes() {
 
 //  - - - - - - - - -  IZVAJANJE  - - - - - -
 
+// inicializiramo testno polje
+testWindow.innerHTML = `<p style="font-size:small"> 
+različica testa: 110 </p>`;
 doLayout();
 
-screen.addEventListener("change", () => {
+screen.orientation.addEventListener("change", () => {
   // location.reload();  // 108: to dela
-  htmlText = `<p style="font-size:small">v listenerju: screen.orientation.type je: ${screen.orientation.type}</p>`;
-  testWindow.insertAdjacentHTML("beforeend", htmlText);
+
+  // 109
+  // htmlText = `<p style="font-size:small">v listenerju: screen.orientation.type je: ${screen.orientation.type}</p>`;
+  // testWindow.insertAdjacentHTML("beforeend", htmlText);
+
+  // 110 - poslušamo screen.orientation.addEventListener
+  htmlText = `<p style="font-size:small">listener 110 sprožil: screen.orientation.type je: ${screen.orientation.type}</p>`;
+  // testWindow.insertAdjacentHTML("beforeend", htmlText);
+  doLayout();
+
 });
 // todo dodat, da se ta listener kliče samo če se izve, da je mobile
 
