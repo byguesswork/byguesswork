@@ -3,28 +3,103 @@
     padding: 0;
     font-family: Helvetica, Arial, sans-serif;
     color: #f0fff0;
-    /* honeydew #f0fff0 */
     background-color: #313131;
     font-size: 15px;
-
 }
 
-/* botom (bottom: 0;) ne definiramo, da je zadeva ready za mobilca; če bo prikazano na računalniku, programatično dodamo */
-.main {
+
+/*
+pomožni klasi:
+- postavitveni:
+    - show_if_1col        
+    - hide_if_1col        (se ne uporablja, če se uporablja move_left_if_1col)
+    - move_left_if_1col   (se ne uporablja, če se uporablja hide_if_1col)
+- oblikovni
+    - hide_if_mobile        (samo manjši razmik recimo, če na mobilci; se še ne uporablja)
+- unused                    (nisem še prepričan o tem, kako in zakaj bi ga rabil)
+
+klasi, kot so .hide-if-1col, se uporabljajo za upravljanje postavitve, ne za oblikovanje
+za oblikovanje se dodoa kak drug klas, recimo ".pisan" ali karkoli
+
+color: #f0fff0;             svetla barva pisave, honeydew
+background-color: #808080;  najsvetlejša  siva ozadja
+background-color: #5a5a5a;  srednja siva ozadja
+background-color: #313131;  najtemnejša siva ozadja
+*/
+
+
+#left_container {
     position: absolute;
     padding: 20px;
     width: 360px;
     top: 0;
     left: 0;
+    bottom: 0;
     background-color: #808080;
+    border-right: solid 1px #f0fff0;
 }
 
-.main_upper_part {
+#left_upper_content {
     background: inherit;
 }
 
-.main h1 {
+#left_lower_content {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    background: inherit;
+}
+
+#right_container {
+    position: absolute;
+    padding: 20px;
+    width: 560px;
+    top: 0;
+    left: 402px;
+    bottom: 0;
+    background-color: #5a5a5a;
+
+    /* ta zgornja je lih mal svetlejša ; spodnja je prav srebrno siva, ampak ozadje morda ni zadosti temno za to */
+    color: #e8f0eb;
+    /* color: #e5e7eb; */
+}
+
+#right_container p {
+    color: inherit;
+}
+
+#right_upper_content {
+    background-color: inherit;
+    color: inherit;
+}
+
+#right_lower_content {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background-color: inherit;
+    color: inherit;
+}
+
+.fixed {
+    position: fixed;
+}
+
+.hidden {
+    display: none;
+}
+
+/* TIPOGRAFIJA */
+
+h1 {
     font-size: 36px;
+    font-style: italic;
+    background-color: inherit;
+}
+
+h2 {
+    font-size: 30px;
     font-style: italic;
     background-color: inherit;
 }
@@ -44,54 +119,8 @@ p a {
     background-color: inherit;
 }
 
-.top-fixed {
-    position: fixed;
-    width: 400px;
-    background: inherit;
-    top: 20px;
-}
 
-.bottom {
-    position: relative;
-    bottom: 10px;
-    background-color: inherit;
-}
-
-.if_mobile {
-    margin-left: 20px;
+.smaller_text {
     font-size: small;
     background-color: inherit;
-}
-
-.right-index {
-    position: absolute;
-    left: 400px;
-    width: 600px;
-    top: 0;
-    bottom: 0;
-    background: #5a5a5a;
-    /*#313131 pretemna */
-    border-left: solid 1px #f0fff0;
-    padding: 20px;
-}
-
-.right-about {
-    position: absolute;
-    left: 400px;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    background: #5a5a5a;
-    /*#313131 pretemna */
-    border-left: solid 1px #f0fff0;
-}
-
-.main-blabber {
-    padding: 20px;
-    background-color: inherit;
-    width: 600px;
-}
-
-.hidden {
-    display: none;
 }
