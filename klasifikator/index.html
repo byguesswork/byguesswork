@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+
+<head>
+    <title>Poskus nevronske mreže za določanje spola slovenskim imenom</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="vrhnji">
+        <p>Poskus nevronske mreže - klasifikator</p>
+        <p>vnesi ime v spodnji okvirček in klikni gumb "počekiraj"</p>
+        <input id="inputField" type="text"> <button id="gumb">počekiraj</button>
+        <p id="adhocresult"></p>
+    </div>
+    <div>
+        <p style="padding: 20px 20px 0px;">Klasifikator je bil treniran na spodnjih imenih</p>
+    </div>
+    <div>
+        <table id="results">
+        </table>
+    </div>
+    <script src="neuralnetwork.js"></script>
+    <script src="utils.js"></script>
+    <script src="name.js"></script>
+    <script src="main.js"></script>
+</body>

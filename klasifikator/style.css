@@ -1,0 +1,13 @@
+body {
+    margin: 0;
+}
+
+td {
+    font-size: smaller;
+    margin: 0px;
+    padding: 0px 5px;
+}
+
+#vrhnji {
+    margin-left: 20px;
+}
