@@ -2,9 +2,11 @@ const results = document.getElementById('results');
 const inputField = document.getElementById('inputField');
 const gumb = document.getElementById('gumb');
 const adHocResult = document.getElementById('adhocresult');
+const resultsHeader = document.getElementById('results_header');
 
 // TODO 
 // naredit tabelo za primerjavo "if (sum > level.biases[i])" s trenutno rešitvijo v network > level > ff;
+// dodat da je default bias za value od končnice = 0, če ga ne najde;
 
 const rawNamesMale = ['franc',
     'janez',
@@ -499,10 +501,18 @@ function save(someInt) {
     console.log(keyName);
 }
 
+function topHeight() {
+    const topHeight = getComputedStyle(document.getElementById('vrhnji')).height;
+    resultsHeader.style.paddingTop = topHeight;
+}
+
 //  - - - -  KONC FUNKCIJ - - - -
 
 
 //  - - - -  IZVAJANJE - - - -
+
+// videz strani;
+topHeight();
 
 // zapolni preppedNames z imeni in readingi; na tej točli še ne z networkom;
 populateNames();
@@ -516,10 +526,16 @@ calculateOutputsAndDrawTable();
 gumb.addEventListener('click', gumbKliknjen);
 
 function gumbKliknjen() {
+    // inicializiramo ime;
     const enteredName = new Name(inputField.value);
-    addNetwork(enteredName);
+    // dodamo mu network;
+    enteredName.network = JSON.parse(someBrain);
+    // damo pravi bias (od končnice imena);
+    addBias(enteredName);
     const result = NeuralNetwork.feedForward(enteredName.readings, enteredName.network)[0];
     adHocResult.innerHTML = `Klasifikator meni, da je ime <span style="color:red;">${enteredName.name}</span> ${result == 1 ? "moškega" : "ženskega"} spola`;
+    topHeight();
 }
+
 
 //  konc..

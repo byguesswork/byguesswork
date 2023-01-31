@@ -9,5 +9,9 @@ td {
 }
 
 #vrhnji {
-    margin-left: 20px;
+    position: fixed;
+    padding-left: 20px;
+    left: 0;
+    right: 0;
+    background-color: aliceblue;
 }
