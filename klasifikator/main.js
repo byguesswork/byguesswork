@@ -3,6 +3,9 @@ const inputField = document.getElementById('inputField');
 const gumb = document.getElementById('gumb');
 const adHocResult = document.getElementById('adhocresult');
 const resultsHeader = document.getElementById('results_header');
+const btn1 = document.getElementById('btn1');
+const btn2 = document.getElementById('btn2');
+const btn3 = document.getElementById('btn3');
 
 // TODO 
 // naredit tabelo za primerjavo "if (sum > level.biases[i])" s trenutno rešitvijo v network > level > ff;
@@ -347,7 +350,7 @@ const numMale = rawNamesMale.length;
 const numFemale = rawNamesFemale.length;
 const rawNames = rawNamesMale.concat(rawNamesFemale);
 
-const numParallelSeries = 1;    // koliko serij istih imen hkrati obdelaš;
+const numParallelSeries = 3;    // koliko serij istih imen hkrati obdelaš;
 const numNamesPerSerie = rawNames.length;
 let preppedNames = [];
 for (let i = 1; i <= numParallelSeries; i++) {
@@ -388,31 +391,50 @@ function addNetwork(preppedName) {
     addBias(preppedName);
 }
 
-function addNetworks() {
+function addNetworks(passedInstruction) {
+    // ta funkcija pokriva pripravo modela/networka (zgolj generiranje uteži in biasov!! ne pa tudi preračun vrednosti);
+
     for (let j = 0; j < numParallelSeries; j++) {
         //  -- --  prvemu v vsakem nizu naredimo/dobimo uteži in pragove -- --
         if (j == 0) {
-            //  -- --  ČE LOADAŠ, poskrbi da dve in tri vstice spodaj (2x) piše isti veljaven ključ (ključe iščeš tako, da v console napišeš "localStorage");;        
-            //  -- --  ČE NE ŽELIŠ LOADAT: samo napiši eno neobstoječe ime v vrstici tu spodaj;
-            if (localStorage.getItem("network_mž_5_1_1_blabla")) {    /* SPREMENI TUDI 1 vrstico NIŽE !! */
-                preppedNames[0][0].network = JSON.parse(localStorage.getItem("network_mž_5_1_1"));
-                // bias moramo dat na pravega, in case da imaš zdaj prvo ie drugačno od tega, kot je bilo takrat, o si shranil možgane;
-                addBias(preppedNames[0][0]);
-                loadano = true;
-                console.log('USPEŠNO naloadano iz localStorage');
-                // console.log(localStorage.getItem("network_mž_5_1_1"))
-                //  -- -- konc segmenta za loadanje;
-            } else {
+            if (passedInstruction == 1) {
+                console.log('delaš z random networki, noben neuralNetwork ni bil naložen');
+                addNetwork(preppedNames[0][0]);
+                btn1.style.backgroundColor = 'lightgreen';
+                btn2.style.backgroundColor = 'lightgrey';
+                btn3.style.backgroundColor = 'lightgrey';
+            } else if (passedInstruction == 2) {
+                btn1.style.backgroundColor = 'lightgrey';
+                btn2.style.backgroundColor = 'lightgreen';
+                btn3.style.backgroundColor = 'lightgrey';
                 if (typeof someBrain == "string") {
                     preppedNames[0][0].network = JSON.parse(someBrain);
                     // bias moramo dat na pravega, in case da imaš zdaj prvo ie drugačno od tega, kot je bilo takrat, o si shranil možgane;
                     addBias(preppedNames[0][0]);
                     loadano = true;
-                    console.log('naložen je bil neuralNetwork iz kode');
+                    console.log('naložen je bil vzorčni natreniran neuralNetwork iz kode');
                 } else {
                     // če nismo uspeli naloadat, naredimo naključen network;
                     console.log('delaš z random networki, noben neuralNetwork ni bil naložen');
                     addNetwork(preppedNames[0][0]);
+                }
+            } else if (passedInstruction == 3) {
+                if (localStorage.getItem("network_mž_online")) {    /* če spremeniš tu levo, SPREMENI TUDI 1 vrstico NIŽE !! */
+                    preppedNames[0][0].network = JSON.parse(localStorage.getItem("network_mž_online"));
+                    // bias moramo dat na pravega, in case da imaš zdaj prvo ime drugačno od tega, kot je bilo takrat, ko si shranil možgane;
+                    addBias(preppedNames[0][0]);
+                    loadano = true;
+                    console.log('USPEŠNO naloadano iz localStorage');
+                    btn1.style.backgroundColor = 'lightgrey';
+                    btn2.style.backgroundColor = 'lightgrey';
+                    btn3.style.backgroundColor = 'lightgreen';
+                } else {
+                    // če nismo uspeli naloadat, naredimo naključen network;
+                    console.log('delaš z random networki, noben neuralNetwork ni bil naložen');
+                    addNetwork(preppedNames[0][0]);
+                    btn1.style.backgroundColor = 'lightgrey';
+                    btn2.style.backgroundColor = 'lightgrey';
+                    btn3.style.backgroundColor = 'lightcoral';
                 }
             }
         } else {
@@ -424,7 +446,7 @@ function addNetworks() {
                 preppedNames[j][0].network =
                     JSON.parse(JSON.stringify(preppedNames[0][0].network));
                 // potem pa ga mutiramo;
-                NeuralNetwork.mutate(preppedNames[j][0].network, 0.1)
+                NeuralNetwork.mutate(preppedNames[j][0].network, 0.2)
                 // pa spet bias damo na pravega (ker bias je del skopiranega networka in zdaj morda ne ustreza imenu);
                 addBias(preppedNames[j][0]);
             }
@@ -438,14 +460,30 @@ function addNetworks() {
             addBias(preppedNames[j][i]);
         }
     }
+
+    // zdaj pa kličemo še funkcijo, ki vstavi inpute v model, izračuna outpute in izriše tabelo z rezultati;
+    calculateOutputsAndDrawTable();
 }
 
 function calculateOutputsAndDrawTable() {
+    // (po)nastavit začetne vrednosti;
     let html = "";
+    results.innerHTML = "";
+    loadano = false;
     const numWrongResults = new Array(numParallelSeries);
+
+    // akcija;
+    html = "<tr>";
     for (let j = 0; j < numParallelSeries; j++) {
+        // delali bomo dve stvari hkrati v enem loopu;
+        // zafilamo en array;
         numWrongResults[j] = 0;
+        // povsem neodvisno od gornjega še nekaj izpišemo;
+        html += `<td colspan="3"  style="text-align: end;">Razl. ${j + 1}</td>`;
     }
+    html += "</tr>";
+    results.insertAdjacentHTML('beforeend', html);
+
     for (let i = 0; i <= numNamesPerSerie; i++) {
         html = "<tr>";
         for (let j = 0; j < numParallelSeries; j++) {
@@ -483,14 +521,23 @@ function calculateOutputsAndDrawTable() {
     // izrisat gumbe za shranit network
     html = "<tr>";
     for (let i = 0; i < numParallelSeries; i++) {
-        html += `<td colspan="3"  style="text-align: end;"><button id="btn_save_ntwk_${i}" onclick="save(${i}) " style="margin: 10px 0px;">Shrani ${i}</button></td>`;
+        // online različica;
+        html += `<td colspan="3"  style="text-align: end;"><button id="btn_save_ntwk_${i}" onclick="save(${i}) " style="margin: 10px 0px;">Shrani</button></td>`;
+
+        // za lastno uporabo (na lokalnem kompu)
+        // html += `<td colspan="3"  style="text-align: end;"><button id="btn_save_ntwk_${i}" onclick="save(${i}) " style="margin: 10px 0px;">Shrani ${i}</button></td>`;
     }
     html += "</tr>";
     results.insertAdjacentHTML('beforeend', html);
 }
 
 function save(someInt) {
-    let keyName = `network_mž_5_2_${someInt}`;
+    // lastna potreba (lokalni komp);
+    // let keyName = `network_mž_5_2_${someInt}`;
+
+    // online verzija;
+    let keyName = `network_mž_online`;
+
     // to spremenljivko (keyName) po potrebi/sproti spreminjaj:
     //  - prva številka v ključu je številka izvirnega naključno dobljenega obetavnega networka;
     //  - druga številka (če prisotna) je številka mutacije izvirnega naključno dobljenega networka;
@@ -517,13 +564,10 @@ topHeight();
 // zapolni preppedNames z imeni in readingi; na tej točli še ne z networkom;
 populateNames();
 
-// priprava modela/networka (zgolj generiranje uteži in biasov!!);
-addNetworks();
-
-// vstavit inpute v model, izračunat outpute in izrisat tabelo z rezultati;
-calculateOutputsAndDrawTable();
-
 gumb.addEventListener('click', gumbKliknjen);
+btn1.addEventListener('click', addNetworks.bind(null, 1));
+btn2.addEventListener('click', addNetworks.bind(null, 2));
+btn3.addEventListener('click', addNetworks.bind(null, 3));
 
 function gumbKliknjen() {
     // inicializiramo ime;
@@ -537,5 +581,7 @@ function gumbKliknjen() {
     topHeight();
 }
 
+
+// neural network concept based on https://www.youtube.com/watch?v=Rs_rAxEsAvI  (Self-Driving Car with JavaScript Course – Neural Networks and Machine Learning)
 
 //  konc..

@@ -7,13 +7,36 @@
 
 <body>
     <div id="vrhnji">
-        <p>Poskus nevronske mreže - klasifikator</p>
+        <p>Poskus nevronske mreže - klasifikator slovenskih imen</p>
         <p>vnesi ime v spodnji okvirček in klikni gumb "počekiraj"</p>
         <input id="inputField" type="text"> <button id="gumb">počekiraj</button>
         <p id="adhocresult"></p>
     </div>
     <div id="results_header">
-        <p style="padding: 20px 20px 0px;">Klasifikator je bil treniran na spodnjih imenih</p>
+        <p style="padding: 20px 20px 0px;">Lahko si tudi ogledaš delovanje klasifikatorja na trenažnih imenih (n=331).
+            Naložiš
+            lahko:</p>
+        <table id="expl_table">
+            <tr>
+                <td><button id="btn1" class="btn">Naključno nevronsko omrežje</button></td>
+                <td><button id="btn2" class="btn">Natrenirano nevronsko omrežje</button></td>
+                <td><button id="btn3" class="btn">Lastno shranjeno nevr. omr.</button> </td>
+            </tr>
+            <tr>
+                <td class="expl_td">ustvari se naključno nevronsko omrežje oz. toliko naključnih nevronskih omrežij, kot
+                    je število
+                    različic
+                    nevr. omrežij</td>
+                <td class="expl_td">iz kode se naloži natrenirano nevronsko omrežje (v različico 1);<br>ostale različice
+                    so mutacije
+                    različice 1.<br>(ni nekaj močno nartenirano, pravilno je v 96,5 %)</td>
+                <td class="expl_td">če si predhodno shranil/a kakšno nevronsko omrežje (gumb "Shrani" čisto na dnu
+                    seznama imen), se
+                    zdaj to omrežje naloži v različico 1; ostale različice so mutacije različice 1.<br>Če v
+                    brskalniku ni shranjeno nobeno omrežje, se ustvari naključno omrežje in gumb se obarva
+                    rdeče.</td>
+            </tr>
+        </table>
     </div>
     <div>
         <table id="results">

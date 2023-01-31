@@ -15,3 +15,20 @@ td {
     right: 0;
     background-color: aliceblue;
 }
+
+#results {
+    margin-top: 15px;
+}
+
+#expl_table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.expl_td {
+    padding: 0px 15px;
+}
+
+.btn {
+    margin: 0px 20px 7px;
+}
