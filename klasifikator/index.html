@@ -7,6 +7,9 @@
 
 <body>
     <div id="vrhnji">
+        <div id="lang-flag">
+            <a id="home" href="../index.html" title="to byGuesswork"><img src="../images/home2.PNG" alt="home"></a>
+        </div>
         <p>Poskus nevronske mreže - klasifikator slovenskih imen</p>
         <p>vnesi ime v spodnji okvirček in klikni gumb "počekiraj"</p>
         <input id="inputField" type="text"> <button id="gumb">počekiraj</button>
@@ -41,6 +44,32 @@
     <div>
         <table id="results">
         </table>
+        <div id="razlaga" class="zamik_levo hidden">
+            <br>
+            <p class="no_padding"> - - - - -</p>
+            <p class="no_padding">RAZLAGA</p>
+            <p class="no_padding">V vsakem stolpcu so navedeni rezultati prepoznavanja spola imena (z oznako M ali Ž),
+                ki ga opravi neko nevronsko omrežje (nevr. omrežje različica 1, NN razl.2 itd.). Če je bil spol
+                prepoznan pravilno, je oznaka spola črne barve, sicer pa rdeče.</p>
+            <p class="no_padding">Podatek v čisto spodnji vrstici (NAROBE:) pove, koliko imen je bilo razpoznanih
+                narobe. Natrenirano omrežje jih narobe prepozna 11 (trening sicer ni bil močno resen).</p>
+            <p class="no_padding">S klikom na gumb "Shrani" shraniš nastavitve nevronskega omrežja, ki
+                je proizvedlo rezultate v stolpcu, pod katerim je kliknjeni gumb.</p>
+            <p class="no_padding"> Ko imaš enkrat shranjeno neko nevronsko omrežje, ga lahko kdaj naslednjič naložiš
+                (tako da klikneš gumb
+                "Lastno shranjeno nevr. omr." zgoraj desno) in poustvarilo se bo v levem stolpcu (z naslovom "Razl. 1").
+                Obenem bosta sosednji različici (2. in 3.) narejeni kot mutacija 1. različice (spremenjeni, v vsakem
+                svojem parametru, največ do 20 %). Zgolj po sreči se torej lahko zgodi, da dobiš še nekoliko boljše
+                omrežje, ki
+                ga lahko znova shraniš, znova naložiš in tako razvijaš dalje.
+            </p>
+        </div>
+    </div>
+    <div class="zamik_levo">
+        <br><br>
+        <p class="no_padding">Zadeva je povsem ljubiteljske narave. Ne trdim, da so rezultati kakorkoli koristni ali
+            pravilni, programčič je bil namenjen zgolj spoznavanju z nevronskimi omrežji.</p>
+        Ivo Makuc, 2023<br><br>
     </div>
     <script src="neuralnetwork.js"></script>
     <script src="utils.js"></script>

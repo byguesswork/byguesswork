@@ -32,3 +32,17 @@ td {
 .btn {
     margin: 0px 20px 7px;
 }
+
+.zamik_levo {
+    padding-left: 15px;
+    padding-right: 20px;
+}
+
+.no_padding {
+    margin: 0;
+    padding: 0px 0px 5px;
+}
+
+.hidden {
+    display: none;
+}

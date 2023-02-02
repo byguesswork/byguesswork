@@ -6,6 +6,7 @@ const resultsHeader = document.getElementById('results_header');
 const btn1 = document.getElementById('btn1');
 const btn2 = document.getElementById('btn2');
 const btn3 = document.getElementById('btn3');
+const razlaga = document.getElementById('razlaga');
 
 // TODO 
 // naredit tabelo za primerjavo "if (sum > level.biases[i])" s trenutno rešitvijo v network > level > ff;
@@ -460,6 +461,9 @@ function addNetworks(passedInstruction) {
             addBias(preppedNames[j][i]);
         }
     }
+
+    // še nekaj v zvezi z videzom strani
+    razlaga.classList.remove('hidden');
 
     // zdaj pa kličemo še funkcijo, ki vstavi inpute v model, izračuna outpute in izriše tabelo z rezultati;
     calculateOutputsAndDrawTable();
