@@ -1,0 +1,111 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: Helvetica, Arial, sans-serif;
+    color: #313131;
+    background-color: #fefefe;
+    font-size: 15px;
+}
+
+/* 
+barve ozadja v tabeli:
+bckg_dark-red: #f4b084
+bckg_light-red: #fce4d6
+bckg_dark-blue: #9bc2e6
+bckg_light-blue: #bdd7ee
+bckg_dark-grey: #bfbfbf
+bckg_light-grey: #f2f2f2
+bckg_dark-green: #a9d08e
+bckg_light-green: #c6e0b4
+
+
+
+dfg */
+
+.main {
+    margin: 20px 100px 30px 30px
+}
+
+.footnote {
+    color: rgb(34, 34, 104);
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.no-para {
+    margin-bottom: 0;
+}
+
+h1 {
+    margin-bottom: 15px;
+    font-size: 20px;
+}
+
+h2 {
+    margin-top: 20px;
+    margin-bottom: 5px;
+}
+
+p {
+    margin-bottom: 10px;
+}
+
+ol,
+ul {
+    margin-left: 30px;
+    margin-bottom: 15px;
+}
+
+sup {
+    font-size: 11px;
+    color: red;
+}
+
+ul li {
+    list-style: none;
+}
+
+a {
+    font-size: inherit;
+}
+
+td {
+    padding: 5px;
+}
+
+.bckg_dark-red {
+    background-color: #f4b084;
+}
+
+.bckg_light-red {
+    background-color: #fce4d6
+}
+
+.bckg_dark-blue {
+    background-color: #9bc2e6
+}
+
+.bckg_light-blue {
+    background-color: #bdd7ee
+}
+
+.bckg_dark-grey {
+    background-color: #bfbfbf
+}
+
+.bckg_light-grey {
+    background-color: #f2f2f2
+}
+
+.bckg_dark-green {
+    background-color: #a9d08e
+}
+
+.bckg_light-green {
+    background-color: #c6e0b4
+}
+
+.td_no-para {
+    margin: 0;
+    padding: 0px 5px;
+}
