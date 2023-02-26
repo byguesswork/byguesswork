@@ -71,6 +71,10 @@ sup {
     color: red;
 }
 
+sub {
+    font-size: 10px;
+}
+
 ul li {
     list-style: none;
 }
