@@ -20,7 +20,7 @@ bckg_light-green: #c6e0b4
 */
 
 .main {
-    margin: 20px 100px 30px 30px
+    margin: 35px 100px 30px 30px
 }
 
 .footnote {
@@ -39,8 +39,9 @@ bckg_light-green: #c6e0b4
 }
 
 h1 {
+    margin-top: 8px;
     margin-bottom: 3px;
-    font-size: 20px;
+    font-size: 24px;
 }
 
 #date {
