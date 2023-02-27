@@ -17,10 +17,7 @@ bckg_dark-grey: #bfbfbf
 bckg_light-grey: #f2f2f2
 bckg_dark-green: #a9d08e
 bckg_light-green: #c6e0b4
-
-
-
-dfg */
+*/
 
 .main {
     margin: 20px 100px 30px 30px
@@ -34,6 +31,11 @@ dfg */
 
 .no-para {
     margin-bottom: 0;
+}
+
+.td_no-para {
+    margin: 0;
+    padding: 0px 5px;
 }
 
 h1 {
@@ -117,9 +119,4 @@ td {
 
 .bckg_light-green {
     background-color: #c6e0b4
-}
-
-.td_no-para {
-    margin: 0;
-    padding: 0px 5px;
 }
