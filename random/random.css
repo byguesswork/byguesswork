@@ -88,6 +88,11 @@ a {
 
 td {
     padding: 5px;
+    font-size: 14px;
+}
+
+strong {
+	background-color: inherit;
 }
 
 .bckg_dark-red {
