@@ -17,6 +17,7 @@ bckg_dark-grey: #bfbfbf
 bckg_light-grey: #f2f2f2
 bckg_dark-green: #a9d08e
 bckg_light-green: #c6e0b4
+
 */
 
 .main {
@@ -31,6 +32,23 @@ bckg_light-green: #c6e0b4
 
 .no-para {
     margin-bottom: 0;
+}
+
+.half-para {
+    margin-bottom: 5px;
+}
+
+.indent {
+    margin-left: 20px;
+}
+
+.indent_more {
+    margin-left: 35px;
+}
+
+.viva_italia {
+    font-style: italic;
+    font-size: 13px;
 }
 
 .td_no-para {
@@ -92,7 +110,7 @@ td {
 }
 
 strong {
-	background-color: inherit;
+    background-color: inherit;
 }
 
 .bckg_dark-red {
@@ -125,4 +143,12 @@ strong {
 
 .bckg_light-green {
     background-color: #c6e0b4
+}
+
+.bckg_dark-yellow {
+    background-color: #ffff00
+}
+
+.bckg_light-yellow {
+    background-color: #fcfc80
 }

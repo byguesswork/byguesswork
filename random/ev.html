@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="just how sensible are EVs in terms of CO2">
+    <meta name="keywords" content="electric vehicle, ev, co2 emissions">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=1, maximum-scale=5">
+    <title>Plug-in hybrid, yes or no?</title>
+    <link href="random.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="main">
+        <a href="../index.html" title="back to byGuesswork"><img src="../images/home2.PNG" alt="home"></a>
+        <br>
+        <h1>A Hobbyist's Take at How Sensible are EVs, CO2-wise</h1>
+        <p id="date">June 2023</p>
+        <p>Previously I was wondering just how sensible are Plug-ins in terms of lowering CO2 emissions (you can read
+            about that <a href="plug-in.html">here</a>). The next logical step after that would have been to check the
+            same for EVs. Except that I didn't.
+            Well, I once ran a half-marathon and then everybody was saying &quot;Now you should go for a marathon next
+            year&quot; and I was reasoning like &quot;Hell no, just because it seems the most logical next thing or
+            everybody says so, I am not gonna do it.&quot; And so I wasn't. Like seriously. Until one day, when checking
+            magazines while standing in the checkout line, I read Jack Gylenhall was running like almost a
+            half-marathon distance every day in preparation for a movie (or sth like that) and I said to myself that if
+            that skinny Brokeback cowboy can do a half marathon day after day, well heck, then I should surely be able
+            to survive one marathon. And so I did. Plenty of 60- or 70-somethings crossed the finish line before me (I
+            wasn't yet in my forties then) but I wasn't going to complain (Note: I am not a runner, on both occasions I
+            trained for 3 months prior to the event and then quit).
+        </p>
+        <p class="no-para">
+            So, how about EVs? CO<sub>2</sub> emissions from electric vehicles come from 3 directions:
+        </p>
+        <ol>
+            <li>from CO<sub>2</sub> footprint of electricity generation (characteristic of the power network into which
+                an EV is plugged-in to charge its traction battery),
+            </li>
+            <li>the emissions created during the production of the EV&apos;s traction battery (most often
+                than not a lithium ion battery), amortized during the battery&apos;s lifetime (for the purpose of
+                this text, 250,000 km driven by the vehicle).
+            </li>
+            <li>the energy losses during charging, estimated to 15% (it seems that most sources put it between 10 and
+                25%)
+            </li>
+        </ol>
+        <p>Let's calculate these components.</p>
+        <h2>Calculations - theory</h2>
+        <p>CO<sub>2</sub> emissions are expressed in g CO<sub>2</sub> per km driven. Here's how to calculate them for
+            EVs:</p>
+        <p>(1) CO<sub>2</sub> emissions from electricity consumption<br>
+        <p class="no-para indent">
+            Average electricity consumption of the vehicle (in kWh/100 km);
+        </p>
+        <p class="no-para indent_more viva_italia">
+            TIMES
+        </p>
+        <p class="no-para indent">
+            CO<sub>2</sub> emission from electricity
+            generation, characteristic for the network from which the EV gets its glow juice from (in g CO<sub>2</sub>
+            /kWh of electricity produced);
+        </p>
+        <p class="no-para indent_more viva_italia">
+            TIMES
+        </p>
+        <p class="no-para indent">
+            (100 + 15%)/100 to account for the losses at charging point (from point 3 above);
+        </p>
+        <p class="no-para indent_more  viva_italia">
+            DIVIDED BY
+        </p>
+        <p class="no-para indent">
+            100 to express the value per km instead of per 100 kms.
+        </p>
+        <br>
+
+        <p>(2) CO<sub>2</sub> emissions related to lithium battery
+        </p>
+        <p class="no-para indent">
+            Vehicle&apos;s battery size (in kWh);
+        </p>
+        <p class="no-para indent_more  viva_italia">
+            TIMES
+        </p>
+        <p class="no-para indent">
+            g CO<sub>2</sub> emitted to produce 1 kWh of lithium battery<sup>1</sup>;
+        </p>
+        <p class="no-para indent_more viva_italia">
+            DIVIDED BY
+        </p>
+        <p class="no-para indent">
+            250.000 (to get a value of g CO<sub>2</sub> due to battery production per each km
+            driven by the vehicle during its lifetime, which in this text is, rather arbitrarily, set to 250k km).
+        </p>
+        <br>
+        <p>Wait, why have add losses here to the calculation at point 1 when noone talks about losses when calculating
+            consumption for gas guzzlers? Don't the trucks that haul petrol across the country to get it to gas stations
+            add up to losses then too? Well that would rather be similar in content (and probably in size too) to losses
+            in electricity transmission over long distances. But in addition to that, charging EVs also incurs losses
+            right at the charging point (the 15% added in the calculation) while usually all the petrol that passes
+            through the hose at the petrol station also makes it into my car, I don't tend to sprinkle it around
+            water gun style.
+
+        </p>
+        <p>Re: one other factor at calculation 1, the values for emissions from electricity generation vary a lot, for
+            the purpose of this text the following
+            reference values will be used:
+        </p>
+        <ul>
+            <li>-&nbsp;&nbsp;&nbsp;World average: 440 g CO<sub>2</sub>/kWh of electricity produced<sup>2</sup></li>
+            <li>-&nbsp;&nbsp;&nbsp;France: 79 g CO<sub>2</sub>/kWh<sup>3</sup>></li>
+            <li>-&nbsp;&nbsp;&nbsp;Photovoltaics (PV) on roof: 40 g CO<sub>2</sub>/kWh<sup>4</sup>></li>
+        </ul>
+        <p>To get the CO<sub>2</sub> emissions for the vehicle, the 2 components from the 2 calculations above have to
+            be summed!
+        </p>
+        <h2>Selection of cars</h2>
+        <p>One small (VW e-up), one bigger (Tesla 3 Long Range 75 kWh)</p>
+        <h2>Data rules</h2>
+        <p>All data about vehicle consumption mentioned below are real-world consumption data logged by users from a
+            popular site for logging fuel consumption. Requirements: cars year of make 2018 or newer; data from at least
+            100 users; for the average consumptions below I took the mean value between the average consumption of all
+            cars and the consumption of the median car, just in case the average is perhaps distorted due to any extreme
+            value on any of the extremes.
+        </p>
+        <h2>Calculations</h2>
+        <p>
+
+        </p>
+
+        <table>
+            <tr>
+                <td class="bckg_dark-yellow"><strong>Car</strong></td>
+                <td class="bckg_light-yellow">Average<br>Consumption</td>
+                <td class="bckg_light-yellow">Battery<br>capacity</td>
+                <td class="bckg_light-yellow">Elect. prod.<br>emissions</td>
+                <td class="bckg_light-yellow">Emissions due<br>to consumption</td>
+                <td class="bckg_light-yellow">Emissions<br>due to<br>battery</td>
+                <td class="bckg_light-yellow">Car<br>emissions<br>total</td>
+                <td class="bckg_light-yellow">Equivalent<br>consumpt.<br>in petrol car</td>
+                <td class="bckg_light-yellow">Equivalent<br>consumpt.<br>in diesel car</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td style="font-size: 13px;">(kWh/100 km)</td>
+                <td style="font-size: 13px;">(kWh)</td>
+                <td style="font-size: 13px;">(g CO2/kWh)</td>
+                <td style="font-size: 13px;">(g CO2/km)</td>
+                <td style="font-size: 13px;">(g CO2/km)</td>
+                <td style="font-size: 13px;">(g CO2/km)</td>
+                <td style="font-size: 13px;">(l/100 km)</td>
+                <td style="font-size: 13px;">(l/100 km)</td>
+            </tr>
+            <tr>
+                <td class="bckg_dark-grey"><strong>Tesla&nbsp;3</strong></td>
+                <td class="bckg_light-grey"></td>
+                <td class="bckg_light-grey"></td>
+                <td>440 (Wrld)</td>
+                <td>95</td>
+                <td>39</td>
+                <td><strong>133.6</strong></td>
+                <td>5.8</td>
+                <td>5.0</td>
+            </tr>
+            <tr>
+                <td class="bckg_dark-grey"></td>
+                <td class="bckg_light-grey">18.7</td>
+                <td class="bckg_light-grey">75</td>
+                <td>79 (France)</td>
+                <td>17</td>
+                <td>39</td>
+                <td><strong>56</strong></td>
+                <td>2.4</td>
+                <td>2.1</td>
+            </tr>
+            <tr>
+                <td class="bckg_dark-grey"></td>
+                <td class="bckg_light-grey"></td>
+                <td class="bckg_light-grey"></td>
+                <td>40 (PV)</td>
+                <td>9</td>
+                <td>39</td>
+                <td><strong>47.6</strong></td>
+                <td>2.1</td>
+                <td>1.8</td>
+            </tr>
+            <tr>
+                <td class="bckg_dark-grey"><strong>VW&nbsp;e&#8209;UP</strong></td>
+                <td class="bckg_light-grey"></td>
+                <td class="bckg_light-grey"></td>
+                <td>440</td>
+                <td>73</td>
+                <td>17</td>
+                <td><strong>90.4</strong></td>
+                <td>3.9</td>
+                <td>3.4</td>
+            </tr>
+            <tr>
+                <td class="bckg_dark-grey"></td>
+                <td class="bckg_light-grey">14.5</td>
+                <td class="bckg_light-grey">32</td>
+                <td>79</td>
+                <td>13</td>
+                <td>17</td>
+                <td><strong>30.2</strong></td>
+                <td>1.3</td>
+                <td>1.1</td>
+            </tr>
+            <tr>
+                <td class="bckg_dark-grey"></td>
+                <td class="bckg_light-grey"></td>
+                <td class="bckg_light-grey"></td>
+                <td>40</td>
+                <td>7</td>
+                <td>17</td>
+                <td><strong>23.7</strong></td>
+                <td>1.0</td>
+                <td>0.9</td>
+            </tr>
+        </table>
+        <br>
+        <h2>Analysis</h2>
+        <p class="half-para">Charging the Tesla 3 in an average corner of the world (where during production of 1 kWh of
+            electricity 440 g
+            CO2 are emitted) gives already a good result, but still one that is nowhere spectacular. Modern diesel cars
+            regularly dip below 5.0 l fuel per 100 km (which would give the same emission figures as a Tesla 3 in an
+            electricity production average zone) and 5,8 l gasoline per 100 km is no match for modern gasoline
+            (self-charging) hybrids (I drive and older spec hybrid and I am definitely not able to hypermile but my
+            average consumption, calculated at the gas station from fuel-ups over the last 4 years, is 5,1 l).
+        </p>
+        <p class="half-para">But still, that is comparing an average Tesla with the lowest figures of fossil fuel cars
+            (or at least to a car in the lower part of the distribution of consumption data) - I would estimate the
+            average real-world consumption figures of cars (at least in Europe) to
+            be 7-8 l/100 km for gasoline and 6-7 l/100 km for diesel cars. So, some 20% above an average Tesla 3. If the
+            same Tesla is driven in France or Norway, where the CO2 footprint of electricity production is low, then no
+            fossil fuel car can realistically have emissions so low (2-2.5 l fuel per 100 km driven).
+        </p>
+        <p class="half-para">It seems that with current battery production technology the size of the litium ion battery
+            has quite an impact on the overall emissions of an electric car. The small VW e-up car (which is, I think,
+            discontinued as of 2023 but there are plenty of other electric cars with smallish batteries available), when
+            driven in a part of the world with average carbon intensity of electricity production, offers CO2 emissions
+            figures that can be reached only by serious hypermilers, while when driven in low carbon intensity countries
+            (Vive la France) is completely out of reach of the most extreme of the sparsamest of drivers. And
+            conversely,
+            big electric cars with batteries over 90 kWh (a Mercedes-Benz EQS comes with a 110 kWh Li-ion Battery) and
+            then also probably higher average consumption (say 25 kWh/100 km) would come out at 180 g CO2/km (same as 8
+            l gasoline or 6.7 l diesel/100km) and so offer no benefit whatsoever in terms of CO2 emissions reductions.
+        </p>
+        <p>But we humans are where we came to be - or basically we are what we are - because we excel at one thing:
+            standing on the shoulders of giants (or
+            actually anyone) that came before us. And so there is no question that all of the constituents of the
+            equation - battery, drivetrain and electricity production technology - will be improved to the point where
+            every and any electric car will be a no-brainer in terms of CO2 emissions plausibility.
+        </p>
+
+        <p class="footnote"><br><br><br>1 To best of knowledge set to 130,000 g CO<sub>2</sub> for each kWh of battery
+            capacity (sources:
+            <a
+                href="https://www.transportenvironment.org/wp-content/uploads/2021/07/2019_11_Analysis_CO2_footprint_lithium-ion_batteries.pdf">https://www.transportenvironment.org/wp-content/uploads/2021/07/2019_11_Analysis_CO<sub>2</sub>_footprint_lithium-ion_batteries.pdf</a>
+            ,
+            <a
+                href="https://theicct.org/sites/default/files/publications/EV-life-cycle-GHG_ICCT-Briefing_09022018_vF.pdf">Effects
+                of battery manufacturing on electric vehicle life-cycle greenhouse gas emissions (theicct.org)</a>
+            , both accessed Feb 2023)
+        </p>
+        <p class="footnote">2 Source: <a
+                href="https://ourworldindata.org/grapher/carbon-intensity-electricity?tab=table">Carbon intensity of
+                electricity, 2000 to 2021 (ourworldindata.org)</a> (accessed Feb 2023)</p>
+        <p class="footnote">3 The average of the two: <a
+                href="https://ourworldindata.org/grapher/carbon-intensity-electricity?tab=table">Carbon intensity of
+                electricity, 2000 to 2021 (ourworldindata.org)</a> and <a
+                href="https://app.electricitymaps.com/map">https://app.electricitymaps.com/map</a> (past data for 5
+            years) (Both accessed Feb 2023)</p>
+        <p class="footnote">4 Best shot from sources: <a href="https://www.nrel.gov/docs/fy13osti/56487.pdf">Life Cycle
+                Greenhouse Gas Emissions from Solar Photovoltaics (nrel.gov)</a> ,
+            <a href="https://www.nature.com/articles/ncomms13728">Re-assessment of net energy production and greenhouse
+                gas emissions avoidance after 40 years of photovoltaics development (nature.com)</a>
+            (Both accessed Feb 2023)
+        </p>
+        <br>
+        <span style="background-color: inherit; font-size: 13px;">Ivo Makuc, 2023</span> <br>
+        <span style="background-color: inherit; font-size: 13px;">byguesswork@gmail.com</span> <br>
+    </div>
+    <script src="random.js"></script>
+
+</body>
+
+</html>
