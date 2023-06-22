@@ -17,15 +17,20 @@ if (isMobile) {
 } else atResize();
 
 function atResize() {
-    if (window.innerWidth > 930) {
-        if (window.innerWidth > 2400) {
-            let newRightMargin = window.innerWidth * 0.61;
+    if (window.innerWidth > 910) {
+        if (window.innerWidth > 2355) {
+            const newRightMargin = window.innerWidth * 0.61;
             mainDocElement.style.marginRight = `${newRightMargin}px`;
+            mainDocElement.style.marginLeft = `45px`;
         } else {
-            let newRightMargin = window.innerWidth - 930;
+            const newRightMargin = window.innerWidth - 910;
             mainDocElement.style.marginRight = `${newRightMargin}px`;
+            mainDocElement.style.marginLeft = `30px`;
         }
-    } else mainDocElement.style.marginRight = `20px`;
+    } else {
+        mainDocElement.style.marginRight = `20px`;
+        mainDocElement.style.marginLeft = `20px`;
+    }
 }
 
 window.addEventListener("resize", atResize);
