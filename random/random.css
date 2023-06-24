@@ -20,8 +20,30 @@ bckg_light-green: #c6e0b4
 
 */
 
+.container {
+    padding: 15px 20px 50px;
+    background-color: #808080;
+    display: flex;
+}
+
 .main {
-    margin: 35px 100px 30px 30px
+    padding: 35px 100px 30px 35px;
+    width: 970px;
+    /*835 sama vsebina + 35 + 100 = 970*/
+    background-color: #fefefe;
+}
+
+.second-flex {
+    padding: 0px;
+    width: 0px;
+    background: linear-gradient(90deg, #fefefe, #808080);
+    /* morda še ena vnes: #fafa9a, */
+}
+
+.optional-bottom-filler {
+    background-color: #5a5a5a;
+    width: 100%;
+    height: 100%;
 }
 
 .footnote {

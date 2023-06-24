@@ -12,311 +12,318 @@
 </head>
 
 <body>
-    <div class="main">
-        <a href="../index.html" title="back to byGuesswork"><img src="../images/home2.PNG" alt="home"></a>
-        <br>
-        <h1>To plug-in, or not to plug-in? (emissions-wise)</h1>
-        <p id="date">Feb 2023</p>
-        <p>Plug-in hybrid electric vehicles (or PHEVs, or simply plug-ins) are a proposition for how a vehicle owner can
-            cut back on CO<sub>2</sub> emissions from their driving. But just how good are they at this task? If used
-            correctly, they sure (or probably) can bring savings in terms of money spent for fuel for their owners,
-            but even though this aspect is very important, I view the mission to cut back emissions as the primary angle
-            from which they should be looked at. After all, isn&apos;t electrification of road traffic and promotion of
-            electric vehicles (of which PHEVs are a subgroup) mainly aimed at reducing CO<sub>2</sub> emissions from
-            road transport, as part of wider climate-related actions?</p>
-        <p>Out of curiosity and just for the heck of it I set out to make an analysis of sorts to see how they
-            compare, purely in terms of CO<sub>2</sub> emissions (skipping the considerations about fuel cost savings
-            altogether).</p>
-        <p class="no-para">CO<sub>2</sub> emissions from plug-ins come from 3 directions:</p>
-        <ol>
-            <li>from fossil fuel burned in the combustion engine component of the plug-in drive system,</li>
-            <li>from CO<sub>2</sub> footprint of electricity generation (characteristic of the power network into which
-                a plug-in is, well, plugged-in to charge the battery for the electric motor component of its drive
-                system),
-            </li>
-            <li>the emissions created during the production of the plug-in&apos;s traction battery (most often
-                than not a lithium ion battery), amortized during the battery&apos;s lifetime (for the purpose of
-                this text, 250,000 km driven by the vehicle).</li>
-        </ol>
-        <p>Let's calculate these components.</p>
-        <h2>Calculations</h2>
-        <p>CO<sub>2</sub> emissions are expressed in g CO<sub>2</sub> per km driven. Here's how to calculate them:</p>
-        <p>(1) CO<sub>2</sub> emissions from fossil fuel burned:<br>
-            Average fossil fuel consumption of the vehicle (in l/100 km) * 2300 (gasoline engines produce 2300 g of
-            CO<sub>2</sub> per litre of gasoline consumed; for diesel fuel, use 2680 instead of 2300 here) / 100 (to
-            express the value per km instead of per 100 kms)</p>
-        <p>(2) CO<sub>2</sub> emissions from electricity consumption<br>
-            Average electricity consumption of the vehicle (in kWh/100 km) * CO<sub>2</sub> emission from electricity
-            generation, characteristic for the network from which the plug-in gets its glow juice from (in g
-            CO<sub>2</sub>/kWh of
-            electricity produced) / 100 to express the value per km instead of per 100 kms)<br>
-            The values for emissions from electricity generation vary a lot, for the purpose of this text the following
-            reference values will be used:</p>
-        <ul>
-            <li>-&nbsp;&nbsp;&nbsp;World average: 440 g CO<sub>2</sub>/kWh of electricity produced<sup>2</sup></li>
-            <li>-&nbsp;&nbsp;&nbsp;France: 79 g CO<sub>2</sub>/kWh<sup>3</sup>></li>
-            <li>-&nbsp;&nbsp;&nbsp;Photovoltaics (PV) on roof: 40 g CO<sub>2</sub>/kWh<sup>4</sup>></li>
-        </ul>
-        <p>(3) CO<sub>2</sub> emissions related to lithium battery<br>
-            Vehicle&apos;s battery size (in kWh) * g CO<sub>2</sub> emitted to produce 1 kWh of lithium
-            battery<sup>1</sup> / 250.000 (to get a value of g CO<sub>2</sub> due to battery production per each km
-            driven by the vehicle during its lifetime, which in this text is, rather arbitrarily, set to 250k km)</p>
-        <p>To get the CO<sub>2</sub> emissions for the vehicle, the 3 components have to be summed!</p>
-        <p>In order to see how fit are plug-ins for their task, I will compare the performance of a
-            plug-in (emissions-wise, that is) to the relevant values of its sibling that comes equipped with an internal
-            combustion engine (ICE) only.</p>
-        <h2>Data rules</h2>
-        <p>All data about vehicle consumption mentioned below are averages of data from a popular site where users log
-            their real-world consumption data. Requirements: cars year of make 2018 or newer; at least
-            10,000 km of logged data; ideally the same amount of kms logged for gasoline and for electricity consumption
-            and ideally at least one full year of data.
-            After sorting, the top and bottom 5% of sorted vehicles scrapped to avoid extreme values. For the average
-            consumptions for diesel and gasoline-only cars I took the mean value between the average consumprion of all
-            cars and the consumption of the median car, just in case the average is perhaps distorted due to any
-            extreme value on any of the extremes. I am not a data scientist in any way so this list of requirements
-            might not be ideal/necessary/logical, but it is the one I used.</p>
-        <h2>Carz analysis</h2>
-        <h3>Volkswagen passat</h3>
-        <p>A VW passat is very handy for this comparison, as you can get it in diesel, gasoline engine only and plug-in
-            versions and they put a similar number of hp on the road.</p>
-        <p class="no-para"><em>Plug-in (VW passat GTE)</em></p>
-        <ul class="no-para">
-            <li>Average gasoline consumption: 4.0 l/100 km (which per calculation (1) translates to: 4 * 2300 / 100 =
-                92.0 g CO<sub>2</sub> emitted per each km driven)</li>
-            <li>Average electricity consumption: 11.5 kWh/100 km (depending on electricity source, translates to 4.6 to
-                50.6 g CO<sub>2</sub>/km)</li>
-            <li>Battery capacity: 13 kWh (as per calculation (3) translates to: 13 * 130,000 / 250,000 = 6.8 g
-                CO<sub>2</sub>/km)
-            </li>
-        </ul>
-        <p>Add the 3 together and the plug-in passat comes in at <strong>103 to 149 g CO<sub>2</sub>/km</strong>.</p>
-        <p>Table 1: CO<sub>2</sub> emissions for VW passat GTE plug-in (average consumption: 4.0 l gasoline + 11.5 kWh
-            electricity per 100 km; battery capacity: 13 kWh)</p>
+    <div class="container">
+        <div class="main">
+            <a href="../index.html" title="back to byGuesswork"><img src="../images/home2.PNG" alt="home"></a>
+            <br>
+            <h1>To plug-in, or not to plug-in? (emissions-wise)</h1>
+            <p id="date">Feb 2023</p>
+            <p>Plug-in hybrid electric vehicles (or PHEVs, or simply plug-ins) are a proposition for how a vehicle owner
+                can cut back on CO<sub>2</sub> emissions from their driving. But just how good are they at this task? If
+                used correctly, they sure (or probably) can bring savings in terms of money spent for fuel for their
+                owners, but even though this aspect is very important, I view the mission to cut back emissions as the
+                primary angle from which they should be looked at. After all, isn&apos;t electrification of road traffic
+                and promotion of electric vehicles (of which PHEVs are a subgroup) mainly aimed at reducing
+                CO<sub>2</sub> emissions from road transport, as part of wider climate-related actions?</p>
+            <p>Out of curiosity and just for the heck of it I set out to make an analysis of sorts to see how they
+                compare, purely in terms of CO<sub>2</sub> emissions (skipping the considerations about fuel cost
+                savings altogether).</p>
+            <p class="no-para">CO<sub>2</sub> emissions from plug-ins come from 3 directions:</p>
+            <ol>
+                <li>from fossil fuel burned in the combustion engine component of the plug-in drive system,</li>
+                <li>from CO<sub>2</sub> footprint of electricity generation (characteristic of the power network into
+                    which a plug-in is, well, plugged-in to charge the battery for the electric motor component of its
+                    drive system), </li>
+                <li>the emissions created during the production of the plug-in&apos;s traction battery (most often than
+                    not a lithium ion battery), amortized during the battery&apos;s lifetime (for the purpose of this
+                    text, 250,000 km driven by the vehicle).</li>
+            </ol>
+            <p>Let's calculate these components.</p>
+            <h2>Calculations</h2>
+            <p>CO<sub>2</sub> emissions are expressed in g CO<sub>2</sub> per km driven. Here's how to calculate them:
+            </p>
+            <p>(1) CO<sub>2</sub> emissions from fossil fuel burned:<br> Average fossil fuel consumption of the vehicle
+                (in l/100 km) * 2300 (gasoline engines produce 2300 g of CO<sub>2</sub> per litre of gasoline consumed;
+                for diesel fuel, use 2680 instead of 2300 here) / 100 (to express the value per km instead of per 100
+                kms)</p>
+            <p>(2) CO<sub>2</sub> emissions from electricity consumption<br> Average electricity consumption of the
+                vehicle (in kWh/100 km) * CO<sub>2</sub> emission from electricity generation, characteristic for the
+                network from which the plug-in gets its glow juice from (in g CO<sub>2</sub>/kWh of electricity
+                produced) / 100 to express the value per km instead of per 100 kms)<br> The values for emissions from
+                electricity generation vary a lot, for the purpose of this text the following reference values will be
+                used:</p>
+            <ul>
+                <li>-&nbsp;&nbsp;&nbsp;World average: 440 g CO<sub>2</sub>/kWh of electricity produced<sup>2</sup></li>
+                <li>-&nbsp;&nbsp;&nbsp;France: 79 g CO<sub>2</sub>/kWh<sup>3</sup>></li>
+                <li>-&nbsp;&nbsp;&nbsp;Photovoltaics (PV) on roof: 40 g CO<sub>2</sub>/kWh<sup>4</sup>></li>
+            </ul>
+            <p>(3) CO<sub>2</sub> emissions related to lithium battery<br>
+                Vehicle&apos;s battery size (in kWh) * g CO<sub>2</sub> emitted to produce 1 kWh of lithium
+                battery<sup>1</sup> / 250.000 (to get a value of g CO<sub>2</sub> due to battery production per each km
+                driven by the vehicle during its lifetime, which in this text is, rather arbitrarily, set to 250k km)
+            </p>
+            <p>To get the CO<sub>2</sub> emissions for the vehicle, the 3 components have to be summed!</p>
+            <p>In order to see how fit are plug-ins for their task, I will compare the performance of a plug-in
+                (emissions-wise, that is) to the relevant values of its sibling that comes equipped with an internal
+                combustion engine (ICE) only.</p>
+            <h2>Data rules</h2>
+            <p>All data about vehicle consumption mentioned below are averages of data from a popular site where users
+                log their real-world consumption data. Requirements: cars year of make 2018 or newer; at least 10,000 km
+                of logged data; ideally the same amount of kms logged for gasoline and for electricity consumption and
+                ideally at least one full year of data. After sorting, the top and bottom 5% of sorted vehicles scrapped
+                to avoid extreme values. For the average consumptions for diesel and gasoline-only cars I took the mean
+                value between the average consumprion of all cars and the consumption of the median car, just in case
+                the average is perhaps distorted due to any extreme value on any of the extremes. I am not a data
+                scientist in any way so this list of requirements might not be ideal/necessary/logical, but it is the
+                one I used.</p>
+            <h2>Carz analysis</h2>
+            <h3>Volkswagen passat</h3>
+            <p>A VW passat is very handy for this comparison, as you can get it in diesel, gasoline engine only and
+                plug-in versions and they put a similar number of hp on the road.</p>
+            <p class="no-para"><em>Plug-in (VW passat GTE)</em></p>
+            <ul class="no-para">
+                <li>Average gasoline consumption: 4.0 l/100 km (which per calculation (1) translates to: 4 * 2300 / 100
+                    = 92.0 g CO<sub>2</sub> emitted per each km driven)</li>
+                <li>Average electricity consumption: 11.5 kWh/100 km (depending on electricity source, translates to 4.6
+                    to 50.6 g CO<sub>2</sub>/km)</li>
+                <li>Battery capacity: 13 kWh (as per calculation (3) translates to: 13 * 130,000 / 250,000 = 6.8 g
+                    CO<sub>2</sub>/km)
+                </li>
+            </ul>
+            <p>Add the 3 together and the plug-in passat comes in at <strong>103 to 149 g CO<sub>2</sub>/km</strong>.
+            </p>
+            <p>Table 1: CO<sub>2</sub> emissions for VW passat GTE plug-in (average consumption: 4.0 l gasoline + 11.5
+                kWh
+                electricity per 100 km; battery capacity: 13 kWh)</p>
 
-        <table>
-            <tr>
-                <td colspan="2"><strong>VW Passat GTE</strong></td>
-                <td colspan="4" class="bckg_dark-green">vehicle emissions from</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td colspan="2" class="bckg_dark-grey">emissions from<br>electricity production</td>
-                <td colspan="3" class="bckg_dark-red">vehicle motion</td>
-                <td class="bckg_dark-blue">energy<br>storage</td>
-                <td>&nbsp;</td>
-            </tr>
-            <tr>
-                <td class="bckg_light-grey">electricity<br>source</td>
-                <td class="bckg_light-grey">g CO<sub>2</sub>/kWh</td>
-                <td class="bckg_light-red">powered by<br>electricity</td>
-                <td class="bckg_light-red">powered by<br>gasoline</td>
-                <td class="bckg_light-red">motion<br>total</td>
-                <td class="bckg_light-blue">vehicle<br>battery</td>
-                <td class="bckg_light-green"><strong>emissions<br>total</strong></td>
-            </tr>
-            <tr>
-                <td class="td_no-para">World</td>
-                <td class="td_no-para">440</td>
-                <td class="td_no-para">50.6</td>
-                <td class="td_no-para">92.0</td>
-                <td class="td_no-para">142.6</td>
-                <td class="td_no-para">6.8</td>
-                <td class="td_no-para"><strong>149</strong></td>
-            </tr>
-            <tr>
-                <td class="td_no-para">France</td>
-                <td class="td_no-para">79</td>
-                <td class="td_no-para">9.1</td>
-                <td class="td_no-para">92.0</td>
-                <td class="td_no-para">101.1</td>
-                <td class="td_no-para">6.8</td>
-                <td class="td_no-para"><strong>108</strong></td>
-            </tr>
-            <tr>
-                <td class="td_no-para">PV@roof</td>
-                <td class="td_no-para">40</td>
-                <td class="td_no-para">4.6</td>
-                <td class="td_no-para">92.0</td>
-                <td class="td_no-para">96.6</td>
-                <td class="td_no-para">6.8</td>
-                <td class="td_no-para"><strong>103</strong></td>
-            </tr>
-            <tr>
-                <td colspan="7" class="td_no-para" style="text-align: end;">(in g CO<sub>2</sub> per km driven)</td>
-            </tr>
-            <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-        </table>
+            <table>
+                <tr>
+                    <td colspan="2"><strong>VW Passat GTE</strong></td>
+                    <td colspan="4" class="bckg_dark-green">vehicle emissions from</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="bckg_dark-grey">emissions from<br>electricity production</td>
+                    <td colspan="3" class="bckg_dark-red">vehicle motion</td>
+                    <td class="bckg_dark-blue">energy<br>storage</td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td class="bckg_light-grey">electricity<br>source</td>
+                    <td class="bckg_light-grey">g CO<sub>2</sub>/kWh</td>
+                    <td class="bckg_light-red">powered by<br>electricity</td>
+                    <td class="bckg_light-red">powered by<br>gasoline</td>
+                    <td class="bckg_light-red">motion<br>total</td>
+                    <td class="bckg_light-blue">vehicle<br>battery</td>
+                    <td class="bckg_light-green"><strong>emissions<br>total</strong></td>
+                </tr>
+                <tr>
+                    <td class="td_no-para">World</td>
+                    <td class="td_no-para">440</td>
+                    <td class="td_no-para">50.6</td>
+                    <td class="td_no-para">92.0</td>
+                    <td class="td_no-para">142.6</td>
+                    <td class="td_no-para">6.8</td>
+                    <td class="td_no-para"><strong>149</strong></td>
+                </tr>
+                <tr>
+                    <td class="td_no-para">France</td>
+                    <td class="td_no-para">79</td>
+                    <td class="td_no-para">9.1</td>
+                    <td class="td_no-para">92.0</td>
+                    <td class="td_no-para">101.1</td>
+                    <td class="td_no-para">6.8</td>
+                    <td class="td_no-para"><strong>108</strong></td>
+                </tr>
+                <tr>
+                    <td class="td_no-para">PV@roof</td>
+                    <td class="td_no-para">40</td>
+                    <td class="td_no-para">4.6</td>
+                    <td class="td_no-para">92.0</td>
+                    <td class="td_no-para">96.6</td>
+                    <td class="td_no-para">6.8</td>
+                    <td class="td_no-para"><strong>103</strong></td>
+                </tr>
+                <tr>
+                    <td colspan="7" class="td_no-para" style="text-align: end;">(in g CO<sub>2</sub> per km driven)</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
 
-        <p class="no-para"><em>VW Passat - gasoline</em></p>
-        <ul>
-            <li>Average gasoline consumption: 7,1 l/100 km (as per calculation (1) translates to: 7.1 * 2300 / 100 =
-                <strong>
-                    163.3 g CO<sub>2</sub>/km</strong>)
-            </li>
-        </ul>
-        <p class="no-para"><em>VW Passat - diesel</em></p>
-        <ul>
-            <li>Average diesel consumption: 5.8 l/100 km (as per calculation (1) translates to: 5.8 * 2680 / 100 =
-                <strong>155.4 g CO<sub>2</sub>/km</strong>)
-            </li>
-        </ul>
-        <p>So, if you charge a passat GTE PHEV in an average corner of the world (in the sense of carbon intensity of
-            electricity generation) and then you go around driving it rather averagely, your car's CO<sub>2</sub>
-            emissions would be very much in line with a diesel passat (149 vs 155 g CO<sub>2</sub>) and less than
-            10% below the value for a gasoline powered, ICE-only passat (163 g CO<sub>2</sub>).<br>
-            If you would drive the same plug-in across India, South Africa, Indonesia or Poland, where the carbon
-            intensity of electricity generation is above world's average<sup>2</sup>, then your emissions would come
-            out at at least 170 g CO<sub>2</sub>/km, so above the average value for any version of the same car that
-            comes equipped solely with an ICE. In such places, at least from the
-            perspective of curbing CO<sub>2</sub> emissions, driving a plug-in to achieve that mission brings to mind
-			a line from a David Bowie song: &quot;And I&apos;ve been putting out fire / With gasoline.&quot;<br>
-            If you happen to live in a part of the world where carbon intensity of electricity generation is low though,
-            like France, Norway, New Zealand, Uruguay<sup>2</sup>, or you mainly fill your car from a PV installation,
-            then the CO<sub>2</sub> emissions savings you get (compared to same car that is powered solely by an ICE)
-            can be around 33%, provided, of course, you regularely fill your car with electricity.
-        </p>
-        <br>
-        <h3>Toyota RAV4</h3>
-        <p>Toyota RAV4 comes as a plug-in, a regular hybrid or a normal ICE (gasoline). I will compare the plug-in with
-            the regular hybrid (as they are the bulk of non-PHEV cars available in the database where I got the data
-            from). In RAV4's case though there is quite a substantial difference in horsepower between the PHEV and
-            the non-PHEV vehicles, with some 30% more hp in the PHEV variant, so this might mess the results a bit
-            perhaps.</p>
-        <p class="no-para"><em>Plug-in (Toyota RAV4 Plug-in)</em></p>
-        <ul>
-            <li>Average gasoline consumption: 3.5 l/100 km (which per calculation (1) translates to: 3.5 * 2300 / 100 =
-                80.5 g CO<sub>2</sub> emitted per each km driven)</li>
-            <li>Average electricity consumption: 13.00 kWh/100 km (depending on electricity source, translates to 5.2 to
-                57.2 g CO<sub>2</sub>/km)</li>
-            <li>Battery capacity: 18 kWh (as per calculation (3) translates to: 18 * 130,000 / 250,000 = 9.4 g
-                CO<sub>2</sub>/km)
-            </li>
-        </ul>
+            <p class="no-para"><em>VW Passat - gasoline</em></p>
+            <ul>
+                <li>Average gasoline consumption: 7,1 l/100 km (as per calculation (1) translates to: 7.1 * 2300 / 100 =
+                    <strong> 163.3 g CO<sub>2</sub>/km</strong>)
+                </li>
+            </ul>
+            <p class="no-para"><em>VW Passat - diesel</em></p>
+            <ul>
+                <li>Average diesel consumption: 5.8 l/100 km (as per calculation (1) translates to: 5.8 * 2680 / 100 =
+                    <strong>155.4 g CO<sub>2</sub>/km</strong>)
+                </li>
+            </ul>
+            <p>So, if you charge a passat GTE PHEV in an average corner of the world (in the sense of carbon intensity
+                of electricity generation) and then you go around driving it rather averagely, your car's CO<sub>2</sub>
+                emissions would be very much in line with a diesel passat (149 vs 155 g CO<sub>2</sub>) and less than
+                10% below the value for a gasoline powered, ICE-only passat (163 g CO<sub>2</sub>).<br> If you would
+                drive the same plug-in across India, South Africa, Indonesia or Poland, where the carbon intensity of
+                electricity generation is above world's average<sup>2</sup>, then your emissions would come out at at
+                least 170 g CO<sub>2</sub>/km, so above the average value for any version of the same car that comes
+                equipped solely with an ICE. In such places, at least from the perspective of curbing CO<sub>2</sub>
+                emissions, driving a plug-in to achieve that mission brings to mind a line from a David Bowie song:
+                &quot;And I&apos;ve been putting out fire / With gasoline.&quot;<br> If you happen to live in a part of
+                the world where carbon intensity of electricity generation is low though, like France, Norway, New
+                Zealand, Uruguay<sup>2</sup>, or you mainly fill your car from a PV installation, then the
+                CO<sub>2</sub> emissions savings you get (compared to same car that is powered solely by an ICE) can be
+                around 33%, provided, of course, you regularely fill your car with electricity.
+            </p>
+            <br>
+            <h3>Toyota RAV4</h3>
+            <p>Toyota RAV4 comes as a plug-in, a regular hybrid or a normal ICE (gasoline). I will compare the plug-in
+                with the regular hybrid (as they are the bulk of non-PHEV cars available in the database where I got the
+                data from). In RAV4's case though there is quite a substantial difference in horsepower between the PHEV
+                and the non-PHEV vehicles, with some 30% more hp in the PHEV variant, so this might mess the results a
+                bit perhaps.</p>
+            <p class="no-para"><em>Plug-in (Toyota RAV4 Plug-in)</em></p>
+            <ul>
+                <li>Average gasoline consumption: 3.5 l/100 km (which per calculation (1) translates to: 3.5 * 2300 /
+                    100 = 80.5 g CO<sub>2</sub> emitted per each km driven)</li>
+                <li>Average electricity consumption: 13.00 kWh/100 km (depending on electricity source, translates to
+                    5.2 to 57.2 g CO<sub>2</sub>/km)</li>
+                <li>Battery capacity: 18 kWh (as per calculation (3) translates to: 18 * 130,000 / 250,000 = 9.4 g
+                    CO<sub>2</sub>/km)
+                </li>
+            </ul>
 
-        <p>Table 2: CO<sub>2</sub> emissions for Toyota RAV4 Plug-in (average consumption: 3.5 l gasoline + 13.0 kWh
-            electricity per 100 km; battery capacity: 18 kWh)</p>
+            <p>Table 2: CO<sub>2</sub> emissions for Toyota RAV4 Plug-in (average consumption: 3.5 l gasoline + 13.0 kWh
+                electricity per 100 km; battery capacity: 18 kWh)</p>
 
-        <table>
-            <tr>
-                <td colspan="2"><strong>Toyota RAV4 Plug-in</strong></td>
-                <td colspan="4" class="bckg_dark-green">vehicle emissions from</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td colspan="2" class="bckg_dark-grey">emissions from<br>electricity production</td>
-                <td colspan="3" class="bckg_dark-red">vehicle motion</td>
-                <td class="bckg_dark-blue">energy<br>storage</td>
-                <td>&nbsp;</td>
-            </tr>
-            <tr>
-                <td class="bckg_light-grey">electricity<br>source</td>
-                <td class="bckg_light-grey">g CO<sub>2</sub>/kWh</td>
-                <td class="bckg_light-red">powered by<br>electricity</td>
-                <td class="bckg_light-red">powered by<br>gasoline</td>
-                <td class="bckg_light-red">motion<br>total</td>
-                <td class="bckg_light-blue">vehicle<br>battery</td>
-                <td class="bckg_light-green"><strong>emissions<br>total</strong></td>
-            </tr>
-            <tr>
-                <td class="td_no-para">World</td>
-                <td class="td_no-para">440</td>
-                <td class="td_no-para">57.2</td>
-                <td class="td_no-para">80.5</td>
-                <td class="td_no-para">137.7</td>
-                <td class="td_no-para">9.4</td>
-                <td class="td_no-para"><strong>147</strong></td>
-            </tr>
-            <tr>
-                <td class="td_no-para">France</td>
-                <td class="td_no-para">79</td>
-                <td class="td_no-para">10.3</td>
-                <td class="td_no-para">80.5</td>
-                <td class="td_no-para">90.8</td>
-                <td class="td_no-para">9.4</td>
-                <td class="td_no-para"><strong>100</strong></td>
-            </tr>
-            <tr>
-                <td class="td_no-para">PV@roof</td>
-                <td class="td_no-para">40</td>
-                <td class="td_no-para">5.2</td>
-                <td class="td_no-para">80.5</td>
-                <td class="td_no-para">85.7</td>
-                <td class="td_no-para">9.4</td>
-                <td class="td_no-para"><strong>95</strong></td>
-            </tr>
-            <tr>
-                <td colspan="7" class="td_no-para" style="text-align: end;">(in g CO<sub>2</sub> per km driven)</td>
-            </tr>
-            <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-        </table>
+            <table>
+                <tr>
+                    <td colspan="2"><strong>Toyota RAV4 Plug-in</strong></td>
+                    <td colspan="4" class="bckg_dark-green">vehicle emissions from</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="bckg_dark-grey">emissions from<br>electricity production</td>
+                    <td colspan="3" class="bckg_dark-red">vehicle motion</td>
+                    <td class="bckg_dark-blue">energy<br>storage</td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td class="bckg_light-grey">electricity<br>source</td>
+                    <td class="bckg_light-grey">g CO<sub>2</sub>/kWh</td>
+                    <td class="bckg_light-red">powered by<br>electricity</td>
+                    <td class="bckg_light-red">powered by<br>gasoline</td>
+                    <td class="bckg_light-red">motion<br>total</td>
+                    <td class="bckg_light-blue">vehicle<br>battery</td>
+                    <td class="bckg_light-green"><strong>emissions<br>total</strong></td>
+                </tr>
+                <tr>
+                    <td class="td_no-para">World</td>
+                    <td class="td_no-para">440</td>
+                    <td class="td_no-para">57.2</td>
+                    <td class="td_no-para">80.5</td>
+                    <td class="td_no-para">137.7</td>
+                    <td class="td_no-para">9.4</td>
+                    <td class="td_no-para"><strong>147</strong></td>
+                </tr>
+                <tr>
+                    <td class="td_no-para">France</td>
+                    <td class="td_no-para">79</td>
+                    <td class="td_no-para">10.3</td>
+                    <td class="td_no-para">80.5</td>
+                    <td class="td_no-para">90.8</td>
+                    <td class="td_no-para">9.4</td>
+                    <td class="td_no-para"><strong>100</strong></td>
+                </tr>
+                <tr>
+                    <td class="td_no-para">PV@roof</td>
+                    <td class="td_no-para">40</td>
+                    <td class="td_no-para">5.2</td>
+                    <td class="td_no-para">80.5</td>
+                    <td class="td_no-para">85.7</td>
+                    <td class="td_no-para">9.4</td>
+                    <td class="td_no-para"><strong>95</strong></td>
+                </tr>
+                <tr>
+                    <td colspan="7" class="td_no-para" style="text-align: end;">(in g CO<sub>2</sub> per km driven)</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
 
-        <p class="no-para"><em>Toyota RAV4 - gasoline (hybrid engine, non-plug-in)</em></p>
-        <p class="no-para">Since the Plug-in version of the RAV4 is a 4-wheel drive car, I also took into account only
-            the AWD versions of the regular hybrid RAV4 to even the field a bit.</p>
-        <ul>
-            <li>Average gasoline consumption: 6,3 l/100 km (as per calculation (1) translates to: 6.3 * 2300 / 100 =
-                <strong>
-                    144.9 g CO<sub>2</sub>/km</strong>)
-            </li>
-        </ul>
-        <p>In this case again, if you charge your RAV4 Plug-in from a well that has a carbon footprint equal to the
-            world's average, there is no difference between the CO<sub>2</sub> emissions of the Plug-in and the regular
-            hybrid car (147 vs 145 g CO<sub>2</sub>/km; sidenote: the plug-in's consumption does not seem to be
-            penalized by the fact that it has more horsepower). If the Plug-in gets its electricity from a low carbon
-            intensitiy source, then the emission savings are substantial (33%, 100 vs 145 g CO<sub>2</sub>/km).</p>
-        <h2>Sorta conclusion</h2>
-        <p>For a proper analysis more cars would be needed (maybe will be added at a later date), but it would seem that
-            driving plug-ins somewhere where the carbon intensity of the power network from which the
-            car gets its charge is equal to the world's average electricity generation carbon intensity, then the
-            plug-in offers no savings in terms of CO<sub>2</sub> emissions compared to same/similar car that is not a
-            plug-in. You might still save money though, if the electricity is cheap, but this is another topic, not
-            touched here.</p>
-        <p>So if you care about CO<sub>2</sub> emissions and are considering buying a plug-in, it perhaps pays to get
-            to know in advance what is the electricity generation carbon footprint in the network where you will be
-            getting your charge from.</p>
-        <p class="footnote"><br><br><br>1 To best of knowledge set to 130,000 g CO<sub>2</sub> for each kWh of battery
-            capacity (sources:
-            <a
-                href="https://www.transportenvironment.org/wp-content/uploads/2021/07/2019_11_Analysis_CO2_footprint_lithium-ion_batteries.pdf">https://www.transportenvironment.org/wp-content/uploads/2021/07/2019_11_Analysis_CO<sub>2</sub>_footprint_lithium-ion_batteries.pdf</a>
-            ,
-            <a
-                href="https://theicct.org/sites/default/files/publications/EV-life-cycle-GHG_ICCT-Briefing_09022018_vF.pdf">Effects
-                of battery manufacturing on electric vehicle life-cycle greenhouse gas emissions (theicct.org)</a>
-            , both accessed Feb 2023)
-        </p>
-        <p class="footnote">2 Source: <a
-                href="https://ourworldindata.org/grapher/carbon-intensity-electricity?tab=table">Carbon intensity of
-                electricity, 2000 to 2021 (ourworldindata.org)</a> (accessed Feb 2023)</p>
-        <p class="footnote">3 The average of the two: <a
-                href="https://ourworldindata.org/grapher/carbon-intensity-electricity?tab=table">Carbon intensity of
-                electricity, 2000 to 2021 (ourworldindata.org)</a> and <a
-                href="https://app.electricitymaps.com/map">https://app.electricitymaps.com/map</a> (past data for 5
-            years) (Both accessed Feb 2023)</p>
-        <p class="footnote">4 Best shot from sources: <a href="https://www.nrel.gov/docs/fy13osti/56487.pdf">Life Cycle
-                Greenhouse Gas Emissions from Solar Photovoltaics (nrel.gov)</a> ,
-            <a href="https://www.nature.com/articles/ncomms13728">Re-assessment of net energy production and greenhouse
-                gas emissions avoidance after 40 years of photovoltaics development (nature.com)</a>
-            (Both accessed Feb 2023)
-        </p>
-        <br>
-        <span style="background-color: inherit; font-size: 13px;">Ivo Makuc, 2023</span> <br>
-        <span style="background-color: inherit; font-size: 13px;">byguesswork@gmail.com</span> <br>
+            <p class="no-para"><em>Toyota RAV4 - gasoline (hybrid engine, non-plug-in)</em></p>
+            <p class="no-para">Since the Plug-in version of the RAV4 is a 4-wheel drive car, I also took into account
+                only
+                the AWD versions of the regular hybrid RAV4 to even the field a bit.</p>
+            <ul>
+                <li>Average gasoline consumption: 6,3 l/100 km (as per calculation (1) translates to: 6.3 * 2300 / 100 =
+                    <strong> 144.9 g CO<sub>2</sub>/km</strong>)
+                </li>
+            </ul>
+            <p>In this case again, if you charge your RAV4 Plug-in from a well that has a carbon footprint equal to the
+                world's average, there is no difference between the CO<sub>2</sub> emissions of the Plug-in and the
+                regular hybrid car (147 vs 145 g CO<sub>2</sub>/km; sidenote: the plug-in's consumption does not seem to
+                be penalized by the fact that it has more horsepower). If the Plug-in gets its electricity from a low
+                carbon intensitiy source, then the emission savings are substantial (33%, 100 vs 145 g
+                CO<sub>2</sub>/km).</p>
+            <h2>Sorta conclusion</h2>
+            <p>For a proper analysis more cars would be needed (maybe will be added at a later date), but it would seem
+                that driving plug-ins somewhere where the carbon intensity of the power network from which the car gets
+                its charge is equal to the world's average electricity generation carbon intensity, then the plug-in
+                offers no savings in terms of CO<sub>2</sub> emissions compared to same/similar car that is not a
+                plug-in. You might still save money though, if the electricity is cheap, but this is another topic, not
+                touched here.</p>
+            <p>So if you care about CO<sub>2</sub> emissions and are considering buying a plug-in, it perhaps pays to
+                get to know in advance what is the electricity generation carbon footprint in the network where you will
+                be getting your charge from.</p>
+            <p class="footnote"><br><br><br>1 To best of knowledge set to 130,000 g CO<sub>2</sub> for each kWh of
+                battery capacity (sources: <a
+                    href="https://www.transportenvironment.org/wp-content/uploads/2021/07/2019_11_Analysis_CO2_footprint_lithium-ion_batteries.pdf">https://www.transportenvironment.org/wp-content/uploads/2021/07/2019_11_Analysis_CO<sub>2</sub>_footprint_lithium-ion_batteries.pdf</a>
+                , <a
+                    href="https://theicct.org/sites/default/files/publications/EV-life-cycle-GHG_ICCT-Briefing_09022018_vF.pdf">Effects
+                    of battery manufacturing on electric vehicle life-cycle greenhouse gas emissions (theicct.org)</a> ,
+                both accessed Feb 2023) </p>
+            <p class="footnote">2 Source: <a
+                    href="https://ourworldindata.org/grapher/carbon-intensity-electricity?tab=table">Carbon intensity of
+                    electricity, 2000 to 2021 (ourworldindata.org)</a> (accessed Feb 2023)</p>
+            <p class="footnote">3 The average of the two: <a
+                    href="https://ourworldindata.org/grapher/carbon-intensity-electricity?tab=table">Carbon intensity of
+                    electricity, 2000 to 2021 (ourworldindata.org)</a> and <a
+                    href="https://app.electricitymaps.com/map">https://app.electricitymaps.com/map</a> (past data for 5
+                years) (Both accessed Feb 2023)</p>
+            <p class="footnote">4 Best shot from sources: <a href="https://www.nrel.gov/docs/fy13osti/56487.pdf">Life
+                    Cycle
+                    Greenhouse Gas Emissions from Solar Photovoltaics (nrel.gov)</a> ,
+                <a href="https://www.nature.com/articles/ncomms13728">Re-assessment of net energy production and
+                    greenhouse
+                    gas emissions avoidance after 40 years of photovoltaics development (nature.com)</a>
+                (Both accessed Feb 2023)
+            </p>
+            <br>
+            <span style="background-color: inherit; font-size: 13px;">Ivo Makuc, 2023</span> <br>
+            <span style="background-color: inherit; font-size: 13px;">byguesswork@gmail.com</span> <br>
+        </div>
+        <div class="second-flex">
+        </div>
+    </div>
+    <div class="optional-bottom-filler">
     </div>
     <script src="random.js"></script>
 
