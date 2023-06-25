@@ -11,7 +11,7 @@
 /*
 pomožni klasi:
 - postavitveni:
-    - show_if_1col        
+    - show_if_1col
     - hide_if_1col        (se ne uporablja, če se uporablja move_left_if_1col)
     - move_left_if_1col   (se ne uporablja, če se uporablja hide_if_1col)
 - oblikovni
@@ -99,7 +99,8 @@ tr,
 td,
 td a,
 p b,
-p a {
+p a,
+p strong {
     background-color: inherit;
 }
 

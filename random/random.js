@@ -16,8 +16,7 @@ if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null || navigator.use
 if (isMobile) {
     mainDocElement.style.paddingRight = '20px';
     mainDocElement.style.paddingLeft = '20px';
-    const td = document.querySelectorAll('td');
-    td.forEach((el) => el.style.fontSize = '12px');
+    tableize();
 } else {
     atResize();
     window.addEventListener("resize", atResize);
@@ -40,8 +39,7 @@ function atResize() {
             container.style.paddingLeft = `0px`;
             container.style.paddingRight = `0px`;
             if (!isTwelved) {
-                const td = document.querySelectorAll('td');
-                td.forEach((el) => el.style.fontSize = '12px');
+                tableize();
                 isTwelved = true;
             }
         } else {
@@ -56,4 +54,11 @@ function atResize() {
     if (viewPortHeight > containerHeight) {
         optionalBtmFiller.style.height = `${viewPortHeight - containerHeight}px`;
     } else optionalBtmFiller.style.height = `0px`;
+}
+
+function tableize() {
+    const td = document.querySelectorAll('td');
+    td.forEach((el) => el.style.fontSize = '11px');
+    const tdb = document.querySelectorAll('td strong');
+    tdb.forEach((el) => el.style.fontSize = '12px');
 }
