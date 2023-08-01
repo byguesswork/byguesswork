@@ -7,7 +7,7 @@
     font-size: 15px;
 }
 
-/* 
+/*
 barve ozadja v tabeli:
 bckg_dark-red: #f4b084
 bckg_light-red: #fce4d6
@@ -88,6 +88,11 @@ h1 {
     font-size: 11px;
     color: #8b8b8b;
     margin-bottom: 20px;
+}
+
+.date {
+    font-size: 11px;
+    color: #8b8b8b;
 }
 
 h2 {
