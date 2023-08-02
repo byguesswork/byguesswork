@@ -14,6 +14,7 @@ const rightUpperContent = document.getElementById('right_upper_content');
 const rightLowerContent = document.getElementById('right_lower_content');
 
 const hideIf1col = document.querySelectorAll('.hide_if_1_col');
+const showIf1col = document.querySelectorAll('.show_if_1_col');
 
 let lesserWidth;
 let isMobile;
@@ -76,14 +77,14 @@ function doLayout() {
 
 function goForOneColumn() {
 
-  //  kjerje to potrebno, prikažemo, skrijemo, premaknemo vsebino;
-  if (isFirstTimeOneColumn) {   // to naredimo samo enkrat, od tu dalje (recimo pri resize ali orientation change) se ureja s hide/show;
+  //  kjer je to potrebno, prikažemo, skrijemo, premaknemo vsebino;
+  // najprej premaknemo, to naredimo samo enkrat, od tu dalje (recimo pri resize ali orientation change) se ureja s hide/show;
+  if (isFirstTimeOneColumn) {
     const lengthAltPosExpl = alternatePosition4Explanation.innerHTML.length;
     alternatePosition4Explanation.innerHTML = origPosExplanation.innerHTML;
-    if (alternatePosition4Explanation.innerHTML.length > lengthAltPosExpl) {  // preverimo, če je skopiralo, in če, potem izvirni položaj izbrišemo;
-      origPosExplanation.innerHTML = '';
+    if (alternatePosition4Explanation.innerHTML.length > lengthAltPosExpl) {  // preverimo, če je skopiralo, in če, potem posodobimo spremenljivko stanja; brisat ni treba, ker se bi skrilo nekaj vrstic niže;
+      isFirstTimeOneColumn = false;
     };
-    isFirstTimeOneColumn = false;
   }
 
   //  prilagodimo širino vsebine levega, edinega stolpca
@@ -93,11 +94,15 @@ function goForOneColumn() {
   // skrijemo hideIf1col, s čimer se skrije tudi desni stolpec
   hideIf1col?.forEach((i) => i.classList.add('hidden'));
 
+  // prikažemo showIf!Col
+  showIf1col?.forEach((i) => i.classList.remove('hidden'));
+
 }
 
 function goForTwoColumns() {
   leftContainer.style.borderRight = 'solid 1px #f0fff0';
   hideIf1col?.forEach((i) => i.classList.remove('hidden'));
+  showIf1col?.forEach((i) => i.classList.add('hidden'));
 }
 
 function checkAbsolutes() {
