@@ -40,7 +40,9 @@ background-color: #313131;  najtemnejša siva ozadja
     border-right: solid 1px #f0fff0;
 }
 
-#left_upper_content {
+#left_upper_content,
+#upper_position_4_blog,
+#lower_position_4_blog {
     background-color: inherit;
 }
 

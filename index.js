@@ -4,19 +4,17 @@
 
 const leftContainer = document.getElementById('left_container');
 const leftUpperContent = document.getElementById('left_upper_content');
+const upperPosition4Blog = document.getElementById('upper_position_4_blog');
+const lowerPosition4Blog = document.getElementById('lower_position_4_blog');
 const leftLowerContent = document.getElementById('left_lower_content');
 const rightContainer = document.getElementById('right_container');
 const rightUpperContent = document.getElementById('right_upper_content');
 const rightLowerContent = document.getElementById('right_lower_content');
 
-const hideIfMobiles = document.querySelectorAll('.hide_if_mobile');
-const showIf1col = document.querySelectorAll('.show_if_1_col');
 const hideIf1col = document.querySelectorAll('.hide_if_1_col');
-const moveLeftIfMobiles = document.querySelectorAll('.move_left_if_mobile');
 
 let lesserWidth;
 let isMobile;
-
 
 //  če je manj kot 441  : en stolpec
 // če je med 441 in 730 : dva stolpca (360 + 370, vmes je border 1px), horizontalni skrol; 2. stolpec je končno ravno nekoliko večji od prvega
@@ -25,7 +23,11 @@ let isMobile;
 // če je nad 960:       : dva stolpca (400 + 560, vmes je border 1px)
 
 function init() {
-  if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null || navigator.userAgentData.mobile == true) isMobile = true;  // todo to bi veljalo izboljšat s čeiranjem še širine
+  if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null || navigator.userAgentData.mobile == true) {    // todo to bi veljalo izboljšat s čeiranjem še širine
+    isMobile = true;
+    upperPosition4Blog.innerHTML = lowerPosition4Blog.innerHTML;    // blog premaknemo na vrh, da je bolj viden, ker je zaslon manjši; to se potem ne spreminja več, tudi če spremeniš orientacijo;
+    lowerPosition4Blog.innerHTML = '';
+  }
 }
 
 function doLayout() {
@@ -60,15 +62,6 @@ function doLayout() {
     }
   }
 
-  // if (isMobile) {
-  //   let ratio = ((leftContainer.getBoundingClientRect().width + rightContainer?.getBoundingClientRect().width) / screen.width);
-  //   // document.body.style.transform = `scale(${1 / ratio})`;   115 - to ne dela OK, morda treba kaj dodat
-  // }
-
-  // potem postavimo elemente, ki vplivajo na višino, ter čekiramo & prilagodimo višino
-  if (isMobile) {
-    hideIfMobiles?.forEach((el) => el.classList.add('hidden'))
-  } else hideIfMobiles?.forEach((el) => el.classList.remove('hidden'));
 
   checkAbsolutes();
 
@@ -83,14 +76,12 @@ function goForOneColumn() {
   //  kjerje to potrebno, prikažemo, skrijemo (v prihodnje morda tudi premaknemo) vsebino
 
   // najprej prikažemo show_if_mobile, nato skrijemo hide_if_mobile, s čimer se skrije tudi desni stolpec
-  showIf1col?.forEach((i) => i.classList.remove('hidden'));
   hideIf1col?.forEach((i) => i.classList.add('hidden'));
 
 }
 
 function goForTwoColumns() {
   leftContainer.style.borderRight = 'solid 1px #f0fff0';
-  showIf1col?.forEach((i) => i.classList.add('hidden'));
   hideIf1col?.forEach((i) => i.classList.remove('hidden'));
 }
 
@@ -99,7 +90,7 @@ function checkAbsolutes() {
   // poiščemo, koliko največ vidi uporabnik na zaslonu
   let lesserHeight = document.documentElement.clientHeight < screen.height ? document.documentElement.clientHeight : screen.height;
 
-  // preverimo, ali vsebina levega ALI desnega stolpca sega globlje od spodnjega roba 
+  // preverimo, ali vsebina levega ALI desnega stolpca sega globlje od spodnjega roba
   if (leftUpperContent?.getBoundingClientRect().height + leftLowerContent?.getBoundingClientRect().height + 20 > lesserHeight ||   // ta plus 20 je zato, da se upošteva tudi padding nad in pod levim kontejnerjem, ki sicer ni vštet v višino posmičnih elementov;
     rightUpperContent?.getBoundingClientRect().height + rightLowerContent?.getBoundingClientRect().height + 20 > lesserHeight) {
 
