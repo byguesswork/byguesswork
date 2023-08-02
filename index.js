@@ -6,6 +6,8 @@ const leftContainer = document.getElementById('left_container');
 const leftUpperContent = document.getElementById('left_upper_content');
 const upperPosition4Blog = document.getElementById('upper_position_4_blog');
 const lowerPosition4Blog = document.getElementById('lower_position_4_blog');
+const alternatePosition4Explanation = document.getElementById('alternate_postn_explanation');
+const origPosExplanation = document.getElementById('explanation');
 const leftLowerContent = document.getElementById('left_lower_content');
 const rightContainer = document.getElementById('right_container');
 const rightUpperContent = document.getElementById('right_upper_content');
@@ -15,6 +17,7 @@ const hideIf1col = document.querySelectorAll('.hide_if_1_col');
 
 let lesserWidth;
 let isMobile;
+let isFirstTimeOneColumn = true;
 
 //  če je manj kot 441  : en stolpec
 // če je med 441 in 730 : dva stolpca (360 + 370, vmes je border 1px), horizontalni skrol; 2. stolpec je končno ravno nekoliko večji od prvega
@@ -23,10 +26,14 @@ let isMobile;
 // če je nad 960:       : dva stolpca (400 + 560, vmes je border 1px)
 
 function init() {
-  if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null || navigator.userAgentData.mobile == true) {    // todo to bi veljalo izboljšat s čeiranjem še širine
+  if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null || navigator.userAgentData.mobile == true) {    // todo to bi veljalo izboljšat s čekiranjem še širine
     isMobile = true;
-    upperPosition4Blog.innerHTML = lowerPosition4Blog.innerHTML;    // blog premaknemo na vrh, da je bolj viden, ker je zaslon manjši; to se potem ne spreminja več, tudi če spremeniš orientacijo;
-    lowerPosition4Blog.innerHTML = '';
+    // blog premaknemo na vrh, da je bolj viden, ker je zaslon manjši; to se potem ne spreminja več, tudi če spremeniš orientacijo;
+    const upperLength = upperPosition4Blog.innerHTML.length;
+    upperPosition4Blog.innerHTML = lowerPosition4Blog.innerHTML;
+    if (upperPosition4Blog.innerHTML.length > upperLength) {  // preverjanje al je zdaj dolžina večja kot na začetku in če ja, potem izbrišemo spodnje;
+      lowerPosition4Blog.innerHTML = '';
+    };
   }
 }
 
@@ -69,13 +76,21 @@ function doLayout() {
 
 function goForOneColumn() {
 
+  //  kjerje to potrebno, prikažemo, skrijemo, premaknemo vsebino;
+  if (isFirstTimeOneColumn) {   // to naredimo samo enkrat, od tu dalje (recimo pri resize ali orientation change) se ureja s hide/show;
+    const lengthAltPosExpl = alternatePosition4Explanation.innerHTML.length;
+    alternatePosition4Explanation.innerHTML = origPosExplanation.innerHTML;
+    if (alternatePosition4Explanation.innerHTML.length > lengthAltPosExpl) {  // preverimo, če je skopiralo, in če, potem izvirni položaj izbrišemo;
+      origPosExplanation.innerHTML = '';
+    };
+    isFirstTimeOneColumn = false;
+  }
+
   //  prilagodimo širino vsebine levega, edinega stolpca
   leftContainer.style.width = lesserWidth > 300 ? `${lesserWidth - 40}px` : '260px';  // -40, ker je padding 40; minimalno mora bit vsebina široka 260px;
   leftContainer.style.borderRight = 'unset';
 
-  //  kjerje to potrebno, prikažemo, skrijemo (v prihodnje morda tudi premaknemo) vsebino
-
-  // najprej prikažemo show_if_mobile, nato skrijemo hide_if_mobile, s čimer se skrije tudi desni stolpec
+  // skrijemo hideIf1col, s čimer se skrije tudi desni stolpec
   hideIf1col?.forEach((i) => i.classList.add('hidden'));
 
 }
@@ -97,6 +112,7 @@ function checkAbsolutes() {
     // uredimo za levi stolpec
     leftContainer.style.bottom = 'unset';
     leftLowerContent.style.position = 'static';
+    leftLowerContent.style.padding = '0 0 0 0';
 
     //  še za desni stolpec
     rightContainer.style.bottom = 'unset';
@@ -123,6 +139,7 @@ function checkAbsolutes() {
     // levi stolpec
     leftContainer.style.bottom = '0';
     leftLowerContent.style.position = 'absolute';
+    leftLowerContent.style.padding = '0 20px 20px 20px';
 
     //  desni stolpec
     rightContainer.style.bottom = '0';
@@ -136,7 +153,13 @@ function checkAbsolutes() {
 init();
 doLayout();
 
-if (isMobile) screen.orientation.addEventListener("change", () => { doLayout(); });
+if (isMobile) {
+  // screen.orientation.addEventListener("change", () => { doLayout(); });
+  screen.orientation.addEventListener("change", doLayout);
+} else {
+  window.addEventListener("resize", doLayout);
+}
+
 
 //  coded with love and by guesswork by Ivo Makuc, 2022
 //  byguesswork@gmail.com

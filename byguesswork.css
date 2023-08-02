@@ -42,7 +42,10 @@ background-color: #313131;  najtemnejša siva ozadja
 
 #left_upper_content,
 #upper_position_4_blog,
-#lower_position_4_blog {
+#lower_position_4_blog,
+#alternate_postn_explanation,
+#left_upper_content div b,
+#left_upper_content div b a {
     background-color: inherit;
 }
 
@@ -70,11 +73,10 @@ background-color: #313131;  najtemnejša siva ozadja
     /* color: #e5e7eb; */
 }
 
-#right_container p {
-    color: inherit;
-}
-
-#right_upper_content {
+#right_upper_content,
+#explanation,
+#explanation b,
+#explanation b a {
     background-color: inherit;
     color: inherit;
 }
