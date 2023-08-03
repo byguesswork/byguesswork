@@ -23,15 +23,19 @@ if (isMobile) {
 }
 
 function atResize() {
+    console.log('smo 1');
     // po širini;
     const widthh = window.innerWidth;
     if (widthh > 1024) { // 20 + 20 padding container + 35 + 100 padd main + 835 p + 14 scroll;
+        console.log('smo 2');
         mainDocElement.style.paddingRight = `100px`;
         mainDocElement.style.paddingLeft = `35px`;
         secondFlexChild.style.width = `${widthh - 1024}px`;
         container.style.paddingLeft = `20px`;
         container.style.paddingRight = `20px`;
+        console.log('smo 3');
     } else {
+        console.log('smo 4');
         mainDocElement.style.paddingRight = `30px`;
         mainDocElement.style.paddingLeft = `20px`;
         secondFlexChild.style.width = `0px`;
