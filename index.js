@@ -153,6 +153,19 @@ function checkAbsolutes() {
 }
 
 
+function letsplayLink() {
+  let langString = 'en';
+  if (navigator.language != '') {
+    langString = navigator.language;
+  } else if (navigator.userLanguage != '') {
+    langString = navigator.userLanguage;
+  };
+  if (langString == 'sl' || langString == 'sl-si' || langString == 'sl-SI' || langString == 'si') {
+    window.open("app/igrajmose/sl/index.html");
+  }
+  else window.open("app/igrajmose/en/index.html");
+}
+
 //  - - - - - - - - -  IZVAJANJE  - - - - - -
 
 init();
