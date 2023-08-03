@@ -7,7 +7,7 @@ const optionalBtmFiller = document.querySelector('.optional-bottom-filler');
 let isTwelved = false;  // al se je font tabele že zmanjšal na 12;
 
 let isMobile;
-if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null || navigator.userAgentData.mobile == true) {
+if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null || navigator.userAgentData?.mobile == true) {
     isMobile = true;
 } else {
     isMobile = false;
