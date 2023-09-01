@@ -159,7 +159,6 @@ init();
 doLayout();
 
 if (isMobile) {
-  // screen.orientation.addEventListener("change", () => { doLayout(); });
   screen.orientation.addEventListener("change", doLayout);
 } else {
   window.addEventListener("resize", doLayout);
