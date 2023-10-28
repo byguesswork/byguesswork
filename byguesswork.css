@@ -45,7 +45,8 @@ background-color: #313131;  najtemnejša siva ozadja
 #lower_position_4_blog,
 #alternate_postn_explanation,
 #left_upper_content div b,
-#left_upper_content div b a {
+#left_upper_content div b a,
+#programs {
     background-color: inherit;
 }
 

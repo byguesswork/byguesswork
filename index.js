@@ -37,12 +37,15 @@ function init() {
     };
 
     // razširimo razmike med vrsticami v razpredelnici od bloga
-    const blogs_table_chldrn = document.getElementById("blogs_table").getElementsByTagName("tbody")[0].getElementsByTagName("tr");
-    const blogs_table_chldrn_arr = [...blogs_table_chldrn];
+    const blogs_table_chldrn_arr = [...document.getElementById("blogs_table").getElementsByTagName("tbody")[0].getElementsByTagName("tr")];
     blogs_table_chldrn_arr.forEach(tr => {
       inflate(tr.getElementsByTagName('td')[0]);
       inflate(tr.getElementsByTagName('td')[1]);
     })
+
+    // razširimo vrstice med linki na programe (tetris, ...)
+    const programs_arr = [...document.getElementById('programs').getElementsByTagName('p')];
+    programs_arr.forEach(p => { inflate(p) });
   }
 }
 
@@ -78,7 +81,7 @@ function doLayout() {
     }
   }
 
-
+  // s tem pa čekiramo & prilagodimo višino
   checkAbsolutes();
 
 }
@@ -175,10 +178,7 @@ function letsplayLink() {
 }
 
 function inflate(element) {
-  element.style.paddingTop = '5px';
-  element.style.marginTop = '3px';
-  element.style.marginBottom = '3px';
-
+  element.style.paddingTop = '10px';
 }
 
 //  - - - - - - - - -  IZVAJANJE  - - - - - -
