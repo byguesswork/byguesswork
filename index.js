@@ -35,6 +35,14 @@ function init() {
     if (upperPosition4Blog.innerHTML.length > upperLength) {  // preverjanje al je zdaj dolžina večja kot na začetku in če ja, potem izbrišemo spodnje;
       lowerPosition4Blog.innerHTML = '';
     };
+
+    // razširimo razmike med vrsticami v razpredelnici od bloga
+    const blogs_table_chldrn = document.getElementById("blogs_table").getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+    const blogs_table_chldrn_arr = [...blogs_table_chldrn];
+    blogs_table_chldrn_arr.forEach(tr => {
+      inflate(tr.getElementsByTagName('td')[0]);
+      inflate(tr.getElementsByTagName('td')[1]);
+    })
   }
 }
 
@@ -166,6 +174,12 @@ function letsplayLink() {
   else window.open("app/igrajmose/en/index.html");
 }
 
+function inflate(element) {
+  element.style.paddingTop = '5px';
+  element.style.marginTop = '3px';
+  element.style.marginBottom = '3px';
+
+}
 
 //  - - - - - - - - -  IZVAJANJE  - - - - - -
 
