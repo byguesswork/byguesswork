@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Color circle learning file">
+
+    <meta property="og:url" content="https://byguesswork.org/progs/color_circle/color_circle.html">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Color circle learning ground">
+    <meta property="og:description" content="">
+    <meta property="og:image" content="https://byguesswork.org/images/byGuesswork_logo_600x315.PNG">
+    <meta property="og:image:width" content="600">
+    <meta property="og:image:height" content="315">
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Angles on the color circle</title>
+    <link rel="icon" href="/images/favicon.ico">
+    <link href="color_circle.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="content">
+        <p><a href="/index.html" title="back to byGuesswork"><img src="/images/home.PNG" alt="home"> <span
+                    class="italics-smaller">Home</span></a>
+        </p>
+        <br>
+        <div id="both-cols">
+            <div id="left-col">
+                <h1>Angles on the Color Circle</h1>
+                <br>
+                <div id="alternative-right-col"></div>
+                <div id="heading-data">
+                    <p id="head-data-left-data"> Main color (hex value): <span class="black"
+                            id="main-color-hex">#ff0000</span> <br>
+                        Angle of main color on color circle (red = 0 deg): <span class="black" id="main-color-angle">0
+                            deg</span>
+                    </p>
+                    <canvas id="circlette"></canvas>
+                </div>
+                <div id="circle"></div>
+                <div id="offset-data-div">
+                    <p id="offset-data-left-data"> Dependent (offset) color: <span class="black"
+                            id="offset-color-hex">#ff00ff</span><br>
+                        Offset angle (on circle): <span class="black" id="offset-color-offset">-60 deg</span>
+                    </p>
+                    <canvas id="offset-circlette"></canvas>
+                </div>
+                <div>
+                    <p class="padded-p">Direction of gradient:</p>
+                    <input type="radio" id="0deg-gradient-dirctn" name="gradient-direction" value="0" checked>
+                    <label for="0deg-gradient-dirctn">Up-Down (main color on top)</label><br>
+                    <input type="radio" id="90deg-gradient-dirctn" name="gradient-direction" value="90">
+                    <label for="90deg-gradient-dirctn">Left-Right (main color on right edge)</label><br>
+                    <input type="radio" id="follow-angle" name="gradient-direction" value="follow-angle">
+                    <label for="follow-angle">Follows color angle</label>
+                </div>
+                <span style="background-color: inherit; font-size: 12px; display: block; text-align: start;
+                margin-top: 50px;" id="signature">Ivo Makuc, 2023, byguesswork@gmail.com</span> <br>
+            </div>
+            <div id="right-col">
+                <p> <br>A simple utility to explore <span class="black">relations between colors on the color
+                        circle</span>.
+                    How do colors separated by 60 degrees on the color circle look like when they are one next to the
+                    other? How well do they go together? What about colors that are separated by 120 or 90 degrees (or
+                    any other number)?<br>
+                    <br>
+                    In researching for this I was to astonished to learn that it was Isaac Newton who formed the theory
+                    of the color wheel. Cheeky guy, as if developing calculus and formulating the laws of gravity
+                    wasn&apos;t enough.<br>
+                    <br>
+                    The thingy currently works only with vivid colors, no shades or tints. Maybe later.<br>
+                    <br><br>
+                <p> <span class="black">Arrow left/right</span><br>
+                    to change main color (ie. position on the color circle)<br>
+                    <span class="black">Arrow up/down</span><br>
+                    to change offset (angle on the color circle) between
+                    the two colors on the
+                    opposite sides of gradient<br><br>
+                </p>
+                </p>
+            </div>
+        </div>
+        <canvas id="circlette-overlay"></canvas>
+    </div>
+
+    <script src="utils.js"></script>
+    <script src="axis.js"></script>
+    <script src="color_circle.js"></script>
+
+    <!-- coded with love and, well, by guesswork by Ivo Makuc, 2023 -->
+    <!-- byguesswork@gmail.com -->
+
+</body>
+
+</html>

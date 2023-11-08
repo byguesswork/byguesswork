@@ -1,0 +1,96 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: Helvetica, Arial, sans-serif;
+    background-color: #808080;
+    color: #333333;
+    font-size: 15px;
+}
+
+body {
+    position: relative;
+    margin: 20px;
+}
+
+#content {
+    margin: auto;
+    width: fit-content;
+}
+
+#left-col {
+    display: inline-block;
+    width: 600px;
+}
+
+#right-col {
+    display: inline-block;
+    vertical-align: top;
+    width: 250px;
+    padding-left: 20px;
+}
+
+#head-data-left-data,
+#offset-data-left-data {
+    display: inline-block;
+    width: 480px;
+}
+
+#offset-data-left-data {
+    vertical-align: top;
+}
+
+#circlette,
+#offset-circlette {
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    background-color: #808080;
+}
+
+#circlette-overlay {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    top: 0px;
+    left: 0px;
+    background-color: transparent;
+}
+
+#circle {
+    width: 0px;
+    height: 400px;
+
+    /* to je za krog:
+    border-radius: 50%; */
+
+    background-image: linear-gradient(0deg, #ff00ff, #ff0000);
+    /* prave: #e66464, #9198e5 */
+}
+
+#heading-data,
+#alternative-right-col,
+#right-col {
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+#offset-data-div {
+    padding-top: 10px;
+}
+
+.padded-p {
+    margin: 10px 0px 5px;
+}
+
+.black {
+    color: black;
+}
+
+.italics-smaller {
+    font-style: italic;
+    font-size: 13px;
+}
+
+h1 {
+    margin-top: 10px;
+}

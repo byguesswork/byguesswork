@@ -142,3 +142,12 @@ p {
     font-size: small;
     background-color: inherit;
 }
+
+.new {
+    background-color: inherit;
+    font-size: 14;
+    color: white;
+    text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #50ff2d, 0 0 30px #50ff2d, 0 0 40px #50ff2d, 0 0 50px #50ff2d, 0 0 75px #50ff2d;
+    /* original roza #ff2d95  zelena: #50ff2d  */
+    font-weight: 600;
+}
