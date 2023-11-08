@@ -38,18 +38,18 @@ function doLayout() {
     if (screenWidth < geringest) geringest = screenWidth;
     if (elementWidth < geringest) geringest = elementWidth;
 
-    if (geringest > 920) {
+    if (geringest > 950) {
         if (lastChange === 'shrinked') {    // začetni je "widened", ker je tako določeno v CSS z merami;
             moveDivsAround('widen');
         }
         leftCol.style.width = '600px';
         circle.style.width = '600px';
-        rightCol.style.width = '250px';
+        rightCol.style.width = '270px';
     } else {
         if (lastChange === 'widened') {
             moveDivsAround('shrink');
         }
-        if (geringest > 650) {
+        if (geringest > 680) {
             leftCol.style.width = '600px';
             circle.style.width = '600px';
         } else {
