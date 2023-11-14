@@ -2,6 +2,12 @@ function percOf60(lowerBoundary, value) {
     return (value - lowerBoundary) / 60;
 }
 
+function lerp(a, b, t) {    // a- začetna meja, b - končna meja, t - delež med 0 in 1;
+    if (t > 0 && t < 1) {
+        return a + (b - a) * t;
+    } else console.log('incorrect ratio parameter for lerp')
+}
+
 function decToHex(num) {    // prejet mora število od 0-255;
     let quot = Math.floor(num / 16);
     if (quot > 9) switch (quot) {

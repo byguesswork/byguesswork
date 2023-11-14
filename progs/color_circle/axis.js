@@ -1,15 +1,40 @@
 class Axis {  // axis kot gradient axis, gradient line;
     constructor() {
 
+
+        // TODO da se da vlečt black ali tone
+
         // to je kot (angle) od heading barve; na vrhu, navpično navzgor oz. 0deg, je rdeča;
         this.heading = 0;
         // zamik druge barve; -60 pomeni, da offset barva za 60 stopinj zaostaja za glavno (heading) barvo;
         this.offset = -60;
         this.offsetAngle = 300;
-        this.gradientDirection = '0';
 
         // glavna oz. neodvisna barva (kot heading pri orientaciji, torej kamor si usmerjen);
+        // PAZI - v RGB, ker bo še veliko preračunov;
         this.headingColor = {
+            R: 255,
+            G: 0,
+            B: 0,
+            get value() {
+                return `${this.R}${this.G}${this.B}`;
+            }
+        }
+
+        // odvisna barva, ki je za določen kot na barvnem krogu drugačna od glavne barve;
+        // PAZI - v RGB, ker bo še veliko preračunov;
+        this.offsetColor = {
+            R: 255,
+            G: 0,
+            B: 255,
+            get value() {
+                return `${this.R}${this.G}${this.B}`;
+            }
+        }
+
+        // glavna barva, samo tokrat z upoštevanjem morebitnega shadow (black) in tint (white);
+        // tale pa je v hex;
+        this.impactedHeadingColor = {
             R: 'ff',
             G: '00',
             B: '00',
@@ -18,18 +43,20 @@ class Axis {  // axis kot gradient axis, gradient line;
             }
         }
 
-        // odvisna barva, ki je za določen kot na barvnem krogu drugačna od glavne barve
-        this.offsetColor = {
-            R: '00',
+        // offset barva z upoštevanjem toniranja;
+        // v hex;
+        this.impactedOffsetColor = {
+            R: 'ff',
             G: '00',
-            B: '00',
+            B: 'ff',
             get value() {
                 return `${this.R}${this.G}${this.B}`;
             }
         }
 
+        this.controls = new Controls(this);
+
         this.#initialCircletteBckgroundDo();
-        this.#offsetCirclette();
         this.#addEventListeners();
     }
 
@@ -63,83 +90,75 @@ class Axis {  // axis kot gradient axis, gradient line;
         };
 
         if (shallDo === true) {
-            this.#calculateComponentValues();
-            this.#draw();
-            this.#circlette();
-            this.#offsetCirclette();
-            this.#refreshLabels();
+            this.#calculateComponentValues();   // iz kota izračuna rgb (v hex), brez upoštevanja toniranja;
+            this.calculateImpact();
+            this.draw();
+            this.circlette();
+            this.refreshLabels();
         }
     }
 
     #addEventListeners() {
         document.addEventListener('keydown', this.#atKeyPress.bind(this)); // temu bind bi se lahko izognil z arrow funkcijo
 
-        gradientDirection.forEach(curr => {
-            curr.addEventListener('change', (e) => {
-                this.gradientDirection = e.target.value;
-                curr.blur();
-                this.#draw();
-            })
-        });
+    }   // konec listenerjev
 
-
-    }
-
-    #draw() {
-        // privzeto gre gradient 0deg od spodaj navzgor; začetna (neodvisna, nosilna, heading) barva je torej v mojem primeru podana v drug barvni atribut, ne v prvega;
-        const text = this.gradientDirection === 'follow-angle' ? this.heading : this.gradientDirection;
-        circle.style.backgroundImage = `linear-gradient(${text}deg, #${this.offsetColor.value} 12%, #${this.headingColor.value} 88%)`;  // pravilno: ${this.heading}deg
+    draw() {
+        // privzeto gre gradient 0deg od spodaj-navzgor; začetna (neodvisna, nosilna, heading) barva je torej v mojem primeru podana v drug barvni atribut, ne v prvega;
+        // v programu gre sicer gradient privzeto L-D (90');
+        const text = this.controls.gradientDirection === 'follow-angle' ? this.heading : this.controls.gradientDirection;
+        circle.style.backgroundImage = `linear-gradient(${text}deg, #${this.impactedOffsetColor.value} 12%, #${this.impactedHeadingColor.value} 88%)`;  // pravilno: ${this.heading}deg
     }
 
     #doStuffHelper(angle, color) {      // za določitev barve na podlagi kota;
         if (angle > 0 && angle < 60) {
-            color.R = 'ff';
-            color.G = decToHex(percOf60(0, angle) * 255);
-            color.B = '00';
+            color.R = 255;
+            color.G = percOf60(0, angle) * 255;
+            color.B = 0;
         } else if (angle > 180 && angle < 240) {
-            color.R = '00';
-            color.G = decToHex((1 - percOf60(180, angle)) * 255);
-            color.B = 'ff';
+            color.R = 0;
+            color.G = (1 - percOf60(180, angle)) * 255;
+            color.B = 255;
         } else if (angle > 60 && angle < 120) {
-            color.R = decToHex((1 - percOf60(60, angle)) * 255);
-            color.G = 'ff';
-            color.B = '00';
+            color.R = (1 - percOf60(60, angle)) * 255;
+            color.G = 255;
+            color.B = 0;
         } else if (angle > 240 && angle < 300) {
-            color.R = decToHex(percOf60(240, angle) * 255);
-            color.G = '00';
-            color.B = 'ff';
+            color.R = percOf60(240, angle) * 255;
+            color.G = 0;
+            color.B = 255;
         } else if (angle > 120 && angle < 180) {
-            color.R = '00';
-            color.G = 'ff';
-            color.B = decToHex(percOf60(120, angle) * 255);
+            color.R = 0;
+            color.G = 255;
+            color.B = percOf60(120, angle) * 255;
         } else if (angle > 300 && angle < 360) {
-            color.R = 'ff';
-            color.G = '00';
-            color.B = decToHex((1 - percOf60(300, angle)) * 255);
+            color.R = 255;
+            color.G = 0;
+            color.B = (1 - percOf60(300, angle)) * 255;
         } else if (angle === 0) {
-            color.R = 'ff';
-            color.G = '00';
-            color.B = '00';
+            color.R = 255;
+            color.G = 0;
+            color.B = 0;
         } else if (angle === 60) {
-            color.R = 'ff';
-            color.G = 'ff';
-            color.B = '00';
+            color.R = 255;
+            color.G = 255;
+            color.B = 0;
         } else if (angle === 120) {
-            color.R = '00';
-            color.G = 'ff';
-            color.B = '00';
+            color.R = 0;
+            color.G = 255;
+            color.B = 0;
         } else if (angle === 180) {
-            color.R = '00';
-            color.G = 'ff';
-            color.B = 'ff';
+            color.R = 0;
+            color.G = 255;
+            color.B = 255;
         } else if (angle === 240) {
-            color.R = '00';
-            color.G = '00';
-            color.B = 'ff';
+            color.R = 0;
+            color.G = 0;
+            color.B = 255;
         } else if (angle === 300) {
-            color.R = 'ff';
-            color.G = '00';
-            color.B = 'ff';
+            color.R = 255;
+            color.G = 0;
+            color.B = 255;
         }
     }
 
@@ -164,6 +183,68 @@ class Axis {  // axis kot gradient axis, gradient line;
 
     };
 
+    calculateImpact() {     // ta izračuna vpliv black in white, obenem pretvori RGB v hex;
+
+        let intermediateR, intermediateG, intermediateB;
+        const shadow = this.controls.shadow;
+        const tint = this.controls.tint;
+
+        function helperShadow(color) {  // tu je pomembno, da dobimo intermediateX, in ga dobimo v vsakem primeru;
+            if (color.R > 0) {
+                intermediateR = lerp(color.R, 0, shadow / 100);
+            } else intermediateR = color.R;
+            if (color.G > 0) {
+                intermediateG = lerp(color.G, 0, shadow / 100);
+            } else intermediateG = color.G;
+            if (color.B > 0) {
+                intermediateB = lerp(color.B, 0, shadow / 100);
+            } else intermediateB = color.B;
+        }
+
+        function helperTint() {   // najvišja cifra od treh ostane enaka, ostale se ji sorazmerno približajo (lerp);
+            const maxx = Math.max(intermediateR, intermediateG, intermediateB);
+            if (intermediateR < maxx) { // če je manj kot max, se sorazmerno ratiu približa od izvirne vrednosti do max-a;
+                intermediateR = lerp(intermediateR, maxx, tint / 100)
+            };
+            if (intermediateG < maxx) {
+                intermediateG = lerp(intermediateG, maxx, tint / 100)
+            };
+            if (intermediateB < maxx) {
+                intermediateB = lerp(intermediateB, maxx, tint / 100)
+            };
+        }
+
+        function helperAssign(passedImpactedColor) {
+            passedImpactedColor.R = decToHex(intermediateR);
+            passedImpactedColor.G = decToHex(intermediateG);
+            passedImpactedColor.B = decToHex(intermediateB);
+        }
+
+        function mainAction(color, impactedColor) {
+            // najprej shadow
+            if (shadow === 0) {
+                intermediateR = color.R;
+                intermediateG = color.G;
+                intermediateB = color.B;
+            } else {
+                helperShadow(color);
+            }
+
+            // potem tint;
+            if (tint === 0) {
+                // se nič ne spremeni, intermediate smo dobili že v prejšnjem koraku, ga ni treba znova zganjat;
+            } else {
+                helperTint();
+            }
+
+            helperAssign(impactedColor);
+        }
+
+        mainAction(this.headingColor, this.impactedHeadingColor);
+        mainAction(this.offsetColor, this.impactedOffsetColor);
+
+    }
+
 
     // - - - - - POMEMBNO - - - - -
     // POMEMBNO!! treba se je zavedat, da kljub temu da črte rišeš, da predstavljajo kot, pod katerim je barva (0 je navzgor), so v preračunih mišljene tako, da kot 0 gleda vodoravno desno;
@@ -174,10 +255,11 @@ class Axis {  // axis kot gradient axis, gradient line;
         for (let x = 0; x < 360; x++) {
             this.heading = x;
             this.#calculateComponentValues();
+            this.calculateImpact();
 
             let kot = degToRad(this.heading, -90);
 
-            ctxBckgrnd.strokeStyle = `#${this.headingColor.value}`;
+            ctxBckgrnd.strokeStyle = `#${this.impactedHeadingColor.value}`;
             ctxBckgrnd.beginPath();
             ctxBckgrnd.moveTo(50, 50);
             ctxBckgrnd.lineTo(50 + Math.cos(kot) * 50, 50 + Math.sin(kot) * 50);
@@ -189,42 +271,15 @@ class Axis {  // axis kot gradient axis, gradient line;
         ctxBckgrnd.arc(50, 50, 49, 0, 2 * Math.PI);
         ctxBckgrnd.stroke();
 
-        this.positionCirclette();
-
         // to je da povrneš začetne vrednosti (0 in -60), ker je izris končal pri 359;
         this.heading = 0;
         this.#calculateComponentValues();
+        this.calculateImpact();
     }
 
-    positionCirclette() {   // to pozicionira glavni canvas (activeCanvas), da leži točno nad ozadjem glavnega canvasa;
-        const bckgndCanvasFrame = canvas.getBoundingClientRect();
-        activeCanvas.style.top = `${bckgndCanvasFrame.top - 20}px`;     // -20, ker ima body, ki je relative source tega absoulta, margin 20;
-        activeCanvas.style.left = `${bckgndCanvasFrame.left - 20}px`;   // -20, ker ima body, ki je relative source tega absoulta, margin 20;
-        activeCanvas.style.width = '100px';
-        activeCanvas.style.height = '100px';
-        activeCanvas.width = 100;
-        activeCanvas.height = 100;
-
-        this.#circlette();
-    }
-
-    #circlette() {  // to vsakokrat nariše črn kazalec glavnega canvasa;
+    circlette() {  // to vsakokrat nariše filo, ki predstavlja ofset in območje gradienta, ter črn krog in črn kazalec glavnega canvasa;
         activeCanvas.width = 99;    // to je finta, da izbrišeš canvas;
         activeCanvas.width = 100;
-
-        const kot = degToRad(this.heading, -90);
-
-        ctx.strokeStyle = `black`;
-        ctx.beginPath();
-        ctx.moveTo(50, 50);
-        ctx.lineTo(50 + Math.cos(kot) * 49, 50 + Math.sin(kot) * 49);
-        ctx.stroke();
-
-    }
-
-    #offsetCirclette() {    //  to izriše canvas pod gradientom, tistega, na katerem je prikazan offset;
-        offsetCanvas.width = 99;    // to je finta, da izbrišeš canvas;
-        offsetCanvas.width = 100;
 
         if (this.heading.valueOf() != this.offsetAngle.valueOf()) {
 
@@ -239,52 +294,51 @@ class Axis {  // axis kot gradient axis, gradient line;
             const manjsiKotVRad = degToRad(manjsiKot, -90);
             const vecjiKotVRad = degToRad(vecjiKot, -90);
 
-            offsetCtx.strokeStyle = `#d3d3d377`;    // RGBA - polprosojna
-            offsetCtx.fillStyle = `#d3d3d377`;
-            offsetCtx.lineWidth = 1;
+            ctx.strokeStyle = `#d3d3d3`;    // RGBA - polprosojna
+            ctx.fillStyle = `#b3b3b380`;
+            ctx.lineWidth = 1;
 
             // narišemo levi kazalec iz središča (v svetlo sivi);
-            offsetCtx.beginPath();
-            offsetCtx.moveTo(50, 50);
-            offsetCtx.lineTo(50 + Math.cos(manjsiKotVRad) * 48, 50 + Math.sin(manjsiKotVRad) * 48);  // 48, ker je canvas 100, polmer pa za bit 49, da ziher ne gre čez rob canvasa; fila pa mora bit še manjša kot polmer;
+            ctx.beginPath();
+            ctx.moveTo(50, 50);
+            ctx.lineTo(50 + Math.cos(manjsiKotVRad) * 49, 50 + Math.sin(manjsiKotVRad) * 49);
 
             // narišemo del krožnice (v smeri urinega) in zapremo;
-            offsetCtx.arc(50, 50, 48, manjsiKotVRad, vecjiKotVRad);
-            offsetCtx.closePath();
-            offsetCtx.fill();
-            offsetCtx.stroke();
+            ctx.arc(50, 50, 49, manjsiKotVRad, vecjiKotVRad);   // 49, ker je canvas 100, polmer pa naj bo mal manj kot 50, da ne bo kje krožnica prisekana;
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
 
         }
 
-        // vedno narišemo črn krog in kazalec glavnega kota;
-        offsetCtx.strokeStyle = `black`;
-        offsetCtx.beginPath();
-        offsetCtx.arc(50, 50, 49, 0, 2 * Math.PI);
-        offsetCtx.closePath();
-        offsetCtx.stroke();
+        // vedno narišemo črn krog (da preriše svetlo siv izsek krožnice, ki uokvirja filo) in kazalec glavnega kota;
+        ctx.strokeStyle = `black`;
+        ctx.beginPath();
+        ctx.arc(50, 50, 49, 0, 2 * Math.PI);
+        ctx.closePath();
+        ctx.stroke();
 
         const kot = degToRad(this.heading.valueOf(), -90);
-        offsetCtx.lineWidth = 1.5;
-        offsetCtx.beginPath();
-        offsetCtx.moveTo(50, 50);
-        offsetCtx.lineTo(50 + Math.cos(kot) * 50, 50 + Math.sin(kot) * 50);
-        offsetCtx.stroke();
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(50, 50);
+        ctx.lineTo(50 + Math.cos(kot) * 50, 50 + Math.sin(kot) * 50);
+        ctx.stroke();
 
     }
 
-    #refreshLabels() {
-        mainColorHexLbl.innerHTML = `#${axis.headingColor.value}`;
-        mainColorAngleLbl.innerHTML = `${axis.heading} deg`;
-        offsetColorHexLbl.innerHTML = `#${axis.offsetColor.value}`;
-        if (Math.abs(axis.offset) <= 180) {
-            offsetColorOffsetLbl.innerHTML = `${axis.offset} deg`;
+    refreshLabels() {
+        mainColorHexLbl.innerHTML = `#${this.impactedHeadingColor.value}`;
+        mainColorAngleLbl.innerHTML = `${this.heading} deg`;
+        offsetColorHexLbl.innerHTML = `#${this.impactedOffsetColor.value}`;
+        if (Math.abs(this.offset) <= 180) {
+            offsetColorOffsetLbl.innerHTML = `${this.offset} deg`;
         } else {
-            const neg = axis.offset < 0 ? true : false;
-            const alt = 360 - Math.abs(axis.offset);
-            offsetColorOffsetLbl.innerHTML = `${axis.offset} (${neg ? '+' : '-'}${alt}) deg`;
+            const neg = this.offset < 0 ? true : false;
+            const alt = 360 - Math.abs(this.offset);
+            offsetColorOffsetLbl.innerHTML = `${this.offset} (${neg ? '+' : '-'}${alt}) deg`;
         };
     }
-
 
 }
 

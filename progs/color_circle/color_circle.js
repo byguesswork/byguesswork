@@ -7,7 +7,6 @@ const mainColorHexLbl = document.getElementById('main-color-hex');
 const mainColorAngleLbl = document.getElementById('main-color-angle');
 const offsetColorHexLbl = document.getElementById('offset-color-hex');
 const offsetColorOffsetLbl = document.getElementById('offset-color-offset');
-const gradientDirection = document.getElementsByName('gradient-direction');
 const rightCol = document.getElementById('right-col');
 
 // inicializiramo spodnji (v smislu spodnji sloj) canvas (za ozadje) in narišemo začetni lik (slednje se bo zgodilo s klicem axis = new Axis());
@@ -19,12 +18,6 @@ canvas.height = 100;
 // inicializiramo delovni canvas (vrhnji sloj nad spodnjim slojem);
 const activeCanvas = document.getElementById('circlette-overlay');
 const ctx = activeCanvas.getContext('2d');
-
-// inicializiramo canvas za offset (ki je enoslojen, nima spodnjega in zgornjega sloja)
-const offsetCanvas = document.getElementById('offset-circlette');
-const offsetCtx = offsetCanvas.getContext('2d');
-offsetCanvas.width = 100;
-offsetCanvas.height = 100;
 
 let lastChange = 'widened';
 let isFirstTimeSetup = true;
@@ -59,7 +52,8 @@ function doLayout() {
     }
 
     if (!isFirstTimeSetup) {
-        axis.positionCirclette();
+        positionCirclette();
+        axis.controls.getBoundingRects();
     } else {    // samo prvič;
         const visible = Math.min(window.innerHeight, screen.height, document.documentElement.clientHeight)
         const needed = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight,
@@ -71,6 +65,7 @@ function doLayout() {
             signature.style.textAlign = 'end';
         }
     }
+
 }
 
 function moveDivsAround(instruction) {
@@ -87,11 +82,24 @@ function moveDivsAround(instruction) {
     }
 }
 
+function positionCirclette() {   // to pozicionira glavni canvas (activeCanvas), da leži točno nad ozadjem glavnega canvasa;
+    const bckgndCanvasFrame = canvas.getBoundingClientRect();
+    activeCanvas.style.top = `${bckgndCanvasFrame.top - 20}px`;     // -20, ker ima body, ki je relative source tega absoulta, margin 20;
+    activeCanvas.style.left = `${bckgndCanvasFrame.left - 20}px`;   // -20, ker ima body, ki je relative source tega absoulta, margin 20;
+    activeCanvas.style.width = '100px';
+    activeCanvas.style.height = '100px';
+    activeCanvas.width = 100;
+    activeCanvas.height = 100;
+
+    axis.circlette();
+}
+
 
 // - - - -   IZVAJANJE   - - - -
 
 doLayout();
 const axis = new Axis();
+positionCirclette();    // najprej mora bit inicializiran axis;
 isFirstTimeSetup = false;
 window.addEventListener("resize", doLayout);
 

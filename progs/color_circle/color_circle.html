@@ -23,36 +23,48 @@
 <body>
     <div id="content">
         <p><a href="/index.html" title="back to byGuesswork"><img src="/images/home.PNG" alt="home"> <span
-                    class="italics-smaller">Home</span></a>
+                    class="italics smaller">Home</span></a>
         </p>
         <br>
         <div id="both-cols">
             <div id="left-col">
                 <h1>Angles on the Color Circle</h1>
-                <br>
                 <div id="alternative-right-col"></div>
                 <div id="heading-data">
-                    <p id="head-data-left-data"> Main color (hex value): <span class="black"
+                    <p id="head-data-left-data"> Main hue (hex value): <span class="black"
                             id="main-color-hex">#ff0000</span> <br>
-                        Angle of main color on color circle (red = 0 deg): <span class="black" id="main-color-angle">0
-                            deg</span>
+                        Main hue&apos;s angle on color circle (red = 0 deg): <span class="black" id="main-color-angle">0
+                            deg</span><br>
+                        Angle of offset (on circle): <span class="black" id="offset-color-offset">-60 deg</span><br>
+                        Offset hue: <span class="black" id="offset-color-hex">#ff00ff</span><br>
+                        <span class="smaller">Shaded pie on color circle represents the area covered by the
+                            gradient</span>
                     </p>
                     <canvas id="circlette"></canvas>
                 </div>
                 <div id="circle"></div>
-                <div id="offset-data-div">
-                    <p id="offset-data-left-data"> Dependent (offset) color: <span class="black"
-                            id="offset-color-hex">#ff00ff</span><br>
-                        Offset angle (on circle): <span class="black" id="offset-color-offset">-60 deg</span>
-                    </p>
-                    <canvas id="offset-circlette"></canvas>
+                <div id="controllers-div">
+                    <div class="pad-below">
+                        <span>Black&nbsp;&nbsp;</span>
+                        <div id="shadow-div">
+                            <span id="shadow-L-side"></span><span id="shadow-R-side"></span>
+                        </div>
+                        &nbsp;&nbsp;<span id="shadow-info">0</span>
+                    </div>
+                    <div class="pad-below">
+                        <span>White&nbsp;&nbsp;</span>
+                        <div id="tint-div">
+                            <span id="tint-L-side"></span><span id="tint-R-side"></span>
+                        </div>
+                        &nbsp;&nbsp;<span id="tint-info">0</span>
+                    </div>
                 </div>
                 <div>
                     <p class="padded-p">Direction of gradient:</p>
-                    <input type="radio" id="0deg-gradient-dirctn" name="gradient-direction" value="0" checked>
-                    <label for="0deg-gradient-dirctn">Up-Down (main color on top)</label><br>
-                    <input type="radio" id="90deg-gradient-dirctn" name="gradient-direction" value="90">
+                    <input type="radio" id="90deg-gradient-dirctn" name="gradient-direction" value="90" checked>
                     <label for="90deg-gradient-dirctn">Left-Right (main color on right edge)</label><br>
+                    <input type="radio" id="0deg-gradient-dirctn" name="gradient-direction" value="0">
+                    <label for="0deg-gradient-dirctn">Up-Down (main color on top)</label><br>
                     <input type="radio" id="follow-angle" name="gradient-direction" value="follow-angle">
                     <label for="follow-angle">Follows color angle</label>
                 </div>
@@ -60,33 +72,34 @@
                 margin-top: 50px;" id="signature">Ivo Makuc, 2023, byguesswork@gmail.com</span> <br>
             </div>
             <div id="right-col">
-                <p> <br>A simple utility to explore <span class="black">relations between colors on the color
+                <p> <br>
+                    A simple utility to explore <span class="black">relations between colors on the color
                         circle</span>.
                     How do colors separated by 60 degrees on the color circle look like when they are one next to the
                     other? How well do they go together? What about colors that are separated by 120 or 90 degrees (or
                     any other number)?<br>
                     <br>
+                    <span class="black">Arrow left / right</span><br>
+                    to change main color (ie. position on the color circle)<br>
+                    <span class="black">Arrow up / down</span><br>
+                    to change offset (angle on the color circle) between
+                    the two colors on the opposite sides of gradient<br>
+                    <span class="black">Black / white (shadow / tint) controls</span><br>
+                    Same shadow and/or tint value is applied to both sides of gradient.<br>
+                    <br>
                     In researching for this I was astonished to learn that it was Isaac Newton who formed the theory
                     of the color wheel. Cheeky guy, as if developing calculus and formulating the laws of gravity
                     wasn&apos;t enough.<br>
                     <br>
-                    The thingy currently deals only with vivid colors, no shades or tints. Maybe later.<br>
-                    <br>
                     <em>Not mobile friendly</em>. Maybe later.<br>
-                    <br><br>
-                <p> <span class="black">Arrow left/right</span><br>
-                    to change main color (ie. position on the color circle)<br>
-                    <span class="black">Arrow up/down</span><br>
-                    to change offset (angle on the color circle) between
-                    the two colors on the
-                    opposite sides of gradient<br><br>
-                </p>
+                    <br>
                 </p>
             </div>
         </div>
         <canvas id="circlette-overlay"></canvas>
     </div>
 
+    <script src="controls.js"></script>
     <script src="utils.js"></script>
     <script src="axis.js"></script>
     <script src="color_circle.js"></script>
