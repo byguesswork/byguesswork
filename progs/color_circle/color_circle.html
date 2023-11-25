@@ -31,16 +31,19 @@
                 <h1>Angles on the Color Circle</h1>
                 <div id="alternative-right-col"></div>
                 <div id="heading-data">
-                    <p id="head-data-left-data"> Main hue (hex value): <span class="black"
-                            id="main-color-hex">#ff0000</span> <br>
-                        Main hue&apos;s angle on color circle (red = 0 deg): <span class="black" id="main-color-angle">0
-                            deg</span><br>
+                    <p id="head-data-left-data">Main hue angle on color circle (red = 0 deg): <span class="black"
+                            id="main-color-angle">0 deg</span><br>
+                        Main hue (vibrant color): <span class="black" id="main-color-hue">#ff0000</span> <br>
+                        Main color (hue + tint + shade): <span class="black" id="main-color-color">(same as hue)</span>
+                        <br>
                         Angle of offset (on circle): <span class="black" id="offset-color-offset">-60 deg</span><br>
-                        Offset hue: <span class="black" id="offset-color-hex">#ff00ff</span><br>
+                        Offset hue: <span class="black" id="offset-hue">#ff00ff</span>, offset toned color: <span
+                            class="black" id="offset-toned-color">(same as hue)</span><br>
                         <span class="smaller">Shaded pie on color circle represents the area covered by the
                             gradient</span>
                     </p>
                     <canvas id="circlette"></canvas>
+                    <br><br>
                 </div>
                 <div id="circle"></div>
                 <div id="controllers-div">
@@ -72,7 +75,7 @@
                 margin-top: 50px;" id="signature">Ivo Makuc, 2023, byguesswork@gmail.com</span> <br>
             </div>
             <div id="right-col">
-                <p> <br>
+                <p>
                     A simple utility to explore <span class="black">relations between colors on the color
                         circle</span>.
                     How do colors separated by 60 degrees on the color circle look like when they are one next to the
@@ -84,8 +87,8 @@
                     <span class="black">Arrow up / down</span><br>
                     to change offset (angle on the color circle) between
                     the two colors on the opposite sides of gradient<br>
-                    <span class="black">Black / white (shadow / tint) controls</span><br>
-                    Same shadow and/or tint value is applied to both sides of gradient.<br>
+                    <span class="black">Black / white (shade / tint) controls</span><br>
+                    Same shade and/or tint value is applied to both sides of gradient.<br>
                     <br>
                     In researching for this I was astonished to learn that it was Isaac Newton who formed the theory
                     of the color wheel. Cheeky guy, as if developing calculus and formulating the laws of gravity

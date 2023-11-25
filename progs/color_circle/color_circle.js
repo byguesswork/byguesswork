@@ -3,9 +3,11 @@
 const circle = document.getElementById('circle');
 const leftCol = document.getElementById('left-col');
 const altPosExplanation = document.getElementById('alternative-right-col');
-const mainColorHexLbl = document.getElementById('main-color-hex');
+const mainColorHueLbl = document.getElementById('main-color-hue');
+const mainColorTonedLbl = document.getElementById('main-color-color');
 const mainColorAngleLbl = document.getElementById('main-color-angle');
-const offsetColorHexLbl = document.getElementById('offset-color-hex');
+const offsetColorHueLbl = document.getElementById('offset-hue');
+const offsetColorTonedLbl = document.getElementById('offset-toned-color');
 const offsetColorOffsetLbl = document.getElementById('offset-color-offset');
 const rightCol = document.getElementById('right-col');
 

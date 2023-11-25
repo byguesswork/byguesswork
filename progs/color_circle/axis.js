@@ -328,9 +328,25 @@ class Axis {  // axis kot gradient axis, gradient line;
     }
 
     refreshLabels() {
-        mainColorHexLbl.innerHTML = `#${this.impactedHeadingColor.value}`;
+        let textt = decToHex(this.headingColor.R);
+        textt += decToHex(this.headingColor.G);
+        textt += decToHex(this.headingColor.B);
+        mainColorHueLbl.innerHTML = `#${textt}`;
+        if (this.controls.shadow > 0 || this.controls.tint > 0) {
+            mainColorTonedLbl.innerHTML = `#${this.impactedHeadingColor.value}`;
+        } else {
+            mainColorTonedLbl.innerHTML = '(same as hue)';
+        }
         mainColorAngleLbl.innerHTML = `${this.heading} deg`;
-        offsetColorHexLbl.innerHTML = `#${this.impactedOffsetColor.value}`;
+        textt = decToHex(this.offsetColor.R);
+        textt += decToHex(this.offsetColor.G);
+        textt += decToHex(this.offsetColor.B);
+        offsetColorHueLbl.innerHTML = `#${textt}`;
+        if (this.controls.shadow > 0 || this.controls.tint > 0) {
+            offsetColorTonedLbl.innerHTML = `#${this.impactedOffsetColor.value}`;
+        } else {
+            offsetColorTonedLbl.innerHTML = `(same as hue)`;
+        }
         if (Math.abs(this.offset) <= 180) {
             offsetColorOffsetLbl.innerHTML = `${this.offset} deg`;
         } else {
