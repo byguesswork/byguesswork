@@ -164,6 +164,7 @@ function checkAbsolutes() {
 }
 
 
+// ti dve funkciji spodaj bi se dalo refaktorizirat na eno
 function letsplayLink() {
   let langString = 'en';
   if (navigator.language != '') {
@@ -175,6 +176,19 @@ function letsplayLink() {
     window.open("app/igrajmose/sl/index.html");
   }
   else window.open("app/igrajmose/en/index.html");
+}
+
+function fuelLink() {
+  let langString = 'en';
+  if (navigator.language != '') {
+    langString = navigator.language;
+  } else if (navigator.userLanguage != '') {
+    langString = navigator.userLanguage;
+  };
+  if (langString == 'sl' || langString == 'sl-si' || langString == 'sl-SI' || langString == 'si') {
+    window.open("app/fuel/sl/index.html");
+  }
+  else window.open("app/fuel/en/index.html");
 }
 
 function inflate(element) {
