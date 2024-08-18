@@ -176,6 +176,7 @@ function letsplayLink() {
     window.open("app/igrajmose/sl/index.html");
   }
   else window.open("app/igrajmose/en/index.html");
+  console.log('smo bli not v index js');
 }
 
 function fuelLink() {
