@@ -53,6 +53,7 @@ function doLayout() {
 
   // najprej čekiramo & prilagodimo širino
   lesserWidth = document.documentElement.clientWidth < screen.width ? document.documentElement.clientWidth : screen.width;
+  console.log('lesserW:', lesserWidth);
 
   if (lesserWidth < 441) goForOneColumn();
   else {
@@ -120,6 +121,7 @@ function checkAbsolutes() {
 
   // poiščemo, koliko največ vidi uporabnik na zaslonu
   let lesserHeight = document.documentElement.clientHeight < screen.height ? document.documentElement.clientHeight : screen.height;
+  console.log('lesserH:', lesserHeight);
 
   // preverimo, ali vsebina levega ALI desnega stolpca sega globlje od spodnjega roba
   if (leftUpperContent?.getBoundingClientRect().height + leftLowerContent?.getBoundingClientRect().height + 20 > lesserHeight ||   // ta plus 20 je zato, da se upošteva tudi padding nad in pod levim kontejnerjem, ki sicer ni vštet v višino posmičnih elementov;
@@ -137,21 +139,7 @@ function checkAbsolutes() {
     if (rightContainer.getBoundingClientRect().height > leftContainer.getBoundingClientRect().height) leftContainer.style.height = `${rightContainer.getBoundingClientRect().height - 40}px`; // -40 ker padding
     if (leftContainer.getBoundingClientRect().height > rightContainer.getBoundingClientRect().height) rightContainer.style.height = `${leftContainer.getBoundingClientRect().height - 40}px`; // -40 ker padding
 
-    // za about.html, spravit vsebino pod fiksni del
-    if (leftUpperContent.classList.contains('fixed')) {
-      leftUpperContent.style.width = `${leftContainer.getBoundingClientRect().width - 20 - 1}px`; // -20 ker je treba odštet levi padding, -1, ker je teba odštet vidni border;
-      leftLowerContent.style.marginTop = `${leftUpperContent.getBoundingClientRect().bottom}px`;
-
-      //test
-      leftContainer.style.paddingTop = '0';       // zakaj tukaj vzet 20px (0) in spodaj dodat 20px (40px) ?;
-      leftContainer.style.paddingBottom = '40px'; // ker skupni vertikalni padding levega kontejnerja mora še vedno biti 40, sicer se levi in desni kontejner razlikujeta po višini;
-      leftUpperContent.style.paddingTop = '20px'; // tako se naredi, da ni nad fiksnim delom prozornega dela, v katerem bi se videlo besedilo od about, ki ga skrolaš navzgor
-
-      // konec test
-
-    }
-
-  } else {  // če je vse na enem ekranu, prilepimo dno vsebine na dno ekrana
+  } else {  // če je vse na enem ekranu (če ni treba skrolat dol), prilepimo dno vsebine na dno ekrana
     // levi stolpec
     leftContainer.style.bottom = '0';
     leftLowerContent.style.position = 'absolute';
@@ -176,7 +164,6 @@ function letsplayLink() {
     window.open("app/igrajmose/sl/index.html");
   }
   else window.open("app/igrajmose/en/index.html");
-  console.log('smo bli not v index js');
 }
 
 function fuelLink() {

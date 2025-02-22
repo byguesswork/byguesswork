@@ -55,7 +55,6 @@ class Ring {
             drawingCtx.strokeStyle = `${Data.prominentRingColor}${opacityValue}`;
         }
         
-
         // risanje
         let fOVdx = 0;
         const aa = (Data.numRatios - this.currRatioIdx) / Data.stepsPerUnit;    // v enotah, koliko je pravokotna razdalja od ravnine gledalca do središča obroča 
@@ -68,18 +67,9 @@ class Ring {
         // 'conn:', connection.toFixed(1), 'fovdx:', fOVdx.toFixed(2)); 
 
         drawingCtx.beginPath();
-        drawingCtx.arc((Ring.x - fOVdx * Ring.r), Ring.y, /*this.currR*/Ring.r * aa, 0, 2 * Math.PI);
-        console.log(aa);
-        //  Ring.x - Ring.dx, ker ko gledalec pritisne tipko desno, je to pozitiven odmik, ampak obroči pa e morajo premaknit levo;
-        drawingCtx.stroke();
-
-        drawingCtx.strokeStyle = 'red';
-        drawingCtx.beginPath();
         drawingCtx.arc((Ring.x - fOVdx * Ring.r), Ring.y, Ring.r * Data.ratios[this.currRatioIdx], 0, 2 * Math.PI);
         //  Ring.x - Ring.dx, ker ko gledalec pritisne tipko desno, je to pozitiven odmik, ampak obroči pa e morajo premaknit levo;
         drawingCtx.stroke();
-
-        if (ringsIdx >= 9) console.log(2*Math.atan2(0.5, aa), Data.ratios[this.currRatioIdx])
 
     }
 

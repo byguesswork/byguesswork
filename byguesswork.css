@@ -83,7 +83,7 @@ background-color: #313131;  najtemnejša siva ozadja
 }
 
 #right_lower_content {
-    position: absolute;
+    /* position: absolute; */
     bottom: 20px;
     left: 20px;
     background-color: inherit;
