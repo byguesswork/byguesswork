@@ -32,23 +32,27 @@ function init() {
   if (forTest != null) forTest.innerHTML = `forDebug`;
   if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null || navigator.userAgentData.mobile == true) {    // todo to bi veljalo izboljšat s čekiranjem še širine
     isMobile = true;
-    // blog premaknemo na vrh, da je bolj viden, ker je zaslon manjši; to se potem ne spreminja več, tudi če spremeniš orientacijo;
-    const upperLength = upperPosition4Blog.innerHTML.length;
-    upperPosition4Blog.innerHTML = lowerPosition4Blog.innerHTML;
-    if (upperPosition4Blog.innerHTML.length > upperLength) {  // preverjanje al je zdaj dolžina večja kot na začetku in če ja, potem izbrišemo spodnje;
-      lowerPosition4Blog.innerHTML = '';
-    };
 
-    // razširimo razmike med vrsticami v razpredelnici od bloga
-    const blogs_table_chldrn_arr = [...document.getElementById("blogs_table").getElementsByTagName("tbody")[0].getElementsByTagName("tr")];
-    blogs_table_chldrn_arr.forEach(tr => {
-      inflate(tr.getElementsByTagName('td')[0]);
-      inflate(tr.getElementsByTagName('td')[1]);
-    })
+    if (upperPosition4Blog != null) { // to se izvede samo na glavni strani (index.html);
+      // blog premaknemo na vrh, da je bolj viden, ker je zaslon manjši; to se potem ne spreminja več, tudi če spremeniš orientacijo;
+      const upperLength = upperPosition4Blog.innerHTML.length;
+      upperPosition4Blog.innerHTML = lowerPosition4Blog.innerHTML;
+      if (upperPosition4Blog.innerHTML.length > upperLength) {  // preverjanje al je zdaj dolžina večja kot na začetku in če ja, potem izbrišemo spodnje;
+        lowerPosition4Blog.innerHTML = '';
+      };
 
-    // razširimo vrstice med linki na programe (tetris, ...)
-    const programs_arr = [...document.getElementById('programs').getElementsByTagName('p')];
-    programs_arr.forEach(p => { inflate(p) });
+      // razširimo razmike med vrsticami v razpredelnici od bloga
+      const blogs_table_chldrn_arr = [...document.getElementById("blogs_table").getElementsByTagName("tbody")[0].getElementsByTagName("tr")];
+      blogs_table_chldrn_arr.forEach(tr => {
+        inflate(tr.getElementsByTagName('td')[0]);
+        inflate(tr.getElementsByTagName('td')[1]);
+      })
+  
+      // razširimo vrstice med linki na programe (tetris, ...)
+      const programs_arr = [...document.getElementById('programs').getElementsByTagName('p')];
+      programs_arr.forEach(p => { inflate(p) });
+    }
+
   }
 }
 
