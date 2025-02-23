@@ -13,7 +13,7 @@ const rightContainer = document.getElementById('right_container');
 const rightUpperContent = document.getElementById('right_upper_content');
 const rightLowerContent = document.getElementById('right_lower_content');
 
-const forTest = document.getElementById('za_test');
+// const forTest = document.getElementById('za_test');
 
 const hideIf1col = document.querySelectorAll('.hide_if_1_col');
 const showIf1col = document.querySelectorAll('.show_if_1_col');
@@ -29,7 +29,7 @@ let isFirstTimeOneColumn = true;
 // če je nad 960:       : dva stolpca (400 + 560, vmes je border 1px)
 
 function init() {
-  if (forTest != null) forTest.innerHTML = `forDebug`;
+  // if (forTest != null) forTest.innerHTML = `forDebug`;
   if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null || navigator.userAgentData.mobile == true) {    // todo to bi veljalo izboljšat s čekiranjem še širine
     isMobile = true;
 
@@ -61,7 +61,7 @@ function doLayout() {
   // najprej čekiramo & prilagodimo širino
   lesserWidth = document.documentElement.clientWidth < screen.width ? document.documentElement.clientWidth : screen.width;
   console.log('lesserW:', lesserWidth);
-  if (forTest != null) forTest.innerHTML = `lesserW: ${lesserWidth}, isMob: ${isMobile}`;
+  // if (forTest != null) forTest.innerHTML = `lesserW: ${lesserWidth}, isMob: ${isMobile}`;
 
   if (lesserWidth < 441) goForOneColumn();
   else {
@@ -130,7 +130,7 @@ function checkAbsolutes() {
   // poiščemo, koliko največ vidi uporabnik na zaslonu
   let lesserHeight = document.documentElement.clientHeight < screen.height ? document.documentElement.clientHeight : screen.height;
   console.log('lesserH:', lesserHeight);
-  if (forTest != null) forTest.innerHTML = `lesserW: ${lesserWidth}, lesserH: ${lesserHeight}, isMob: ${isMobile}`;
+  // if (forTest != null) forTest.innerHTML = `lesserW: ${lesserWidth}, lesserH: ${lesserHeight}, isMob: ${isMobile}`;
 
   // preverimo, ali vsebina levega ALI desnega stolpca sega globlje od spodnjega roba
   if (leftUpperContent?.getBoundingClientRect().height + leftLowerContent?.getBoundingClientRect().height + 20 > lesserHeight ||   // ta plus 20 je zato, da se upošteva tudi padding nad in pod levim kontejnerjem, ki sicer ni vštet v višino posmičnih elementov;
