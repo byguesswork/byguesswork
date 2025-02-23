@@ -29,6 +29,7 @@ let isFirstTimeOneColumn = true;
 // če je nad 960:       : dva stolpca (400 + 560, vmes je border 1px)
 
 function init() {
+  if (forTest != null) forTest.innerHTML = `forDebug`;
   if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null || navigator.userAgentData.mobile == true) {    // todo to bi veljalo izboljšat s čekiranjem še širine
     isMobile = true;
     // blog premaknemo na vrh, da je bolj viden, ker je zaslon manjši; to se potem ne spreminja več, tudi če spremeniš orientacijo;
