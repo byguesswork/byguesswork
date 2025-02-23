@@ -68,7 +68,7 @@ console.log('num ratios:', Data.numRatios, ' rings:', Data.numRings, ' steps/rin
 console.log('x:', Ring.x, ' y:', Ring.y, ' r:', Ring.r);
 
 let newAngle = false;    // taka komplikacija, ker si me ne da sporočat spremembe kota, ki bi sama lahko bila trigger;
-let bump = 0;
+let bumpX = 0, bumpY = 0;
 let changesLog = [];
 while (isRunning) {
 
@@ -79,21 +79,30 @@ while (isRunning) {
     
     // zdaj v bistvu deluje tako, da pošiljamo noter absoluten kot, ne pa spremembo;
     // zato je treba ločeno pošiljat noter še trigger, da se sploh ve, da je prišlo do spremembe;
-    
-    if (stepCounter == 90) {    // tole izrazit v obročih, da ti niti ni treba razmišljat ...
+    if (ringCounter == 5) { // ker se ringCounter poveča takoj zatem, to pomeni, da se sprememba zgodi PO 4. obroču, torej pri 5. obroču
         newAngle = true;
-        bump = 0.25;
-        console.log('bump');
+        bumpX = 0.25;
+        bumpY = 0.25;
     }
-    if (stepCounter == 180) {
+    if (ringCounter == 10) {
         newAngle = true;
-        bump = -0.25;
-        console.log('bump2');
+        bumpX = 0.25;
+        bumpY = -0.25;
     }
-    if (stepCounter == 285) {
+    if (ringCounter == 15) {
         newAngle = true;
-        bump = 0.00;
-        console.log('bump3');
+        bumpX = -0.25;
+        bumpY = -0.25;
+    }
+    if (ringCounter == 20) {
+        newAngle = true;
+        bumpX = -0.25;
+        bumpY = 0.25;
+    }
+    if (ringCounter == 25) {
+        newAngle = true;
+        bumpX = 0.0;
+        bumpY = 0.0;
     }
 
     // če je treba, vstavimo nov obroč na začetek
@@ -121,10 +130,9 @@ while (isRunning) {
 
         if (i == 0 && newAngle && currStepInIntrvl == 1) {    // pogoj currentStepinIntrvl je zato, ker če ne bi nek obstoječi obroč kar skočil na nov položaj; nov obr. mora dobit nov položaj;
             // če bump;
-            console.log('akcija od bump')
-            changesLog = rings[i].update(bump, true, ringCounter);
+            changesLog = rings[i].update(bumpX, bumpY, true, ringCounter);
             newAngle = false;
-        } else changesLog = rings[i].update(0, false, ringCounter);
+        } else changesLog = rings[i].update(0, 0, false, ringCounter);
         // console.log('i:',i, ' ringCounter:', ringCounter, 'ringNr:', rings[i].ringNr, changesLog);
         // console.log('-')
     }
@@ -147,16 +155,5 @@ while (isRunning) {
     stepCounter++;
     
 }
-
-
-// odložišče: 
-
-// zadnji obroč mora biti že OK, ko pa predzadnji začne svojo pot, mora do trenutka, ko postane zadnji, spraviti svoj kot na 0, da gleda naravnost in na sredini;    
-// else if ((i == rings.length - 2 && rings[i].vAngle != 0 && currStepInIntrvl == 2) || setAlltoTrue) { // zakaj 2? da najprej nariše tudi že ta najmanjšega, ker če ne je sam narisan na sredini, medtem, ko se ostali še normalizirajo;
-//     changesLog = rings[i].update(i, pkg);
-//     setAlltoTrue = true;
-//     console.log('normalize');
-
-// } 
 
 

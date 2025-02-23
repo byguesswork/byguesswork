@@ -8,7 +8,8 @@ class Ring {
         this.ringNr = ringCounter;  // katera absolutna številka kroga je tale krog;
         this.isProminent = isProminent;
         this.changes = Array.from(changes); // bodoča struktura, ki se inicializira v update:
-        // angle,
+        // angleX,
+        // angleY,
         // ringNrAtShift,
         // r; premer obroča, ko je prišlo do sprmembe; TO JE OBENEM TUDI VEDNO NAJMANJŠI R, oz. r pri najmanjšem ratio, ker do spremembe itak pride pri novem obroču!
         
@@ -24,37 +25,41 @@ class Ring {
         this.r = r;
     }
 
-    update(bump, newAngle, ringCounter) {
+    update(bumpX, bumpY, newAngle, ringCounter) {
         this.currRatioIdx++;
         this.currR = Ring.r * Data.ratios[this.currRatioIdx];
 
         if (newAngle) {
-            this.changes.unshift({angle : bump, ringNrAtShift : ringCounter, r : this.currR})
-            console.log('Ring at shift: ', this.changes[0].ringNrAtShift);
+            this.changes.unshift({angleX : bumpX, angleY : bumpY, ringNrAtShift : ringCounter, r : this.currR})
+            console.log('Angle shift after ring nr: ', this.changes[0].ringNrAtShift - 1);
         }
         
-        let angle = 0;
-        let times = 0; 
+        let angleX = 0, angleY = 0;
+        let timesX = 0, timesY = 0;
         let shiftR = 0;
-        this.currY = 0; // zdaj jo bomo uporabili kot začasno spremenljivko;
+        this.currX = 0; // zdaj jo bomo uporabili kot začasno spremenljivko;
+        this.currY = 0;
         if (this.changes.length != 0) {
             let startRingNr;
             for (let j = 0; j < this.changes.length; j++) {
                 if (j == 0) startRingNr = this.ringNr;
                     else startRingNr = this.changes[j-1].ringNrAtShift;
-                angle = this.changes[j].angle;
-                times = startRingNr - this.changes[j].ringNrAtShift + 1;
+                angleX = this.changes[j].angleX;
+                timesX = startRingNr - this.changes[j].ringNrAtShift + 1;
+                angleY = this.changes[j].angleY;
+                timesY = startRingNr - this.changes[j].ringNrAtShift + 1;
                 // težava je pogruntat, kako velik premik naredit;
                 // za zdaj je videt, dognano s poskušanjem, da bi lahko bilo (this.changes[0].r + this.currR); zakaj je tako, ne vem;
                 // vsaka posebej al mal preveč zaostaja, al mal preveč prehiteva ...
                 shiftR = (this.changes[j].r + this.currR)/2;
                 // console.log('j:', j, 'angl:', angle, 'times:', times, 'shiftR', shiftR);
-                this.currY += Math.sin(angle) * times * (2 * shiftR); // bi tu moralo bit 1x ali 2x shiftR ??  ; 
+                this.currX += Math.sin(angleX) * timesX * (2 * shiftR); // bi tu moralo bit 1x ali 2x shiftR ??  ; 
+                this.currY += Math.sin(angleY) * timesY * (2 * shiftR);
             }
         }
 
+        this.currX = Ring.x + this.currX;   // slednji currX se je v zgornji zanki potencialno spremenil;
         this.currY = Ring.y + this.currY;   // slednji currY se je v zgornji zanki potencialno spremenil;
-        // console.log('currY:',this.currY.toFixed(2), this.changes);
 
         return Array.from(this.changes);
 
@@ -81,7 +86,7 @@ class Ring {
         
         // risanje
         drawingCtx.beginPath();
-        drawingCtx.arc(Ring.x, this.currY, this.currR, 0, 2 * Math.PI);
+        drawingCtx.arc(this.currX, this.currY, this.currR, 0, 2 * Math.PI);
         drawingCtx.stroke();
 
     }
