@@ -56,6 +56,7 @@ function doLayout() {
   // najprej čekiramo & prilagodimo širino
   lesserWidth = document.documentElement.clientWidth < screen.width ? document.documentElement.clientWidth : screen.width;
   console.log('lesserW:', lesserWidth);
+  if (forTest != null) forTest.innerHTML = `lesserW: ${lesserWidth}, isMob: ${isMobile}`;
 
   if (lesserWidth < 441) goForOneColumn();
   else {
@@ -124,7 +125,7 @@ function checkAbsolutes() {
   // poiščemo, koliko največ vidi uporabnik na zaslonu
   let lesserHeight = document.documentElement.clientHeight < screen.height ? document.documentElement.clientHeight : screen.height;
   console.log('lesserH:', lesserHeight);
-  forTest.innerHTML = `lesserW: ${lesserWidth}, lesserH: ${lesserHeight}, isMob: ${isMobile}`;
+  if (forTest != null) forTest.innerHTML = `lesserW: ${lesserWidth}, lesserH: ${lesserHeight}, isMob: ${isMobile}`;
 
   // preverimo, ali vsebina levega ALI desnega stolpca sega globlje od spodnjega roba
   if (leftUpperContent?.getBoundingClientRect().height + leftLowerContent?.getBoundingClientRect().height + 20 > lesserHeight ||   // ta plus 20 je zato, da se upošteva tudi padding nad in pod levim kontejnerjem, ki sicer ni vštet v višino posmičnih elementov;

@@ -9,8 +9,6 @@ if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null || navigator.use
     isMobile = false;
 }
 
-console.log('smo prebrali app.js');
-
 if (isMobile) {
     mainDocElement.style.marginTop = '30px';
     mainDocElement.style.marginRight = '30px';
