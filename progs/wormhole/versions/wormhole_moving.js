@@ -4,6 +4,8 @@
 
 const canvas = document.getElementById('canvas');
 const drawingCtx = canvas.getContext('2d');
+const kotDataDiv = document.getElementById('kot');
+const dxDataDiv = document.getElementById('dx');
 
 canvas.height = window.innerHeight - 3; // če ni -3 dobi skrolbar, morda zato, ker ima canvas rob = 1
 canvas.width = window.innerWidth - 3;
@@ -19,26 +21,25 @@ r = (x ** 2 + y ** 2) ** (1/2);
 Ring.setXYR(x, y, r);
 
 // za programatično: 
-// for (let i = 12; i >= 0.82; i -= 0.04) {
-//     const v = Math.trunc((2*Math.atan2(0.5, i) - 0.045) * 10000) / 10000; // 10000/10000 je za zaokroženje na 4 decim.
-//     if (v <= 1) Data.ratios.push(v);
-//         else break;
-// }
+for (let i = Data.numLengths; i >= 0.82; i -= 0.06) {
+    // const v = Math.trunc(2*Math.atan2(0.5, i) * 10000) / 10000; // 10000/10000 je za zaokroženje na 4 decim.
+    const v = 2*Math.atan2(0.5, i);
+    if (v <= 1) Data.ratios.push(v);
+        else break;
+}
 Data.numRatios = Data.ratios.length;
 Data.stepsInIntrvl = Math.floor(Data.numRatios / Data.numRings);  // če je +0, je vsako tolko več obročev, kot n tukaj; če je +1, jih je vsake tolko manj kot definitano tukaj;
-console.log(Data.ratios, Data.numRatios);
-
-const rings = [];
-// štetje ustvarjenih obročev, da veš, kdaj narediti temnega oz. tistega druge barve, tj vsak numRings - 1;
-let currRingInRingLoop = 1; // to se preverja takrat, ko ga vstavljaš; skratka, pomani številko tistega, ki bo naslednji vstavljen;
+Data.stepsPerUnit = Math.floor(Data.numRatios/Data.numLengths);
+Data.shareOf1StepIn1Unit = 1/Data.stepsPerUnit;
 
 // na koliko korakov bo vstavljen nov obroč;
 let currStepInIntrvl = 0;    // števec korakov; dela od 1 do n (ni zero-based), tukaj damo 0, ker se ža na začetku zanke posodobi;
-let isRunning = true;   // al se koda izvaja ali ne (al se krogi premikajo al ne)
-const pauseDuration = 30;
+const pauseDuration = 25;
 
-let stepCounter = 0;    // absolutni števec korakov, šteje do neskončno;
-let ringCounter = 0;    // absolutni števec obročev, šteje do neskončno;
+// urejanje podatka, da veš, kdaj vstaviti vidnejši obroč;
+const prominentOne = Data.numRings > 5 ? Data.numRings - 3 : Data.numRings; // na vsake klko gre vidnejši?
+let currRingInProminentRLoop = 1; // to se preverja takrat, ko ga vstavljaš; skratka, pomani številko tistega, ki bo naslednji vstavljen;
+
 
 //   - - - - - - -   FUNKCIJE   - - - - - - - - - - - - -   
 
@@ -71,47 +72,26 @@ document.addEventListener('keydown', atKeyPress);
 
 //   - - - - - - -   IZVAJANJE    - - - - - - - - - - - - - 
 
+// console.log(Data.ratios);
 console.log('num ratios:', Data.numRatios, ' rings:', Data.numRings, ' steps/ring:', Data.stepsInIntrvl);
-console.log('x:', Ring.x, ' y:', Ring.y, ' r:', Ring.r);
+console.log('steps per unit:', Data.stepsPerUnit, 'Share of step in unit:', Data.shareOf1StepIn1Unit.toFixed(3));
+console.log('x:', Ring.x, ' y:', Ring.y, ' r:', Ring.r.toFixed(0));
 
-let newAngle = false;    // taka komplikacija, ker si me ne da sporočat spremembe kota, ki bi sama lahko bila trigger;
-let bumpX = 0, bumpY = 0;
-let changesLog = [];
+const rings = [];
+let stepCounter = 0;    // absolutni števec korakov, šteje do neskončno;
+let ringCounter = 0;    // absolutni števec obročev, šteje do neskončno;
+const you = new You();    // ha
+Ring.meet(you);
+let isRunning = true;   // al se koda izvaja ali ne (al se krogi premikajo al ne)
+
 while (isRunning) {
 
     // povečamo števce;
+    stepCounter++;
     if (currStepInIntrvl < Data.stepsInIntrvl) {
         currStepInIntrvl++; 
     }   else currStepInIntrvl = 1;
     
-    // zdaj v bistvu deluje tako, da pošiljamo noter absoluten kot, ne pa spremembo;
-    // zato je treba ločeno pošiljat noter še trigger, da se sploh ve, da je prišlo do spremembe;
-    if (ringCounter == 5) { // ker se ringCounter poveča takoj zatem, to pomeni, da se sprememba zgodi PO 4. obroču, torej pri 5. obroču
-        newAngle = true;
-        bumpX = 0.25;
-        bumpY = 0.25;
-    }
-    if (ringCounter == 10) {
-        newAngle = true;
-        bumpX = 0.25;
-        bumpY = -0.25;
-    }
-    if (ringCounter == 15) {
-        newAngle = true;
-        bumpX = -0.25;
-        bumpY = -0.25;
-    }
-    if (ringCounter == 20) {
-        newAngle = true;
-        bumpX = -0.25;
-        bumpY = 0.25;
-    }
-    if (ringCounter == 25) {
-        newAngle = true;
-        bumpX = 0.0;
-        bumpY = 0.0;
-    }
-
     // če je treba, vstavimo nov obroč na začetek
     // tu se morda pojavi ideja, da bi dodal pogoj, da št. oboročev v arrayu ne sme že biti enako max številu, če želimo povečati, ..
     //.. ampak potem se zgodi, da pride med dvema obročema nenavadno velik interval; raje ob vedno enakem intervalu;
@@ -122,32 +102,29 @@ while (isRunning) {
         
         ringCounter++;  // šteje, koliko obročev je bilo ustvarjenih sploh, ni 0b;
         // vstavimo nov obroč na prvo mesto;
-        rings.unshift(new Ring(ringCounter, currRingInRingLoop == 1 ? true : false, changesLog)); // -1, ker mu takoj povečamo na 0, uporablja se namreč idx;
+        rings.unshift(new Ring(ringCounter, currRingInProminentRLoop == 1 ? true : false /*, changesLog */)); // -1, ker mu takoj povečamo na 0, uporablja se namreč idx;
         
         // uredimo števec za določanje debelega obroča, da bo pripravljen za naslednji obroč, ki bo ustvarjen;
-        if (currRingInRingLoop == Data.numRings - 3) { // če smo trenutno vstavili zadnji obroč (primer: 5. obroč, če je vseh obročev 6)
-            currRingInRingLoop = 1;    // ponastavimo na 1 (da bomo naslednjič vstavili drugačnega);
-        }   else currRingInRingLoop++; // sicer povečamo števec za določanje debelega obroča;
+        if (currRingInProminentRLoop == prominentOne) { // če smo trenutno vstavili zadnji obroč zanke, ki določa vstavitev vidnega obroča;
+            currRingInProminentRLoop = 1;    // ponastavimo na 1 (da bomo naslednjič vstavili drugačnega);
+        }   else currRingInProminentRLoop++; // sicer povečamo števec za določanje debelega obroča;
 
     }
 
-    // vsakemu obroču povečamu currRatio;
+    // posodobimo podatke obročev (prikaz poti, brez upoštevanja gibanja gledalca);
     // obroč [0] je uni , k je na sredini, rišemo pa od length-1 proti 0, torej od zunaj proti sredini, kakor gre pogled in razvoj;
     for (let i = rings.length - 1; i >= 0; i--) {
-
-        if (i == 0 && newAngle && currStepInIntrvl == 1) {    // pogoj currentStepinIntrvl je zato, ker če ne bi nek obstoječi obroč kar skočil na nov položaj; nov obr. mora dobit nov položaj;
-            // če bump;
-            changesLog = rings[i].update(bumpX, bumpY, true, ringCounter);
-            newAngle = false;
-        } else changesLog = rings[i].update(0, 0, false, ringCounter);
-        // console.log('i:',i, ' ringCounter:', ringCounter, 'ringNr:', rings[i].ringNr, changesLog);
-        // console.log('-')
+       rings[i].update();
     }
     
+    // posodobimo podatke, povezane s pogledom gledalca;
+    kotDataDiv.innerHTML = you.update().toFixed(2);
+    dxDataDiv.innerHTML = Ring.dxAbstrct.toFixed(2);
+
     // izbrišemo polje; brišemo šele tik pred risanjem, da ni črnega ekrana vmes (če morebiti vmesni izračuni trajali dolgo);
     drawingCtx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // obroč [0] je uni , k je na sredini, rišemo pa od length-1 proti 0, torej od zunaj proti sredini, kakor gre pogled in razvoj;
+    // obroč [0] je uni , k je na sredini (najmanjši), rišemo pa od length-1 proti 0, torej od največjega proti najmanjšemu, kakor gre pogled in razvoj;
     // risanje
     for (let i = rings.length - 1; i >= 0; i--) {
         rings[i].draw(drawingCtx, i);
@@ -159,8 +136,5 @@ while (isRunning) {
         rings.pop();
     }
     
-    stepCounter++;
-    
 }
-
 

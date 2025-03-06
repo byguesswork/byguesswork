@@ -47,16 +47,22 @@ function pauseInSecs(pauseDuration) {   // za pavziranje, premor; ni treba async
     return new Promise(function (resolve) {setTimeout(resolve, pauseDuration)})
 }
 
+function gBack(){
+    isRunning = false;
+    window.location.replace("../wormholing.html");
+}
+
 function atKeyPress(e) {
     if (e.key === 'Escape') {
         if (isRunning) {
             isRunning = false;
             you.destroyControls();
             console.log('izvajanje je bilo true, zdaj je false');
-        } else {
-            isRunning = true;
-            console.log('izvajanje je bilo false, zdaj je true');
         }
+    } else if (e.key === 'b') { 
+        gBack();
+    } else if  (e.key === 'B') { 
+        gBack();
     }
 }
 

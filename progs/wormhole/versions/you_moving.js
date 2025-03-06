@@ -1,19 +1,12 @@
 class You {
 
-    static movtFwdPerTurn = 0.05;   // če je razdalja o gledalca do zadnjega obroča numRings enot in je po en obroč na enoto, je treba 1 / movtFwdPerTrn klikov, da se obroč premakne na mesto prejšnjega;
-
     constructor () {   // nobenih statičnih ni treba, ker itak instanciiraš samo enkrat in pol je lih isto al je static al 1x instanca;
 
         // količine
-        this.angleSpeed = 0;        // končna hitrost na koncu koraka;
-        this.angleSpeedToAction = 0;    // srednja hitrost tekom koraka; ta se upošteva pri spremembi kota;
-        this.angle = 0;         // končni kot na koncu koraka;
-        this.angleToAction = 0; // srednji kot tekom koraka; ta se upošteva pri premiku naprej in pri odmikih;
+        this.angleSpeed = 0;        // končna hitrost po koraku;
+        this.angleSpeedToAction;    // srednja hitrost tekom koraka; ta se upošteva pri spremembi kota;
+        this.angle = 0;
         
-        // količine gibanja, izpeljane iz kota;
-        this.dFwd = 0;  // sprotno; koliko se je v tem turnusu gledalec premaknil naprej vzdolž navidezne poti naravnost;
-        this.dx = 0;  // kumulativno; abstrakten odmik po osi x od navidezne poti naravnost, ki bi jo delala središča krogov, če se gledalec nikoli ne bi odmaknil levo ali desno;
-
         // fizikalne omejitve
         this.maxAngleSpeed = 0.02;  // orig: 0,03
         this.friction = 0.0025;     // orig: 0,005; meja za anulirat: 0,003
@@ -32,16 +25,10 @@ class You {
         this.#updateAngleSpeed();
         
         // po potrebi spremenimo še KOT (pogleda);
-        if (this.angleSpeedToAction != 0) this.#updateAngles();
-            // če je v prejšnjem turnusu hitrost padla na nič, je povp. h. še vedno bila različna od nič in zato končni kot drugačen od srednjega;
-            else if (this.angleToAction != this.angle) {
-                // zdaj mora ta srednji kot postati tak, kot je bil prej končni, ker se premiki in odmiki računajo s srednjim kotom;
-                this.angleToAction = this.angle;
-                console.log('ja, tak primer');
-            }
+        if (this.angleSpeed != 0) this.#updateAngles();
         
-        // določimo premik NAPREJ in po potrebi ODMIK iz preteklega odmika ter kota in trajanja;
-        this.#updateOffsets();
+        // po potrebi določimo ODMIK iz preteklega odmika ter kota in trajanja;
+        if (this.angle != 0) this.#updateOffsets();
 
         return this.angle;
     }
@@ -90,34 +77,28 @@ class You {
 
         // kot iz kotne hitrosti;
         this.angle += this.angleSpeedToAction;
-        this.angleToAction = (previousAngle + this.angle) / 2;  // tega niti ni teba pretvorit, ker izračun bo lih enak (ni ga pa treba prikazat);
         // če ustrezno, kot izrazimo drugače
         if (previousAngle <= Math.PI && this.angle > Math.PI) this.angle = -Math.PI + (this.angle - Math.PI);
         if (previousAngle >= -Math.PI && this.angle < -Math.PI) this.angle = Math.PI + (this.angle + Math.PI); 
     }
     
     #updateOffsets() {
-
-        // premik naprej; ni kumulativno;
-        this.dFwd = You.movtFwdPerTurn * Math.cos(this.angleToAction); 
-        
-        // odmik po osi x; kumulativno;
-        this.dx += You.movtFwdPerTurn * Math.sin(this.angleToAction); 
+        Ring.dxAbstrct += Data.shareOf1StepIn1Unit * Math.sin(this.angle); 
         // +=, da je pozitiven odmik pri pozitivnem kotu (arbitrarno takrat, ko uporabiš tipko za desno);
+        // Data.shareOf1StepIn1Unit, ker v enem koraku narediš (se premakneš naprej za) tolik del enote;
         
         // console.log('kot:', this.angle.toFixed(3), 'dX:', Ring.dxAbstrct.toFixed(2));
     }
 
     #straighten() {
         this.angleSpeed = 0;
-        this.angleSpeedToAction = 0;
+        this.angleSpeedToAction;
         this.angle = 0;
-        this.angleToAction = 0;
     }
 
     #center() {
         this.#straighten();
-        this.dx = 0;
+        Ring.dxAbstrct = 0;
     }
 
 
@@ -162,5 +143,7 @@ class You {
         document.onkeyup = null;
 
     }
+
+
 
 }
