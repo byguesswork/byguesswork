@@ -20,7 +20,7 @@ const themedLks = document.getElementsByClassName('themed_link');
 const hideIf1col = document.querySelectorAll('.hide_if_1_col');
 const showIf1col = document.querySelectorAll('.show_if_1_col');
 
-const themeQ = '?theme=blue'; // query za setTimeout;
+const themeQ = '?theme=blue'; // query za določanje modre teme;
 
 // const forTest = document.getElementById('za_test');
 
@@ -69,8 +69,6 @@ function doGrey () {
       console.log('stripped', txt.includes(themeQ), idx, txt.substring(0, idx))
     }
   }
-
-
 }
 
 function doBlue () {
@@ -103,7 +101,6 @@ function doBlue () {
       console.log('dodan q za theme', themedLks[i].attributes.href.value);
     }
   }
-
 }
 
 
@@ -171,7 +168,6 @@ function doLayout() {
 
   // s tem pa čekiramo & prilagodimo višino
   checkAbsolutes();
-
 }
 
 function goForOneColumn() {
@@ -239,7 +235,6 @@ function checkAbsolutes() {
     //  desni stolpec
     rightContainer.style.bottom = '0';
   }
-
 }
 
 function applyTheme(){
@@ -302,19 +297,20 @@ if (themePic != null) {
   themePic.addEventListener('click', function(){
     if (isBlueTheme) {
 
-      // najprej, če si na index.html, ki je modre teme in ima tudi search query za modro temo, je treba uredit, da klik na izbirnik za sivo temo naloži stran, ki nima querija za temo v URL-ju;
-      // v bistvu bomo na novo naložili stran;
+      // na index.html (themePic je samo na index.html) temo zamenjaš tako, da spremeniš URL (dodaš ali odvzameš themeQ) in znova naloadaš stran;
       let currentURL = window.location.href;
       const idx = currentURL.indexOf(themeQ);  // če ni noter, vrne -1;
       if (idx > 0) {
         // znova naložimo stran s skrajšanim URL-jem (iz katerega odstranjen theme Q);
         window.location.href = currentURL.substring(0, idx);
       }
+    } else {
 
-      // sicer pa običajen doGrey;
-      doGrey();
+      const currentURL = window.location.href;
+      const newURL = currentURL + themeQ;
+      window.location.href = newURL;
 
-    } else doBlue();
+    }
   })
 }
 
