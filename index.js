@@ -76,9 +76,9 @@ function doBlue () {
 
   // spremembe nastavitev, ki so povsod, na vseh straneh;
   bodyNode[0].style.background = '#e8f4f7';
-  leftContainer.style.backgroundColor = '#306599';
-  leftContainer.style.color = '#d0ebf3';
-  leftContainer.style.borderRight = 'solid 1px #306599';
+  leftContainer.style.backgroundColor = isMobile ? '#587694' : '#306599' ;  // normalno: #306599 ; mobile: #587694
+  leftContainer.style.color = isMobile ? '#FAF6EB' : '#f8f2e3';  // normalno: #f8f2e3 (izvirno: #EFE9DB) , mobilno: #FAF6EB
+  leftContainer.style.borderRight = 'solid 1px #306599'; // prikazan samo pri neMobile (razen če daš vodoravno)
   rightContainer.style.backgroundColor = '#D1E5E9';
   rightContainer.style.color = '#3F4446';
   
