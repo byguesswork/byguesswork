@@ -1,0 +1,79 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: Helvetica, Arial, sans-serif;
+    color: #f0fff0;
+    background-color: #808080;
+}
+
+/*barve: 
+siva:hover              #808080;        (ozadje menijev,sicer grey)
+svetlejša temno siva: 	#757575;
+flourescentna zelena: 	#9cfa9c		(ozadje, ko hover pri izbiri elementa)
+temno zelena: 			#3c523c					(ozadje izbranega elementa)
+temno sivo ozadje:      #313131
+
+*/
+
+#canvas {
+    position: absolute;
+    background: #808080;    /* bilo: #5a5a5a */
+}
+
+.joker {
+    position: absolute;
+    top: 2px;
+    left: 8px;
+}
+
+#score_content {
+    left: unset;
+    right: 8px;
+    font-size: 0.8em;
+}
+
+.blk_bckg {
+    background-color: black;
+    color: #FDAE34;
+    padding: 30px;
+}
+
+.fx {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    justify-self: center;
+    align-self: center;
+    width: 288px;
+    height: 158px;
+    margin: 0;
+    padding: 20px;
+    color: white;
+    background-color: #80808075;
+}
+
+.hidden {
+    display: none;
+}
+
+.btn {
+    position: absolute;
+    background-color: #FDAE34;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.side_btn {
+    bottom: 20px;
+}
+
+#left_btn {
+    left: 20px;
+}
+
+#right_btn {
+    right: 20px;
+}

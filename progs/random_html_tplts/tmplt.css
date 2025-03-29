@@ -1,0 +1,89 @@
+* {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    margin: 0;
+}
+
+.main {
+    margin: 40px 15px 15px 15px;
+    padding: 30px 400px 40px;
+    background-color: #eee3e3;
+    z-index: 4;
+    border-color: black;
+    border-style: solid;
+    border-width: 0;
+    border-bottom-width: 1px;
+}
+
+.brdr {
+    position: fixed;
+    background-color: #fabdbd;  /*  #fabdbd */
+    border-color: black;
+    border-style: solid;
+    border-width: 0;
+}
+
+.brdr-top {
+    left: 0;
+    top: 0;
+    right: 0;
+    height: 40px;
+    border-bottom-width: 1px;
+}
+
+.brdr-top-lft {
+    left: 0;
+    top: 0;
+    height: 39px;
+    width: 29px;
+}
+
+.brdr-rgt {
+    top: 40px;
+    right: 0;
+    bottom: 15px;
+    width: 15px;
+    border-left-width: 1px;
+}
+
+.brdr-btm {
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 15px;;
+}
+
+.brdr-lft {
+    top: 40px;
+    bottom: 15px;
+    left: 0;
+    width: 15px;
+    border-right-width: 1px;
+}
+
+.okrask {
+    font-size: 1.5em;
+}
+
+.center_txt {
+    text-align: center;
+}
+
+.txt_greyish {
+    color: rgb(105, 101, 101);
+}
+
+.nav_menu {         /* margin-left prvega čajlda prekriva brdr-top-lft; to bi lahko uredil z nav_menu:first-child {m-l:none} */
+    display: inline flex;
+    margin-left: 27px;
+    height: 28px;
+    padding: 8px 0 4px;
+    
+}
+
+.nav_menu span {
+    padding: 5px 10px;
+    border-left: grey 1px solid;
+}
