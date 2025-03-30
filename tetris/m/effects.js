@@ -106,7 +106,11 @@ function effectDoubleTrouble() {  // izvirno async;
     doAnimation('#b89561', '#b3b1b1', 'white', 600);
     doAnimation('grey', 'grey', '#c9c8c8', 900);
     doAnimation('grey', 'grey', 'grey', 1200);
-    setTimeout(() => contentJoker2.classList.add('hidden'), 1300);
+    setTimeout(() => {
+        contentJoker2.classList.add('hidden');
+        refreshCurrentScore();
+        insertOnTopAndStartInt();
+    }, 1300);
 }
 
 function effectTripple() {  // izvirno async (v webu);
@@ -239,6 +243,8 @@ function effectTripple() {  // izvirno async (v webu);
         contentJoker2.innerHTML = ``;
         contentJoker2.classList.add('hidden');
         contentJoker2.style.paddingRight = '20px';
+        refreshCurrentScore();
+        insertOnTopAndStartInt();
     }, 1950);
 }
 
@@ -270,5 +276,9 @@ function effectQuad() { // izvirno async (v webu);
     doStyling('#6d0202', '#704902', '#757502', 'grey', '#757502', 900);
     doStyling('#410101', '#3d2801', '#3d3d01', 'grey', '#505050', 1200);
     doStyling('grey', 'grey', 'grey', 'grey', '#505050', 1450);
-    setTimeout(() => contentJoker2.classList.add('hidden'), 1500);
+    setTimeout(() => {
+        contentJoker2.classList.add('hidden');
+        refreshCurrentScore();
+        insertOnTopAndStartInt();
+    }, 1500);
 }

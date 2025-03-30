@@ -33,6 +33,13 @@ temno sivo ozadje:      #313131
 }
 
 .blk_bckg {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    justify-self: center;
+    align-self: center;
     background-color: black;
     color: #FDAE34;
     padding: 30px;

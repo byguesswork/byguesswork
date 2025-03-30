@@ -60,7 +60,8 @@ const rghtBtn = document.getElementById('right_btn');
 
 //      -------------       SPREMENLJIVKE in VREDNOSTI
 
-const pageLang = document.firstElementChild.lang;
+// const pageLang = document.firstElementChild.lang;   // precej neuporabno, ker to sam definiraš v html-ju; v mobilni varianti se ne koristi, v web pa ja;
+let lang = 'en'; // to je jezik browserja, odkrit v funkciji spodaj;
 let lastRow0based = 15;
 let lastColumn0Based = 9;
 let board = [];     //  board: spremenljivka, ki vsebuje matriko true/false, kar pomeni, da je na taki poziciji prisoten kvadratek
@@ -396,22 +397,21 @@ async function explodeRow() {
     // refreshExplosionsCountDisplay(); samo web;
     // preveri, ali je morda še kakšna vrstica za razstrelit, sicer znova zaženi gibanje likov;
     if (canExplodeHuh()) explodeRow(); else {
-        if (numberConsecutiveXplosions === 1) score += 10;
-        else if (numberConsecutiveXplosions === 2) {
+        if (numberConsecutiveXplosions === 1) {
+            score += 10;
+            refreshCurrentScore();      // pri efektih pa je ponovno sproženje igre premaknjeno na konec efekta, ..
+            insertOnTopAndStartInt();   // ..da naslednji lik še ne pada, ko se efekt izvaja;
+        } else if (numberConsecutiveXplosions === 2) {
             score += 25;
             effectDoubleTrouble();
-        }
-        else if (numberConsecutiveXplosions === 3) {
+        }else if (numberConsecutiveXplosions === 3) {
             score += 50;
             effectTripple();
-        }
-        else {
+        } else {
             score += 100;
             effectQuad();
         };
-        refreshCurrentScore();
         numberConsecutiveXplosions = 0;
-        insertOnTopAndStartInt();
     };
 }
 
@@ -566,10 +566,8 @@ function decisionAfterFormMovementEnded() {
 
 function behAftrCurtnsCloseAtGOver() {
     // contentJoker2.className = '';   // to odstrani tudi morebitni hidden;
-    contentJoker2.className = 'joker blk_bckg';
+    contentJoker2.className = 'blk_bckg';
     contentJoker2.innerHTML = 'G A M E   O V E R';
-    contentJoker2.style.top = `${screen.height / 2 - 20}px`;
-    contentJoker2.style.left = `${screen.width / 2 - contentJoker2.clientWidth / 2}px`;
     standBy();
     contentJoker.innerHTML = 'START GAME';
 }
@@ -688,6 +686,16 @@ function assignControlListeners() {
     });
 }
 
+function checkLang(){
+    let langString = 'en';
+    if (navigator.language != '') {
+        langString = navigator.language;
+    } else if (navigator.userLanguage != '') {
+        langString = navigator.userLanguage;
+    };
+    if (langString == 'sl' || langString == 'sl-si' || langString == 'sl-SI' || langString == 'si') { lang = 'sl' } // privzeto, ob deklaraciji, je "en";
+}
+
 function faint() {
     document.body.style.transition = 'opacity 1s';
     document.body.style.opacity = '30%';
@@ -713,14 +721,18 @@ function faint() {
 // btnTestButton2.addEventListener('click', testButton2Operation);  // v live različici listener ne smebiti aktiven
 
 
-// gumbi okrogli
-
-// https://developer.mozilla.org/en-US/docs/Web/API/Touch_events
-
+/* 
+sl vsebine
+premaknit začetek izvajanja v efekte, točneje na knec efekta (quad ...) - a bo potem kocka počakala na konec efekta, predeen se začne premikat?
+klik v polje desno ali levo od kocke, da je premakneš tja
+podrsat lik dol, da ga vržeš dol
+klik na lik, da ga obrneš
+*/
 
 //  ----------------    IZVAJANJE
 contentJoker.innerHTML = `START GAME`;
 initializeScreenAndSizes();
+checkLang();
 drawEmptyMainGrid();
 standBy();
 assignControlListeners();

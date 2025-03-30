@@ -92,7 +92,8 @@ const overlayDuringAlert = document.getElementById('window-overlay-for-alert');
 
 //      -------------       SPREMENLJIVKE in VREDNOSTI
 
-const pageLang = document.firstElementChild.lang;
+const pageLang = document.firstElementChild.lang;    /* ta lang sam definiraš v HTML-ju, tako da ne gre za neko odkrivanje, se pa rabi v highScores, zato je potrebno */
+let lang = 'en';    // to pa odkrije (funkijca na dnu), kateri je jezik navigatorja; v tem programu se sicer ne rabi, tle je samo demonstracijsko;
 let lastRow0based = 15;
 let lastColumn0Based = 9;
 let board = [];     //  board: spremenljivka, ki vsebuje matriko true/false, kar pomeni, da je na taki poziciji prisoten kvadratek
@@ -971,6 +972,16 @@ function refreshCurrentScore() {
     //  ..zato interval ni primeren za vodenje točk; hm, ali bi pač morda kar interval bile točke ...
 }
 
+function checkLang(){
+    let langString = 'en';
+    if (navigator.language != '') {
+        langString = navigator.language;
+    } else if (navigator.userLanguage != '') {
+        langString = navigator.userLanguage;
+    };
+    if (langString == 'sl' || langString == 'sl-si' || langString == 'sl-SI' || langString == 'si') { lang = 'sl' } // privzeto, od deklaracije, je "en";
+}
+
 function faint() {
     document.body.style.transition = 'opacity 1s';
     document.body.style.opacity = '30%';
@@ -999,19 +1010,18 @@ boxStartGame.addEventListener('mouseup', () => { if (!isAGameRunning && !control
 
 
 //  ----------------    IZVAJANJE
-if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null || navigator.userAgentData.mobile == true) {    // mobile
-    window.location.replace('m_tetris.html')
-} else if (screen.width < 1040 || screen.height < 560 || window.innerWidth < 1040 || window.innerHeight < 559) { // ni mobile, a je premajhen zaslon;
+if (screen.width < 1040 || screen.height < 560 || window.innerWidth < 1040 || window.innerHeight < 559) { // ni mobile, a je premajhen zaslon;
     document.body.innerHTML = `<p style="padding-left: 20px;"><br><a href="../index.html" title="back to By Guesswork"><img src="../images/home2.PNG" alt="home"></a><br><br>This game is not fond of small screens.<br>
 A tetris block might fall off the screen and<br>hurt your foot. Not good for you.<br><br>
 Please do revisit when viewing on a<br>regular desktop or laptop monitor.<br></p>
 <p class="comment" style="padding-left: 20px; padding-top:5px">Min required size: 1040 x 560px<br>Suggested size: 1350 x 700px<br>Do not forget to bring a keyboard!</p>
 <p style="padding-left: 20px;"><br>Warmly welcome!</p>`;
-} else {  //  če ni mobile in pasa test velikosti, zaženeš igro v web;
+} else {  //  če pasa test velikosti, zaženeš igro v web;
     loadHighScores();   // v scores.js; najprej loadHighScores, ker če ne inicializacija ekrana ni OK, ker ekran brez higScores še nima končnih dimenzij;
     initializeScreenAndSizes();
     colorSelectedMenuChoicesAtInit();   // samo web
     drawEmptyMainGrid();
+    checkLang();
     standBy();
 }
 
