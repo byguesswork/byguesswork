@@ -16,6 +16,9 @@ const rightLowerContent = document.getElementById('right_lower_content');
 const logo = document.querySelector('.logo'); // querySelector, ker je class; če daš getElementsbyClass, ti vrne HTML collection;
 const themePic = document.getElementById('theme');
 const themedLks = document.getElementsByClassName('themed_link');
+const tetrisLink = document.getElementById('tetrisLink');
+const letsplayLink = document.getElementById('letsplayLink');
+const fuelLink = document.getElementById('fuelLink');
 
 const hideIf1col = document.querySelectorAll('.hide_if_1_col');
 const showIf1col = document.querySelectorAll('.show_if_1_col');
@@ -108,6 +111,8 @@ function init() {
   // if (forTest != null) forTest.innerHTML = `forDebug`;
   if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null || navigator.userAgentData.mobile == true) {    // todo to bi veljalo izboljšat s čekiranjem še širine
     isMobile = true;
+    // dinamično nastavimo href takoj po prihodu na stran;
+    tetrisLink.href = "tetris/m/tetris.html";
 
     if (upperPosition4Blog != null) { // to se izvede samo na glavni strani (index.html);
       // blog premaknemo na vrh, da je bolj viden, ker je zaslon manjši; to se potem ne spreminja več, tudi če spremeniš orientacijo;
@@ -129,7 +134,25 @@ function init() {
       programs_arr.forEach(p => { inflate(p) });
     }
 
+  } else {
+    tetrisLink.href = "tetris/tetris_EN.html";  // link za tetris, če stran ni prikazana mobile;
   }
+
+  // dinamično nastavit linke za appe;
+  let langString = 'en';
+  if (navigator.language != '') {
+    langString = navigator.language;
+  } else if (navigator.userLanguage != '') {
+    langString = navigator.userLanguage;
+  };
+  if (langString == 'sl' || langString == 'sl-si' || langString == 'sl-SI' || langString == 'si') {
+    letsplayLink.href = "app/igrajmose/sl/index.html";
+    fuelLink.href = "app/fuel/sl/index.html";
+  } else {
+    letsplayLink = "app/igrajmose/en/index.html";
+    fuelLink.href = "app/fuel/en/index.html";
+  }
+
 }
 
 function doLayout() {
@@ -248,43 +271,9 @@ function applyTheme(){
 
 }
 
-// ti dve funkciji spodaj bi se dalo refaktorizirat na eno
-function letsplayLink() {
-  let langString = 'en';
-  if (navigator.language != '') {
-    langString = navigator.language;
-  } else if (navigator.userLanguage != '') {
-    langString = navigator.userLanguage;
-  };
-  if (langString == 'sl' || langString == 'sl-si' || langString == 'sl-SI' || langString == 'si') {
-    window.open("app/igrajmose/sl/index.html");
-  }
-  else window.open("app/igrajmose/en/index.html");
-}
-
-function fuelLink() {
-  let langString = 'en';
-  if (navigator.language != '') {
-    langString = navigator.language;
-  } else if (navigator.userLanguage != '') {
-    langString = navigator.userLanguage;
-  };
-  if (langString == 'sl' || langString == 'sl-si' || langString == 'sl-SI' || langString == 'si') {
-    window.open("app/fuel/sl/index.html");
-  }
-  else window.open("app/fuel/en/index.html");
-}
-
-function tetrisLink() {
-  if (navigator.userAgent.match(/(android|iphone)/i) != null || navigator.userAgentData.mobile == true) {
-    window.location.assign("tetris/m/tetris.html");
-  } else window.location.assign("about.html");
-}
-
 function inflate(element) {
   element.style.paddingTop = '10px';
 }
-
 
 
 //  - - - - - - - - -  IZVAJANJE  - - - - - -
