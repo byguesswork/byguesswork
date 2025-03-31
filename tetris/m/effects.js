@@ -107,6 +107,7 @@ function effectDoubleTrouble() {  // izvirno async;
     doAnimation('grey', 'grey', '#c9c8c8', 900);
     doAnimation('grey', 'grey', 'grey', 1200);
     setTimeout(() => {
+        contentJoker2.style.background = '';    // je treba odstranit style, ker je bil določen programatično in to preglasi nastavitev iz css-a (in potem je game over okno sivo, ker je tukaj bilo nazadnje določeno sivo);
         contentJoker2.classList.add('hidden');
         refreshCurrentScore();
         insertOnTopAndStartInt();
@@ -242,7 +243,7 @@ function effectTripple() {  // izvirno async (v webu);
     setTimeout(() => {
         contentJoker2.innerHTML = ``;
         contentJoker2.classList.add('hidden');
-        contentJoker2.style.paddingRight = '20px';
+        contentJoker2.style = '';   // je treba odstanit style, ker programatično nastavljen style preglasi pozneje nastavljen style iz CSS (ki je nastavljen na klasu, ne na elementu);
         refreshCurrentScore();
         insertOnTopAndStartInt();
     }, 1950);
@@ -278,6 +279,7 @@ function effectQuad() { // izvirno async (v webu);
     doStyling('grey', 'grey', 'grey', 'grey', '#505050', 1450);
     setTimeout(() => {
         contentJoker2.classList.add('hidden');
+        contentJoker2.style = '';   // je treba odstanit style, ker programatično nastavljen style preglasi pozneje nastavljen style iz CSS (ki je nastavljen na klasu, ne na elementu);
         refreshCurrentScore();
         insertOnTopAndStartInt();
     }, 1500);

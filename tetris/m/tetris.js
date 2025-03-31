@@ -61,7 +61,7 @@ const rghtBtn = document.getElementById('right_btn');
 //      -------------       SPREMENLJIVKE in VREDNOSTI
 
 // const pageLang = document.firstElementChild.lang;   // precej neuporabno, ker to sam definiraš v html-ju; v mobilni varianti se ne koristi, v web pa ja;
-let lang = 'en'; // to je jezik browserja, odkrit v funkciji spodaj;
+let lang = 'en'; // to je jezik browserja, odkrit v funkciji spodaj, kjer se lahko spremeni na 'sl';
 let lastRow0based = 15;
 let lastColumn0Based = 9;
 let board = [];     //  board: spremenljivka, ki vsebuje matriko true/false, kar pomeni, da je na taki poziciji prisoten kvadratek
@@ -95,6 +95,8 @@ const gamestats = { // samo za potrebe razvoja; ukvarja se predvsem z random, ko
     randomDirectionChanges: [],
 };
 let spacePressedHuh = false;    // samo za potrebe razvoja;
+let var1, var2, phrase; // spremenljivke in pomožna fraza za vstavljanje besedila;
+const langSL = 'sl', langEN = 'en';
 
 class Form {
     constructor(coordinates, name, color) {
@@ -492,7 +494,7 @@ function initializeScreenAndSizes() {
     canvasTop = canvas.getBoundingClientRect().top;
     console.log('canvasLeft:', canvasLeft, 'canvasTop:', canvasTop, 'block size:', blockSize);
 
-    // vrednosti za lokacijo miniGrida in mainGrida:
+    // vrednosti za lokacijo miniGrida in mainGrida; IZRAŽENE v koordinatah na canvasu, ne na ekranu!!!
     mainGridLayoutsCoords.vertical.x = 0;   // vertical pomeni pri vertikalni postavitvi; x pomeni odmik zgornje leve točke main grida v canvasu;
     mainGridLayoutsCoords.vertical.y = 5 * blockSize + 20;
     mainGridLayoutsCoords.vertical.l = (lastColumn0Based + 1) * blockSize;
@@ -501,14 +503,14 @@ function initializeScreenAndSizes() {
 
     mainGridCoords = mainGridLayoutsCoords[gameDirection.layout];   // v mobile je trenutno je to vedno vertical;
 
-    miniGridCoords.x = lesserBoundingHorizontal / 2 - 5 * blockSize;
+    miniGridCoords.x = 2.5 * blockSize; // ker je mini dolg 5 in cel kanvas 10, je na obeh straneh minija 2,5 kocke placa;
     miniGridCoords.y = 0;
     miniGridCoords.l = 5 * blockSize;
     miniGridCoords.h = 5 * blockSize;
 
     insertionColumn = (lastColumn0Based + 1) % 2 === 0 ? ((lastColumn0Based + 1) / 2) - 1 : ((lastColumn0Based + 1) - 1) / 2;
-    resolveEmptyMainGridAndBckgndGrid();
-    drawDirectionArrow();
+    // resolveEmptyMainGridAndBckgndGrid();
+    // drawDirectionArrow();
 
     // umestitev srednjega gumba
     midBtn.style.left = `${lesserBoundingHorizontal / 2 - 25}px`;   // -25, ker je širina gumba 50px;
@@ -565,11 +567,18 @@ function decisionAfterFormMovementEnded() {
 }
 
 function behAftrCurtnsCloseAtGOver() {
-    // contentJoker2.className = '';   // to odstrani tudi morebitni hidden;
+    contentJoker2.className = '';   // to odstrani tudi morebitni hidden;
     contentJoker2.className = 'blk_bckg';
-    contentJoker2.innerHTML = 'G A M E   O V E R';
+    if (lang === langEN) {
+        var1 = 'G A M E&nbsp;&nbsp;';
+        var2 = 'O V E R';
+    } else {
+        var1 = 'I G R E&nbsp;&nbsp;J E';
+        var2 = 'K O N E C';
+    }
+    contentJoker2.innerHTML = `<div>${var1}</div><div class="rotate">${var2}</div>`;
     standBy();
-    contentJoker.innerHTML = 'START GAME';
+    contentJoker.innerHTML = phrase;
 }
 
 function actionWhenSpacePressed() {
@@ -624,7 +633,8 @@ function getBlocksMoving() {    // motor vsega
 }
 
 function startGame() {
-    contentJoker.innerHTML = 'Pause game';
+    phrase = lang === langEN ? 'Pause game' : 'Začasno ustavi igro';
+    contentJoker.innerHTML = phrase;
     contentJoker2.classList.add('hidden');
     eraseBothMainGridLayouts();
     resolveEmptyMainGridAndBckgndGrid();
@@ -648,10 +658,19 @@ function standBy() {
     numberConsecutiveXplosions = 0;
     curtainInMiniGridStaticClosed();
     nextForm = getRandomForm();
+    phrase = lang === langSL ? "ZAČNI IGRO" : "START GAME";
+    contentJoker.innerHTML = phrase;
 }
 
 function refreshCurrentScore() {
-    scoreContent.innerHTML = `Score: ${score}  Lines: ${numberOfExplosions}`;
+    if (lang === langEN) {
+        var1 = "Score: ";
+        var2 = "Lines: ";
+    } else {
+        var1 = "Točke: ";
+        var2 = "Vrstice: ";
+    }
+    scoreContent.innerHTML = `${var1}${score}<br>${var2}${numberOfExplosions}`;
     //	trivia (ali ne): intervalID (zaporedna številka intervala), ko gre igra skozi eksplozijo, se poveča za 7, ker setTimer in SetInterval imajo skupno štetje,
     //  ..zato interval ni primeren za vodenje točk; hm, ali bi pač morda kar interval bile točke ...
 }
@@ -662,11 +681,13 @@ function assignControlListeners() {
         else if (isAGameRunning && !controlsTemporarilyOff && gameIntervalIsInMotion !== null) {    // pri eksploziji gre na null, takrat ne sme biti možno pavzirat,
             isGamePaused = true;
             clearInt();
-            contentJoker.innerHTML = 'GAME PAUSED click to resume';
+            phrase = lang === langEN ? 'GAME PAUSED click to resume' : 'PAVZIRANO, kliknite za nadalj.';
+            contentJoker.innerHTML = phrase;
         } else if (isGamePaused) {
             isGamePaused = false;
             getBlocksMoving();
-            contentJoker.innerHTML = 'Pause game';
+            phrase = lang === langEN ? 'Pause game' : 'Začasno ustavi igro';
+            contentJoker.innerHTML = phrase;
         }
         });
     lftBtn.addEventListener('click', () => {if (isAGameRunning && !isGamePaused && !controlsTemporarilyOff) maneuver('left')});
@@ -679,7 +700,6 @@ function assignControlListeners() {
                 if (canFormMoveDownHuh()) moveForm('down');
             } else if (e.x > canvasLeft + miniGridCoords.x && e.x < canvasLeft + miniGridCoords.x + miniGridCoords.l
                 && e.y > canvasTop && e.y < canvasTop + miniGridCoords.h) { // e.x vrne abs koordinate ekrana, ne na canvasu;
-                    console.log('space');
                     actionWhenSpacePressed();
             }
         } 
@@ -687,13 +707,13 @@ function assignControlListeners() {
 }
 
 function checkLang(){
-    let langString = 'en';
+    let checkLangStr = 'en';
     if (navigator.language != '') {
-        langString = navigator.language;
+        checkLangStr = navigator.language;
     } else if (navigator.userLanguage != '') {
-        langString = navigator.userLanguage;
+        checkLangStr = navigator.userLanguage;
     };
-    if (langString == 'sl' || langString == 'sl-si' || langString == 'sl-SI' || langString == 'si') { lang = 'sl' } // privzeto, ob deklaraciji, je "en";
+    if (checkLangStr == 'sl' || checkLangStr == 'sl-si' || checkLangStr == 'sl-SI' || checkLangStr == 'si') { lang = 'sl' } // privzeto, ob deklaraciji, je "en";
 }
 
 function faint() {
@@ -720,20 +740,18 @@ function faint() {
 
 // btnTestButton2.addEventListener('click', testButton2Operation);  // v live različici listener ne smebiti aktiven
 
-
+ 
 /* 
-sl vsebine
-premaknit začetek izvajanja v efekte, točneje na knec efekta (quad ...) - a bo potem kocka počakala na konec efekta, predeen se začne premikat?
 klik v polje desno ali levo od kocke, da je premakneš tja
 podrsat lik dol, da ga vržeš dol
 klik na lik, da ga obrneš
 */
 
 //  ----------------    IZVAJANJE
-contentJoker.innerHTML = `START GAME`;
+
 initializeScreenAndSizes();
-checkLang();
 drawEmptyMainGrid();
+checkLang();
 standBy();
 assignControlListeners();
 

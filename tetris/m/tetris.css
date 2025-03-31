@@ -29,7 +29,8 @@ temno sivo ozadje:      #313131
 #score_content {
     left: unset;
     right: 8px;
-    font-size: 0.8em;
+    font-size: 1em;
+    text-align: right;
 }
 
 .blk_bckg {
@@ -40,9 +41,20 @@ temno sivo ozadje:      #313131
     left: 0;
     justify-self: center;
     align-self: center;
+    width: unset;
+    height: unset;
     background-color: black;
     color: #FDAE34;
     padding: 30px;
+}
+
+.blk_bckg div {
+    color: inherit;
+    background-color: inherit;
+}
+
+.rotate {
+    rotate: 180deg;
 }
 
 .fx {
