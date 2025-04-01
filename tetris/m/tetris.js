@@ -56,6 +56,7 @@ const contentJoker2 = document.getElementById('content_joker2');
 const lftBtn = document.getElementById('left_btn');
 const midBtn = document.getElementById('mid_btn');
 const rghtBtn = document.getElementById('right_btn');
+const contentJokerBottom = document.getElementById('content_joker_bottom');
 // const btnTestButton2 = document.getElementById('button-2');
 
 //      -------------       SPREMENLJIVKE in VREDNOSTI
@@ -73,15 +74,17 @@ let controlsTemporarilyOff = false;     // med eksplozijo se tipke ne odzivajo, 
 let intervalTypeShrinkingHuh = true;
 let kateriJeVesTrue;     // številska vrednost; katera vrstica je vsa true, torej vsa zapolnjena s kockami in zrela za eksplozijo;
 let numberOfExplosions, numberConsecutiveXplosions, numberOfFallenForms, numberOfCycles, score;
-let gameDirection = { direction: 'down', layout: 'vertical' };
-const currentBlockPos = {};      // globalna spremenljivka, ki se v realnem času spremninja in uporablja za izrisovanje kock; NE UPORABLJAJ za preverjanja izvedljivosti pred premikom in niti pri polnjenju podatkov "true" na board!!
 const lineColor = '#bdb9b9';    // pri lineWidth === 2 je še najboljša: #bdb9b9, pri lineWidth === 1 pa #8d8989
-let mainGridLayoutsCoords = {
+const currentBlockPos = {};      // globalna spremenljivka, ki se v realnem času spremninja in uporablja za izrisovanje kock; NE UPORABLJAJ za preverjanja izvedljivosti pred premikom in niti pri polnjenju podatkov "true" na board!!
+
+let gameDirection = { direction: 'down', layout: 'vertical' };
+let lesserBoundingVertical = 0, lesserBoundingHorizontal = 0;
+const mainGridLayoutsCoords = {
     vertical: { x: 30, y: 30, l: 402, h: 642 },
     horizontal: { x: 30, y: 270, l: 642, h: 402 }
 };
-let mainGridCoords = { x: 30, y: 30, l: 402, h: 642 };  // za naredit, to in naslednjo vrstico se morda lahko izbriše, ekr se verjetno definirata ob prvi priliki;
-let miniGridCoords = { x: 467, y: 30, l: 203, h: 203 }
+let mainGridCoords = { x: 30, y: 30, l: 402, h: 642 };  // ta mora bit let, ker mu za spreminjanje vsebine spreminjamo referenco;
+const miniGridCoords = { x: 467, y: 30, l: 203, h: 203 }    // ta je lahko const, kr mu ne spreminjamo reference, ampak polja;
 let blockSize = 40, canvasLeft = 0, canvasTop = 0; // canvasLeft je x levega roba canvasa;
 const canvasSizeData = {
     canvasBase: 700,
@@ -97,6 +100,7 @@ const gamestats = { // samo za potrebe razvoja; ukvarja se predvsem z random, ko
 let spacePressedHuh = false;    // samo za potrebe razvoja;
 let var1, var2, phrase; // spremenljivke in pomožna fraza za vstavljanje besedila;
 const langSL = 'sl', langEN = 'en';
+let isPortraitPrimary = true;
 
 class Form {
     constructor(coordinates, name, color) {
@@ -453,6 +457,15 @@ function drawDirectionArrow() {     // puščica, ki je pred začetkom igre lahk
 
 function resolveEmptyMainGridAndBckgndGrid() {
     drawEmptyMainGrid();
+    // opd tu dalje je v web varianti risanje mreže v ozadju, če je izbrana;
+
+}
+
+function checkOrientation () {
+    if (screen.orientation.angle != 0) {
+        notifyOrientationNotSupp();
+        return false;
+    } else return true;
 }
 
 function initializeScreenAndSizes() {
@@ -473,11 +486,11 @@ function initializeScreenAndSizes() {
     20px hig. rob desno
     */
 
-    const lesserBoundingHorizontal = window.innerWidth > screen.width ? screen.width : window.innerWidth;
+    lesserBoundingHorizontal = window.innerWidth > screen.width ? screen.width : window.innerWidth;
     const avail4blocksHrztl = lesserBoundingHorizontal - 40;    // 40px je ne-canvas del, glej izračun zgoraj;
     let hrztlBlckSze = Math.floor(avail4blocksHrztl / 10);  // 10 kock širine je igralno polje;
     if (hrztlBlckSze > 40) hrztlBlckSze = 40;
-    const lesserBoundingVertical = window.innerHeight > screen.height ? screen.height : window.innerHeight;
+    lesserBoundingVertical = window.innerHeight > screen.height ? screen.height : window.innerHeight;
     const avail4blocksVerticl = lesserBoundingVertical - 130; // 130px je ne-grid delov, glej izračun zgoraj;
     let vertBlckSze = Math.floor(avail4blocksVerticl / 21);   // 21 = 5 kock minigrid + 16 kock igralni del; brez roba;
     if (vertBlckSze > 40) vertBlckSze = 40;
@@ -501,7 +514,7 @@ function initializeScreenAndSizes() {
     mainGridLayoutsCoords.vertical.h = (lastRow0based + 1) * blockSize;
     // če se bo obračalo, bo treba določit tudi hzntl;
 
-    mainGridCoords = mainGridLayoutsCoords[gameDirection.layout];   // v mobile je trenutno je to vedno vertical;
+    mainGridCoords = mainGridLayoutsCoords[gameDirection.layout];   // v mobile je trenutno je to vedno vertical;   ta vrstica je razlog, da je mainGridCoords let in ne const;
 
     miniGridCoords.x = 2.5 * blockSize; // ker je mini dolg 5 in cel kanvas 10, je na obeh straneh minija 2,5 kocke placa;
     miniGridCoords.y = 0;
@@ -509,8 +522,8 @@ function initializeScreenAndSizes() {
     miniGridCoords.h = 5 * blockSize;
 
     insertionColumn = (lastColumn0Based + 1) % 2 === 0 ? ((lastColumn0Based + 1) / 2) - 1 : ((lastColumn0Based + 1) - 1) / 2;
-    // resolveEmptyMainGridAndBckgndGrid();
-    // drawDirectionArrow();
+    resolveEmptyMainGridAndBckgndGrid();
+    // drawDirectionArrow();    // trenutno izključeno, ker itak ne obračamo;
 
     // umestitev srednjega gumba
     midBtn.style.left = `${lesserBoundingHorizontal / 2 - 25}px`;   // -25, ker je širina gumba 50px;
@@ -637,7 +650,7 @@ function startGame() {
     contentJoker.innerHTML = phrase;
     contentJoker2.classList.add('hidden');
     eraseBothMainGridLayouts();
-    resolveEmptyMainGridAndBckgndGrid();
+    resolveEmptyMainGridAndBckgndGrid();    // to je verjetno zato, da izbrišeš puščico, če je narisana;
     refreshCurrentScore();
     // refreshExplosionsCountDisplay(); samo web
     curtainInMiniGridOpening();
@@ -716,6 +729,41 @@ function checkLang(){
     if (checkLangStr == 'sl' || checkLangStr == 'sl-si' || checkLangStr == 'sl-SI' || checkLangStr == 'si') { lang = 'sl' } // privzeto, ob deklaraciji, je "en";
 }
 
+function notifyOrientationNotSupp() {
+    contentJokerBottom.stye = ""; // za vsak slučaj popucamo morebiten element level style;
+    contentJokerBottom.classList.remove('hidden');
+    contentJokerBottom.style.width = `${lesserBoundingVertical}px`;
+    contentJokerBottom.style.height = `${lesserBoundingHorizontal}px`; 
+    contentJokerBottom.innerHTML = lang === langEN ? 'Game currently does not support horizontal orientation' : 'Igra trenutno še ne podpira vodoravne postavitve';
+}
+
+function atOrientChg() {
+    if (screen.orientation.angle == 90 || screen.orientation.angle == 270) {    // 0 in 270 naj bi bili vodoravni postavitvi;
+        isPortraitPrimary = false;
+        if (isAGameRunning) {
+            isGamePaused = true;
+            clearInt();
+        }
+        notifyOrientationNotSupp();
+    } else if (screen.orientation.angle == 0 && isPortraitPrimary == false) {    // torej če si prej imel postrani in zdaj si vrnil pravilno pokonci;
+        isPortraitPrimary = true;
+        if (isAGameRunning) {
+            isGamePaused = false;
+            getBlocksMoving();
+        }
+        contentJokerBottom.classList.add('hidden');
+    } else if (screen.orientation.angle == 0 && isPortraitPrimary == true) {    // kar je možno le, če si vstopil v igro z vodoravnim telefonom (ker je portraitPrimary na začetku true, ampak ne more biti true, če s sprmembo prideš na kot 0), zdaj pa si ga poravnal;
+        contentJokerBottom.classList.add('hidden');
+        init();
+    }
+}
+
+function init() {
+    initializeScreenAndSizes();
+    standBy();
+    assignControlListeners();
+}
+
 function faint() {
     document.body.style.transition = 'opacity 1s';
     document.body.style.opacity = '30%';
@@ -739,9 +787,13 @@ function faint() {
 //  ---------------     LISTENERJI
 
 // btnTestButton2.addEventListener('click', testButton2Operation);  // v live različici listener ne smebiti aktiven
+screen.orientation.addEventListener("change", atOrientChg);
 
  
 /* 
+da se ne obrača z obračanjem ekrana
+? za navodila
+ikona za Domov
 klik v polje desno ali levo od kocke, da je premakneš tja
 podrsat lik dol, da ga vržeš dol
 klik na lik, da ga obrneš
@@ -749,11 +801,10 @@ klik na lik, da ga obrneš
 
 //  ----------------    IZVAJANJE
 
-initializeScreenAndSizes();
-drawEmptyMainGrid();
 checkLang();
-standBy();
-assignControlListeners();
+if (checkOrientation) {
+    init();
+}
 
 
 //  coded with love and by guesswork by Ivo Makuc, 2022
