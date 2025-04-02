@@ -461,13 +461,6 @@ function resolveEmptyMainGridAndBckgndGrid() {
 
 }
 
-function checkOrientation () {
-    if (screen.orientation.angle != 0) {
-        notifyOrientationNotSupp();
-        return false;
-    } else return true;
-}
-
 function initializeScreenAndSizes() {
 
     /*
@@ -730,11 +723,27 @@ function checkLang(){
 }
 
 function notifyOrientationNotSupp() {
+    // najprej skrijemo elemente igre;
+    lftBtn.classList.add('hidden');
+    midBtn.classList.add('hidden');
+    rghtBtn.classList.add('hidden');
+    canvas.classList.add('hidden');
+    scoreContent.classList.add('hidden');
+
+    // pokažemo obvestilo;
     contentJokerBottom.stye = ""; // za vsak slučaj popucamo morebiten element level style;
     contentJokerBottom.classList.remove('hidden');
-    contentJokerBottom.style.width = `${lesserBoundingVertical}px`;
-    contentJokerBottom.style.height = `${lesserBoundingHorizontal}px`; 
+    contentJokerBottom.style.width = lesserBoundingVertical > 0 ? `${lesserBoundingVertical}px`: `${screen.width}px`;   // na začetku sta lesser.. == 0 in se nastavita šele, ko greš uspešno čez sizing,..
+    contentJokerBottom.style.height = lesserBoundingHorizontal > 0 ? `${lesserBoundingHorizontal}px` : `${screen.height}px`;    // ..zato primer z screen.width, če si v igro prišel direkt v ležečem položaju (takrat ni sizinga);
     contentJokerBottom.innerHTML = lang === langEN ? 'Game currently does not support horizontal orientation' : 'Igra trenutno še ne podpira vodoravne postavitve';
+}
+
+function showGameElmnts() {
+    lftBtn.classList.remove('hidden');
+    midBtn.classList.remove('hidden');
+    rghtBtn.classList.remove('hidden');
+    canvas.classList.remove('hidden');
+    scoreContent.classList.remove('hidden');
 }
 
 function atOrientChg() {
@@ -747,13 +756,19 @@ function atOrientChg() {
         notifyOrientationNotSupp();
     } else if (screen.orientation.angle == 0 && isPortraitPrimary == false) {    // torej če si prej imel postrani in zdaj si vrnil pravilno pokonci;
         isPortraitPrimary = true;
+        contentJokerBottom.classList.add('hidden');
+
+        // prikažemo elemente igre;
+        showGameElmnts();
+
         if (isAGameRunning) {
             isGamePaused = false;
             getBlocksMoving();
         }
+    } else if (screen.orientation.angle == 0 && isPortraitPrimary == true) {    // kar je možno le, če si vstopil v igro z vodoravnim telefonom (ker je portraitPrimary na začetku true in vmes nikoli ni imel priložnosti preiti na false), zdaj pa si ga poravnal;
         contentJokerBottom.classList.add('hidden');
-    } else if (screen.orientation.angle == 0 && isPortraitPrimary == true) {    // kar je možno le, če si vstopil v igro z vodoravnim telefonom (ker je portraitPrimary na začetku true, ampak ne more biti true, če s sprmembo prideš na kot 0), zdaj pa si ga poravnal;
-        contentJokerBottom.classList.add('hidden');
+        // prikažemo elemente igre; prej so bili skriti;
+        showGameElmnts();
         init();
     }
 }
@@ -762,6 +777,13 @@ function init() {
     initializeScreenAndSizes();
     standBy();
     assignControlListeners();
+}
+
+function checkOrientation () {  // to se izvede kot prva stvar takoj po obisku strani z mobilcem, samo enkrat;
+    if (screen.orientation.angle != 0) {
+        notifyOrientationNotSupp();
+        return false;
+    } else return true;
 }
 
 function faint() {
@@ -802,7 +824,7 @@ klik na lik, da ga obrneš
 //  ----------------    IZVAJANJE
 
 checkLang();
-if (checkOrientation) {
+if (checkOrientation) { // to se izvede kot prva stvar takoj po obisku strani z mobilcem, samo enkrat;
     init();
 }
 
