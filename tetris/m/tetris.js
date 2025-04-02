@@ -50,9 +50,9 @@
 
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
-const contentJoker = document.getElementById('content_joker');
+const mainAtionLbl = document.getElementById('main_actn_lbl');
 const scoreContent = document.getElementById('score_content');
-const contentJoker2 = document.getElementById('content_joker2');
+const contentJoker = document.getElementById('content_joker');
 const lftBtn = document.getElementById('left_btn');
 const midBtn = document.getElementById('mid_btn');
 const rghtBtn = document.getElementById('right_btn');
@@ -70,7 +70,7 @@ let board = [];     //  board: spremenljivka, ki vsebuje matriko true/false, kar
 let isAGameRunning = false;          // pomeni, da je ena igra tetrisa v teku; lahko je pavzirana
 let isGamePaused = false;
 let gameIntervalIsInMotion = null;  //  spremenljivka, ki kliče setInterval
-let controlsTemporarilyOff = false;     // med eksplozijo se tipke ne odzivajo, nobena; med običajno igro je na false
+let controlsTemporarilyOff = false;     // med eksplozijo se tipke ne odzivajo, nobena; tudi med vpisovanjem inicialk (web) je aktivna ta reč; med običajno igro je na false
 let intervalTypeShrinkingHuh = true;
 let kateriJeVesTrue;     // številska vrednost; katera vrstica je vsa true, torej vsa zapolnjena s kockami in zrela za eksplozijo;
 let numberOfExplosions, numberConsecutiveXplosions, numberOfFallenForms, numberOfCycles, score;
@@ -100,7 +100,8 @@ const gamestats = { // samo za potrebe razvoja; ukvarja se predvsem z random, ko
 let spacePressedHuh = false;    // samo za potrebe razvoja;
 let var1, var2, phrase; // spremenljivke in pomožna fraza za vstavljanje besedila;
 const langSL = 'sl', langEN = 'en';
-let isPortraitPrimary = true;
+let isPortraitPrimary = true;   // hrani podatek, al imaš telefon navpično in pravilno obrnjen;
+let wasPausdAtOrntnChg = false, wasContJokerShwnAtOrntChg = false, wrCtrlsTempOffAtOrtChg = false;  // spremenljivke, ki beležijo stanje oken/procesov, ki jih je treba beležit pri orientation change
 
 class Form {
     constructor(coordinates, name, color) {
@@ -395,7 +396,6 @@ async function explodeRow() {
     helperFunkcijaZaExplozijo('white', '#313131');
     await pauseInSecs(0.1);
 
-    controlsTemporarilyOff = false;    // vrnemo delovanje tipk
     //  odstranit najdeno polno vrstico, posodobit board in narisat posodobljeno igralno polje
     board.splice(kateriJeVesTrue, 1);
     board.splice(0, 0, new Array(lastColumn0Based + 1).fill(false));
@@ -405,8 +405,11 @@ async function explodeRow() {
     if (canExplodeHuh()) explodeRow(); else {
         if (numberConsecutiveXplosions === 1) {
             score += 10;
-            refreshCurrentScore();      // pri efektih pa je ponovno sproženje igre premaknjeno na konec efekta, ..
-            insertOnTopAndStartInt();   // ..da naslednji lik še ne pada, ko se efekt izvaja;
+            refreshCurrentScore();
+            if (!wrCtrlsTempOffAtOrtChg) {  // pri efektih pa je ponovno sproženje igre premaknjeno na konec efekta, ..
+                insertOnTopAndStartInt();   // ..da naslednji lik še ne pada, ko se efekt izvaja;
+                controlsTemporarilyOff = false;    // vrnemo delovanje tipk (pri efektu se to zgodi v efektu);
+            }
         } else if (numberConsecutiveXplosions === 2) {
             score += 25;
             effectDoubleTrouble();
@@ -487,8 +490,6 @@ function initializeScreenAndSizes() {
     const avail4blocksVerticl = lesserBoundingVertical - 130; // 130px je ne-grid delov, glej izračun zgoraj;
     let vertBlckSze = Math.floor(avail4blocksVerticl / 21);   // 21 = 5 kock minigrid + 16 kock igralni del; brez roba;
     if (vertBlckSze > 40) vertBlckSze = 40;
-
-    // contentJoker.innerHTML+=`<br>blckSzHz: ${hrztlBlckSze}, blockSzeVErt: ${vertBlckSze}`;
 
     // kocke smejo biti le toliko velike, kot je manjša od obeh omejitev;
     blockSize = hrztlBlckSze < vertBlckSze ? hrztlBlckSze : vertBlckSze;
@@ -573,8 +574,8 @@ function decisionAfterFormMovementEnded() {
 }
 
 function behAftrCurtnsCloseAtGOver() {
-    contentJoker2.className = '';   // to odstrani tudi morebitni hidden;
-    contentJoker2.className = 'blk_bckg';
+    contentJoker.className = '';   // to odstrani tudi morebitni hidden;
+    contentJoker.className = 'blk_bckg';
     if (lang === langEN) {
         var1 = 'G A M E&nbsp;&nbsp;';
         var2 = 'O V E R';
@@ -582,9 +583,8 @@ function behAftrCurtnsCloseAtGOver() {
         var1 = 'I G R E&nbsp;&nbsp;J E';
         var2 = 'K O N E C';
     }
-    contentJoker2.innerHTML = `<div>${var1}</div><div class="rotate">${var2}</div>`;
+    contentJoker.innerHTML = `<div>${var1}</div><div class="rotate">${var2}</div>`;
     standBy();
-    contentJoker.innerHTML = phrase;
 }
 
 function actionWhenSpacePressed() {
@@ -640,8 +640,9 @@ function getBlocksMoving() {    // motor vsega
 
 function startGame() {
     phrase = lang === langEN ? 'Pause game' : 'Začasno ustavi igro';
-    contentJoker.innerHTML = phrase;
-    contentJoker2.classList.add('hidden');
+    mainAtionLbl.innerHTML = phrase;
+    contentJoker.classList.add('hidden');
+    if (wasContJokerShwnAtOrntChg) wasContJokerShwnAtOrntChg = false;
     eraseBothMainGridLayouts();
     resolveEmptyMainGridAndBckgndGrid();    // to je verjetno zato, da izbrišeš puščico, če je narisana;
     refreshCurrentScore();
@@ -665,7 +666,7 @@ function standBy() {
     curtainInMiniGridStaticClosed();
     nextForm = getRandomForm();
     phrase = lang === langSL ? "ZAČNI IGRO" : "START GAME";
-    contentJoker.innerHTML = phrase;
+    mainAtionLbl.innerHTML = phrase;
 }
 
 function refreshCurrentScore() {
@@ -682,18 +683,18 @@ function refreshCurrentScore() {
 }
 
 function assignControlListeners() {
-    contentJoker.addEventListener('click', () => {
+    mainAtionLbl.addEventListener('click', () => {
         if (!isAGameRunning && !controlsTemporarilyOff) startGame() ;
-        else if (isAGameRunning && !controlsTemporarilyOff && gameIntervalIsInMotion !== null) {    // pri eksploziji gre na null, takrat ne sme biti možno pavzirat,
+        else if (isAGameRunning && !controlsTemporarilyOff && !isGamePaused) {    // pri eksploziji so controlsTempOff, takrat ne sme biti možno pavzirat,
             isGamePaused = true;
             clearInt();
             phrase = lang === langEN ? 'GAME PAUSED click to resume' : 'PAVZIRANO, kliknite za nadalj.';
-            contentJoker.innerHTML = phrase;
+            mainAtionLbl.innerHTML = phrase;
         } else if (isGamePaused) {
             isGamePaused = false;
             getBlocksMoving();
             phrase = lang === langEN ? 'Pause game' : 'Začasno ustavi igro';
-            contentJoker.innerHTML = phrase;
+            mainAtionLbl.innerHTML = phrase;
         }
         });
     lftBtn.addEventListener('click', () => {if (isAGameRunning && !isGamePaused && !controlsTemporarilyOff) maneuver('left')});
@@ -729,13 +730,17 @@ function notifyOrientationNotSupp() {
     rghtBtn.classList.add('hidden');
     canvas.classList.add('hidden');
     scoreContent.classList.add('hidden');
+    if (!contentJoker.classList.contains('hidden')) {   // če je contentjoker (v praksi je to GAME OVER) prikazan;
+        contentJoker.classList.add('hidden');
+        wasContJokerShwnAtOrntChg = true;
+    }
 
     // pokažemo obvestilo;
     contentJokerBottom.stye = ""; // za vsak slučaj popucamo morebiten element level style;
     contentJokerBottom.classList.remove('hidden');
     contentJokerBottom.style.width = lesserBoundingVertical > 0 ? `${lesserBoundingVertical}px`: `${screen.width}px`;   // na začetku sta lesser.. == 0 in se nastavita šele, ko greš uspešno čez sizing,..
     contentJokerBottom.style.height = lesserBoundingHorizontal > 0 ? `${lesserBoundingHorizontal}px` : `${screen.height}px`;    // ..zato primer z screen.width, če si v igro prišel direkt v ležečem položaju (takrat ni sizinga);
-    contentJokerBottom.innerHTML = lang === langEN ? 'Game currently does not support horizontal orientation' : 'Igra trenutno še ne podpira vodoravne postavitve';
+    contentJokerBottom.innerHTML = lang === langEN ? 'On mobile phone, game currently does not support horizontal orientation.<br>Try playing it on a laptop/desktop' : 'Na mobilnem telefonu igra trenutno še ne omogoča vodoravne postavitve.<br>Poskusite jo igrati na računalniku/prenosniku.';
 }
 
 function showGameElmnts() {
@@ -744,14 +749,22 @@ function showGameElmnts() {
     rghtBtn.classList.remove('hidden');
     canvas.classList.remove('hidden');
     scoreContent.classList.remove('hidden');
+    if (wasContJokerShwnAtOrntChg) contentJoker.classList.remove('hidden'); // odstranimo hidden, samo že je bil prikazan;
 }
 
 function atOrientChg() {
     if (screen.orientation.angle == 90 || screen.orientation.angle == 270) {    // 0 in 270 naj bi bili vodoravni postavitvi;
         isPortraitPrimary = false;
         if (isAGameRunning) {
-            isGamePaused = true;
-            clearInt();
+            if (controlsTemporarilyOff) {   // isGamePaused in CtrlsTempOff (samo od začetka ekslplozije do konca efekta) nista nikoli hkrati true;
+                wrCtrlsTempOffAtOrtChg = true;
+                console.log('wrCtrlsTempOffAtOrtChg = true')
+            } else {
+                if (!isGamePaused) {    // običajen primer, ni pavzirano in obrneš;
+                    isGamePaused = true;
+                    clearInt();
+                } else wasPausdAtOrntnChg = true;
+            }
         }
         notifyOrientationNotSupp();
     } else if (screen.orientation.angle == 0 && isPortraitPrimary == false) {    // torej če si prej imel postrani in zdaj si vrnil pravilno pokonci;
@@ -762,8 +775,17 @@ function atOrientChg() {
         showGameElmnts();
 
         if (isAGameRunning) {
-            isGamePaused = false;
-            getBlocksMoving();
+            if (wrCtrlsTempOffAtOrtChg) {   // wasPausdAtOrntnChg in wrCtrlsTempOffAtOrtChg nikoli nista aktivirana hkrati;
+                console.log('primer')
+                wrCtrlsTempOffAtOrtChg = false;
+                insertOnTopAndStartInt();
+                controlsTemporarilyOff = false;    // vrnemo delovanje tipk;
+            } else {
+                if (!wasPausdAtOrntnChg) {  // običajen primer, si igral in obrnil vodoravno, zdaj pa obračaš nazaj navpično;
+                    isGamePaused = false;
+                    getBlocksMoving();
+                } else wasPausdAtOrntnChg = false;  // povrnemo na običajno vrednost;
+            }
         }
     } else if (screen.orientation.angle == 0 && isPortraitPrimary == true) {    // kar je možno le, če si vstopil v igro z vodoravnim telefonom (ker je portraitPrimary na začetku true in vmes nikoli ni imel priložnosti preiti na false), zdaj pa si ga poravnal;
         contentJokerBottom.classList.add('hidden');
@@ -813,12 +835,16 @@ screen.orientation.addEventListener("change", atOrientChg);
 
  
 /* 
-da se ne obrača z obračanjem ekrana
+stestirat (najprej objavit):
+če je igra pavzirana, preden obrneš fon vodoarvno, si to zapomnit, da je ne štarta po ponovni postavitvi pokonci
+
 ? za navodila
 ikona za Domov
 klik v polje desno ali levo od kocke, da je premakneš tja
 podrsat lik dol, da ga vržeš dol
 klik na lik, da ga obrneš
+kaj se zgodi, če obrneš telefon med doubletrouble? dodat kontrolno spremenljivko, ki prepreči zagon intervala na koncu izvajanja efekta?
+da bi kocke hodile v levo, ko obrneš ekran na levo
 */
 
 //  ----------------    IZVAJANJE

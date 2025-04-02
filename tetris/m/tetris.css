@@ -20,7 +20,7 @@ temno sivo ozadje:      #313131
     background: #808080;    /* bilo: #5a5a5a */
 }
 
-.joker {
+.top_lbl {
     position: absolute;
     top: 2px;
     left: 8px;

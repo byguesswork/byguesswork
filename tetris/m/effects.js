@@ -88,10 +88,10 @@ function effectDoubleTrouble() {  // izvirno async;
 
     function doAnimation(background, color1, color2, delay) {
         setTimeout(() => {
-            contentJoker2.className = 'fx';
-            contentJoker2.style.background = background;
+            contentJoker.className = 'fx';
+            contentJoker.style.background = background;
             //                                     tale box-sizing spodaj je ena major zadeva
-            contentJoker2.innerHTML = `
+            contentJoker.innerHTML = `
             <div style="background:grey;height:100%;box-sizing: border-box">
             <p style="color:${color1}"><br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DOUBLE</p>
             <p style="color:${color2}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TROUBLE</p><br> 
@@ -99,7 +99,7 @@ function effectDoubleTrouble() {  // izvirno async;
             `}, delay)
     }
 
-    contentJoker2.classList.remove('hidden');
+    contentJoker.classList.remove('hidden');
     doAnimation('yellow', 'grey', 'grey', 0);
     doAnimation('#ebeb27', 'white', 'grey', 100);   // bilo: #d8d834
     doAnimation('#d3b946', '#c9c8c8', 'grey', 350); // bilo: #b9b967
@@ -107,20 +107,23 @@ function effectDoubleTrouble() {  // izvirno async;
     doAnimation('grey', 'grey', '#c9c8c8', 900);
     doAnimation('grey', 'grey', 'grey', 1200);
     setTimeout(() => {
-        contentJoker2.style.background = '';    // je treba odstranit style, ker je bil določen programatično in to preglasi nastavitev iz css-a (in potem je game over okno sivo, ker je tukaj bilo nazadnje določeno sivo);
-        contentJoker2.classList.add('hidden');
+        contentJoker.style.background = '';    // je treba odstranit style, ker je bil določen programatično in to preglasi nastavitev iz css-a (in potem je game over okno sivo, ker je tukaj bilo nazadnje določeno sivo);
+        contentJoker.classList.add('hidden');
         refreshCurrentScore();
-        insertOnTopAndStartInt();
+        if (!wrCtrlsTempOffAtOrtChg) {
+            insertOnTopAndStartInt();
+            controlsTemporarilyOff = false;    // vrnemo delovanje tipk;
+        }
     }, 1300);
 }
 
 function effectTripple() {  // izvirno async (v webu);
-    contentJoker2.className = 'fx';
-    contentJoker2.style.paddingLeft = '60px';
-    contentJoker2.style.width = '250px';            // ti dve vrstici sta zato, da se uni možičk pomakne bolj desno
-    contentJoker2.classList.remove('hidden');
+    contentJoker.className = 'fx';
+    contentJoker.style.paddingLeft = '60px';
+    contentJoker.style.width = '250px';            // ti dve vrstici sta zato, da se uni možičk pomakne bolj desno
+    contentJoker.classList.remove('hidden');
 
-    contentJoker2.innerHTML = `
+    contentJoker.innerHTML = `
         <p style="font-family: 'Courier New', Courier, monospace; font-size:small">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;II]&nbsp;&nbsp;&nbsp;I^^<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;I&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;I&nbsp;&nbsp;<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IIIIIIIIIIII&nbsp;&nbsp;<br>
@@ -136,7 +139,7 @@ function effectTripple() {  // izvirno async (v webu);
         `;
 
     setTimeout(() => {
-        contentJoker2.innerHTML = `
+        contentJoker.innerHTML = `
         <p style="font-family: 'Courier New', Courier, monospace; font-size:small">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;II]&nbsp;&nbsp;&nbsp;&nbsp;I^^<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;I&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;I&nbsp;&nbsp;&nbsp;<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IIIIIIIIIIII&nbsp;&nbsp;&nbsp;&nbsp;<br>
@@ -153,7 +156,7 @@ function effectTripple() {  // izvirno async (v webu);
     }, 200);
 
     setTimeout(() => {
-        contentJoker2.innerHTML = `
+        contentJoker.innerHTML = `
         <p style="font-family: 'Courier New', Courier, monospace; font-size:small">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;II]&nbsp;&nbsp;&nbsp;I^^<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;I&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;I&nbsp;&nbsp;<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IIIIIIIIIIII&nbsp;&nbsp;<br>
@@ -171,7 +174,7 @@ function effectTripple() {  // izvirno async (v webu);
 
     //  obrat, nazaj
     setTimeout(() => {
-        contentJoker2.innerHTML = `
+        contentJoker.innerHTML = `
         <p style="font-family: 'Courier New', Courier, monospace; font-size:small">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;^^I&nbsp;&nbsp;&nbsp;[II&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;I&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;I&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IIIIIIIIIIII&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
@@ -188,7 +191,7 @@ function effectTripple() {  // izvirno async (v webu);
     }, 700);
 
     setTimeout(() => {
-        contentJoker2.innerHTML = `
+        contentJoker.innerHTML = `
         <p style="font-family: 'Courier New', Courier, monospace; font-size:small">&nbsp;&nbsp;^^I&nbsp;&nbsp;&nbsp;[II&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;I&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;I&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IIIIIIIIIIII&nbsp;&nbsp;&nbsp;&nbsp;<br>
@@ -205,7 +208,7 @@ function effectTripple() {  // izvirno async (v webu);
     }, 900);
 
     setTimeout(() => {
-        contentJoker2.innerHTML = `
+        contentJoker.innerHTML = `
         <p style="font-family: 'Courier New', Courier, monospace; font-size:small">&nbsp;^^I&nbsp;&nbsp;&nbsp;[II&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
         &nbsp;&nbsp;&nbsp;I&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;I&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
         &nbsp;&nbsp;&nbsp;IIIIIIIIIIII&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
@@ -222,13 +225,13 @@ function effectTripple() {  // izvirno async (v webu);
     }, 1100);
 
     setTimeout(() => {
-        contentJoker2.style.paddingLeft = '20px';
-        contentJoker2.style.width = '290px';
+        contentJoker.style.paddingLeft = '20px';
+        contentJoker.style.width = '290px';
     }, 1350);
 
     function doAnimation(size, color, delay) {
         setTimeout(() => {
-            contentJoker2.innerHTML = `
+            contentJoker.innerHTML = `
         <p style="font-size: ${size}px; text-align: center; color: ${color}; padding-right:100px">3x</p>`;
         }, delay);
     };
@@ -241,27 +244,30 @@ function effectTripple() {  // izvirno async (v webu);
     doAnimation(150, '#6c9766', 1850);
 
     setTimeout(() => {
-        contentJoker2.innerHTML = ``;
-        contentJoker2.classList.add('hidden');
-        contentJoker2.style = '';   // je treba odstanit style, ker programatično nastavljen style preglasi pozneje nastavljen style iz CSS (ki je nastavljen na klasu, ne na elementu);
+        contentJoker.innerHTML = ``;
+        contentJoker.classList.add('hidden');
+        contentJoker.style = '';   // je treba odstanit style, ker programatično nastavljen style preglasi pozneje nastavljen style iz CSS (ki je nastavljen na klasu, ne na elementu);
         refreshCurrentScore();
-        insertOnTopAndStartInt();
+        if (!wrCtrlsTempOffAtOrtChg) {
+            insertOnTopAndStartInt();
+            controlsTemporarilyOff = false;    // vrnemo delovanje tipk;
+        }
     }, 1950);
 }
 
 function effectQuad() { // izvirno async (v webu);
-    contentJoker2.className = 'fx';
-    contentJoker2.innerHTML = '';
-    contentJoker2.classList.remove('hidden');
-    contentJoker2.style.background = 'yellow';
+    contentJoker.className = 'fx';
+    contentJoker.innerHTML = '';
+    contentJoker.classList.remove('hidden');
+    contentJoker.style.background = 'yellow';
 
-    setTimeout(() => contentJoker2.style.background = 'white', 40);
-    setTimeout(() => contentJoker2.style.background = '#808080', 90);
+    setTimeout(() => contentJoker.style.background = 'white', 40);
+    setTimeout(() => contentJoker.style.background = '#808080', 90);
 
     function doStyling(color1, color2, color3, colorBackground, colorFont, delay) {
         setTimeout(() => {
-            contentJoker2.style.background = `${color1}`;
-            contentJoker2.innerHTML = `
+            contentJoker.style.background = `${color1}`;
+            contentJoker.innerHTML = `
            <div style="background:${color2};height:100%;box-sizing: border-box;padding:20px">
                <div style="background:${color3};height:100%;box-sizing: border-box;padding:20px">
                    <div style="background:${colorBackground};height:100%;box-sizing: border-box;padding:20px">
@@ -278,9 +284,12 @@ function effectQuad() { // izvirno async (v webu);
     doStyling('#410101', '#3d2801', '#3d3d01', 'grey', '#505050', 1200);
     doStyling('grey', 'grey', 'grey', 'grey', '#505050', 1450);
     setTimeout(() => {
-        contentJoker2.classList.add('hidden');
-        contentJoker2.style = '';   // je treba odstanit style, ker programatično nastavljen style preglasi pozneje nastavljen style iz CSS (ki je nastavljen na klasu, ne na elementu);
+        contentJoker.classList.add('hidden');
+        contentJoker.style = '';   // je treba odstanit style, ker programatično nastavljen style preglasi pozneje nastavljen style iz CSS (ki je nastavljen na klasu, ne na elementu);
         refreshCurrentScore();
-        insertOnTopAndStartInt();
+        if (!wrCtrlsTempOffAtOrtChg) {
+            insertOnTopAndStartInt();
+            controlsTemporarilyOff = false;    // vrnemo delovanje tipk;
+        }
     }, 1500);
 }
