@@ -33,7 +33,13 @@ temno sivo ozadje:      #313131
     text-align: right;
 }
 
-.blk_bckg {
+#home_link{
+    position: absolute;
+    top: 2px;
+    right: 8px;
+}
+
+.blk_bckg { /* ta se rabi za GAME OVER; */
     position: absolute;
     top: 0;
     right: 0;
@@ -96,12 +102,4 @@ temno sivo ozadje:      #313131
     height: 50px;
     border-radius: 50%;
     bottom: 20px;
-}
-
-#left_btn {
-    left: 20px;
-}
-
-#right_btn {
-    right: 20px;
 }

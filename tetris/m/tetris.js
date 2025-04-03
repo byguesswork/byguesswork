@@ -52,7 +52,8 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const mainAtionLbl = document.getElementById('main_actn_lbl');
 const scoreContent = document.getElementById('score_content');
-const contentJoker = document.getElementById('content_joker');
+const homeLink = document.getElementById('home_link');
+const contentJoker = document.getElementById('content_joker');  // tle se riše GAME OVER in pa efekti;
 const lftBtn = document.getElementById('left_btn');
 const midBtn = document.getElementById('mid_btn');
 const rghtBtn = document.getElementById('right_btn');
@@ -76,7 +77,7 @@ let kateriJeVesTrue;     // številska vrednost; katera vrstica je vsa true, tor
 let numberOfExplosions, numberConsecutiveXplosions, numberOfFallenForms, numberOfCycles, score;
 const lineColor = '#bdb9b9';    // pri lineWidth === 2 je še najboljša: #bdb9b9, pri lineWidth === 1 pa #8d8989
 const currentBlockPos = {};      // globalna spremenljivka, ki se v realnem času spremninja in uporablja za izrisovanje kock; NE UPORABLJAJ za preverjanja izvedljivosti pred premikom in niti pri polnjenju podatkov "true" na board!!
-
+const currentFormCoords = {};   // spremenljivka samo za mobile, za shranjevanje lokacije kock lika, da lahko izmeriškam glede na lik je pritisnil uporabnik;
 let gameDirection = { direction: 'down', layout: 'vertical' };
 let lesserBoundingVertical = 0, lesserBoundingHorizontal = 0;
 const mainGridLayoutsCoords = {
@@ -86,10 +87,6 @@ const mainGridLayoutsCoords = {
 let mainGridCoords = { x: 30, y: 30, l: 402, h: 642 };  // ta mora bit let, ker mu za spreminjanje vsebine spreminjamo referenco;
 const miniGridCoords = { x: 467, y: 30, l: 203, h: 203 }    // ta je lahko const, kr mu ne spreminjamo reference, ampak polja;
 let blockSize = 40, canvasLeft = 0, canvasTop = 0; // canvasLeft je x levega roba canvasa;
-const canvasSizeData = {
-    canvasBase: 700,
-    canvasWidthWas: 700,
-};
 let insertionColumn = 4;
 let arrowIconCoords = [{ x: 0, y: 60 }, { x: -20, y: 60 }, { x: 15, y: 100 }, { x: 50, y: 60 }, { x: 30, y: 60 }, { x: 30, y: 0 }, { x: 15, y: 10 }];
 let isGreenMode = false;
@@ -101,7 +98,7 @@ let spacePressedHuh = false;    // samo za potrebe razvoja;
 let var1, var2, phrase; // spremenljivke in pomožna fraza za vstavljanje besedila;
 const langSL = 'sl', langEN = 'en';
 let isPortraitPrimary = true;   // hrani podatek, al imaš telefon navpično in pravilno obrnjen;
-let wasPausdAtOrntnChg = false, wasContJokerShwnAtOrntChg = false, wrCtrlsTempOffAtOrtChg = false;  // spremenljivke, ki beležijo stanje oken/procesov, ki jih je treba beležit pri orientation change
+let wasPausdAtOrntnChg = false, wasGmeOvrShwnAtOrntChg = false, wrCtrlsTempOffAtOrtChg = false;  // spremenljivke, ki beležijo stanje oken/procesov, ki jih je treba beležit pri orientation change
 
 class Form {
     constructor(coordinates, name, color) {
@@ -161,13 +158,8 @@ function showNextFormInMiniGrid() {
     ctx.strokeStyle = lineColor;
     ctx.lineWidth = 1;
     ctx.fillStyle = isGreenMode === false ? nextForm.color : 'green';
-    if (canvasSizeData.canvasBase === 700) {
-        nextForm.notionalPos.row = nextForm.name === 'dolga' ? 2 : 1.5;		// to je da like vedno postavi v sredino tega polja
-        nextForm.notionalPos.col = nextForm.name === 'dolga' || nextForm.name === 'kocka' ? 1.5 : 2;	// to je da like vedno postavi v sredino tega polja
-    } else {
-        nextForm.notionalPos.row = nextForm.name === 'dolga' ? 2.5 : 2;		// to je da like vedno postavi v sredino tega polja
-        nextForm.notionalPos.col = nextForm.name === 'dolga' || nextForm.name === 'kocka' ? 2.2 : 2.7;	// to je da like vedno postavi v sredino tega polja        
-    };
+    nextForm.notionalPos.row = nextForm.name === 'dolga' ? 2 : 1.5;		// to je da like vedno postavi v sredino tega polja
+    nextForm.notionalPos.col = nextForm.name === 'dolga' || nextForm.name === 'kocka' ? 1.5 : 2;	// to je da like vedno postavi v sredino tega polja
     nextForm.activeRotation = 0;
     nextForm.coordinates[nextForm.activeRotation].forEach(element => {
         miniGridSingleBlockPos.row = nextForm.notionalPos.row + element.rDiff;
@@ -460,69 +452,10 @@ function drawDirectionArrow() {     // puščica, ki je pred začetkom igre lahk
 
 function resolveEmptyMainGridAndBckgndGrid() {
     drawEmptyMainGrid();
-    // opd tu dalje je v web varianti risanje mreže v ozadju, če je izbrana;
+    // od tu dalje je v web varianti risanje mreže v ozadju, če je izbrana;
 
 }
 
-function initializeScreenAndSizes() {
-
-    /*
-    ----  po NAVPIČNI dimenziji
-    20px higienski rob zgoraj
-        minigrid (5 kock)
-    20px higienski rob (v canvasu)
-        glavni grid (16 kock)
-    90px (gumbov del):
-        20px zgoraj
-        50px gumb
-        20px spodaj
-
-    ----  po VODORAVNI dimenziji
-    20px hig. rob levo
-    20px hig. rob desno
-    */
-
-    lesserBoundingHorizontal = window.innerWidth > screen.width ? screen.width : window.innerWidth;
-    const avail4blocksHrztl = lesserBoundingHorizontal - 40;    // 40px je ne-canvas del, glej izračun zgoraj;
-    let hrztlBlckSze = Math.floor(avail4blocksHrztl / 10);  // 10 kock širine je igralno polje;
-    if (hrztlBlckSze > 40) hrztlBlckSze = 40;
-    lesserBoundingVertical = window.innerHeight > screen.height ? screen.height : window.innerHeight;
-    const avail4blocksVerticl = lesserBoundingVertical - 130; // 130px je ne-grid delov, glej izračun zgoraj;
-    let vertBlckSze = Math.floor(avail4blocksVerticl / 21);   // 21 = 5 kock minigrid + 16 kock igralni del; brez roba;
-    if (vertBlckSze > 40) vertBlckSze = 40;
-
-    // kocke smejo biti le toliko velike, kot je manjša od obeh omejitev;
-    blockSize = hrztlBlckSze < vertBlckSze ? hrztlBlckSze : vertBlckSze;
-    canvas.width = 10 * blockSize;
-    canvas.height = 21 * blockSize + 20;
-    canvas.style.top = '20px';
-    canvas.style.left = `${(lesserBoundingHorizontal - canvas.width) / 2}px`
-    canvasLeft = canvas.getBoundingClientRect().left;
-    canvasTop = canvas.getBoundingClientRect().top;
-    console.log('canvasLeft:', canvasLeft, 'canvasTop:', canvasTop, 'block size:', blockSize);
-
-    // vrednosti za lokacijo miniGrida in mainGrida; IZRAŽENE v koordinatah na canvasu, ne na ekranu!!!
-    mainGridLayoutsCoords.vertical.x = 0;   // vertical pomeni pri vertikalni postavitvi; x pomeni odmik zgornje leve točke main grida v canvasu;
-    mainGridLayoutsCoords.vertical.y = 5 * blockSize + 20;
-    mainGridLayoutsCoords.vertical.l = (lastColumn0Based + 1) * blockSize;
-    mainGridLayoutsCoords.vertical.h = (lastRow0based + 1) * blockSize;
-    // če se bo obračalo, bo treba določit tudi hzntl;
-
-    mainGridCoords = mainGridLayoutsCoords[gameDirection.layout];   // v mobile je trenutno je to vedno vertical;   ta vrstica je razlog, da je mainGridCoords let in ne const;
-
-    miniGridCoords.x = 2.5 * blockSize; // ker je mini dolg 5 in cel kanvas 10, je na obeh straneh minija 2,5 kocke placa;
-    miniGridCoords.y = 0;
-    miniGridCoords.l = 5 * blockSize;
-    miniGridCoords.h = 5 * blockSize;
-
-    insertionColumn = (lastColumn0Based + 1) % 2 === 0 ? ((lastColumn0Based + 1) / 2) - 1 : ((lastColumn0Based + 1) - 1) / 2;
-    resolveEmptyMainGridAndBckgndGrid();
-    // drawDirectionArrow();    // trenutno izključeno, ker itak ne obračamo;
-
-    // umestitev srednjega gumba
-    midBtn.style.left = `${lesserBoundingHorizontal / 2 - 25}px`;   // -25, ker je širina gumba 50px;
-    
-}
 
 //      ---------------     Potek igre
 
@@ -565,8 +498,8 @@ function decisionAfterFormMovementEnded() {
 
     // in če ne, je pač game over;
     if (gameIntervalIsInMotion !== null) clearInt(); // če ni spejs, je treba odstranit intervalni callBK; če je spejs, je interval že bil ustavljen
-    console.log(' G A M E   O V E R ');
     isAGameRunning = false;
+    console.log(' G A M E   O V E R ');
     // controlsTemporarilyOff = true;    // če bo vpisovanje inicialk, je treba to odpret; medtem ko je odprto okno za high scores, tipka enter ne sme imet funkcionalnosti "zaženi igro";
     clearMiniGrid();
     curtainInMiniGridClosing();
@@ -641,11 +574,14 @@ function getBlocksMoving() {    // motor vsega
 function startGame() {
     phrase = lang === langEN ? 'Pause game' : 'Začasno ustavi igro';
     mainAtionLbl.innerHTML = phrase;
-    contentJoker.classList.add('hidden');
-    if (wasContJokerShwnAtOrntChg) wasContJokerShwnAtOrntChg = false;
+    contentJoker.classList.add('hidden');   // za GAME OVER;
+    if (wasGmeOvrShwnAtOrntChg) wasGmeOvrShwnAtOrntChg = false;
     eraseBothMainGridLayouts();
     resolveEmptyMainGridAndBckgndGrid();    // to je verjetno zato, da izbrišeš puščico, če je narisana;
     refreshCurrentScore();
+    if (homeLink.getBoundingClientRect().top < 5) { // ta mora bit obvezno za refreshScore, ker če ne se ne bo postavil pod njega;
+        homeLink.style.top = `${scoreContent.getBoundingClientRect().bottom + 8}px`;
+    }
     // refreshExplosionsCountDisplay(); samo web
     curtainInMiniGridOpening();
     setTimeout(() => {
@@ -713,6 +649,73 @@ function assignControlListeners() {
     });
 }
 
+function initializeScreenAndSizes() {
+
+    /*
+    ----  po NAVPIČNI dimenziji
+    20px higienski rob zgoraj
+        minigrid (5 kock)
+    20px higienski rob (v canvasu)
+        glavni grid (16 kock)
+    90px (gumbov del):
+        20px zgoraj
+        50px gumb
+        20px spodaj
+
+    ----  po VODORAVNI dimenziji
+    20px hig. rob levo
+    20px hig. rob desno
+    */
+
+    lesserBoundingHorizontal = window.innerWidth > screen.width ? screen.width : window.innerWidth;
+    const avail4blocksHrztl = lesserBoundingHorizontal - 40;    // 40px je ne-canvas del, glej izračun zgoraj;
+    let hrztlBlckSze = Math.floor(avail4blocksHrztl / 10);  // 10 kock širine je igralno polje;
+    if (hrztlBlckSze > 40) hrztlBlckSze = 40;
+    lesserBoundingVertical = window.innerHeight > screen.height ? screen.height : window.innerHeight;
+    const avail4blocksVerticl = lesserBoundingVertical - 130; // 130px je ne-grid delov, glej izračun zgoraj;
+    let vertBlckSze = Math.floor(avail4blocksVerticl / 21);   // 21 = 5 kock minigrid + 16 kock igralni del; brez roba;
+    if (vertBlckSze > 40) vertBlckSze = 40;
+
+    // kocke smejo biti le toliko velike, kot je manjša od obeh omejitev;
+    blockSize = hrztlBlckSze < vertBlckSze ? hrztlBlckSze : vertBlckSze;
+    canvas.width = 10 * blockSize;
+    canvas.height = 21 * blockSize + 20;
+    canvas.style.top = '20px';
+    canvas.style.left = `${(lesserBoundingHorizontal - canvas.width) / 2}px`
+    canvasLeft = canvas.getBoundingClientRect().left;
+    canvasTop = canvas.getBoundingClientRect().top;
+    console.log('canvasLeft:', canvasLeft, 'canvasTop:', canvasTop, 'block size:', blockSize);
+
+    // vrednosti za lokacijo miniGrida in mainGrida; IZRAŽENE v koordinatah na canvasu, ne na ekranu!!!
+    mainGridLayoutsCoords.vertical.x = 0;   // vertical pomeni pri vertikalni postavitvi; x pomeni odmik zgornje leve točke main grida v canvasu;
+    mainGridLayoutsCoords.vertical.y = 5 * blockSize + 20;
+    mainGridLayoutsCoords.vertical.l = (lastColumn0Based + 1) * blockSize;
+    mainGridLayoutsCoords.vertical.h = (lastRow0based + 1) * blockSize;
+    // če se bo obračalo, bo treba določit tudi hzntl;
+
+    mainGridCoords = mainGridLayoutsCoords[gameDirection.layout];   // v mobile je trenutno je to vedno vertical;   ta vrstica je razlog, da je mainGridCoords let in ne const;
+
+    miniGridCoords.x = 2.5 * blockSize; // ker je mini dolg 5 in cel kanvas 10, je na obeh straneh minija 2,5 kocke placa;
+    miniGridCoords.y = 0;
+    miniGridCoords.l = 5 * blockSize;
+    miniGridCoords.h = 5 * blockSize;
+
+    insertionColumn = (lastColumn0Based + 1) % 2 === 0 ? ((lastColumn0Based + 1) / 2) - 1 : ((lastColumn0Based + 1) - 1) / 2;
+    resolveEmptyMainGridAndBckgndGrid();
+    // drawDirectionArrow();    // trenutno izključeno, ker itak ne obračamo;
+
+    // umestitev spodnjih 3 gumbov;
+    if (canvasLeft > 50) {  // da je odmik najmanj 20;
+        lftBtn.style.left = `${canvasLeft - 30}px`;
+        rghtBtn.style.right = `${canvasLeft - 30}px`;   // ker je right definiran z odmikom od desnega roba (in ne od levega), je ta odmik isti, kot ga ima odmik levega gumba;
+    } else {
+        lftBtn.style.left = `20px`;
+        rghtBtn.style.right = '20px';
+    }
+    midBtn.style.left = `${lesserBoundingHorizontal / 2 - 25}px`;   // -25, ker je širina gumba 50px;
+    
+}
+
 function checkLang(){
     let checkLangStr = 'en';
     if (navigator.language != '') {
@@ -730,9 +733,10 @@ function notifyOrientationNotSupp() {
     rghtBtn.classList.add('hidden');
     canvas.classList.add('hidden');
     scoreContent.classList.add('hidden');
-    if (!contentJoker.classList.contains('hidden')) {   // če je contentjoker (v praksi je to GAME OVER) prikazan;
+    homeLink.classList.add('hidden');
+    if (!contentJoker.classList.contains('hidden') && !isAGameRunning) {   // če je GAME OVER prikazan (zato tudi pogoj o noGameRunning); v contentJokerju se izvajajo tudi efekti (takrat jeisAGameRunning true), ampak ti so meneđirani z wrCtrlsTempOffAtOrtChg;
         contentJoker.classList.add('hidden');
-        wasContJokerShwnAtOrntChg = true;
+        wasGmeOvrShwnAtOrntChg = true;
     }
 
     // pokažemo obvestilo;
@@ -749,7 +753,8 @@ function showGameElmnts() {
     rghtBtn.classList.remove('hidden');
     canvas.classList.remove('hidden');
     scoreContent.classList.remove('hidden');
-    if (wasContJokerShwnAtOrntChg) contentJoker.classList.remove('hidden'); // odstranimo hidden, samo že je bil prikazan;
+    homeLink.classList.remove('hidden');
+    if (wasGmeOvrShwnAtOrntChg) contentJoker.classList.remove('hidden'); // odstranimo hidden, samo že bil prikazan GameOver;
 }
 
 function atOrientChg() {
@@ -835,15 +840,14 @@ screen.orientation.addEventListener("change", atOrientChg);
 
  
 /* 
-stestirat (najprej objavit):
-če je igra pavzirana, preden obrneš fon vodoarvno, si to zapomnit, da je ne štarta po ponovni postavitvi pokonci
+stestirat
+preklopil na vodoravno med izvajanjem doubleTr in je ostal siv okvir; je hidden na pravem mestu?
 
 ? za navodila
 ikona za Domov
 klik v polje desno ali levo od kocke, da je premakneš tja
 podrsat lik dol, da ga vržeš dol
 klik na lik, da ga obrneš
-kaj se zgodi, če obrneš telefon med doubletrouble? dodat kontrolno spremenljivko, ki prepreči zagon intervala na koncu izvajanja efekta?
 da bi kocke hodile v levo, ko obrneš ekran na levo
 */
 
