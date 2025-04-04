@@ -77,7 +77,7 @@ let kateriJeVesTrue;     // številska vrednost; katera vrstica je vsa true, tor
 let numberOfExplosions, numberConsecutiveXplosions, numberOfFallenForms, numberOfCycles, score;
 const lineColor = '#bdb9b9';    // pri lineWidth === 2 je še najboljša: #bdb9b9, pri lineWidth === 1 pa #8d8989
 const currentBlockPos = {};      // globalna spremenljivka, ki se v realnem času spremninja in uporablja za izrisovanje kock; NE UPORABLJAJ za preverjanja izvedljivosti pred premikom in niti pri polnjenju podatkov "true" na board!!
-const currentFormCoords = {};   // spremenljivka samo za mobile, za shranjevanje lokacije kock lika, da lahko izmeriškam glede na lik je pritisnil uporabnik;
+const currFormScreenCoords = {};   // spremenljivka samo za mobile, za shranjevanje lokacije kock lika, da lahko izmeriškam glede na lik je pritisnil uporabnik;
 let gameDirection = { direction: 'down', layout: 'vertical' };
 let lesserBoundingVertical = 0, lesserBoundingHorizontal = 0;
 const mainGridLayoutsCoords = {
@@ -106,7 +106,7 @@ class Form {
         this.name = name;
         this.totalRotations = this.coordinates.length;
         this.activeRotation = 0;
-        this.notionalPos = { row: 0, col: 4 };
+        this.notionalPos = { row: 0, col: 4 };  // očitno je 0b, ker je row == 0;
         this.color = color;
     }
 }
@@ -247,6 +247,18 @@ function getRandomForm() {
     return randomForm;
 }
 
+function getCurrFrmScreenCoords() {
+    // pridobimo leftMost in rightMost za potrebe premikanja s tapkanjem;
+    activeForm.coordinates[activeForm.activeRotation].forEach(function (element, i) {
+        if (i == 0 || canvasLeft + (activeForm.notionalPos.col + element.cDiff) * blockSize < currFormScreenCoords.leftmost) {  // najprej mora bit pogoj 0, da se najprej vnese ena relevantna vrednost za ta lik,..
+            currFormScreenCoords.leftmost = canvasLeft + (activeForm.notionalPos.col + element.cDiff) * blockSize;              // ..pol pa se po potrebi še zmanjša (2. del if pogoja);
+        }
+        if (i == 0 || canvasLeft + (activeForm.notionalPos.col + element.cDiff) * blockSize + (blockSize - 1) > currFormScreenCoords.rightmost) {
+            currFormScreenCoords.rightmost = canvasLeft + (activeForm.notionalPos.col + element.cDiff) * blockSize + (blockSize - 1);
+        }
+    });
+}
+
 const insertFormOnTop = () => {
 
     activeForm = nextForm;
@@ -257,6 +269,8 @@ const insertFormOnTop = () => {
     activeForm.notionalPos.col = insertionColumn; // ker tako next kot active kažeta na objekt, je treba vrednosti ponastaviti zdaj..
     activeForm.activeRotation = 0;  // ..sicer pride do težav, če sta active in next isti lik (pred tem je v showNextFormInMiniGrid() lik dobil drugačne koordinate)
     numberOfFallenForms++;
+
+    getCurrFrmScreenCoords();
 
     drawForm();
 }
@@ -309,9 +323,13 @@ function canFormMoveDownHuh() {
 
 function moveForm(direction) {
     deleteForm();
-    if (direction === 'left') activeForm.notionalPos.col--;
-    if (direction === 'right') activeForm.notionalPos.col++;
-    if (direction === 'down') activeForm.notionalPos.row++;
+    if (direction === 'left') {
+        activeForm.notionalPos.col--;
+        getCurrFrmScreenCoords();
+    } else if (direction === 'right') {
+        activeForm.notionalPos.col++;
+        getCurrFrmScreenCoords();
+    } else if (direction === 'down') activeForm.notionalPos.row++; // pri temu ni treba računat getCurrScr.. ()leftMost in rMost, ker se pri premiku dol ne spremenita;
     drawForm();
 }
 
@@ -333,6 +351,7 @@ function rotate() {
     if (canIt) {
         deleteForm();
         activeForm.activeRotation = targetRotation;
+        getCurrFrmScreenCoords();
         drawForm();
     };
 }
@@ -632,19 +651,29 @@ function assignControlListeners() {
             phrase = lang === langEN ? 'Pause game' : 'Začasno ustavi igro';
             mainAtionLbl.innerHTML = phrase;
         }
-        });
+    });
     lftBtn.addEventListener('click', () => {if (isAGameRunning && !isGamePaused && !controlsTemporarilyOff) maneuver('left')});
     rghtBtn.addEventListener('click', () => {if (isAGameRunning && !isGamePaused && !controlsTemporarilyOff)  maneuver('right')});
     midBtn.addEventListener('click', () => {if (isAGameRunning && !isGamePaused && !controlsTemporarilyOff) rotate()});
     canvas.addEventListener('click', (e) => {
         console.log(e.x, miniGridCoords.x);
-        if (!controlsTemporarilyOff && isAGameRunning && !isGamePaused) {
-            if ((e.y > (canvas.height - 3 * blockSize))) {
+        if (!isGamePaused && !controlsTemporarilyOff && isAGameRunning) {
+            // za premikanje po korak navzdol;
+            if ((e.y > (20 + canvas.height - 2.5 * blockSize) && e.y < (20 + canvas.height))) {   // 20, ker je canvas 20px od gornjega roba; približno 2,5 vrstice lahko klikaš
                 if (canFormMoveDownHuh()) moveForm('down');
-            } else if (e.x > canvasLeft + miniGridCoords.x && e.x < canvasLeft + miniGridCoords.x + miniGridCoords.l
+            }
+            // za spust do konca navzdol (namesto space);
+            else if (e.x > canvasLeft + miniGridCoords.x && e.x < canvasLeft + miniGridCoords.x + miniGridCoords.l
                 && e.y > canvasTop && e.y < canvasTop + miniGridCoords.h) { // e.x vrne abs koordinate ekrana, ne na canvasu;
                     actionWhenSpacePressed();
             }
+            // za premik levo desno s tapanjem po canvasu;
+            else if (e.x > canvasLeft - 3 && e.x < currFormScreenCoords.leftmost // pogoji po x osi za premik levo; -3, da ni treba bit tako natančen;
+                && e.y < (20 + canvas.height - 2.5 * blockSize) && e.y > (20 + miniGridCoords.h + 20) // pogoji po y osi
+            ) maneuver('left');
+            else if (e.x > currFormScreenCoords.rightmost && e.x < canvasLeft + (lastColumn0Based + 1) * blockSize + 3   // pogoji po x osi za premik desno;
+                && e.y < (20 + canvas.height - 2.5 * blockSize) && e.y > (20 + miniGridCoords.h + 20) // pogoji po y osi
+            ) maneuver('right');
         } 
     });
 }
@@ -840,8 +869,6 @@ screen.orientation.addEventListener("change", atOrientChg);
 
  
 /* 
-stestirat
-preklopil na vodoravno med izvajanjem doubleTr in je ostal siv okvir; je hidden na pravem mestu?
 
 ? za navodila
 ikona za Domov
