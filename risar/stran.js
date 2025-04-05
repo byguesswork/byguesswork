@@ -1067,7 +1067,7 @@ canvas.addEventListener('mouseleave', function () {
 
 if (screen.width < 900 || screen.height < 690) { // to načeloma skensla moblce, ne pa tudi laptopov
     document.body.style.background = '#808080';
-    document.body.innerHTML = '<p style="padding-left: 20px;"><br><a href="../index.html" title="back to By Guesswork"><img src="../images/home2.PNG" alt="home"></a><br><br>This program is not fond of small screens.<br>They make it look bad.<br><br>Please revisit this page when viewing<br>on a regular desktop or laptop monitor.<br>Min required size: 900 x 755px<br><br>Warmly welcome!</p>';
+    document.body.innerHTML = '<p style="padding-left: 20px;"><br><a href="../index.html" title="back to By Guesswork"><img src="../images/home.PNG" alt="home"></a><br><br>This program is not fond of small screens.<br>They make it look bad.<br><br>Please revisit this page when viewing<br>on a regular desktop or laptop monitor.<br>Min required size: 900 x 755px<br><br>Warmly welcome!</p>';
 }
 else {
 

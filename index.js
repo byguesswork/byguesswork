@@ -111,8 +111,8 @@ function init() {
   // if (forTest != null) forTest.innerHTML = `forDebug`;
   if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null || navigator.userAgentData.mobile == true) {    // todo to bi veljalo izboljšat s čekiranjem še širine
     isMobile = true;
-    // dinamično nastavimo href takoj po prihodu na stran;
-    tetrisLink.href = "tetris/m/tetris.html";
+    // dinamično nastavimo href takoj po prihodu na stran (samo na index.html);
+    if (tetrisLink != null) tetrisLink.href = "tetris/m/tetris.html";
 
     if (upperPosition4Blog != null) { // to se izvede samo na glavni strani (index.html);
       // blog premaknemo na vrh, da je bolj viden, ker je zaslon manjši; to se potem ne spreminja več, tudi če spremeniš orientacijo;
@@ -135,23 +135,25 @@ function init() {
     }
 
   } else {
-    tetrisLink.href = "tetris/tetris_EN.html";  // link za tetris, če stran ni prikazana mobile;
+    if (tetrisLink != null) tetrisLink.href = "tetris/tetris_EN.html";  // link za tetris, če stran ni prikazana mobile (koda relevantna samo za index.html);
   }
 
-  // dinamično nastavit linke za appe;
-  let langString = 'en';
-  if (navigator.language != '') {
-    langString = navigator.language;
-  } else if (navigator.userLanguage != '') {
-    langString = navigator.userLanguage;
-  };
-  if (langString == 'sl' || langString == 'sl-si' || langString == 'sl-SI' || langString == 'si') {
-    letsplayLink.href = "app/igrajmose/sl/index.html";
-    fuelLink.href = "app/fuel/sl/index.html";
-  } else {
-    letsplayLink = "app/igrajmose/en/index.html";
-    fuelLink.href = "app/fuel/en/index.html";
-  }
+  // dinamično nastavit linke za appe (samo na strani index.html);
+  if (fuelLink != null || letsplayLink != null) {
+    let langString = 'en';
+    if (navigator.language != '') {
+      langString = navigator.language;
+    } else if (navigator.userLanguage != '') {
+      langString = navigator.userLanguage;
+    };
+    if (langString == 'sl' || langString == 'sl-si' || langString == 'sl-SI' || langString == 'si') {
+      if (letsplayLink != null) letsplayLink.href = "app/igrajmose/sl/index.html";
+      if (fuelLink != null) fuelLink.href = "app/fuel/sl/index.html";
+    } else {
+      if (letsplayLink != null) letsplayLink = "app/igrajmose/en/index.html";
+      if (fuelLink != null) fuelLink.href = "app/fuel/en/index.html";
+    }
+  } 
 
 }
 
@@ -280,7 +282,7 @@ function inflate(element) {
 
 
 init(); // določimo, al je mobile; po potrebi premečemo in preuredimo vsebino znotraj levega stolpca;
-doLayout(); // širina stolcev in premetavnaje vsebine iz stoolpca v drugega
+doLayout(); // širina stolcev in premetavnaje vsebine iz stolpca v drugega;
 applyTheme(); // naredimo modro temo, če treba;
 
 if (isMobile) {

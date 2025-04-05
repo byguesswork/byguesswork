@@ -86,7 +86,7 @@ const mainGridLayoutsCoords = {
 };
 let mainGridCoords = { x: 30, y: 30, l: 402, h: 642 };  // ta mora bit let, ker mu za spreminjanje vsebine spreminjamo referenco;
 const miniGridCoords = { x: 467, y: 30, l: 203, h: 203 }    // ta je lahko const, kr mu ne spreminjamo reference, ampak polja;
-let blockSize = 40, canvasLeft = 0, canvasTop = 0; // canvasLeft je x levega roba canvasa;
+let blockSize = 40, canvasLeft = 0, canvasTop = 0 /* canvas obsega minigrid in maingrid ! */, mainGridTop = 0 ; // canvasLeft je x levega roba canvasa;
 let insertionColumn = 4;
 let arrowIconCoords = [{ x: 0, y: 60 }, { x: -20, y: 60 }, { x: 15, y: 100 }, { x: 50, y: 60 }, { x: 30, y: 60 }, { x: 30, y: 0 }, { x: 15, y: 10 }];
 let isGreenMode = false;
@@ -256,6 +256,13 @@ function getCurrFrmScreenCoords() {
         if (i == 0 || canvasLeft + (activeForm.notionalPos.col + element.cDiff) * blockSize + (blockSize - 1) > currFormScreenCoords.rightmost) {
             currFormScreenCoords.rightmost = canvasLeft + (activeForm.notionalPos.col + element.cDiff) * blockSize + (blockSize - 1);
         }
+    // pridobimo še za topmost in bottommost;
+        if (i == 0) {  // za topmost je prva kocka v vsakem liku zgoraj (če je lik v dveh nivojih), tako da topmost poberemo samo enkrat
+            currFormScreenCoords.topmost = mainGridTop + (activeForm.notionalPos.row + element.rDiff) * blockSize;
+        }
+        if (i == 0 || mainGridTop + (activeForm.notionalPos.row + element.rDiff) * blockSize + (blockSize - 1) > currFormScreenCoords.bottommost) {  // najprej mora bit pogoj 0, da se najprej vnese ena relevantna vrednost za ta lik,..
+            currFormScreenCoords.bottommost = mainGridTop + (activeForm.notionalPos.row + element.rDiff) * blockSize + (blockSize - 1);              // ..pol pa se po potrebi še poveča (2. del if pogoja);
+        }
     });
 }
 
@@ -323,13 +330,10 @@ function canFormMoveDownHuh() {
 
 function moveForm(direction) {
     deleteForm();
-    if (direction === 'left') {
-        activeForm.notionalPos.col--;
-        getCurrFrmScreenCoords();
-    } else if (direction === 'right') {
-        activeForm.notionalPos.col++;
-        getCurrFrmScreenCoords();
-    } else if (direction === 'down') activeForm.notionalPos.row++; // pri temu ni treba računat getCurrScr.. ()leftMost in rMost, ker se pri premiku dol ne spremenita;
+    if (direction === 'left') { activeForm.notionalPos.col--; }
+    else if (direction === 'right') { activeForm.notionalPos.col++; }
+    else if (direction === 'down') activeForm.notionalPos.row++;
+    getCurrFrmScreenCoords();
     drawForm();
 }
 
@@ -639,8 +643,8 @@ function refreshCurrentScore() {
 
 function assignControlListeners() {
     mainAtionLbl.addEventListener('click', () => {
-        if (!isAGameRunning && !controlsTemporarilyOff) startGame() ;
-        else if (isAGameRunning && !controlsTemporarilyOff && !isGamePaused) {    // pri eksploziji so controlsTempOff, takrat ne sme biti možno pavzirat,
+        if (!isAGameRunning && !controlsTemporarilyOff) startGame();    // controlsTempOff tukaj je verjetno legacy iz web, kjer se to lahko zgodi ob vnašanju inicialk;
+        else if (!isGamePaused && !controlsTemporarilyOff && isAGameRunning) {    // pri eksploziji so controlsTempOff, takrat ne sme biti možno pavzirat,
             isGamePaused = true;
             clearInt();
             phrase = lang === langEN ? 'GAME PAUSED click to resume' : 'PAVZIRANO, kliknite za nadalj.';
@@ -656,25 +660,35 @@ function assignControlListeners() {
     rghtBtn.addEventListener('click', () => {if (isAGameRunning && !isGamePaused && !controlsTemporarilyOff)  maneuver('right')});
     midBtn.addEventListener('click', () => {if (isAGameRunning && !isGamePaused && !controlsTemporarilyOff) rotate()});
     canvas.addEventListener('click', (e) => {
-        console.log(e.x, miniGridCoords.x);
+        // MED IGRO
         if (!isGamePaused && !controlsTemporarilyOff && isAGameRunning) {
-            // za premikanje po korak navzdol;
-            if ((e.y > (20 + canvas.height - 2.5 * blockSize) && e.y < (20 + canvas.height))) {   // 20, ker je canvas 20px od gornjega roba; približno 2,5 vrstice lahko klikaš
-                if (canFormMoveDownHuh()) moveForm('down');
-            }
-            // za spust do konca navzdol (namesto space);
-            else if (e.x > canvasLeft + miniGridCoords.x && e.x < canvasLeft + miniGridCoords.x + miniGridCoords.l
+            // za spust do konca navzdol (klik na minigrid namesto pritiska space);
+            if (e.x > canvasLeft + miniGridCoords.x && e.x < canvasLeft + miniGridCoords.x + miniGridCoords.l
                 && e.y > canvasTop && e.y < canvasTop + miniGridCoords.h) { // e.x vrne abs koordinate ekrana, ne na canvasu;
                     actionWhenSpacePressed();
             }
-            // za premik levo desno s tapanjem po canvasu;
-            else if (e.x > canvasLeft - 3 && e.x < currFormScreenCoords.leftmost // pogoji po x osi za premik levo; -3, da ni treba bit tako natančen;
-                && e.y < (20 + canvas.height - 2.5 * blockSize) && e.y > (20 + miniGridCoords.h + 20) // pogoji po y osi
+            // za premik levo/desno s tapanjem po canvasu;
+            else if (e.x >= canvasLeft - 19 && e.x < currFormScreenCoords.leftmost // pogoji po x osi za premik levo; -19, da lahko tudi malo izven roba glavnega grida (-21 bi morda dalo že error, zato dam -19);
+                && e.y < 20 + canvas.height && e.y > 20 + miniGridCoords.h + 20 // pogoji po y osi (kjer koli na višini glavnega grida);
             ) maneuver('left');
-            else if (e.x > currFormScreenCoords.rightmost && e.x < canvasLeft + (lastColumn0Based + 1) * blockSize + 3   // pogoji po x osi za premik desno;
-                && e.y < (20 + canvas.height - 2.5 * blockSize) && e.y > (20 + miniGridCoords.h + 20) // pogoji po y osi
+            else if (e.x > currFormScreenCoords.rightmost && e.x <= canvasLeft + (lastColumn0Based + 1) * blockSize + 19   // pogoji po x osi za premik desno;
+                && e.y < (20 + canvas.height) && e.y > (20 + miniGridCoords.h + 20) // pogoji po y osi
             ) maneuver('right');
-        } 
+            // za obračanje lika ALI premikanje po korak navzdol (oboje deluje samo v navpičnem stolpcu lika; prvo v vodoravni vrstici lika, drugo pod likom);
+            else if (e.x >= currFormScreenCoords.leftmost && e.x <= currFormScreenCoords.rightmost) {  // pogoji po osi x; mora bit v navpični senci lika, meje vključene;
+                // OBRAČANJE;
+                if (e.y >= currFormScreenCoords.topmost && e.y <= currFormScreenCoords.bottommost) {
+                    rotate();
+                }
+                // KORAKOMA NAVZDOL;
+                else if (e.y > currFormScreenCoords.bottommost && e.y < 20 + canvas.height + 3) {  // 20, ker je canvas 20px od gornjega roba; 3, da ni treba bit tako natančen pri robu
+                    if (canFormMoveDownHuh()) moveForm('down');
+                }
+            }
+        } else if (!isAGameRunning && !controlsTemporarilyOff) {
+            if (e.x > canvasLeft + miniGridCoords.x && e.x < canvasLeft + miniGridCoords.x + miniGridCoords.l   // klik na minigrid za štart;
+                && e.y > canvasTop && e.y < canvasTop + miniGridCoords.h) startGame();
+        }
     });
 }
 
@@ -713,6 +727,7 @@ function initializeScreenAndSizes() {
     canvas.style.left = `${(lesserBoundingHorizontal - canvas.width) / 2}px`
     canvasLeft = canvas.getBoundingClientRect().left;
     canvasTop = canvas.getBoundingClientRect().top;
+    mainGridTop = canvasTop + 5 * blockSize + 20;
     console.log('canvasLeft:', canvasLeft, 'canvasTop:', canvasTop, 'block size:', blockSize);
 
     // vrednosti za lokacijo miniGrida in mainGrida; IZRAŽENE v koordinatah na canvasu, ne na ekranu!!!

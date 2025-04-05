@@ -98,8 +98,17 @@ temno sivo ozadje:      #313131
 .btn {
     position: absolute;
     background-color: #FDAE34;
+    color: black;
+    font-size: 1.5em;
     width: 50px;
     height: 50px;
     border-radius: 50%;
     bottom: 20px;
+    text-align: center;
+    line-height: 50px;  /* finta da centriraš vertikalno; drugi načini so da to daš table cell (ki je samodejno vertikalno centrirana ali display: flex; justify-content: center; align-items: center; flex-direction: column;) */
+
+}
+
+.bold {
+    font-weight: bold;
 }
