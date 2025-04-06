@@ -150,7 +150,7 @@ function init() {
       if (letsplayLink != null) letsplayLink.href = "app/igrajmose/sl/index.html";
       if (fuelLink != null) fuelLink.href = "app/fuel/sl/index.html";
     } else {
-      if (letsplayLink != null) letsplayLink = "app/igrajmose/en/index.html";
+      if (letsplayLink != null) letsplayLink.href = "app/igrajmose/en/index.html";
       if (fuelLink != null) fuelLink.href = "app/fuel/en/index.html";
     }
   } 
