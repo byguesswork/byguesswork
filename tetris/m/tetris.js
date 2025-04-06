@@ -658,7 +658,7 @@ function assignControlListeners() {
                 clearInt();
                 phrase = lang === langEN ? 'GAME PAUSED click to resume' : 'PAVZIRANO, kliknite za nadalj.';
                 mainAtionLbl.innerHTML = phrase;
-            } else if (isGamePaused) {
+            } else if (isGamePaused && !isInfoSettingsOpen) {
                 isGamePaused = false;
                 getBlocksMoving();
                 phrase = lang === langEN ? 'Pause game' : 'Začasno ustavi igro';
@@ -679,11 +679,16 @@ function assignControlListeners() {
                 <strong>Faster movement down:</strong> Tap playing field under tetromino<br><strong>Drop tetromino:</strong> Tap square above playing field</div><br><br>`;
                 infoSettgsOK.innerHTML = 'OK';
             } else {
-                infoSettgsContent.innerHTML = `Navodila<br><br><div style="font-size:0.9em;"><strong>Premik levo/desno:</strong> stranska gumba spodaj ali dotik igralnega polja levo/desno od lika<br><strong>Obrat lika:</strong> srednji gumb spodaj ali dotik lika<br>
-                <strong>Hitrejše premikanje lika navzdol:</strong> dotik igralnega polja pod likom<br><strong>Spust lika do dna:</strong> dotik kvadrata nad igralnim poljem</div><br><br>`;
+                infoSettgsContent.innerHTML = `Navodila<br><br><div style="font-size:0.9em;"><strong>Premik levo/desno:</strong> uporabite stranska gumba spodaj ali tapnite igralno polje levo/desno od lika<br><strong>Obrat lika:</strong> uporabite srednji gumb spodaj
+                ali tapnite lik<br><strong>Hitrejše premikanje lika navzdol:</strong> tapnite igralno polje pod likom<br><strong>Spust lika do dna:</strong> tapnite kvadrat nad igralnim poljem</div><br><br>`;
                 infoSettgsOK.innerHTML = 'V redu';
             }
             infoSettgsOK.className = 'align-right';
+
+            if (!contentJoker.classList.contains('hidden') && !isAGameRunning) {   // če je GAME OVER prikazan (zato tudi pogoj o noGameRunning), skrij content joker in nastavi kontrolno spremenljivko;
+                contentJoker.classList.add('hidden');
+                wasGmeOvrShwnAtOrntChg = true;
+            }
             // listener za nasprotno dejanje je spodaj;
         }
     });
@@ -695,6 +700,14 @@ function assignControlListeners() {
         infoSettgsContent.className = 'info_settings_content_closed';
         infoSettgsContent.innerHTML = 'i';
         infoSettgsOK.className = 'hidden';  // skrijemo gumb;
+        if (wasGmeOvrShwnAtOrntChg) {
+            contentJoker.classList.remove('hidden');
+            wasGmeOvrShwnAtOrntChg = false;
+        }
+    });
+
+    contentJoker.addEventListener('click', () => {
+        if (!isAGameRunning) startGame();   // za infoSettings ni treba preverjat, ker če je !isAGameRunning, je v contentJokerju prikazan GAME OVER; če odpreš infoSettgs, se contentJoker skrije;
     });
 
     canvas.addEventListener('click', (e) => {
@@ -860,12 +873,13 @@ function checkLang(){
 
 function notifyOrientationNotSupp() {
     // najprej skrijemo elemente igre;
+    scoreContent.classList.add('hidden');
+    infoSettgs.classList.add('hidden');
+    homeLink.classList.add('hidden');
+    canvas.classList.add('hidden');
     lftBtn.classList.add('hidden');
     midBtn.classList.add('hidden');
     rghtBtn.classList.add('hidden');
-    canvas.classList.add('hidden');
-    scoreContent.classList.add('hidden');
-    homeLink.classList.add('hidden');
     if (!contentJoker.classList.contains('hidden') && !isAGameRunning) {   // če je GAME OVER prikazan (zato tudi pogoj o noGameRunning); v contentJokerju se izvajajo tudi efekti (takrat jeisAGameRunning true), ampak ti so meneđirani z wrCtrlsTempOffAtOrtChg;
         contentJoker.classList.add('hidden');
         wasGmeOvrShwnAtOrntChg = true;
@@ -880,12 +894,13 @@ function notifyOrientationNotSupp() {
 }
 
 function showGameElmnts() {
+    scoreContent.classList.remove('hidden');
+    infoSettgs.classList.remove('hidden');
+    homeLink.classList.remove('hidden');
+    canvas.classList.remove('hidden');
     lftBtn.classList.remove('hidden');
     midBtn.classList.remove('hidden');
     rghtBtn.classList.remove('hidden');
-    canvas.classList.remove('hidden');
-    scoreContent.classList.remove('hidden');
-    homeLink.classList.remove('hidden');
     if (wasGmeOvrShwnAtOrntChg) contentJoker.classList.remove('hidden'); // odstranimo hidden, samo že bil prikazan GameOver;
 }
 
