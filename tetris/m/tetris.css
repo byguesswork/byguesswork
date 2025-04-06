@@ -33,6 +33,38 @@ temno sivo ozadje:      #313131
     text-align: right;
 }
 
+.info_settings_closed {
+    position: absolute;
+    top: 46px;
+    left: 8px;
+    height: 1.1em;
+    width: 1.1em;
+    line-height: 1.1em;
+    text-align: center;
+}
+
+.info_settings_content_closed {
+    border-radius: 50%;
+    border-color: #bdc4bd;
+    border-width: 1px;
+    border-style: solid;
+}
+.info_settings_content_open {
+    border: none;
+}
+
+.info_settings_open {
+    position: absolute;
+    top: 80px;
+    left: 40px;
+    right: 40px;
+    padding: 20px;
+    text-align: left;
+    border-color: #bdc4bd;
+    border-width: 1px;
+    border-style: solid;
+}
+
 #home_link{
     position: absolute;
     top: 2px;
@@ -95,20 +127,17 @@ temno sivo ozadje:      #313131
     display: none;
 }
 
+.align-right {
+    text-align: right;
+}
+
 .btn {
     position: absolute;
     background-color: #FDAE34;
     color: black;
-    font-size: 1.5em;
-    width: 50px;
+    width: 50px;    /* to je širina in spodaj višina html elementa, širino canvasa pa je trebe poem določit programatično */
     height: 50px;
     border-radius: 50%;
     bottom: 20px;
-    text-align: center;
-    line-height: 50px;  /* finta da centriraš vertikalno; drugi načini so da to daš table cell (ki je samodejno vertikalno centrirana ali display: flex; justify-content: center; align-items: center; flex-direction: column;) */
 
-}
-
-.bold {
-    font-weight: bold;
 }

@@ -52,11 +52,17 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const mainAtionLbl = document.getElementById('main_actn_lbl');
 const scoreContent = document.getElementById('score_content');
+const infoSettgs = document.getElementById('info_settings');
+    const infoSettgsContent = document.getElementById('info_settings_content');
+    const infoSettgsOK = document.getElementById('info_settings_OK');
 const homeLink = document.getElementById('home_link');
 const contentJoker = document.getElementById('content_joker');  // tle se riše GAME OVER in pa efekti;
 const lftBtn = document.getElementById('left_btn');
+const lftBtnCtx = lftBtn.getContext('2d');
 const midBtn = document.getElementById('mid_btn');
+const midBtnCtx = midBtn.getContext('2d');
 const rghtBtn = document.getElementById('right_btn');
+const rghtBtnCtx = rghtBtn.getContext('2d');
 const contentJokerBottom = document.getElementById('content_joker_bottom');
 // const btnTestButton2 = document.getElementById('button-2');
 
@@ -99,6 +105,7 @@ let var1, var2, phrase; // spremenljivke in pomožna fraza za vstavljanje besedi
 const langSL = 'sl', langEN = 'en';
 let isPortraitPrimary = true;   // hrani podatek, al imaš telefon navpično in pravilno obrnjen;
 let wasPausdAtOrntnChg = false, wasGmeOvrShwnAtOrntChg = false, wrCtrlsTempOffAtOrtChg = false;  // spremenljivke, ki beležijo stanje oken/procesov, ki jih je treba beležit pri orientation change
+let isInfoSettingsOpen = false;
 
 class Form {
     constructor(coordinates, name, color) {
@@ -643,30 +650,70 @@ function refreshCurrentScore() {
 
 function assignControlListeners() {
     mainAtionLbl.addEventListener('click', () => {
-        if (!isAGameRunning && !controlsTemporarilyOff) startGame();    // controlsTempOff tukaj je verjetno legacy iz web, kjer se to lahko zgodi ob vnašanju inicialk;
-        else if (!isGamePaused && !controlsTemporarilyOff && isAGameRunning) {    // pri eksploziji so controlsTempOff, takrat ne sme biti možno pavzirat,
-            isGamePaused = true;
-            clearInt();
-            phrase = lang === langEN ? 'GAME PAUSED click to resume' : 'PAVZIRANO, kliknite za nadalj.';
-            mainAtionLbl.innerHTML = phrase;
-        } else if (isGamePaused) {
-            isGamePaused = false;
-            getBlocksMoving();
-            phrase = lang === langEN ? 'Pause game' : 'Začasno ustavi igro';
-            mainAtionLbl.innerHTML = phrase;
+        if (!isAGameRunning) {
+            if (!isInfoSettingsOpen && !controlsTemporarilyOff) startGame();    // controlsTempOff tukaj je verjetno legacy iz web, kjer se to lahko zgodi ob vnašanju inicialk;
+        } else {    // igra je v teku (lahko pavzirana ali pa ne);
+            if (!isGamePaused && !controlsTemporarilyOff && !isInfoSettingsOpen) {    // pri eksploziji so controlsTempOff, takrat ne sme biti možno pavzirat,
+                isGamePaused = true;
+                clearInt();
+                phrase = lang === langEN ? 'GAME PAUSED click to resume' : 'PAVZIRANO, kliknite za nadalj.';
+                mainAtionLbl.innerHTML = phrase;
+            } else if (isGamePaused) {
+                isGamePaused = false;
+                getBlocksMoving();
+                phrase = lang === langEN ? 'Pause game' : 'Začasno ustavi igro';
+                mainAtionLbl.innerHTML = phrase;
+            }
+        }
+        
+    });
+    
+    infoSettgsContent.addEventListener('click', () => {
+        if (!isInfoSettingsOpen && !controlsTemporarilyOff) {   // zaradi pogoja isInfo... listener ne deluje, ko je okvir odprt, zato ga ni treba odstranjevat;
+            isInfoSettingsOpen = true;
+            if (isAGameRunning && !isGamePaused) clearInt();    // če je pavzirano je že itak tam clearInt;
+            infoSettgs.className = 'info_settings_open';
+            infoSettgsContent.className = 'info_settings_content_open';
+            if (lang === langEN) {
+                infoSettgsContent.innerHTML = `Instructions<br><br><div style="font-size:0.9em;"><strong>Move left/right:</strong> Use side buttons below or tap playing field left/right of shape<br><strong>Rotate:</strong> Use middle button below or tap tetromino (shape)<br>
+                <strong>Faster movement down:</strong> Tap playing field under tetromino<br><strong>Drop tetromino:</strong> Tap square above playing field</div><br><br>`;
+                infoSettgsOK.innerHTML = 'OK';
+            } else {
+                infoSettgsContent.innerHTML = `Navodila<br><br><div style="font-size:0.9em;"><strong>Premik levo/desno:</strong> stranska gumba spodaj ali dotik igralnega polja levo/desno od lika<br><strong>Obrat lika:</strong> srednji gumb spodaj ali dotik lika<br>
+                <strong>Hitrejše premikanje lika navzdol:</strong> dotik igralnega polja pod likom<br><strong>Spust lika do dna:</strong> dotik kvadrata nad igralnim poljem</div><br><br>`;
+                infoSettgsOK.innerHTML = 'V redu';
+            }
+            infoSettgsOK.className = 'align-right';
+            // listener za nasprotno dejanje je spodaj;
         }
     });
-    lftBtn.addEventListener('click', () => {if (isAGameRunning && !isGamePaused && !controlsTemporarilyOff) maneuver('left')});
-    rghtBtn.addEventListener('click', () => {if (isAGameRunning && !isGamePaused && !controlsTemporarilyOff)  maneuver('right')});
-    midBtn.addEventListener('click', () => {if (isAGameRunning && !isGamePaused && !controlsTemporarilyOff) rotate()});
+    
+    infoSettgsOK.addEventListener('mouseup', () => {
+        isInfoSettingsOpen = false;
+        if (isAGameRunning && !isGamePaused) getBlocksMoving();
+        infoSettgs.className = 'info_settings_closed';
+        infoSettgsContent.className = 'info_settings_content_closed';
+        infoSettgsContent.innerHTML = 'i';
+        infoSettgsOK.className = 'hidden';  // skrijemo gumb;
+    });
+
     canvas.addEventListener('click', (e) => {
-        // MED IGRO
-        if (!isGamePaused && !controlsTemporarilyOff && isAGameRunning) {
+
+        // Canvas, za zagon igre, če igra ni aktivna;
+        if (!isAGameRunning) {  
+            if (!isInfoSettingsOpen && !controlsTemporarilyOff) {
+                if (e.x > canvasLeft + miniGridCoords.x && e.x < canvasLeft + miniGridCoords.x + miniGridCoords.l   // klik na minigrid za štart;
+                    && e.y > canvasTop && e.y < canvasTop + miniGridCoords.h) startGame();
+            }  
+
+            // MED IGRO, upravljanje na canvasu;
+        } else if (!isGamePaused && !controlsTemporarilyOff && !isInfoSettingsOpen) {
             // za spust do konca navzdol (klik na minigrid namesto pritiska space);
             if (e.x > canvasLeft + miniGridCoords.x && e.x < canvasLeft + miniGridCoords.x + miniGridCoords.l
                 && e.y > canvasTop && e.y < canvasTop + miniGridCoords.h) { // e.x vrne abs koordinate ekrana, ne na canvasu;
                     actionWhenSpacePressed();
             }
+            
             // za premik levo/desno s tapanjem po canvasu;
             else if (e.x >= canvasLeft - 19 && e.x < currFormScreenCoords.leftmost // pogoji po x osi za premik levo; -19, da lahko tudi malo izven roba glavnega grida (-21 bi morda dalo že error, zato dam -19);
                 && e.y < 20 + canvas.height && e.y > 20 + miniGridCoords.h + 20 // pogoji po y osi (kjer koli na višini glavnega grida);
@@ -674,6 +721,7 @@ function assignControlListeners() {
             else if (e.x > currFormScreenCoords.rightmost && e.x <= canvasLeft + (lastColumn0Based + 1) * blockSize + 19   // pogoji po x osi za premik desno;
                 && e.y < (20 + canvas.height) && e.y > (20 + miniGridCoords.h + 20) // pogoji po y osi
             ) maneuver('right');
+            
             // za obračanje lika ALI premikanje po korak navzdol (oboje deluje samo v navpičnem stolpcu lika; prvo v vodoravni vrstici lika, drugo pod likom);
             else if (e.x >= currFormScreenCoords.leftmost && e.x <= currFormScreenCoords.rightmost) {  // pogoji po osi x; mora bit v navpični senci lika, meje vključene;
                 // OBRAČANJE;
@@ -685,11 +733,15 @@ function assignControlListeners() {
                     if (canFormMoveDownHuh()) moveForm('down');
                 }
             }
-        } else if (!isAGameRunning && !controlsTemporarilyOff) {
-            if (e.x > canvasLeft + miniGridCoords.x && e.x < canvasLeft + miniGridCoords.x + miniGridCoords.l   // klik na minigrid za štart;
-                && e.y > canvasTop && e.y < canvasTop + miniGridCoords.h) startGame();
         }
+
     });
+
+    // upravljanje z gumbi spodaj
+    lftBtn.addEventListener('click', () => {if (!isGamePaused && !controlsTemporarilyOff && !isInfoSettingsOpen && isAGameRunning) maneuver('left')});  // pri listenerjih ne moreš združevat po pogojih, ampak po elementih (ne naredi recimo skupine za "isAGameRunning" in nato v njo canvas in gumbe);
+    rghtBtn.addEventListener('click', () => {if (!isGamePaused && !controlsTemporarilyOff && !isInfoSettingsOpen && isAGameRunning) maneuver('right')});
+    midBtn.addEventListener('click', () => {if (!isGamePaused && !controlsTemporarilyOff && !isInfoSettingsOpen && isAGameRunning) rotate()});
+
 }
 
 function initializeScreenAndSizes() {
@@ -748,7 +800,7 @@ function initializeScreenAndSizes() {
     resolveEmptyMainGridAndBckgndGrid();
     // drawDirectionArrow();    // trenutno izključeno, ker itak ne obračamo;
 
-    // umestitev spodnjih 3 gumbov;
+    // umestitev spodnjih 3 gumbov (HTML);
     if (canvasLeft > 50) {  // da je odmik najmanj 20;
         lftBtn.style.left = `${canvasLeft - 30}px`;
         rghtBtn.style.right = `${canvasLeft - 30}px`;   // ker je right definiran z odmikom od desnega roba (in ne od levega), je ta odmik isti, kot ga ima odmik levega gumba;
@@ -757,6 +809,42 @@ function initializeScreenAndSizes() {
         rghtBtn.style.right = '20px';
     }
     midBtn.style.left = `${lesserBoundingHorizontal / 2 - 25}px`;   // -25, ker je širina gumba 50px;
+
+    // oblikovanje spodnjih 3 gumbov (canvas);
+    function btnHlpr(btn, ctx) {
+        btn.width = 50; // tisto, da ima html element v css-u napisano, da ima width 50px ne šteje tukaj (tisto je verjetno style.width), tu je treba določit ločeno, sicer je canvas nekle privzete velikosti (500*700 ?);
+        btn.height = 50;
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#313131';
+        ctx.beginPath();
+    }
+    
+    // levi gumb;
+    btnHlpr(lftBtn, lftBtnCtx);
+    lftBtnCtx.moveTo(37, 25);
+    lftBtnCtx.lineTo(13, 25);
+    lftBtnCtx.lineTo(21, 17);
+    lftBtnCtx.moveTo(13, 25);
+    lftBtnCtx.lineTo(21, 33);
+    lftBtnCtx.stroke();
+    
+    // desni gumb;
+    btnHlpr(rghtBtn, rghtBtnCtx);
+    rghtBtnCtx.moveTo(13, 25);
+    rghtBtnCtx.lineTo(37, 25);
+    rghtBtnCtx.lineTo(29, 17);
+    rghtBtnCtx.moveTo(37, 25);
+    rghtBtnCtx.lineTo(29, 33);
+    rghtBtnCtx.stroke();
+
+    // srednji gumb;
+    btnHlpr(midBtn, midBtnCtx);
+    midBtnCtx.arc(25, 25, 12, 1, 6);
+    midBtnCtx.moveTo(25 + 11.52 + 1, 25 - 3.36);    // 11,52 in 3, 31 sta sin in cos kota 0,283, kolikor ostane od 6 do 2Pi; + 1 je prilagoditev na osi x (določoena od oka glede na to, kar sem videl na sliki);
+    midBtnCtx.lineTo(25 + 11.52 + 1, 25 - 3.36 - 11.31);    // 11,31 je hipotenuza kvadrata s stranico 8, kolikor sta zavihka pri ravnih puščicah;
+    midBtnCtx.moveTo(25 + 11.52 + 1, 25 - 3.36);
+    midBtnCtx.lineTo(25 + 11.52 - 10 + 1, 25 - 3.36 - 2);   // -10 in -2 sta bila določena od oka;
+    midBtnCtx.stroke();
     
 }
 
@@ -805,12 +893,10 @@ function atOrientChg() {
     if (screen.orientation.angle == 90 || screen.orientation.angle == 270) {    // 0 in 270 naj bi bili vodoravni postavitvi;
         isPortraitPrimary = false;
         if (isAGameRunning) {
-            if (controlsTemporarilyOff) {   // isGamePaused in CtrlsTempOff (samo od začetka ekslplozije do konca efekta) nista nikoli hkrati true;
+            if (controlsTemporarilyOff) {   // isGamePaused in CtrlsTempOff (samo od začetka eksplozije do konca efekta) nista nikoli hkrati true;
                 wrCtrlsTempOffAtOrtChg = true;
-                console.log('wrCtrlsTempOffAtOrtChg = true')
             } else {
                 if (!isGamePaused) {    // običajen primer, ni pavzirano in obrneš;
-                    isGamePaused = true;
                     clearInt();
                 } else wasPausdAtOrntnChg = true;
             }
@@ -825,14 +911,12 @@ function atOrientChg() {
 
         if (isAGameRunning) {
             if (wrCtrlsTempOffAtOrtChg) {   // wasPausdAtOrntnChg in wrCtrlsTempOffAtOrtChg nikoli nista aktivirana hkrati;
-                console.log('primer')
                 wrCtrlsTempOffAtOrtChg = false;
                 insertOnTopAndStartInt();
                 controlsTemporarilyOff = false;    // vrnemo delovanje tipk;
             } else {
                 if (!wasPausdAtOrntnChg) {  // običajen primer, si igral in obrnil vodoravno, zdaj pa obračaš nazaj navpično;
-                    isGamePaused = false;
-                    getBlocksMoving();
+                    if (!isInfoSettingsOpen) getBlocksMoving();
                 } else wasPausdAtOrntnChg = false;  // povrnemo na običajno vrednost;
             }
         }
@@ -885,11 +969,8 @@ screen.orientation.addEventListener("change", atOrientChg);
  
 /* 
 
-? za navodila
-ikona za Domov
-klik v polje desno ali levo od kocke, da je premakneš tja
+če je prikazan GAME OVER in se prekriva z informacijami, skrij game over
 podrsat lik dol, da ga vržeš dol
-klik na lik, da ga obrneš
 da bi kocke hodile v levo, ko obrneš ekran na levo
 */
 
