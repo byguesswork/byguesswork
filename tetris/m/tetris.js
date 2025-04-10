@@ -92,7 +92,7 @@ const mainGridLayoutsCoords = {
 };
 let mainGridCoords = { x: 30, y: 30, l: 402, h: 642 };  // ta mora bit let, ker mu za spreminjanje vsebine spreminjamo referenco;
 const miniGridCoords = { x: 467, y: 30, l: 203, h: 203 }    // ta je lahko const, kr mu ne spreminjamo reference, ampak polja;
-let blockSize = 40, canvasLeft = 0, canvasTop = 0 /* canvas obsega minigrid in maingrid ! */, mainGridTop = 0 ; // canvasLeft je x levega roba canvasa;
+let blockSize = 40, canvasLeft = 0, canvasTop = 0 /* canvas obsega minigrid in maingrid ! */, mainGridTop = 0, marg = 0;// canvasLeft je x levega roba canvasa;
 let insertionColumn = 4;
 let arrowIconCoords = [{ x: 0, y: 60 }, { x: -20, y: 60 }, { x: 15, y: 100 }, { x: 50, y: 60 }, { x: 30, y: 60 }, { x: 30, y: 0 }, { x: 15, y: 10 }];
 let isGreenMode = false;
@@ -728,10 +728,10 @@ function assignControlListeners() {
             }
             
             // za premik levo/desno s tapanjem po canvasu;
-            else if (e.x >= canvasLeft - 19 && e.x < currFormScreenCoords.leftmost // pogoji po x osi za premik levo; -19, da lahko tudi malo izven roba glavnega grida (-21 bi morda dalo že error, zato dam -19);
+            else if (e.x >= canvasLeft && e.x < currFormScreenCoords.leftmost // pogoji po x osi (znotrajcanvasa) za premik levo;
                 && e.y < 20 + canvas.height && e.y > 20 + miniGridCoords.h + 20 // pogoji po y osi (kjer koli na višini glavnega grida);
             ) maneuver('left');
-            else if (e.x > currFormScreenCoords.rightmost && e.x <= canvasLeft + (lastColumn0Based + 1) * blockSize + 19   // pogoji po x osi za premik desno;
+            else if (e.x > currFormScreenCoords.rightmost && e.x <= canvasLeft + (lastColumn0Based + 1) * blockSize   // pogoji po x osi za premik desno;
                 && e.y < (20 + canvas.height) && e.y > (20 + miniGridCoords.h + 20) // pogoji po y osi
             ) maneuver('right');
             
@@ -747,6 +747,17 @@ function assignControlListeners() {
                 }
             }
         }
+
+    });
+
+    // za premik levo/desno s tapanjem ZUNAJ roba canvasa;
+    document.getElementsByTagName('html')[0].addEventListener('click', (e) => {
+        if (e.x >= canvasLeft - marg && e.x < canvasLeft // pogoji po x osi za premik levo; marg, da lahko tudi malo izven roba glavnega grida;
+            && e.y < 20 + canvas.height && e.y > 20 + miniGridCoords.h + 20 // pogoji po y osi (kjer koli na višini glavnega grida);
+        ) maneuver('left');
+        else if (e.x > canvasLeft + (lastColumn0Based + 1) * blockSize && e.x <= canvasLeft + (lastColumn0Based + 1) * blockSize + marg   // pogoji po x osi za premik desno;
+            && e.y < (20 + canvas.height) && e.y > (20 + miniGridCoords.h + 20) // pogoji po y osi
+        ) maneuver('right');
 
     });
 
@@ -793,6 +804,7 @@ function initializeScreenAndSizes() {
     canvasLeft = canvas.getBoundingClientRect().left;
     canvasTop = canvas.getBoundingClientRect().top;
     mainGridTop = canvasTop + 5 * blockSize + 20;
+    marg = canvasLeft > 1.6 * blockSize ? Math.floor(1.6 * blockSize) : 19; // margin, koliko stran od canvasaše lahko tapneš, da zazna da želiš premaknit lik L/D;
     console.log('canvasLeft:', canvasLeft, 'canvasTop:', canvasTop, 'block size:', blockSize);
 
     // vrednosti za lokacijo miniGrida in mainGrida; IZRAŽENE v koordinatah na canvasu, ne na ekranu!!!

@@ -115,12 +115,14 @@ function init() {
     if (tetrisLink != null) tetrisLink.href = "tetris/m/tetris.html";
 
     if (upperPosition4Blog != null) { // to se izvede samo na glavni strani (index.html);
+      
+      // začasno onemogočeno, ker blog itak ni aktiven
       // blog premaknemo na vrh, da je bolj viden, ker je zaslon manjši; to se potem ne spreminja več, tudi če spremeniš orientacijo;
-      const upperLength = upperPosition4Blog.innerHTML.length;
-      upperPosition4Blog.innerHTML = lowerPosition4Blog.innerHTML;
-      if (upperPosition4Blog.innerHTML.length > upperLength) {  // preverjanje al je zdaj dolžina večja kot na začetku in če ja, potem izbrišemo spodnje;
-        lowerPosition4Blog.innerHTML = '';
-      };
+      // const upperLength = upperPosition4Blog.innerHTML.length;
+      // upperPosition4Blog.innerHTML = lowerPosition4Blog.innerHTML;
+      // if (upperPosition4Blog.innerHTML.length > upperLength) {  // preverjanje al je zdaj dolžina večja kot na začetku in če ja, potem izbrišemo spodnje;
+      //   lowerPosition4Blog.innerHTML = '';
+      // };
 
       // razširimo razmike med vrsticami v razpredelnici od bloga
       const blogs_table_chldrn_arr = [...document.getElementById("blogs_table").getElementsByTagName("tbody")[0].getElementsByTagName("tr")];
