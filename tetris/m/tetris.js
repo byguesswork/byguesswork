@@ -675,12 +675,14 @@ function assignControlListeners() {
             infoSettgs.className = 'info_settings_open';
             infoSettgsContent.className = 'info_settings_content_open';
             if (lang === langEN) {
-                infoSettgsContent.innerHTML = `Instructions<br><br><div style="font-size:0.9em;"><strong>Move left/right:</strong> Use side buttons below or tap playing field left/right of shape<br><strong>Rotate:</strong> Use middle button below or tap tetromino (shape)<br>
-                <strong>Faster movement down:</strong> Tap playing field under tetromino<br><strong>Drop tetromino:</strong> Tap square above playing field</div><br><br>`;
+                infoSettgsContent.innerHTML = `Instructions<br><br><div style="font-size:0.9em;"><strong>Move left/right:</strong> Use side buttons below or tap playing field left/right of shape<br><p class="interstit">&nbsp;</p>
+                <strong>Rotate:</strong> Use middle button below or tap tetromino (shape)<br><p class="interstit">&nbsp;</p>
+                <strong>Faster movement down:</strong> Tap playing field under tetromino<br><p class="interstit">&nbsp;</p><strong>Drop tetromino:</strong> Tap square above playing field</div><br><br>`;
                 infoSettgsOK.innerHTML = 'OK';
             } else {
-                infoSettgsContent.innerHTML = `Navodila<br><br><div style="font-size:0.9em;"><strong>Premik levo/desno:</strong> uporabite stranska gumba spodaj ali tapnite igralno polje levo/desno od lika<br><strong>Obrat lika:</strong> uporabite srednji gumb spodaj
-                ali tapnite lik<br><strong>Hitrejše premikanje lika navzdol:</strong> tapnite igralno polje pod likom<br><strong>Spust lika do dna:</strong> tapnite kvadrat nad igralnim poljem</div><br><br>`;
+                infoSettgsContent.innerHTML = `Navodila<br><br><div style="font-size:0.9em;"><strong>Premik levo/desno:</strong> uporabite stranska gumba spodaj ali tapnite igralno polje levo/desno od lika<br><p class="interstit">&nbsp;</p>
+                <strong>Obrat lika:</strong> uporabite srednji gumb spodaj ali tapnite lik<br><p class="interstit">&nbsp;</p>
+                <strong>Hitrejše premikanje lika navzdol:</strong> tapnite igralno polje pod likom<br><p class="interstit">&nbsp;</p><strong>Spust lika do dna:</strong> tapnite kvadrat nad igralnim poljem</div><br><br>`;
                 infoSettgsOK.innerHTML = 'V redu';
             }
             infoSettgsOK.className = 'align-right';
@@ -752,13 +754,14 @@ function assignControlListeners() {
 
     // za premik levo/desno s tapanjem ZUNAJ roba canvasa;
     document.getElementsByTagName('html')[0].addEventListener('click', (e) => {
-        if (e.x >= canvasLeft - marg && e.x < canvasLeft // pogoji po x osi za premik levo; marg, da lahko tudi malo izven roba glavnega grida;
-            && e.y < 20 + canvas.height && e.y > 20 + miniGridCoords.h + 20 // pogoji po y osi (kjer koli na višini glavnega grida);
-        ) maneuver('left');
-        else if (e.x > canvasLeft + (lastColumn0Based + 1) * blockSize && e.x <= canvasLeft + (lastColumn0Based + 1) * blockSize + marg   // pogoji po x osi za premik desno;
-            && e.y < (20 + canvas.height) && e.y > (20 + miniGridCoords.h + 20) // pogoji po y osi
-        ) maneuver('right');
-
+        if (!isGamePaused && !controlsTemporarilyOff && !isInfoSettingsOpen) {
+            if (e.x >= canvasLeft - marg && e.x < canvasLeft // pogoji po x osi za premik levo; marg, da lahko tudi malo izven roba glavnega grida;
+                && e.y < 20 + canvas.height && e.y > 20 + miniGridCoords.h + 20 // pogoji po y osi (kjer koli na višini glavnega grida);
+            ) maneuver('left');
+            else if (e.x > canvasLeft + (lastColumn0Based + 1) * blockSize && e.x <= canvasLeft + (lastColumn0Based + 1) * blockSize + marg   // pogoji po x osi za premik desno;
+                && e.y < (20 + canvas.height) && e.y > (20 + miniGridCoords.h + 20) // pogoji po y osi
+            ) maneuver('right');
+        }
     });
 
     // upravljanje z gumbi spodaj

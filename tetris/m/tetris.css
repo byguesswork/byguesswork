@@ -131,6 +131,11 @@ temno sivo ozadje:      #313131
     text-align: right;
 }
 
+.interstit {
+    line-height: 10px;
+    font-size: 5px;
+}
+
 .btn {
     position: absolute;
     background-color: #FDAE34;
