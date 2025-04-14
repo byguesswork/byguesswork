@@ -10,16 +10,18 @@
 /* postavitev */
 
 .main {
-    margin: 40px 200px 30px 30px
+    margin: 40px 200px 30px 30px    /* desni je 200, ker je to nastavitev za desktop; za mobile se pozneje uredi v js; */
 }
 
 .pics {
-    margin-left: 20px;
+    border: #83a2b8 solid 1px;
 }
 
 img {
-    margin-right: 20px;
+    margin-left: 20px;
+    margin-right: 10px;
     margin-bottom: 20px;
+
 }
 
 /* fonti */
@@ -54,6 +56,7 @@ ul {
 }
 
 ul li {
-    list-style: none;
+    /* list-style: bullet; */
+    list-style: disc;
     margin-bottom: 5px;
 }
