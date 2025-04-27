@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="learning 3D models">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=1, maximum-scale=5">
+    <title>3D models · byGuesswork</title>
+    <link rel="icon" href="/images/favicon.ico">
+    <link href="threeDmodels.css" rel="stylesheet">
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+    <div id="controls">
+        <div id="lens">
+            <p class="lens lens-unselected">Normal</p>
+            <p class="interstit">&nbsp;</p>
+            <p class="lens lens-selected">Fish eye</p>
+        </div>
+        <div id="zoom">
+            <p class="zoom">Closer (C)</p>
+            <p class="interstit">&nbsp;</p>
+            <p class="zoom">Further (F)</p>
+        </div>
+        <div id="pan">
+            <p class="pan">Left <span class="smaller">(Arrow Left)</span></p>
+            <p class="interstit">&nbsp;</p>
+            <p class="pan">Right <span class="smaller">(Arrow Right)</span></p>
+        </div>
+    </div>
+    <div id="home">
+        <a href="/index.html" title="back to byGuesswork"><img src="/images/home.PNG" alt="home"></a>
+
+    </div>
+
+    <script src="classes.js"></script>
+    <script src="threeDmodels.js"></script>
+</body>
+</html>
