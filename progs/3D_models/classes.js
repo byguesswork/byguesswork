@@ -34,6 +34,12 @@ class Thingy {
             } else if (spacePoint == FAR) {
                 this.spacePoints.forEach(el => el.y += 0.5);
                 this.draw(calcScreenPts(this.spacePoints));
+            } else if (spacePoint == UP) {
+                this.spacePoints.forEach(el => el.z += 0.2);
+                this.draw(calcScreenPts(this.spacePoints));
+            } else if (spacePoint == DOWN) {
+                this.spacePoints.forEach(el => el.z -= 0.2);
+                this.draw(calcScreenPts(this.spacePoints));
             }
         }
     }

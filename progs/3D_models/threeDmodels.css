@@ -9,6 +9,12 @@
     background-color: #4e4e4c;
 }
 
+#mode{
+    position: absolute;
+    left: 20px;
+    display: flex;
+}
+
 #controls {
     position: absolute;
     bottom: 30px;
@@ -22,29 +28,32 @@
     left: 20px;
 }
 
-#lens p, #zoom p, #pan p{
-    margin-left: 10px;
-    padding-left: 10px;
+#mode p, #rotate p, #lens p, #zoom p, #pan p, #rise p {
+    margin-left: 8px;
+    padding-left: 6px;
     padding-right:5px;
 }
 
-.lens-selected {
+.selected {
     background-color:beige;
     color: black;
 }
 
-.lens-unselected {
+.unselected {
     background-color: #4e4e4c;
     color: beige;
 }
 
 .interstit {
-    line-height: 6px;
+    line-height: 8px;
 } 
 
+.mode,
+.rotate,
 .lens,
 .zoom,
-.pan {
+.pan,
+.rise {
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
@@ -54,11 +63,17 @@
     cursor:default;
 }
 
+.rotate,
 .zoom,
-.pan {
+.pan,
+.rise {
     color: beige;
 }
 
 .smaller {
     font-size: 12px;
+}
+
+.hidden {
+    display: none;
 }

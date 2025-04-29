@@ -13,11 +13,23 @@
 
 <body>
     <canvas id="canvas"></canvas>
+    <div id="mode">
+        <div>
+            <p class="mode selected">Landscape</p>
+            <p class="interstit">&nbsp;</p>
+            <p class="mode unselected">Rotate object</p>
+        </div>
+        <div id="rotate" class="hidden">
+            <p class="rotate">Clocwise (O)</p>
+            <p class="interstit">&nbsp;</p>
+            <p class="rotate">Anticlockwise (I)</p>
+        </div>
+    </div>
     <div id="controls">
         <div id="lens">
-            <p class="lens lens-unselected">Normal</p>
+            <p class="lens unselected">Narrow angle</p>
             <p class="interstit">&nbsp;</p>
-            <p class="lens lens-selected">Fish eye</p>
+            <p class="lens selected">Fish eye</p>
         </div>
         <div id="zoom">
             <p class="zoom">Closer (C)</p>
@@ -28,6 +40,11 @@
             <p class="pan">Left <span class="smaller">(Arrow Left)</span></p>
             <p class="interstit">&nbsp;</p>
             <p class="pan">Right <span class="smaller">(Arrow Right)</span></p>
+        </div>
+        <div id="rise">
+            <p class="rise">Rise <span class="smaller">(Arrow Up)</span></p>
+            <p class="interstit">&nbsp;</p>
+            <p class="rise">Descend <span class="smaller">(Arrow Down)</span></p>
         </div>
     </div>
     <div id="home">
