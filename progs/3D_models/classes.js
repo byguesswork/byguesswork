@@ -23,10 +23,10 @@ class Thingy {
     move(spacePoint){
         if (typeof spacePoint == 'string') {
             if (spacePoint == LEFT) {
-                this.spacePoints.forEach(el => el.x -= 0.2);
+                this.spacePoints.forEach(el => el.x += 0.2);    // left je plus, ker se levo premakne gledalec, stvari se takrat pomaknejo v desno (x+);
                 this.draw(calcScreenPts(this.spacePoints));
             } else if (spacePoint == RIGHT) {
-                this.spacePoints.forEach(el => el.x += 0.2);
+                this.spacePoints.forEach(el => el.x -= 0.2);
                 this.draw(calcScreenPts(this.spacePoints));
             } else if (spacePoint == CLOSER) {
                 this.spacePoints.forEach(el => el.y -= 0.5);
@@ -170,7 +170,8 @@ class Pickup extends Thingy {
 
         this.spacePoints = new Array(8);
         for (let i = 0; i <= 7; i++) { this.spacePoints[i] = new SpacePoint(); }
-        this.connections = [[1], [2], [3], [0], [4, 5], [6], [7], [4], [0, 4], [1, 5], [2, 6], [3, 7], [3, 8], [2, 9], [8, 9], [10], [11], [8], [10, 12], [13], [11], [13, 15], [14], [12]];
+        this.connections = [[1], [2], [3], [0], [4, 5], [6], [7], [4], [0, 4], [1, 5], [2, 6], [3, 7], [3, 8], [2, 9],
+         [8, 9], [10], [11], [8], [10, 12], [13], [11], [13, 15], [14], [12], [16, 17], [18], [19], [16], [20, 21], [22], [23], [20]];
 
         this.move(passedSpacePoint);    // v bistvu uporabimo isto metodo za prvič postavit na zemljevid in vsakokrat naslednjič;
     }
@@ -209,6 +210,7 @@ class Pickup extends Thingy {
             this.spacePoints[7].x = spacePoint.x;
             this.spacePoints[7].z = - spacePoint.z - 0.9;
 
+            // kabina
             this.spacePoints.push(new SpacePoint(spacePoint.x + 0.05, spacePoint.y + 1.0, - spacePoint.z - 1.1)); // 8   ; 0,1, da je malo ožje kot karoserija spodaj
             this.spacePoints.push(new SpacePoint(spacePoint.x + 1.8, spacePoint.y + 1.0, - spacePoint.z - 1.1));    // 9 ; 1.75, da je malo ožje kot karoserija spodaj (1,85); točki pregiba preden se havba, ki se dviguje, začne dvigovat v steklo;
             this.spacePoints.push(new SpacePoint(spacePoint.x + 1.75, spacePoint.y + 1.7, - spacePoint.z - 1.8)); // 10   ; desna zgornja točka stekla (gledano od spredaj); dolžina tega dela: 0,7, končan višina: 1,8
@@ -217,6 +219,18 @@ class Pickup extends Thingy {
             this.spacePoints.push(new SpacePoint(spacePoint.x + 0.1, spacePoint.y + 2.4, - spacePoint.z - 1.8));    // 13 ; leva zadnja zgornja kabine
             this.spacePoints.push(new SpacePoint(spacePoint.x + 1.85, spacePoint.y + 2.4, - spacePoint.z - 0.9)); // 14   ; desna zadnja spodnja točka kabine (na sredini karoserije, na pol poti od tli do vrha; gledano od spredaj)
             this.spacePoints.push(new SpacePoint(spacePoint.x + 0.0, spacePoint.y + 2.4, - spacePoint.z - 0.9));    // 15 ; leva zadnja spodnja kabine (na sredini med tlemi in vrhom kabine)
+
+            // luči
+            this.spacePoints.push(new SpacePoint(spacePoint.x + 0.15, spacePoint.y, - spacePoint.z - 0.55)); //16
+            this.spacePoints.push(new SpacePoint(spacePoint.x + 0.60, spacePoint.y, - spacePoint.z - 0.55));
+            this.spacePoints.push(new SpacePoint(spacePoint.x + 0.60, spacePoint.y, - spacePoint.z - 0.75));
+            this.spacePoints.push(new SpacePoint(spacePoint.x + 0.15, spacePoint.y, - spacePoint.z - 0.75)); //19
+
+            this.spacePoints.push(new SpacePoint(spacePoint.x + 1.25, spacePoint.y, - spacePoint.z - 0.55)); //20
+            this.spacePoints.push(new SpacePoint(spacePoint.x + 1.70, spacePoint.y, - spacePoint.z - 0.55));
+            this.spacePoints.push(new SpacePoint(spacePoint.x + 1.70, spacePoint.y, - spacePoint.z - 0.75));
+            this.spacePoints.push(new SpacePoint(spacePoint.x + 1.25, spacePoint.y, - spacePoint.z - 0.75)); //23
+
 
         } else if (typeof spacePoint == 'string') {
             super.move(spacePoint);

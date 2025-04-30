@@ -4,6 +4,10 @@
 // naredit pred preračunavanjem calcScreenPoints; polg tega bi moral naredit nove povezave, ker ista točka lahko recimo nastopa v več povezavah..
 // in potem je treba naredit ločeno ekstrapolacijo za vsako od povezav;
 
+// dodat kšne opise v index delovana (recimo za fuel: I like its simplicity, maybe you will too)
+
+// probat uno idejo s koti, da do desnega roba ne greš sorazmerno s piksli, ampak glede na naraščanje kota!! 
+
 const wdth = window.innerWidth - 5; // -5 , da ni skrolbara;
 const hght = window.innerHeight - 5;
 const canvas = document.getElementById('canvas');
@@ -26,14 +30,24 @@ const TELEANGLE = 0.3;
 let hrzRadsFrmCentr = FISHEYE;
 let vertRadsFrmCentr;
 calcVertRadsFrmCentr();
-function calcVertRadsFrmCentr(){
+function calcVertRadsFrmCentr(){    // kliče se vsakokrat, ko zamenjaš narrowAngle/fish eye;
     vertRadsFrmCentr = (Math.round(10000 * (midPoint.y * hrzRadsFrmCentr) / midPoint.x)) / 10000;
+    // if (vertRadsFrmCentr > hrzRadsFrmCentr) vertRadsFrmCentr = hrzRadsFrmCentr; // čebi hotel dat to, bi moral omejit tudi višino, do katere sega canvas..
+    // canvas bi v takem primeru moral naredit kvadrat, ker zdaj poskuša isti majhen kot raztegnit do vrha pokončnega telefona in tako sliko raztegne navzgor;
 }  
 console.log(wdth, hght, midPoint, vertRadsFrmCentr);
 
+// najprej mobilca, ker to lahko spremeni postavitev;
+let mobile = false;
+if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null || navigator.userAgentData.mobile == true) {
+    mobile = true;
+    const spans2remv = [...document.getElementsByClassName('not_if_mobile')];
+    spans2remv.forEach(el => el.classList.add('hidden'));
+}
+
+// šele po morebitni spremembi zaradi mobile umestimo zgornji okvir;
 const someBrdr = document.getElementById('controls').getBoundingClientRect().top;
 document.getElementById('mode').style.bottom = `${hght - someBrdr + 25}px`;
-
 
 function calcScreenPts(spacePoints) {
     const scrnPts = new Array();
@@ -166,10 +180,12 @@ const rotateItems = [pickupTruckRotate];
 
 let activeItems = landscapeItems;
 
+
 //  - - - - - -   IZRIS DODANIH STVARI   - - - - - -
 activeItems.forEach(elt => {
     elt.draw(calcScreenPts(elt.spacePoints))
 });
+
 
 
 // - - - -  CONTROLS  - - - - - -
@@ -277,8 +293,8 @@ const panBtns = document.getElementsByClassName('pan');
 panBtns[0].addEventListener('click', panBtnsOprtn);
 panBtns[1].addEventListener('click', panBtnsOprtn);
 function panBtnsOprtn(e){
-    if (e.target == panBtns[0]) { moveItems(LEFT); }
-    else { moveItems(RIGHT); }
+    if (e.target == panBtns[0]) { moveItems(RIGHT); }
+    else { moveItems(LEFT); }
 }
 
 const riseBtns = document.getElementsByClassName('rise');
