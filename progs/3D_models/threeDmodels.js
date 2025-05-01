@@ -4,7 +4,7 @@
 // naredit pred preračunavanjem calcScreenPoints; polg tega bi moral naredit nove povezave, ker ista točka lahko recimo nastopa v več povezavah..
 // in potem je treba naredit ločeno ekstrapolacijo za vsako od povezav;
 
-// dodat kšne opise v index delovana (recimo za fuel: I like its simplicity, maybe you will too)
+// dodat kšne opise v index.html (recimo za fuel: I like its simplicity, maybe you will too)
 
 // probat uno idejo s koti, da do desnega roba ne greš sorazmerno s piksli, ampak glede na naraščanje kota!! 
 
@@ -20,22 +20,22 @@ ctx.lineWidth = 1;
 ctx.strokeStyle = lineColor;
 Thingy.meetCtx(ctx);
 
-const midPoint = {
+const scrnMidPoint = {
     x: wdth % 2 == 0 ? wdth / 2 : wdth / 2 + 0.5, 
     y: hght % 2 == 0 ? hght / 2 : hght / 2 + 0.5
 }
-// koti; ekran od leve do desne je 3.0 radiana (malo manj kot 180', kao oponaša vidno polje človeka), pomeni da je midPoint.x = 1.5 (ali tam nekje); zdaj izračunamo še, kolikšen kot je lahko po vertikali 
+// koti; ekran od leve do desne je 3.0 radiana (malo manj kot 180', kao oponaša vidno polje človeka), pomeni da je scrnMidPoint.x = 1.5 (ali tam nekje); zdaj izračunamo še, kolikšen kot je lahko po vertikali 
 const FISHEYE = 1.45;
 const TELEANGLE = 0.3;
 let hrzRadsFrmCentr = FISHEYE;
 let vertRadsFrmCentr;
 calcVertRadsFrmCentr();
 function calcVertRadsFrmCentr(){    // kliče se vsakokrat, ko zamenjaš narrowAngle/fish eye;
-    vertRadsFrmCentr = (Math.round(10000 * (midPoint.y * hrzRadsFrmCentr) / midPoint.x)) / 10000;
+    vertRadsFrmCentr = (Math.round(10000 * (scrnMidPoint.y * hrzRadsFrmCentr) / scrnMidPoint.x)) / 10000;
     // if (vertRadsFrmCentr > hrzRadsFrmCentr) vertRadsFrmCentr = hrzRadsFrmCentr; // čebi hotel dat to, bi moral omejit tudi višino, do katere sega canvas..
     // canvas bi v takem primeru moral naredit kvadrat, ker zdaj poskuša isti majhen kot raztegnit do vrha pokončnega telefona in tako sliko raztegne navzgor;
 }  
-console.log(wdth, hght, midPoint, vertRadsFrmCentr);
+console.log(wdth, hght, scrnMidPoint, vertRadsFrmCentr);
 
 // najprej mobilca, ker to lahko spremeni postavitev;
 let mobile = false;
@@ -49,9 +49,22 @@ if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null || navigator.use
 const someBrdr = document.getElementById('controls').getBoundingClientRect().top;
 document.getElementById('mode').style.bottom = `${hght - someBrdr + 25}px`;
 
+
+//  - - - -   FUNKCIJE   - - - -
+function clearCanvas() {
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = bckgndColr;
+    ctx.fillStyle = bckgndColr;
+    ctx.beginPath();
+    ctx.rect(1, 1, wdth, hght);
+    ctx.fill();
+    ctx.stroke();
+    ctx.strokeStyle = lineColor;
+}
+
 function calcScreenPts(spacePoints) {
     const scrnPts = new Array();
-    spacePoints.forEach(element => {
+    spacePoints.forEach(spcPt => {
         // glavna logika je Math.atan2(offset(od navpičnice, vodoravnice), razdalja do tja);
         // računanje hipotenuze služi upoštevanju tega, da če je neka stvar nisoko, je v bistvu tudi oddaljena;
         // odštevanje viewer.x (y, z) je zato, da se upošteva gledišče viewerja  
@@ -59,11 +72,11 @@ function calcScreenPts(spacePoints) {
         
         const scrnPt = new ScreenPoint();
         //x
-        scrnPt.x = midPoint.x + (Math.atan2(element.x - viewer.x, ((element.y + viewer.y)**2 + (element.z + viewer.z)**2 )**(1/2))/hrzRadsFrmCentr) * midPoint.x;
-        // (element.y**2 + element.z**2)**(1/2) - je glavna scena, da upošteva, da se recimo nebotičnik proti navzgor oža;
+        scrnPt.x = scrnMidPoint.x + (Math.atan2(spcPt.x - viewer.posIn3D.x, ((spcPt.y - viewer.posIn3D.y)**2 + (spcPt.z + viewer.posIn3D.z)**2 )**(1/2))/hrzRadsFrmCentr) * scrnMidPoint.x;
+        // (spcPt.y**2 + spcPt.z**2)**(1/2) - je glavna scena, da upošteva, da se recimo nebotičnik proti navzgor oža;
         
         // y;
-        scrnPt.y = midPoint.y + (Math.atan2(element.z + viewer.z, ((element.y + viewer.y)**2  + (element.x - viewer.x)**2 )**(1/2))/vertRadsFrmCentr) * midPoint.y;
+        scrnPt.y = scrnMidPoint.y + (Math.atan2(spcPt.z + viewer.posIn3D.z, ((spcPt.y - viewer.posIn3D.y)**2  + (spcPt.x - viewer.posIn3D.x)**2 )**(1/2))/vertRadsFrmCentr) * scrnMidPoint.y;
         
         scrnPts.push(scrnPt);
     });
@@ -120,24 +133,15 @@ function rotate(spunOne, dirctn){
     // narišemo novo stanje;
     clearCanvas();
     spunOne.draw(calcScreenPts(spunOne.spacePoints));
-
 }
 
-function clearCanvas() {
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = bckgndColr;
-    ctx.fillStyle = bckgndColr;
-    ctx.beginPath();
-    ctx.rect(1, 1, wdth, hght);
-    ctx.fill();
-    ctx.stroke();
-    ctx.strokeStyle = lineColor;
-}
 
-const viewer = new SpacePoint(0, 0, 1.7);
+//  - - - -  AJDE  - - -
+const viewer = new Viewer(0, 0, 1.7);
 // na začetku ima gledalec privzeto spacePoint 0,0,1.7 (kao visok 1.7m) in gleda naravnost naprej vzdolž osi y, torej v {0,neskončno,1.7}
 
-// - - - - - -  USTVARJANJE STVARI NA EKRANU - - - - - -
+
+// - - - - - -  USTVARJANJE STVARI, KI BODO NA EKRANU - - - - - -
 const cubes = [];
 // navpične kocke;
 for (let i = 0; i <= 16; i += 4) {
@@ -153,13 +157,13 @@ const pickupTruckLndscp = new Pickup(new SpacePoint(5, 5, 0));
 const pickupTruckRotate = new Pickup(new SpacePoint(1, 5, 0));
 
 // rob ceste;
-const line1 = new Connection(new SpacePoint(-4, 0, 0), new SpacePoint(-4, 2000, 0));
+const line1 = new Connection(new SpacePoint(-4, 0, 0), new SpacePoint(-4, 2000, 0));      // opazi, kako je line1 ravna in se ne ujema s segmentirano črto;
 const line1_1 = new Connection(new SpacePoint(-4, 0, 0), new SpacePoint(-4, 2, 0));
 const line1_2 = new Connection(new SpacePoint(-4, 2, 0), new SpacePoint(-4, 4, 0));
 const line1_3 = new Connection(new SpacePoint(-4, 4, 0), new SpacePoint(-4, 8, 0));
 const line1_4 = new Connection(new SpacePoint(-4, 8, 0), new SpacePoint(-4, 16, 0));
 const line1_5 = new Connection(new SpacePoint(-4, 16, 0), new SpacePoint(-4, 2000, 0));
-const line2 = new Connection(new SpacePoint(4, 0, 0), new SpacePoint(4, 2000, 0));  // opazi, kako je line2 ravna in tudi posga v avto, ko grejo predmeti zadosti desno; razdeljena linija 2 pa je OK z avtom;
+const line2 = new Connection(new SpacePoint(4, 0, 0), new SpacePoint(4, 2000, 0));  // opazi, kako je line2 ravna in tudi posega v avto, ko gre gledalec zadosti levo; segmentirana linija 2 pa je OK z avtom;
 const line2_1 = new Connection(new SpacePoint(4, 0, 0), new SpacePoint(4, 2, 0));
 const line2_2 = new Connection(new SpacePoint(4, 2, 0), new SpacePoint(4, 4, 0));
 const line2_3 = new Connection(new SpacePoint(4, 4, 0), new SpacePoint(4, 8, 0));
@@ -172,7 +176,7 @@ for (let i = 2; i <= 302; i += 10) {
     dividingLines.push(new HorzRectangle(new SpacePoint(-0.1, i, 0), 0.2, 3))
 };
 
-// - - - - - -  DODAJANJE STVARI NA EKRAN - - - - - -
+// - - - - - -  DODAJANJE STVARI V KATALOGE  - - - - - -
 const landscapeItems = [line1, line1_1, line1_2, line1_3, line1_4, line1_5, /*line2*/, line2_1, line2_2,
     line2_3, line2_4, line2_5, ...dividingLines, ...cubes, pickupTruckLndscp];
 
@@ -181,11 +185,10 @@ const rotateItems = [pickupTruckRotate];
 let activeItems = landscapeItems;
 
 
-//  - - - - - -   IZRIS DODANIH STVARI   - - - - - -
+//  - - - - - -   ZAČETNI IZRIS PRIVZETEGA KATALOGA   - - - - - -
 activeItems.forEach(elt => {
     elt.draw(calcScreenPts(elt.spacePoints))
 });
-
 
 
 // - - - -  CONTROLS  - - - - - -
@@ -199,18 +202,19 @@ const DOWN = 'd';
 const CLOCKW = 'cw';
 const ANTICLOCKW = 'acw';
 
-function moveItems(toWhere){
+function moveViewer(toWhere){
+    viewer.move(toWhere);
     clearCanvas();
-    activeItems.forEach(el => el.move(toWhere));
+    activeItems.forEach(el => el.draw(calcScreenPts(el.spacePoints)));
 }
 
 function atKeyPress(e){
-    if (e.key == 'ArrowLeft') { moveItems(LEFT) }
-    else if (e.key == 'ArrowRight') { moveItems(RIGHT);}
-    else if (e.code == 'KeyC') { moveItems(CLOSER) }
-    else if (e.code == 'KeyF') { moveItems(FAR)  }
-    else if (e.key == 'ArrowUp') { moveItems(UP);}
-    else if (e.key == 'ArrowDown') { moveItems(DOWN);}
+    if (e.key == 'ArrowLeft') { moveViewer(LEFT) }
+    else if (e.key == 'ArrowRight') { moveViewer(RIGHT);}
+    else if (e.code == 'KeyC') { moveViewer(CLOSER) }
+    else if (e.code == 'KeyF') { moveViewer(FAR)  }
+    else if (e.key == 'ArrowUp') { moveViewer(UP);}
+    else if (e.key == 'ArrowDown') { moveViewer(DOWN);}
     else if (e.code == 'KeyI') {
         if (activeItems.length == 1) rotate(activeItems[0], ANTICLOCKW);
     } else if (e.code == 'KeyO') {
@@ -285,22 +289,22 @@ const zoomBtns = document.getElementsByClassName('zoom');
 zoomBtns[0].addEventListener('click', zoomBtnsOprtn);
 zoomBtns[1].addEventListener('click', zoomBtnsOprtn);
 function zoomBtnsOprtn(e){
-    if (e.target == zoomBtns[0]) { moveItems(CLOSER); }
-    else { moveItems(FAR); }
+    if (e.target == zoomBtns[0]) { moveViewer(CLOSER); }
+    else { moveViewer(FAR); }
 }
 
 const panBtns = document.getElementsByClassName('pan');
 panBtns[0].addEventListener('click', panBtnsOprtn);
 panBtns[1].addEventListener('click', panBtnsOprtn);
 function panBtnsOprtn(e){
-    if (e.target == panBtns[0]) { moveItems(RIGHT); }
-    else { moveItems(LEFT); }
+    if (e.target == panBtns[0]) { moveViewer(RIGHT); }
+    else { moveViewer(LEFT); }
 }
 
 const riseBtns = document.getElementsByClassName('rise');
 riseBtns[0].addEventListener('click', riseBtnsOprtn);
 riseBtns[1].addEventListener('click', riseBtnsOprtn);
 function riseBtnsOprtn(e){
-    if (e.target == riseBtns[0]) { moveItems(UP); }
-    else { moveItems(DOWN); }
+    if (e.target == riseBtns[0]) { moveViewer(UP); }
+    else { moveViewer(DOWN); }
 }
