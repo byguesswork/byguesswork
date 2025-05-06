@@ -47,22 +47,33 @@ class Viewer {
 
     constructor(x, y, z){
         this.posIn3D = new SpacePoint(x, y, z)
+        this.angle = 0; // kot 0 gleda vzdolž osi y, v smeri naraščanja y;
+        this.rotnAngleIncrmnt = Math.PI/90;
     }
 
     move(dir){
         if (dir == LEFT) {
-            this.posIn3D.x -= 0.2;
+            this.posIn3D.x -= 0.2 * Math.cos(viewer.angle); // prvenstveni premik;
+            this.posIn3D.y += 0.2 * Math.sin(viewer.angle); // dodaten premik ob morebitnem kotu;
         } else if (dir == RIGHT) {
-            this.posIn3D.x += 0.2;
-        } else if (dir == CLOSER) {
-            this.posIn3D.y += 0.5;
-        } else if (dir == FAR) {
-            this.posIn3D.y -= 0.5;
+            this.posIn3D.x += 0.2 * Math.cos(viewer.angle);
+            this.posIn3D.y -= 0.2 * Math.sin(viewer.angle);
+        } else if (dir == FORWARD) {
+            this.posIn3D.y += 0.2 * Math.cos(viewer.angle); // prvenstveni premik;
+            this.posIn3D.x += 0.2 * Math.sin(viewer.angle);
+        } else if (dir == BACK) {
+            this.posIn3D.y -= 0.2 * Math.cos(viewer.angle);
+            this.posIn3D.x -= 0.2 * Math.sin(viewer.angle);
         } else if (dir == UP) {
             this.posIn3D.z += 0.2;
         } else if (dir == DOWN) {
             this.posIn3D.z -= 0.2;
         }
+    }
+
+    rotate(dir){
+        if (dir == ANTICLOCKW) this.angle -= this.rotnAngleIncrmnt;
+        else this.angle += this.rotnAngleIncrmnt;
     }
 }
 

@@ -14,27 +14,22 @@
 <body>
     <canvas id="canvas"></canvas>
     <div id="mode">
+        <div id="lens">
+            <p class="lens unselected">Narrow angle<span class="not_if_mobile"> (N)</span></p>
+            <p class="interstit">&nbsp;</p>
+            <p class="lens selected">Fish eye<span class="not_if_mobile"> (F)</span></p>
+        </div>
         <div>
             <p class="mode selected">Landscape</p>
             <p class="interstit">&nbsp;</p>
             <p class="mode unselected">Rotate object</p>
         </div>
-        <div id="rotate" class="hidden">
-            <p class="rotate">Clocwise<span class="not_if_mobile"> (O)</span></p>
-            <p class="interstit">&nbsp;</p>
-            <p class="rotate">Anticlockwise<span class="not_if_mobile"> (I)</span></p>
-        </div>
     </div>
     <div id="controls">
-        <div id="lens">
-            <p class="lens unselected">Narrow angle</p>
+        <div id="proceed">
+            <p class="proceed">Forward<span class="smaller not_if_mobile">&nbsp;&nbsp;(Arrow Up)</span></p>
             <p class="interstit">&nbsp;</p>
-            <p class="lens selected">Fish eye</p>
-        </div>
-        <div id="zoom">
-            <p class="zoom">Closer<span class="not_if_mobile"> (C)</span></p>
-            <p class="interstit">&nbsp;</p>
-            <p class="zoom">Far<span class="not_if_mobile"> (F)</span></p>
+            <p class="proceed">Back<span class="smaller not_if_mobile">&nbsp;&nbsp;(Arrow Down)</span></p>
         </div>
         <div id="pan">
             <p class="pan">Right<span class="smaller not_if_mobile">&nbsp;&nbsp;(Arrow Right)</span></p>
@@ -42,9 +37,14 @@
             <p class="pan">Left<span class="smaller not_if_mobile">&nbsp;&nbsp;(Arrow Left)</span></p>
         </div>
         <div id="rise">
-            <p class="rise">Rise<span class="smaller not_if_mobile">&nbsp;&nbsp;(Arrow Up)</span></p>
+            <p class="rise">Up<span class="not_if_mobile"> (U)</span></p>
             <p class="interstit">&nbsp;</p>
-            <p class="rise">Descend<span class="smaller not_if_mobile">&nbsp;&nbsp;(Arrow Down)</span></p>
+            <p class="rise">Down<span class="not_if_mobile"> (J)</span></p>
+        </div>
+        <div id="rotate">
+            <p class="rotate">Clocwise<span class="not_if_mobile"> (O)</span></p>
+            <p class="interstit">&nbsp;</p>
+            <p class="rotate">Anticlockwise<span class="not_if_mobile"> (I)</span></p>
         </div>
     </div>
     <div id="home">
