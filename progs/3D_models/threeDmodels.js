@@ -1,7 +1,5 @@
 'use strict';
 
-// nisem še začel delat za ločen primer obračanja predmeta
-
 // element.draw v listenerjih za lens in mode je treba zaobit, ker zdaj ne rišemo več z draw ampak unim drugim
 
 // težava, ker v calcReltvSpcPtsAndDraw "predpostavka, da se kot meri od pozitivne x osi navzgor (proti pozitivni y osi), tj. stran od gledalca;"
@@ -9,16 +7,17 @@
 
 // interpolacija y-na na 0 že kar v calcReltvSpcPtsAndDraw
 
+// probat uno idejo s koti, da do desnega roba ne greš sorazmerno s piksli, ampak glede na naraščanje kota!! 
+
 // če bi hotel preuredit točke, ki so gledalcu za hrbtom in pokvarijo kote, bi moral to preurejanje (y bi moral ekstrapolirat na recimo 0,1)..
 // naredit pred preračunavanjem calcScreenPoints; polg tega bi moral naredit nove povezave, ker ista točka lahko recimo nastopa v več povezavah..
 // in potem je treba naredit ločeno ekstrapolacijo za vsako od povezav;
 
 // dodat kšne opise v index.html (recimo za fuel: I like its simplicity, maybe you will too)
 
-// probat uno idejo s koti, da do desnega roba ne greš sorazmerno s piksli, ampak glede na naraščanje kota!! 
 
-const wdth = window.innerWidth - 5; // -5 , da ni skrolbara;
-const hght = window.innerHeight - 5;
+const wdth = document.documentElement.clientWidth - 5; // -5 , da ni skrolbara; prej je bilo window.innerWidth, ampak ni ok, vsaj višina ne, prevelika pride;
+const hght = document.documentElement.clientHeight - 5;
 const canvas = document.getElementById('canvas');
 canvas.height = hght;
 canvas.width = wdth;
@@ -55,8 +54,9 @@ if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null || navigator.use
 }
 
 // šele po morebitni spremembi zaradi mobile umestimo zgornji okvir;
-const someBrdr = document.getElementById('controls').getBoundingClientRect().top;
-document.getElementById('mode').style.bottom = `${hght - someBrdr + 25}px`;
+const modeRectHght = document.getElementById('controls').getBoundingClientRect().height;
+document.getElementById('mode').style.bottom = `${30 + modeRectHght + 25}px`;   // 30 ker ima sklop pod njim bottom 30; 25 je arbitrarna meja med skopoma 
+
 
 
 //  - - - -   FUNKCIJE   - - - -
@@ -81,11 +81,11 @@ function calcScreenPts(spacePoints) {
         
         const scrnPt = new ScreenPoint();
         //x
-        scrnPt.x = scrnMidPoint.x + (Math.atan2(spcPt.x - viewer.posIn3D.x, ((spcPt.y - viewer.posIn3D.y)**2 + (spcPt.z + viewer.posIn3D.z)**2 )**(1/2))/hrzRadsFrmCentr) * scrnMidPoint.x;
+        scrnPt.x = scrnMidPoint.x + (Math.atan2(spcPt.x - activeViewer.posIn3D.x, ((spcPt.y - activeViewer.posIn3D.y)**2 + (spcPt.z + activeViewer.posIn3D.z)**2 )**(1/2))/hrzRadsFrmCentr) * scrnMidPoint.x;
         // (spcPt.y**2 + spcPt.z**2)**(1/2) - je glavna scena, da upošteva, da se recimo nebotičnik proti navzgor oža;
         
         // y;
-        scrnPt.y = scrnMidPoint.y + (Math.atan2(spcPt.z + viewer.posIn3D.z, ((spcPt.y - viewer.posIn3D.y)**2  + (spcPt.x - viewer.posIn3D.x)**2 )**(1/2))/vertRadsFrmCentr) * scrnMidPoint.y;
+        scrnPt.y = scrnMidPoint.y + (Math.atan2(spcPt.z + activeViewer.posIn3D.z, ((spcPt.y - activeViewer.posIn3D.y)**2  + (spcPt.x - activeViewer.posIn3D.x)**2 )**(1/2))/vertRadsFrmCentr) * scrnMidPoint.y;
         
         scrnPts.push(scrnPt);
     });
@@ -94,8 +94,32 @@ function calcScreenPts(spacePoints) {
 }
 
 function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od viewerja do predmetov;
-    const center = {x: viewer.posIn3D.x, y: viewer.posIn3D.y};
-    console.log(Math.trunc(viewer.angle * 1000) / 1000, Math.trunc(Math.sin(viewer.angle) * 100) / 100, 'cos:',  Math.trunc(Math.cos(viewer.angle) * 100) / 100);
+    let viewngAngle, center;
+    if (activeItems == landscapeItems) {
+        center = {x: activeViewer.posIn3D.x, y: activeViewer.posIn3D.y};    // activeViewer je v tem primeru itak landscapeViewer;
+        viewngAngle = activeViewer.angle;
+        // console.log(Math.trunc(activeViewer.angle * 1000) / 1000, Math.trunc(Math.sin(activeViewer.angle) * 100) / 100,
+        // 'cos:',  Math.trunc(Math.cos(activeViewer.angle) * 100) / 100);
+    } else {
+        if (obj2Rotate.center == undefined) {
+            // s simple aritmetično sredino največjih in najmanjših;
+            let xMin = activeItems[0].spacePoints[0].x;
+            let xMax = activeItems[0].spacePoints[0].x;    // za zdaj so lahko enaki, se bojo spremenili med naslednjo primerjavo;
+            let yMin = activeItems[0].spacePoints[0].y;
+            let yMax = activeItems[0].spacePoints[0].y;
+            activeItems[0].spacePoints.forEach(el => {
+                //x, lahko z elsom;
+                if (el.x < xMin) xMin = el.x;
+                else if (el.x > xMax) xMax = el.x;
+                // y;
+                if (el.y < yMin) yMin = el.y;
+                else if (el.y > yMax) yMax = el.y;
+            });
+            obj2Rotate.center = {x: (xMin + xMax) / 2, y: (yMin + yMax) / 2};
+        }
+        center = obj2Rotate.center;
+        viewngAngle = obj2Rotate.angle;
+    }
 
     activeItems.forEach(spunItem => {
         // preslikava prostorskih točk na dvodimenzionalno ravnino, ..
@@ -113,12 +137,12 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
             // predpostavka, da se kot meri od pozitivne x osi navzgor (proti pozitivni y osi), tj. stran od gledalca;
             // izračunamo kot točke z relativnimix in y koordinatami in ŽE KAR TAKOJ prištejemo kot zasuka;
             if (x > 0) {
-                angle = Math.asin(y/r) + viewer.angle;
+                angle = Math.asin(y/r) + viewngAngle;
             } else if (x < 0) {
-                angle = Math.PI - Math.asin(y/r) + viewer.angle;
+                angle = Math.PI - Math.asin(y/r) + viewngAngle;
             } else if (x == 0) {
-                if (y < 0) angle = 1.5 * Math.PI + viewer.angle;
-                else angle = 0.5 * Math.PI + viewer.angle;
+                if (y < 0) angle = 1.5 * Math.PI + viewngAngle;
+                else angle = 0.5 * Math.PI + viewngAngle;
             }
             //zdaj, ko smo dobili nov kot, že kar lahko izračunamo nov x in nov y relativne točke, ki bo izrisana;
             x = r * Math.cos(angle) + center.x;
@@ -132,107 +156,15 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
     })
 }
 
-// function rotate(arr2Spin, /*dirn,*/ rotateSelf){ // self pomeni, (true) al rotiraš element okoli svoje osi ali (false) se vrti pogled, ker se je obrnil viewer
-//     // gledamo samo vodoravno ravnino, kjer x rase proti desno, y raste stran od gledalca;
-    
-//     clearCanvas();
-
-//     // najprej najst središčno točko + kot obrata + smer obrata;
-//     let center, rotnAngleIncrmnt, diffAngle;
-//     if (rotateSelf) { // če samo vrtimo en predmet okoli njegove osi na ekranu;
-//         // s simple aritmetično sredino največjih in najmanjših
-//         let xMin = arr2Spin[0].spacePoints[0].x;
-//         let xMax = arr2Spin[0].spacePoints[0].x;    // za zdaj so lahko enaki, se bojo spremenili med naslednjo primerjavo;
-//         let yMin = arr2Spin[0].spacePoints[0].y;
-//         let yMax = arr2Spin[0].spacePoints[0].y;
-//         arr2Spin[0].spacePoints.forEach(el => {
-//             //x, lahko z elsom;
-//             if (el.x < xMin) xMin = el.x;
-//             else if (el.x > xMax) xMax = el.x;
-//             // y;
-//             if (el.y < yMin) yMin = el.y;
-//             else if (el.y > yMax) yMax = el.y;
-//         });
-//         center = {x: (xMin + xMax) / 2, y: (yMin + yMax) / 2};
-
-//         rotnAngleIncrmnt = Math.PI/30;
-//         // diffAngle = dirn == ANTICLOCKW ? rotnAngleIncrmnt : -rotnAngleIncrmnt;
-//     } else {
-//         center = {x: viewer.posIn3D.x, y: viewer.posIn3D.y};
-//         rotnAngleIncrmnt = Math.PI/90;
-//         // diffAngle = dirn == ANTICLOCKW ? -rotnAngleIncrmnt : rotnAngleIncrmnt;
-//         viewer.angle += diffAngle; // viewer angle se povečuje, samo če smo v pogledu landscape
-//         console.log(Math.trunc(viewer.angle * 1000) / 1000, Math.trunc(Math.sin(viewer.angle) * 100) / 100, 'cos:',  Math.trunc(Math.cos(viewer.angle) * 100) / 100);
-//     }
-    
-//     let allYNeg = true; // beleži, ali so vse y koordinate negativne, tj. gledalcu za hrbtom; če tako, ničesar ne izrišemo, ker gre le za zrcalno sliko, ki je za hrbtom;
-//     arr2Spin.forEach(spunItem => {
-//         // preslikava prostorskih točk na dvodimenzionalno ravnino, ..
-//         // ..toda ne navpično ravnino, kot je monitor, ampak vodoravno (x rase proti desno, y raste stran od gledalca);
-        
-//         const item2Draw = new Array();   // item2Draw je nov objekt, da ne spreminjamo dejanskih koordinat teles v prostoru (telesa ostajajo na istih točkah),..
-//                                 // ..ampak da dobimo relativne koordinate glede na center vrtenja in jih podamo v spunItem.draw (in tako dobimo na voljo še connections);
-//         spunItem.spacePoints.forEach(el => {
-//             let x = el.x - center.x;  // x in y relativiziramo;
-//             let y = el.y - center.y;
-//             const r = (x**2 + y**2)**(0.5);
-//             let angle;
-
-//             // predpostavka, da se kot meri od pozitivne x osi navzgor (proti pozitivni y osi), tj. stran od gledalca;
-//             // izračunamo kot točke z relativnimix in y koordinatami in ŽE KAR TAKOJ prištejemo kot zasuka;
-//             if (x > 0) {
-//                 if (y < 0) angle = 2* Math.PI + Math.asin(y/r) + viewer.angle; // +, ker je kot (asin) pri y<0 negativen;
-//                 else angle = Math.asin(y/r) + viewer.angle; // 
-//             } else if (x < 0) {
-//                 angle = Math.PI - Math.asin(y/r) + viewer.angle; // tuki, zanimivo, v obeh y primerih isti izraz, zato ga napišem samo enkrat;
-//             } else if (x == 0) {
-//                 if (y < 0) angle = 1.5 * Math.PI + viewer.angle;
-//                 else angle = 0.5 * Math.PI + viewer.angle;
-//             }
-//             //zdaj, ko smo dobili nov kot, že kar lahko izračunamo nov x in nov y relativne točke, ki bo izrisana;
-//             x = r * Math.cos(angle) + center.x;
-//             y = r * Math.sin(angle) + center.y;
-//             item2Draw.push(new SpacePoint(x, y, el.z)); // z-ja ni treba nič preračunavat
-//             if (y > 0) allYNeg = false;
-//         })
-        
-//         // STAREJŠA VERZIJA ZNOTRAJ ODPRAVLJENE ROTATE
-//         // const centeredShapeOnPlane = [];
-//         // spunItem.spacePoints.forEach(el => {
-//         //     const x = el.x - center.x;
-//         //     const y = el.y - center.y;
-//         //     centeredShapeOnPlane.push({x: x, y: y, r: (x**2 + y**2)**(0.5)} )
-//         // })
-        
-//         // centeredShapeOnPlane.forEach((el, i) => {
-//         //     // predpostavka, da se kot meri od pozitivne x osi navzgor (proti pozitivni y osi), tj. stran od gledalca;
-//         //     // ŽE KAR TAKOJ prištejemo kot zasuka;
-//         //     if (el.x > 0) {
-//         //         if (el.y < 0) el.angle = 2* Math.PI + Math.asin(el.y/el.r) + diffAngle; // +, ker je kot (asin) pri y<0 negativen;
-//         //         else el.angle = Math.asin(el.y/el.r) + diffAngle; // 
-//         //     } else if (el.x < 0) {
-//         //         el.angle = Math.PI - Math.asin(el.y/el.r) + diffAngle; // tuki, zanimivo, v obeh y primerih isti izraz, zato ga napišem samo enkrat;
-//         //     } else if (el.x == 0) {
-//         //         if (el.y < 0) el.angle = 1.5 * Math.PI + diffAngle;
-//         //         else el.angle = 0.5 * Math.PI + diffAngle;
-//         //     }
-//         //     //zdaj, ko smo dobili nov kot, že kar lahko izračunamo nov x in nov y in ga pripišemo ciljnemu telesu;
-//         //     spunItem.spacePoints[i].x = el.r * Math.cos(el.angle) + center.x;
-//         //     spunItem.spacePoints[i].y = el.r * Math.sin(el.angle) + center.y;
-//         //     if (spunItem.spacePoints[i].y > 0) allYNeg = false;
-//         // });
-    
-//         // narišemo novo stanje, ampak samo če niso vse y koordinate negativne, ker v slednjem primeru gre za zrcalno sliko za hrbtom;
-//         if (!allYNeg) spunItem.draw(calcScreenPts(item2Draw));
-//     })
-// }
-
 
 //  - - - -  AJDE  - - -
-const viewer = new Viewer(0, 0, 1.7);
-const obj2Rotate = {angle : 0}; // kot 0 gleda vzdolž osi y, v smeri naraščanja y;
-// na začetku ima gledalec privzeto spacePoint 0,0,1.7 (kao visok 1.7m) in gleda naravnost naprej vzdolž osi y, torej v {0,neskončno,1.7}, tj. kot 0;
-
+const landscapeViewer = new Viewer(0, 0, 1.7);   // na začetku ima gledalec privzeto spacePoint 0,0,1.7 (kao visok 1.7m), gleda naravnost vzdolž osi y, torej v {0,neskončno,1.7}, tj. kot 0;
+const obj2RotateViewer = new Viewer (0, 0, 1.7);
+const obj2Rotate = {
+    angle : 0,  // kot 0 gleda vzdolž osi y, v smeri naraščanja y;
+    rotnAngleIncrmnt : Math.PI/30,
+    center: undefined
+};
 
 // - - - - - -  USTVARJANJE STVARI, KI BODO NA EKRANU - - - - - -
 const cubes = [];
@@ -273,16 +205,16 @@ for (let i = 2; i <= 302; i += 10) {
 const landscapeItems = [line1, line1_1, line1_2, line1_3, line1_4, line1_5, /*line2*/, line2_1, line2_2,
     line2_3, line2_4, line2_5, ...dividingLines, ...cubes, pickupTruckLndscp];
 
-const rotateItems = [pickupTruckRotate];
+const objRotateItems = [pickupTruckRotate];
 
 let activeItems = landscapeItems;
+let activeViewer = landscapeViewer;
 
 
 //  - - - - - -   ZAČETNI IZRIS PRIVZETEGA KATALOGA   - - - - - -
 activeItems.forEach(elt => {
     elt.draw(calcScreenPts(elt.spacePoints))
 });
-
 
 // - - - -  CONTROLS  - - - - - -
 document.addEventListener('keydown', atKeyPress);
@@ -296,15 +228,22 @@ const CLOCKW = 'cw';
 const ANTICLOCKW = 'acw';
 
 function moveViewer(toWhere){
-    viewer.move(toWhere);
-    console.log(Math.trunc(viewer.posIn3D.x * 100) / 100, Math.trunc(viewer.posIn3D.y * 100) / 100, Math.trunc(viewer.posIn3D.z * 100) / 100,
-'kot:', Math.trunc(viewer.angle * 100) / 100);
+    activeViewer.move(toWhere, activeViewer);
+    console.log(Math.trunc(activeViewer.posIn3D.x * 100) / 100, Math.trunc(activeViewer.posIn3D.y * 100) / 100, Math.trunc(activeViewer.posIn3D.z * 100) / 100,
+'kot:', Math.trunc(activeViewer.angle * 100) / 100);
     clearCanvas();
     calcReltvSpcPtsAndDraw();
 }
 
 function rotateViewer(dir){
-    viewer.rotate(dir);
+    activeViewer.rotate(dir);   // samo landscapeViewer pride sem;
+    clearCanvas();
+    calcReltvSpcPtsAndDraw();
+}
+
+function rotateObj(dir){
+    if (dir == ANTICLOCKW) obj2Rotate.angle += obj2Rotate.rotnAngleIncrmnt;
+        else obj2Rotate.angle -= obj2Rotate.rotnAngleIncrmnt;
     clearCanvas();
     calcReltvSpcPtsAndDraw();
 }
@@ -318,8 +257,10 @@ function atKeyPress(e){
     else if (e.code == 'KeyJ') { moveViewer(DOWN);}
     else if (e.code == 'KeyI') {
         if (activeItems.length > 1) rotateViewer(ANTICLOCKW);
+        else rotateObj(ANTICLOCKW);
     } else if (e.code == 'KeyO') {
         if (activeItems.length > 1) rotateViewer(CLOCKW);
+        else rotateObj(CLOCKW);
     } else if (e.code == 'KeyN') {
         if (lensBtns[0].classList.contains('unselected')) { changeLens(false); }
     } if (e.code == 'KeyF') {
@@ -343,9 +284,11 @@ function modeBtnOprtn(evt){
 
     function changeMode(doRotate){
         if (doRotate) {
-            activeItems = rotateItems;
+            activeItems = objRotateItems;
+            activeViewer = obj2RotateViewer;
         } else {
             activeItems = landscapeItems;
+            activeViewer = landscapeViewer;
         }
         clearCanvas();
         activeItems.forEach(element => {
@@ -354,8 +297,8 @@ function modeBtnOprtn(evt){
     }
 }
 
-
-function changeLens(doFish){
+//  - - - - - - - - - 2 povezani funkciji
+function changeLens(doFish){    // to lahko kličeš tudi s tipkamiM
     lensBtns[0].classList.toggle('selected');
     lensBtns[1].classList.toggle('selected');
     lensBtns[0].classList.toggle('unselected');
@@ -379,6 +322,7 @@ function lensBtnOprtn(evt){
         } else changeLens(false);
     }
 }
+//  - - - - - - - - - !2 povezani funkciji
 
 const rotateBtns = document.getElementsByClassName('rotate');
 rotateBtns[0].addEventListener('click', rotateBtnsOprtn);
@@ -386,8 +330,10 @@ rotateBtns[1].addEventListener('click', rotateBtnsOprtn);
 function rotateBtnsOprtn(e){
     if (e.target == rotateBtns[0] || e.target.parentElement == rotateBtns[0]) {
         if (activeItems.length > 1) rotateViewer(CLOCKW);
+        else rotateObj(CLOCKW);
     } else {
         if (activeItems.length > 1) rotateViewer(ANTICLOCKW);
+        else rotateObj(ANTICLOCKW);
     }
 }
 

@@ -51,7 +51,7 @@ class Viewer {
         this.rotnAngleIncrmnt = Math.PI/90;
     }
 
-    move(dir){
+    move(dir, viewer){
         if (dir == LEFT) {
             this.posIn3D.x -= 0.2 * Math.cos(viewer.angle); // prvenstveni premik;
             this.posIn3D.y += 0.2 * Math.sin(viewer.angle); // dodaten premik ob morebitnem kotu;
