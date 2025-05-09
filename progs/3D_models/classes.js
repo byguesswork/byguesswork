@@ -19,21 +19,30 @@ class Thingy {
 
     static ctx;
 
-    constructor () {
+    constructor() {
         // prazen;
     }
 
-    draw(screenPoints, connections) {
+    draw(screenPoints, usesAlt) {
         Thingy.ctx.beginPath();
-        Thingy.ctx.moveTo(screenPoints[0].x, screenPoints[0].y);   // na začetku se vedno najprej pomakneš na izhodiščno točko (0-ta točka v arrayu scrnPts);
-        connections.forEach(element => {  // samo napisalo tako: connections.array.forEach
-            if (element.length == 1) {  // če je array element (ki je del arraya connections) dolg 1, podaja samo končno točko poteze (vzeto iz arraya scrnPts);
-                ctx.lineTo(screenPoints[element[0]].x, screenPoints[element[0]].y);
-            } else {                    // če je array element (ki je del arraya connections) dolg 2, podaja novo izhodišče in nato končno točko poteze;
-                ctx.moveTo(screenPoints[element[0]].x, screenPoints[element[0]].y);
-                ctx.lineTo(screenPoints[element[1]].x, screenPoints[element[1]].y);
-            }
-        });
+        if (!usesAlt) {
+            Thingy.ctx.moveTo(screenPoints[0].x, screenPoints[0].y);   // na začetku se vedno najprej pomakneš na izhodiščno točko (0-ta točka v arrayu scrnPts);
+            this.connections.forEach(element => {
+                if (element.length == 1) {  // če je array element (ki je del arraya connections) dolg 1, podaja samo končno točko poteze (vzeto iz arraya scrnPts);
+                    ctx.lineTo(screenPoints[element[0]].x, screenPoints[element[0]].y);
+                } else {                    // če je array element (ki je del arraya connections) dolg 2, podaja novo izhodišče in nato končno točko poteze;
+                    ctx.moveTo(screenPoints[element[0]].x, screenPoints[element[0]].y);
+                    ctx.lineTo(screenPoints[element[1]].x, screenPoints[element[1]].y);
+                }
+            });
+        } else {
+            this.connectionsAlt.forEach(element => {
+                if (screenPoints[element[0]].x != undefined && screenPoints[element[1]].x != undefined) {   // rišemo samo če imamo obe piki;
+                    ctx.moveTo(screenPoints[element[0]].x, screenPoints[element[0]].y);
+                    ctx.lineTo(screenPoints[element[1]].x, screenPoints[element[1]].y);
+                }
+            });
+        }
         Thingy.ctx.stroke();
     }
 
@@ -72,8 +81,12 @@ class Viewer {
     }
 
     rotate(dir){
-        if (dir == ANTICLOCKW) this.angle -= this.rotnAngleIncrmnt;
-        else this.angle += this.rotnAngleIncrmnt;
+        if (dir == ANTICLOCKW) {
+            this.angle -= this.rotnAngleIncrmnt;
+        } else {
+            this.angle += this.rotnAngleIncrmnt;
+        }
+        this.angle = rangeAngle(this.angle);
     }
 }
 
@@ -125,6 +138,7 @@ class Cube extends Thingy {
         for (let i = 0; i <= 7; i++) { this.spacePoints[i] = new SpacePoint(); }
         this.side = side;
         this.connections = [[1], [2], [3], [0], [4, 5], [6], [7], [4], [0, 4], [1, 5], [2, 6], [3, 7],];    // connections za kocko najprej nariše sprednji kvadrat (0,1,2,3), potem zadnjega (4,5,6,7) in potem povezovalne črte;
+        this.connectionsAlt = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7],];
 
         this.createPoints(passedSpacePoint);
     }
@@ -164,10 +178,6 @@ class Cube extends Thingy {
         this.spacePoints[7].x = spacePoint.x;
         this.spacePoints[7].z = - spacePoint.z - this.side;
     }
-
-    draw(scrnPts){
-        super.draw(scrnPts, this.connections);
-    }
 }
 
 
@@ -179,6 +189,9 @@ class Pickup extends Thingy {
         for (let i = 0; i <= 7; i++) { this.spacePoints[i] = new SpacePoint(); }
         this.connections = [[1], [2], [3], [0], [4, 5], [6], [7], [4], [0, 4], [1, 5], [2, 6], [3, 7], [3, 8], [2, 9],
          [8, 9], [10], [11], [8], [10, 12], [13], [11], [13, 15], [14], [12], [16, 17], [18], [19], [16], [20, 21], [22], [23], [20]];
+        this.connectionsAlt = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7], [3, 8], [2, 9],
+         [8, 9], [9, 10], [10, 11], [11, 8], [10, 12], [12, 13], [13, 11], [13, 15], [15, 14], [14, 12], [16, 17], [17, 18],
+         [18, 19], [19, 16], [20, 21], [21, 22], [22, 23], [23, 20]];
 
         this.createPoints(passedSpacePoint);
     }
@@ -238,10 +251,6 @@ class Pickup extends Thingy {
         this.spacePoints.push(new SpacePoint(spacePoint.x + 1.25, spacePoint.y, - spacePoint.z - 0.80)); //23
     }
 
-    draw(scrnPts){
-        super.draw(scrnPts, this.connections);
-    }
-
 }
 
 
@@ -253,10 +262,7 @@ class Connection extends Thingy {
         this.spacePoints = [spacePoint, spacePoint2];
         // connections so navodila, med katerimi točkami je treba risat povezave; začetek v točki 0 je privzet (v metodi draw());
         this.connections = [[0, 1]];
-    }
-    
-    draw(scrnPts){
-        super.draw(scrnPts, this.connections);
+        this.connectionsAlt = this.connections;
     }
 }
 
@@ -271,6 +277,7 @@ class HorzRectangle extends Thingy {
         this.depth = depth;
         // connections so navodila, med katerimi točkami je treba risat povezave; začetek v točki 0 je privzet (v metodi draw());
         this.connections = [[1], [2], [3], [0]];    // connections za kvadrat podaja samo točke za zvezno risanje, vmes nobenega novega izhodišča (novo izhodišče bi bilo, če bi kateri od elementov arraya connections bil array z dvema elementoma);
+        this.connectionsAlt = [[0, 1], [1, 2], [2, 3], [3, 0]]; // če je kateri y negativen in določene črte ne bomo narisali uporabimo te povezave;
 
         this.createPoints(spacePoint);          
     }
@@ -290,9 +297,5 @@ class HorzRectangle extends Thingy {
         this.spacePoints[2].y = spacePoint.y + this.depth;
         this.spacePoints[3].x = spacePoint.x;
         this.spacePoints[3].y = spacePoint.y + this.depth;
-    }
-
-    draw(scrnPts){
-        super.draw(scrnPts, this.connections);
     }
 }

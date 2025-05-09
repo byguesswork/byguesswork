@@ -1,17 +1,12 @@
 'use strict';
 
-// element.draw v listenerjih za lens in mode je treba zaobit, ker zdaj ne rišemo več z draw ampak unim drugim
-
-// težava, ker v calcReltvSpcPtsAndDraw "predpostavka, da se kot meri od pozitivne x osi navzgor (proti pozitivni y osi), tj. stran od gledalca;"
-// viewer pa gleda kot glede na pozitivno os y
-
-// interpolacija y-na na 0 že kar v calcReltvSpcPtsAndDraw
+// interpolacija y-na na 0 v calcScrnPts
 
 // probat uno idejo s koti, da do desnega roba ne greš sorazmerno s piksli, ampak glede na naraščanje kota!! 
 
-// če bi hotel preuredit točke, ki so gledalcu za hrbtom in pokvarijo kote, bi moral to preurejanje (y bi moral ekstrapolirat na recimo 0,1)..
-// naredit pred preračunavanjem calcScreenPoints; polg tega bi moral naredit nove povezave, ker ista točka lahko recimo nastopa v več povezavah..
-// in potem je treba naredit ločeno ekstrapolacijo za vsako od povezav;
+// ikone za upravljanje v mobile
+
+// da deluje podaljšan pritisk; - https://developer.mozilla.org/en-US/docs/Web/API/Touch_events
 
 // dodat kšne opise v index.html (recimo za fuel: I like its simplicity, maybe you will too)
 
@@ -71,21 +66,25 @@ function clearCanvas() {
     ctx.strokeStyle = lineColor;
 }
 
-function calcScreenPts(spacePoints) {
+function calcScreenPts(spacePoints, parentObj) {   // prejme relativne koordinate!, položaj viewerja mora torej biti že odštet;
     const scrnPts = new Array();
-    spacePoints.forEach(spcPt => {
+    spacePoints.forEach((spcPt, i) => {
         // glavna logika je Math.atan2(offset(od navpičnice, vodoravnice), razdalja do tja);
-        // računanje hipotenuze služi upoštevanju tega, da če je neka stvar nisoko, je v bistvu tudi oddaljena;
-        // odštevanje viewer.x (y, z) je zato, da se upošteva gledišče viewerja  
+        // računanje hipotenuze služi upoštevanju tega, da če je neka stvar visoko, je v bistvu tudi oddaljena;
         // tudi če ozkokotni pogled prikažeš cel (s faktorjem 0,2) ni čisto nič drugačen od fish eye; spreminjanje kota torej ne reši ukrivljenosti, bo treba druga metoda;
-        
         const scrnPt = new ScreenPoint();
-        //x
-        scrnPt.x = scrnMidPoint.x + (Math.atan2(spcPt.x - activeViewer.posIn3D.x, ((spcPt.y - activeViewer.posIn3D.y)**2 + (spcPt.z + activeViewer.posIn3D.z)**2 )**(1/2))/hrzRadsFrmCentr) * scrnMidPoint.x;
-        // (spcPt.y**2 + spcPt.z**2)**(1/2) - je glavna scena, da upošteva, da se recimo nebotičnik proti navzgor oža;
-        
-        // y;
-        scrnPt.y = scrnMidPoint.y + (Math.atan2(spcPt.z + activeViewer.posIn3D.z, ((spcPt.y - activeViewer.posIn3D.y)**2  + (spcPt.x - activeViewer.posIn3D.x)**2 )**(1/2))/vertRadsFrmCentr) * scrnMidPoint.y;
+        if(spcPt.y > 0) {
+            //x
+            scrnPt.x = scrnMidPoint.x + (Math.atan2(spcPt.x, (spcPt.y**2 + spcPt.z**2 )**(1/2))/hrzRadsFrmCentr) * scrnMidPoint.x;
+            // (spcPt.y**2 + spcPt.z**2)**(1/2) - je glavna scena, da upošteva, da se recimo nebotičnik proti navzgor oža;
+            
+            // y;
+            scrnPt.y = scrnMidPoint.y + (Math.atan2(spcPt.z, (spcPt.y**2  + spcPt.x**2 )**(1/2))/vertRadsFrmCentr) * scrnMidPoint.y;
+        } else {
+            // parentObj se uporablja samo tle
+            scrnPt.x = undefined;
+            scrnPt.y = undefined;
+        }
         
         scrnPts.push(scrnPt);
     });
@@ -94,12 +93,15 @@ function calcScreenPts(spacePoints) {
 }
 
 function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od viewerja do predmetov;
+    
+    // ker bomo na koncu risali, moramo na začetku vse izbrisat;
+    clearCanvas();
+
+    // določimo center vrtenja in kot, kar je odvisno od tega al landscape ali objRotate;
     let viewngAngle, center;
     if (activeItems == landscapeItems) {
         center = {x: activeViewer.posIn3D.x, y: activeViewer.posIn3D.y};    // activeViewer je v tem primeru itak landscapeViewer;
         viewngAngle = activeViewer.angle;
-        // console.log(Math.trunc(activeViewer.angle * 1000) / 1000, Math.trunc(Math.sin(activeViewer.angle) * 100) / 100,
-        // 'cos:',  Math.trunc(Math.cos(activeViewer.angle) * 100) / 100);
     } else {
         if (obj2Rotate.center == undefined) {
             // s simple aritmetično sredino največjih in najmanjših;
@@ -124,35 +126,49 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
     activeItems.forEach(spunItem => {
         // preslikava prostorskih točk na dvodimenzionalno ravnino, ..
         // ..toda ne navpično ravnino, kot je monitor, ampak vodoravno (x rase proti desno, y raste stran od gledalca);
+        // kot pogleda je zelo pomemben; risanja ne moreš izvajat brez preračunavanja kota, tudi če je kot == 0,..
+        // .. ker če imaš zadevo za hrbtom, tudi če gledaš direkt proti S (kot == 0), zadeve ne moreš izrisat;
         
-        let allYNeg = true; // beleži, ali so vse y koordinate nekega predmeta negativne, tj. gledalcu za hrbtom; če tako, ničesar ne izrišemo, ker gre le za zrcalno sliko, ki je za hrbtom;
         const item2Draw = new Array();   // item2Draw je nov objekt, da ne spreminjamo dejanskih koordinat teles v prostoru (telesa ostajajo na istih točkah),..
-                                // ..ampak da dobimo relativne koordinate glede na center vrtenja in jih podamo v spunItem.draw (in tako dobimo na voljo še connections);
-        spunItem.spacePoints.forEach(spcPt => {
+                                        // ..ampak da dobimo relativne koordinate glede na center vrtenja in jih podamo v spunItem.draw (in tako dobimo na voljo še connections);
+        let allYNegAngular = true;  // beleži, ali so vse y koordinate nekega predmeta negativne, tj. gledalcu za hrbtom; če tako, ničesar ne izrišemo, ker gre le za zrcalno sliko, ki je za hrbtom;
+        let atLeast1YNeg = false;   // beleži, al ti je vsaj ena koordinata za hrbtom;
+        spunItem.spacePoints.forEach((spcPt) => {
             let x = spcPt.x - center.x;  // x in y relativiziramo;
             let y = spcPt.y - center.y;
             const r = (x**2 + y**2)**(0.5);
+            
             let angle;
-
-            // predpostavka, da se kot meri od pozitivne x osi navzgor (proti pozitivni y osi), tj. stran od gledalca;
-            // izračunamo kot točke z relativnimix in y koordinatami in ŽE KAR TAKOJ prištejemo kot zasuka;
-            if (x > 0) {
-                angle = Math.asin(y/r) + viewngAngle;
-            } else if (x < 0) {
-                angle = Math.PI - Math.asin(y/r) + viewngAngle;
-            } else if (x == 0) {
-                if (y < 0) angle = 1.5 * Math.PI + viewngAngle;
-                else angle = 0.5 * Math.PI + viewngAngle;
+            if (y > 0) {
+                angle = Math.asin(x/r) - viewngAngle;   // pri izračunu že kar takoj upoštevamo kot pogleda
+            } else if (y < 0) {
+                angle = Math.PI - Math.asin(x/r) - viewngAngle;
+            } else if (y == 0) {
+                if (x < 0) angle = 1.5 * Math.PI - viewngAngle;
+                else angle = 0.5 * Math.PI - viewngAngle;
             }
+            
             //zdaj, ko smo dobili nov kot, že kar lahko izračunamo nov x in nov y relativne točke, ki bo izrisana;
-            x = r * Math.cos(angle) + center.x;
-            y = r * Math.sin(angle) + center.y;
-            item2Draw.push(new SpacePoint(x, y, spcPt.z)); // z-ja ni treba nič preračunavat
-            if (y > 0) allYNeg = false;
+            x = r * Math.sin(angle);
+            y = r * Math.cos(angle);
+            if (activeItems == objRotateItems) {
+                x += center.x - activeViewer.posIn3D.x;
+                y += center.y - activeViewer.posIn3D.y;
+            }
+            if (y > 0) allYNegAngular = false;
+            else if (y < 0) atLeast1YNeg = true;
+            item2Draw.push(new SpacePoint(x, y, spcPt.z + activeViewer.posIn3D.z)); // z-ja ni treba nič preračunavat
+        
         })
-    
+                    
         // narišemo novo stanje, ampak samo če niso vse y koordinate negativne, ker v slednjem primeru gre za zrcalno sliko za hrbtom;
-        if (!allYNeg) spunItem.draw(calcScreenPts(item2Draw));
+        if (!allYNegAngular) {
+            if (!atLeast1YNeg) {
+                spunItem.draw(calcScreenPts(item2Draw), false);
+            } else {
+                spunItem.draw(calcScreenPts(item2Draw, spunItem), true);
+            }
+        }
     })
 }
 
@@ -205,6 +221,10 @@ for (let i = 2; i <= 302; i += 10) {
 const landscapeItems = [line1, line1_1, line1_2, line1_3, line1_4, line1_5, /*line2*/, line2_1, line2_2,
     line2_3, line2_4, line2_5, ...dividingLines, ...cubes, pickupTruckLndscp];
 
+// const landscapeItems = [pickupTruckLndscp];
+
+// const landscapeItems = [...dividingLines];
+
 const objRotateItems = [pickupTruckRotate];
 
 let activeItems = landscapeItems;
@@ -212,9 +232,7 @@ let activeViewer = landscapeViewer;
 
 
 //  - - - - - -   ZAČETNI IZRIS PRIVZETEGA KATALOGA   - - - - - -
-activeItems.forEach(elt => {
-    elt.draw(calcScreenPts(elt.spacePoints))
-});
+calcReltvSpcPtsAndDraw();
 
 // - - - -  CONTROLS  - - - - - -
 document.addEventListener('keydown', atKeyPress);
@@ -229,22 +247,19 @@ const ANTICLOCKW = 'acw';
 
 function moveViewer(toWhere){
     activeViewer.move(toWhere, activeViewer);
-    console.log(Math.trunc(activeViewer.posIn3D.x * 100) / 100, Math.trunc(activeViewer.posIn3D.y * 100) / 100, Math.trunc(activeViewer.posIn3D.z * 100) / 100,
-'kot:', Math.trunc(activeViewer.angle * 100) / 100);
-    clearCanvas();
+    console.log(toDecPlace(activeViewer.posIn3D.x), toDecPlace(activeViewer.posIn3D.y), toDecPlace(activeViewer.posIn3D.z), 'kot:', toDecPlace(activeViewer.angle));
     calcReltvSpcPtsAndDraw();
 }
 
 function rotateViewer(dir){
     activeViewer.rotate(dir);   // samo landscapeViewer pride sem;
-    clearCanvas();
+    // console.log(toDecPlace(activeViewer.posIn3D.x), toDecPlace(activeViewer.posIn3D.y), toDecPlace(activeViewer.posIn3D.z), 'kot:', toDecPlace(activeViewer.angle));
     calcReltvSpcPtsAndDraw();
 }
 
 function rotateObj(dir){
     if (dir == ANTICLOCKW) obj2Rotate.angle += obj2Rotate.rotnAngleIncrmnt;
         else obj2Rotate.angle -= obj2Rotate.rotnAngleIncrmnt;
-    clearCanvas();
     calcReltvSpcPtsAndDraw();
 }
 
@@ -256,10 +271,10 @@ function atKeyPress(e){
     else if (e.code == 'KeyU') { moveViewer(UP);}
     else if (e.code == 'KeyJ') { moveViewer(DOWN);}
     else if (e.code == 'KeyI') {
-        if (activeItems.length > 1) rotateViewer(ANTICLOCKW);
+        if (activeItems == landscapeItems) rotateViewer(ANTICLOCKW);
         else rotateObj(ANTICLOCKW);
     } else if (e.code == 'KeyO') {
-        if (activeItems.length > 1) rotateViewer(CLOCKW);
+        if (activeItems == landscapeItems) rotateViewer(CLOCKW);
         else rotateObj(CLOCKW);
     } else if (e.code == 'KeyN') {
         if (lensBtns[0].classList.contains('unselected')) { changeLens(false); }
@@ -290,10 +305,7 @@ function modeBtnOprtn(evt){
             activeItems = landscapeItems;
             activeViewer = landscapeViewer;
         }
-        clearCanvas();
-        activeItems.forEach(element => {
-            element.draw(calcScreenPts(element.spacePoints))
-        });        
+        calcReltvSpcPtsAndDraw();
     }
 }
 
@@ -306,10 +318,7 @@ function changeLens(doFish){    // to lahko kličeš tudi s tipkamiM
     if (doFish) hrzRadsFrmCentr = FISHEYE;
     else hrzRadsFrmCentr = TELEANGLE;
     calcVertRadsFrmCentr();
-    clearCanvas();
-    activeItems.forEach(element => {
-        element.draw(calcScreenPts(element.spacePoints))
-    });        
+    calcReltvSpcPtsAndDraw();
 }
 
 const lensBtns = document.getElementsByClassName('lens');
@@ -329,15 +338,25 @@ rotateBtns[0].addEventListener('click', rotateBtnsOprtn);
 rotateBtns[1].addEventListener('click', rotateBtnsOprtn);
 function rotateBtnsOprtn(e){
     if (e.target == rotateBtns[0] || e.target.parentElement == rotateBtns[0]) {
-        if (activeItems.length > 1) rotateViewer(CLOCKW);
+        if (activeItems == landscapeItems) rotateViewer(CLOCKW);
         else rotateObj(CLOCKW);
     } else {
-        if (activeItems.length > 1) rotateViewer(ANTICLOCKW);
+        if (activeItems == landscapeItems) rotateViewer(ANTICLOCKW);
         else rotateObj(ANTICLOCKW);
     }
 }
 
 const proceedBtns = document.getElementsByClassName('proceed');
+
+// test
+// proceedBtns[0].addEventListener('click', () => console.log('click'));
+// proceedBtns[0].addEventListener('mousedown', (e) => console.log('mouseDown', e));
+// proceedBtns[0].addEventListener('mouseup', () => console.log('mouseup'));
+// proceedBtns[0].addEventListener('touchstart', (e) => console.log('touchstart', e));
+// proceedBtns[0].addEventListener('touchmove', () => console.log('touchmove'));
+// proceedBtns[0].addEventListener('touchend', () => console.log('touchend'));
+// !test
+
 proceedBtns[0].addEventListener('click', proceedBtnsOprtn);
 proceedBtns[1].addEventListener('click', proceedBtnsOprtn);
 function proceedBtnsOprtn(e){
