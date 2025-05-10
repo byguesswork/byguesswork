@@ -1,7 +1,5 @@
 'use strict';
 
-// interpolacija y-na na 0 v calcScrnPts
-
 // probat uno idejo s koti, da do desnega roba ne greš sorazmerno s piksli, ampak glede na naraščanje kota!! 
 
 // ikone za upravljanje v mobile
@@ -67,30 +65,81 @@ function clearCanvas() {
 }
 
 function calcScreenPts(spacePoints, parentObj) {   // prejme relativne koordinate!, položaj viewerja mora torej biti že odštet;
+
+    function doDThing(i, j){    // to samo interpolira x in y od SpacePOinta (ne ScreenPointa!!!) in vrne x in y SpacePointa!;
+        // console.log('i:',i, 'j:', j)
+        if (parentObj.connectionsAlt[j][0] == i) { // spcPt[i] se uporablja kot začetni element črte, ki jo opredeljuje connsAlt[j]; 
+            if (spacePoints[parentObj.connectionsAlt[j][1]].y > 0) {
+                startRoll = j;   // zabeležimo, da smo tle že našli, ker vsako točko interpoliramo samo enkrat, kljub temu da morda sodeluje v več povezavah;
+                // console.log('negativna točka je prva točka povezave in jo lahko interpoliramo - BREAK')
+                return interpolateToYAbvZero(spacePoints[parentObj.connectionsAlt[j][0]].x, spacePoints[parentObj.connectionsAlt[j][0]].y,
+                    spacePoints[parentObj.connectionsAlt[j][1]].x, spacePoints[parentObj.connectionsAlt[j][1]].y);
+            } else {
+                // console.log('negativna točka je prva točka povezave, ampak tudi druga je negativna;')
+                return false;
+            }
+        } else if (parentObj.connectionsAlt[j][1] == i) {   // spcPt[i] se uporablja kot končni element črte, ki jo opredeljuje connsAlt[j]; 
+            if (spacePoints[parentObj.connectionsAlt[j][0]].y > 0) {
+                startRoll = j;   // zabeležimo, da smo tle že našli, ker vsako točko interpoliramo samo enkrat, kljub temu da morda sodeluje v več povezavah;
+                // console.log('negativna točka je končna točka povezave in jo lahko interpoliramo - BREAK')
+                return interpolateToYAbvZero(spacePoints[parentObj.connectionsAlt[j][1]].x, spacePoints[parentObj.connectionsAlt[j][1]].y,
+                    spacePoints[parentObj.connectionsAlt[j][0]].x, spacePoints[parentObj.connectionsAlt[j][0]].y);
+            } else {
+                // console.log('negativna točka je druga točka povezave, ampak tudi prva je negativna;')
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    function frmSpcPtToScrnPt(x, y, z) {
+        const scrnPt = new ScreenPoint();
+        scrnPt.x = scrnMidPoint.x + (Math.atan2(x, (y**2 + z**2 )**(1/2))/hrzRadsFrmCentr) * scrnMidPoint.x;
+        scrnPt.y = scrnMidPoint.y + (Math.atan2(z, (y**2  + x**2 )**(1/2))/vertRadsFrmCentr) * scrnMidPoint.y;
+        return scrnPt;
+    }
+
     const scrnPts = new Array();
+    let startRoll = 0; // spremenljivka v katero shraniš, kjer si že iskal; predvidoma se poznejše točke najdejo v poznejših povezavah, zato;
+    let testShown = false;
     spacePoints.forEach((spcPt, i) => {
         // glavna logika je Math.atan2(offset(od navpičnice, vodoravnice), razdalja do tja);
         // računanje hipotenuze služi upoštevanju tega, da če je neka stvar visoko, je v bistvu tudi oddaljena;
         // tudi če ozkokotni pogled prikažeš cel (s faktorjem 0,2) ni čisto nič drugačen od fish eye; spreminjanje kota torej ne reši ukrivljenosti, bo treba druga metoda;
-        const scrnPt = new ScreenPoint();
-        if(spcPt.y > 0) {
-            //x
-            scrnPt.x = scrnMidPoint.x + (Math.atan2(spcPt.x, (spcPt.y**2 + spcPt.z**2 )**(1/2))/hrzRadsFrmCentr) * scrnMidPoint.x;
-            // (spcPt.y**2 + spcPt.z**2)**(1/2) - je glavna scena, da upošteva, da se recimo nebotičnik proti navzgor oža;
-            
-            // y;
-            scrnPt.y = scrnMidPoint.y + (Math.atan2(spcPt.z, (spcPt.y**2  + spcPt.x**2 )**(1/2))/vertRadsFrmCentr) * scrnMidPoint.y;
-        } else {
-            // parentObj se uporablja samo tle
-            scrnPt.x = undefined;
-            scrnPt.y = undefined;
+        if(spcPt.y > 0) {   // neproblematična varianta, tj. če imaš stvar pred sabo;
+            scrnPts.push(frmSpcPtToScrnPt(spcPt.x, spcPt.y, spcPt.z));
+            // if(parentObj != undefined) console.log('i:', i, 'Y je OK')
+        } else {    // če prideš v else, je bil podan tudi parentObj;
+            // najst kjer v parentObj.connectionsAlt je taka točka
+            if (!testShown) {
+                testShown = true;
+                // console.log(spacePoints, parentObj.connectionsAlt);
+            }
+            let found = false;
+            for (let j = startRoll; j < parentObj.connectionsAlt.length; j++) {
+                const retrndValue = doDThing(i, j); // če je mogoče ekstrapolirati negativni y, vrne novi x in y koordinati spacePointa (space, ne screen) v arrayu;
+                if (typeof retrndValue == 'object') {
+                    found = true;
+                    scrnPts.push(frmSpcPtToScrnPt(retrndValue[0], retrndValue[1], spcPt.z));    // frmSpcPtT... vrne array, ki ima na prvam mestu x, nato y;
+                    break;
+                }
+            }
+            if (startRoll > 0 && !found) for (let j = 0; j < startRoll; j++) {  // reroll in iskanje od začetka, če ni bilo najdeno pri koncu arraya povezav;
+                const retrndValue = doDThing(i, j);
+                if (typeof retrndValue == 'object') {
+                    found = true;
+                    scrnPts.push(frmSpcPtToScrnPt(retrndValue[0], retrndValue[1], spcPt.z));
+                    break;
+                }
+            }
+            if (!found) scrnPts.push(new ScreenPoint(undefined, undefined));
         }
-        
-        scrnPts.push(scrnPt);
     });
     
     return scrnPts;
 }
+
 
 function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od viewerja do predmetov;
     
@@ -148,7 +197,7 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
                 else angle = 0.5 * Math.PI - viewngAngle;
             }
             
-            //zdaj, ko smo dobili nov kot, že kar lahko izračunamo nov x in nov y relativne točke, ki bo izrisana;
+            //zdaj, ko smo dobili nov kot, že kar lahko izračunamo nov x in nov y (prostorske) relativne točke, ki bo izrisana;
             x = r * Math.sin(angle);
             y = r * Math.cos(angle);
             if (activeItems == objRotateItems) {
@@ -161,11 +210,11 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
         
         })
                     
-        // narišemo novo stanje, ampak samo če niso vse y koordinate negativne, ker v slednjem primeru gre za zrcalno sliko za hrbtom;
-        if (!allYNegAngular) {
-            if (!atLeast1YNeg) {
+        if (!allYNegAngular) {  // če so vse prostorske y-koordinate predmeta negativne, je predmet v celoti za hrbtom gledalca in ga ne rišemo;
+            if (!atLeast1YNeg) {    // če niti ena prostorska y koordinata ni negativna, simple case;
                 spunItem.draw(calcScreenPts(item2Draw), false);
-            } else {
+            } else { // če je kakšna y-koordinata prostorske točke negativna, je treba komplicirat, interpolirat y, da ni negativen..
+                    // (zaradi kotnih preračunov se lahko stvari, ki jih imaš za hrbtom, narišejo pred tamo, zato je treba negativne y skenalsat pred kotnimi prer.); 
                 spunItem.draw(calcScreenPts(item2Draw, spunItem), true);
             }
         }
@@ -224,6 +273,8 @@ const landscapeItems = [line1, line1_1, line1_2, line1_3, line1_4, line1_5, /*li
 // const landscapeItems = [pickupTruckLndscp];
 
 // const landscapeItems = [...dividingLines];
+
+// const landscapeItems = [new HorzRectangle(new SpacePoint(-0.1, 2, 0), 0.2, 3)]
 
 const objRotateItems = [pickupTruckRotate];
 

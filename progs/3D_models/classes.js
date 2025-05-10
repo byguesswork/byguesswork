@@ -37,6 +37,7 @@ class Thingy {
             });
         } else {
             this.connectionsAlt.forEach(element => {
+                // console.log(screenPoints)
                 if (screenPoints[element[0]].x != undefined && screenPoints[element[1]].x != undefined) {   // rišemo samo če imamo obe piki;
                     ctx.moveTo(screenPoints[element[0]].x, screenPoints[element[0]].y);
                     ctx.lineTo(screenPoints[element[1]].x, screenPoints[element[1]].y);
