@@ -1,7 +1,5 @@
 'use strict';
 
-// probat uno idejo s koti, da do desnega roba ne greš sorazmerno s piksli, ampak glede na naraščanje kota!! 
-
 // ikone za upravljanje v mobile
 
 // da deluje podaljšan pritisk; - https://developer.mozilla.org/en-US/docs/Web/API/Touch_events
@@ -29,13 +27,8 @@ const scrnMidPoint = {
 const FISHEYE = 1.45;
 const TELEANGLE = 0.3;
 let hrzRadsFrmCentr = FISHEYE;
-let vertRadsFrmCentr;
+let vertRadsFrmCentr, factorX, factorY;
 calcVertRadsFrmCentr();
-function calcVertRadsFrmCentr(){    // kliče se vsakokrat, ko zamenjaš narrowAngle/fish eye;
-    vertRadsFrmCentr = (Math.round(10000 * (scrnMidPoint.y * hrzRadsFrmCentr) / scrnMidPoint.x)) / 10000;
-    // if (vertRadsFrmCentr > hrzRadsFrmCentr) vertRadsFrmCentr = hrzRadsFrmCentr; // čebi hotel dat to, bi moral omejit tudi višino, do katere sega canvas..
-    // canvas bi v takem primeru moral naredit kvadrat, ker zdaj poskuša isti majhen kot raztegnit do vrha pokončnega telefona in tako sliko raztegne navzgor;
-}  
 console.log(wdth, hght, scrnMidPoint, vertRadsFrmCentr);
 
 // najprej mobilca, ker to lahko spremeni postavitev;
@@ -53,6 +46,16 @@ document.getElementById('mode').style.bottom = `${30 + modeRectHght + 25}px`;   
 
 
 //  - - - -   FUNKCIJE   - - - -
+
+function calcVertRadsFrmCentr(){    // kliče se vsakokrat, ko zamenjaš narrowAngle/fish eye;
+    vertRadsFrmCentr = (Math.round(10000 * (scrnMidPoint.y * hrzRadsFrmCentr) / scrnMidPoint.x)) / 10000;
+    factorX = scrnMidPoint.x / Math.sin(hrzRadsFrmCentr);
+    factorY = scrnMidPoint.y / Math.sin(vertRadsFrmCentr);
+
+    // if (vertRadsFrmCentr > hrzRadsFrmCentr) vertRadsFrmCentr = hrzRadsFrmCentr; // čebi hotel dat to, bi moral omejit tudi višino, do katere sega canvas..
+    // canvas bi v takem primeru moral naredit kvadrat, ker zdaj poskuša isti majhen kot raztegnit do vrha pokončnega telefona in tako sliko raztegne navzgor;
+}  
+
 function clearCanvas() {
     ctx.lineWidth = 1;
     ctx.strokeStyle = bckgndColr;
@@ -66,7 +69,7 @@ function clearCanvas() {
 
 function calcScreenPts(spacePoints, parentObj) {   // prejme relativne koordinate!, položaj viewerja mora torej biti že odštet;
 
-    function doDThing(i, j){    // to samo interpolira x in y od SpacePOinta (ne ScreenPointa!!!) in vrne x in y SpacePointa!;
+    function chk4Intrpolate(i, j){    // to samo interpolira x in y od SpacePOinta (ne ScreenPointa!!!) in vrne x in y SpacePointa!;
         // console.log('i:',i, 'j:', j)
         if (parentObj.connectionsAlt[j][0] == i) { // spcPt[i] se uporablja kot začetni element črte, ki jo opredeljuje connsAlt[j]; 
             if (spacePoints[parentObj.connectionsAlt[j][1]].y > 0) {
@@ -95,8 +98,11 @@ function calcScreenPts(spacePoints, parentObj) {   // prejme relativne koordinat
 
     function frmSpcPtToScrnPt(x, y, z) {
         const scrnPt = new ScreenPoint();
-        scrnPt.x = scrnMidPoint.x + (Math.atan2(x, (y**2 + z**2 )**(1/2))/hrzRadsFrmCentr) * scrnMidPoint.x;
-        scrnPt.y = scrnMidPoint.y + (Math.atan2(z, (y**2  + x**2 )**(1/2))/vertRadsFrmCentr) * scrnMidPoint.y;
+        // stara linearna oblika;
+        // scrnPt.x = scrnMidPoint.x + (Math.atan2(x, (y**2 + z**2 )**(1/2))/hrzRadsFrmCentr) * scrnMidPoint.x;
+        // scrnPt.y = scrnMidPoint.y + (Math.atan2(z, (y**2  + x**2 )**(1/2))/vertRadsFrmCentr) * scrnMidPoint.y;
+        scrnPt.x = scrnMidPoint.x +  Math.sin(Math.atan2(x, (y**2 + z**2 )**(1/2))) * factorX;
+        scrnPt.y = scrnMidPoint.y +  Math.sin(Math.atan2(z, (y**2  + x**2 )**(1/2))) * factorY;
         return scrnPt;
     }
 
@@ -107,18 +113,19 @@ function calcScreenPts(spacePoints, parentObj) {   // prejme relativne koordinat
         // glavna logika je Math.atan2(offset(od navpičnice, vodoravnice), razdalja do tja);
         // računanje hipotenuze služi upoštevanju tega, da če je neka stvar visoko, je v bistvu tudi oddaljena;
         // tudi če ozkokotni pogled prikažeš cel (s faktorjem 0,2) ni čisto nič drugačen od fish eye; spreminjanje kota torej ne reši ukrivljenosti, bo treba druga metoda;
-        if(spcPt.y > 0) {   // neproblematična varianta, tj. če imaš stvar pred sabo;
+        
+        if (spcPt.y > 0) {   // neproblematična varianta, tj. če imaš stvar pred sabo;
             scrnPts.push(frmSpcPtToScrnPt(spcPt.x, spcPt.y, spcPt.z));
             // if(parentObj != undefined) console.log('i:', i, 'Y je OK')
         } else {    // če prideš v else, je bil podan tudi parentObj;
-            // najst kjer v parentObj.connectionsAlt je taka točka
-            if (!testShown) {
+            if (!testShown) {   // samo za potrebe debuganja;
                 testShown = true;
                 // console.log(spacePoints, parentObj.connectionsAlt);
             }
+            // najst, kje v parentObj.connectionsAlt je taka točka (y < 0 in ima povezavo, na osnovi katere, ga je mogoče interpolirati);
             let found = false;
             for (let j = startRoll; j < parentObj.connectionsAlt.length; j++) {
-                const retrndValue = doDThing(i, j); // če je mogoče ekstrapolirati negativni y, vrne novi x in y koordinati spacePointa (space, ne screen) v arrayu;
+                const retrndValue = chk4Intrpolate(i, j); // če je mogoče interpolirati negativni y, vrne novi x in y koordinati spacePointa (space, ne screen) v arrayu;
                 if (typeof retrndValue == 'object') {
                     found = true;
                     scrnPts.push(frmSpcPtToScrnPt(retrndValue[0], retrndValue[1], spcPt.z));    // frmSpcPtT... vrne array, ki ima na prvam mestu x, nato y;
@@ -126,7 +133,7 @@ function calcScreenPts(spacePoints, parentObj) {   // prejme relativne koordinat
                 }
             }
             if (startRoll > 0 && !found) for (let j = 0; j < startRoll; j++) {  // reroll in iskanje od začetka, če ni bilo najdeno pri koncu arraya povezav;
-                const retrndValue = doDThing(i, j);
+                const retrndValue = chk4Intrpolate(i, j);
                 if (typeof retrndValue == 'object') {
                     found = true;
                     scrnPts.push(frmSpcPtToScrnPt(retrndValue[0], retrndValue[1], spcPt.z));
@@ -189,8 +196,8 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
             
             let angle;
             if (y > 0) {
-                angle = Math.asin(x/r) - viewngAngle;   // pri izračunu že kar takoj upoštevamo kot pogleda
-            } else if (y < 0) {
+                angle = Math.asin(x/r) - viewngAngle;   // pri izračunu kota, pod katerim gledamo neko točko, je treba upoštevati, kam je usmerjen pogled gledalva (viewAngle)..;
+            } else if (y < 0) {                             // ..pri rotaciji (objRotate) je sicer viewAngle kot, za koliko je zarotiran predmet ! ! !;
                 angle = Math.PI - Math.asin(x/r) - viewngAngle;
             } else if (y == 0) {
                 if (x < 0) angle = 1.5 * Math.PI - viewngAngle;
@@ -200,7 +207,7 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
             //zdaj, ko smo dobili nov kot, že kar lahko izračunamo nov x in nov y (prostorske) relativne točke, ki bo izrisana;
             x = r * Math.sin(angle);
             y = r * Math.cos(angle);
-            if (activeItems == objRotateItems) {
+            if (activeItems == objRotateItems) {    // to je potrebno samo pri objRotate ! ! ! ker tam se relativizacija zgodi glede na središče vrtenja;
                 x += center.x - activeViewer.posIn3D.x;
                 y += center.y - activeViewer.posIn3D.y;
             }
@@ -223,13 +230,6 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
 
 
 //  - - - -  AJDE  - - -
-const landscapeViewer = new Viewer(0, 0, 1.7);   // na začetku ima gledalec privzeto spacePoint 0,0,1.7 (kao visok 1.7m), gleda naravnost vzdolž osi y, torej v {0,neskončno,1.7}, tj. kot 0;
-const obj2RotateViewer = new Viewer (0, 0, 1.7);
-const obj2Rotate = {
-    angle : 0,  // kot 0 gleda vzdolž osi y, v smeri naraščanja y;
-    rotnAngleIncrmnt : Math.PI/30,
-    center: undefined
-};
 
 // - - - - - -  USTVARJANJE STVARI, KI BODO NA EKRANU - - - - - -
 const cubes = [];
@@ -247,18 +247,20 @@ const pickupTruckLndscp = new Pickup(new SpacePoint(5, 5, 0));
 const pickupTruckRotate = new Pickup(new SpacePoint(1, 5, 0));
 
 // rob ceste;
-const line1 = new Connection(new SpacePoint(-4, 0, 0), new SpacePoint(-4, 2000, 0));      // opazi, kako je line1 ravna in se ne ujema s segmentirano črto;
-const line1_1 = new Connection(new SpacePoint(-4, 0, 0), new SpacePoint(-4, 2, 0));
-const line1_2 = new Connection(new SpacePoint(-4, 2, 0), new SpacePoint(-4, 4, 0));
-const line1_3 = new Connection(new SpacePoint(-4, 4, 0), new SpacePoint(-4, 8, 0));
-const line1_4 = new Connection(new SpacePoint(-4, 8, 0), new SpacePoint(-4, 16, 0));
-const line1_5 = new Connection(new SpacePoint(-4, 16, 0), new SpacePoint(-4, 2000, 0));
-const line2 = new Connection(new SpacePoint(4, 0, 0), new SpacePoint(4, 2000, 0));  // opazi, kako je line2 ravna in tudi posega v avto, ko gre gledalec zadosti levo; segmentirana linija 2 pa je OK z avtom;
-const line2_1 = new Connection(new SpacePoint(4, 0, 0), new SpacePoint(4, 2, 0));
-const line2_2 = new Connection(new SpacePoint(4, 2, 0), new SpacePoint(4, 4, 0));
-const line2_3 = new Connection(new SpacePoint(4, 4, 0), new SpacePoint(4, 8, 0));
-const line2_4 = new Connection(new SpacePoint(4, 8, 0), new SpacePoint(4, 16, 0));
-const line2_5 = new Connection(new SpacePoint(4, 16, 0), new SpacePoint(4, 2000, 0));
+const lines = [];
+// new Connection(new SpacePoint(-4, 0, 0), new SpacePoint(-4, 2000, 0));      // opazi, kako je line1 ravna in se ne ujema s segmentirano črto;
+lines.push(new Connection(new SpacePoint(-4, 0, 0), new SpacePoint(-4, 2, 0)));
+lines.push(new Connection(new SpacePoint(-4, 2, 0), new SpacePoint(-4, 4, 0)));
+lines.push(new Connection(new SpacePoint(-4, 4, 0), new SpacePoint(-4, 8, 0)));
+lines.push(new Connection(new SpacePoint(4, 0, 0), new SpacePoint(4, 2, 0)));
+lines.push(new Connection(new SpacePoint(4, 2, 0), new SpacePoint(4, 4, 0)));
+lines.push(new Connection(new SpacePoint(4, 4, 0), new SpacePoint(4, 8, 0)));
+for(let i = 1; i < 8; i++) {
+    lines.push(new Connection(new SpacePoint(-4, 8 + (i - 1) * 8, 0), new SpacePoint(-4, 8 + i * 8, 0)));
+    lines.push(new Connection(new SpacePoint(4, 8 + (i - 1) * 8, 0), new SpacePoint(4, 8 + i * 8, 0)));
+}
+lines.push(new Connection(new SpacePoint(-4, 64, 0), new SpacePoint(-4, 2000, 0)));
+lines.push(new Connection(new SpacePoint(4, 64, 0), new SpacePoint(4, 2000, 0)));
 
 // črte na sredini ceste;
 const dividingLines = [];
@@ -267,16 +269,25 @@ for (let i = 2; i <= 302; i += 10) {
 };
 
 // - - - - - -  DODAJANJE STVARI V KATALOGE  - - - - - -
-const landscapeItems = [line1, line1_1, line1_2, line1_3, line1_4, line1_5, /*line2*/, line2_1, line2_2,
-    line2_3, line2_4, line2_5, ...dividingLines, ...cubes, pickupTruckLndscp];
+const landscapeItems = [...lines, ...dividingLines, ...cubes, pickupTruckLndscp];
 
+// spodnje so za testiranje;
 // const landscapeItems = [pickupTruckLndscp];
-
 // const landscapeItems = [...dividingLines];
-
 // const landscapeItems = [new HorzRectangle(new SpacePoint(-0.1, 2, 0), 0.2, 3)]
 
 const objRotateItems = [pickupTruckRotate];
+
+
+//  - - - - - -  USTVARJANJE GLEDALCEV (2: za pomikanje po pokrajini in za gledanje rotacije predmeta);
+const landscapeViewer = new Viewer(0, 0, 1.7);   // na začetku ima gledalec privzeto spacePoint 0,0,1.7 (kao visok 1.7m), gleda naravnost vzdolž osi y, torej v {0,neskončno,1.7}, tj. kot 0;
+
+const obj2RotateViewer = new Viewer (0, 0, 1.7);
+const obj2Rotate = {    // gledalec za rotacijo potrebuje še ta objekt, v katerem so shranjeni parametri rotacije;
+    angle : 0,  // kot 0 gleda vzdolž osi y, v smeri naraščanja y;
+    rotnAngleIncrmnt : Math.PI/30,
+    center: undefined
+};
 
 let activeItems = landscapeItems;
 let activeViewer = landscapeViewer;
@@ -284,6 +295,7 @@ let activeViewer = landscapeViewer;
 
 //  - - - - - -   ZAČETNI IZRIS PRIVZETEGA KATALOGA   - - - - - -
 calcReltvSpcPtsAndDraw();
+
 
 // - - - -  CONTROLS  - - - - - -
 document.addEventListener('keydown', atKeyPress);
