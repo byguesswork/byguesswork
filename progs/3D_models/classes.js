@@ -207,37 +207,37 @@ class Pickup extends Thingy {
         this.spacePoints[2].y = spacePoint.y;
         this.spacePoints[3].y = spacePoint.y;
         // še ostala oglišča prednjega kvadrata, v kontra smeri urinega kazalca;
-        this.spacePoints[1].x = spacePoint.x + 1.85;    // širina kabine
+        this.spacePoints[1].x = spacePoint.x + 2;    // širina kabine
         this.spacePoints[1].z = - spacePoint.z;
-        this.spacePoints[2].x = spacePoint.x + 1.85;
+        this.spacePoints[2].x = spacePoint.x + 2;
         this.spacePoints[2].z = - spacePoint.z - 0.9; // višina spodnjega dela karoserije; side se odšteje, ne pa prišteje (razlago glej Cube);
         this.spacePoints[3].x = spacePoint.x;
         this.spacePoints[3].z = - spacePoint.z - 0.9;
     
         // zadnji kvadrat karoserij;
         // y-i zadnjega kvadrata so vsi enaki;
-        this.spacePoints[4].y = spacePoint.y + 4.7; // dolžina
-        this.spacePoints[5].y = spacePoint.y + 4.7;
-        this.spacePoints[6].y = spacePoint.y + 4.7;
-        this.spacePoints[7].y = spacePoint.y + 4.7;
+        this.spacePoints[4].y = spacePoint.y + 5; // dolžina
+        this.spacePoints[5].y = spacePoint.y + 5;
+        this.spacePoints[6].y = spacePoint.y + 5;
+        this.spacePoints[7].y = spacePoint.y + 5;
         // še ostala oglišča zadnjega kvadrata, v kontra smeri urinega kazalca;
         this.spacePoints[4].x = spacePoint.x;
         this.spacePoints[4].z = - spacePoint.z;
-        this.spacePoints[5].x = spacePoint.x + 1.85;
+        this.spacePoints[5].x = spacePoint.x + 2;
         this.spacePoints[5].z = - spacePoint.z;
-        this.spacePoints[6].x = spacePoint.x + 1.85;
+        this.spacePoints[6].x = spacePoint.x + 2;
         this.spacePoints[6].z = - spacePoint.z - 0.9;
         this.spacePoints[7].x = spacePoint.x;
         this.spacePoints[7].z = - spacePoint.z - 0.9;
     
         // kabina
         this.spacePoints.push(new SpacePoint(spacePoint.x + 0.05, spacePoint.y + 1.0, - spacePoint.z - 1.1)); // 8   ; 0,1, da je malo ožje kot karoserija spodaj
-        this.spacePoints.push(new SpacePoint(spacePoint.x + 1.8, spacePoint.y + 1.0, - spacePoint.z - 1.1));    // 9 ; 1.75, da je malo ožje kot karoserija spodaj (1,85); točki pregiba preden se havba, ki se dviguje, začne dvigovat v steklo;
-        this.spacePoints.push(new SpacePoint(spacePoint.x + 1.75, spacePoint.y + 1.7, - spacePoint.z - 1.8)); // 10   ; desna zgornja točka stekla (gledano od spredaj); dolžina tega dela: 0,7, končan višina: 1,8
+        this.spacePoints.push(new SpacePoint(spacePoint.x + 1.95, spacePoint.y + 1.0, - spacePoint.z - 1.1));    // 9 ; 1.75, da je malo ožje kot karoserija spodaj (1,85); točki pregiba preden se havba, ki se dviguje, začne dvigovat v steklo;
+        this.spacePoints.push(new SpacePoint(spacePoint.x + 1.9, spacePoint.y + 1.7, - spacePoint.z - 1.8)); // 10   ; desna zgornja točka stekla (gledano od spredaj); dolžina tega dela: 0,7, končan višina: 1,8
         this.spacePoints.push(new SpacePoint(spacePoint.x + 0.1, spacePoint.y + 1.7, - spacePoint.z - 1.8));    // 11 ; leva zgornja stekla
-        this.spacePoints.push(new SpacePoint(spacePoint.x + 1.75, spacePoint.y + 2.4, - spacePoint.z - 1.8)); // 12   ; desna zadnja zgornja točka kabine (gledano od spredaj); ravna streha kabine dolga 0,7
+        this.spacePoints.push(new SpacePoint(spacePoint.x + 1.9, spacePoint.y + 2.4, - spacePoint.z - 1.8)); // 12   ; desna zadnja zgornja točka kabine (gledano od spredaj); ravna streha kabine dolga 0,7
         this.spacePoints.push(new SpacePoint(spacePoint.x + 0.1, spacePoint.y + 2.4, - spacePoint.z - 1.8));    // 13 ; leva zadnja zgornja kabine
-        this.spacePoints.push(new SpacePoint(spacePoint.x + 1.85, spacePoint.y + 2.4, - spacePoint.z - 0.9)); // 14   ; desna zadnja spodnja točka kabine (na sredini karoserije, na pol poti od tli do vrha; gledano od spredaj)
+        this.spacePoints.push(new SpacePoint(spacePoint.x + 2, spacePoint.y + 2.4, - spacePoint.z - 0.9)); // 14   ; desna zadnja spodnja točka kabine (na sredini karoserije, na pol poti od tli do vrha; gledano od spredaj)
         this.spacePoints.push(new SpacePoint(spacePoint.x + 0.0, spacePoint.y + 2.4, - spacePoint.z - 0.9));    // 15 ; leva zadnja spodnja kabine (na sredini med tlemi in vrhom kabine)
     
         // luči
@@ -246,10 +246,10 @@ class Pickup extends Thingy {
         this.spacePoints.push(new SpacePoint(spacePoint.x + 0.60, spacePoint.y, - spacePoint.z - 0.80));
         this.spacePoints.push(new SpacePoint(spacePoint.x + 0.15, spacePoint.y, - spacePoint.z - 0.80)); //19
     
-        this.spacePoints.push(new SpacePoint(spacePoint.x + 1.25, spacePoint.y, - spacePoint.z - 0.60)); //20
-        this.spacePoints.push(new SpacePoint(spacePoint.x + 1.70, spacePoint.y, - spacePoint.z - 0.60));
-        this.spacePoints.push(new SpacePoint(spacePoint.x + 1.70, spacePoint.y, - spacePoint.z - 0.80));
-        this.spacePoints.push(new SpacePoint(spacePoint.x + 1.25, spacePoint.y, - spacePoint.z - 0.80)); //23
+        this.spacePoints.push(new SpacePoint(spacePoint.x + 1.4, spacePoint.y, - spacePoint.z - 0.60)); //20
+        this.spacePoints.push(new SpacePoint(spacePoint.x + 1.85, spacePoint.y, - spacePoint.z - 0.60));
+        this.spacePoints.push(new SpacePoint(spacePoint.x + 1.85, spacePoint.y, - spacePoint.z - 0.80));
+        this.spacePoints.push(new SpacePoint(spacePoint.x + 1.4, spacePoint.y, - spacePoint.z - 0.80)); //23
     }
 
 }

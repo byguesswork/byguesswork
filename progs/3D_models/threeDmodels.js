@@ -24,7 +24,7 @@ const scrnMidPoint = {
     y: hght % 2 == 0 ? hght / 2 : hght / 2 + 0.5
 }
 // koti; ekran od leve do desne je 3.0 radiana (malo manj kot 180', kao oponaša vidno polje človeka), pomeni da je scrnMidPoint.x = 1.5 (ali tam nekje); zdaj izračunamo še, kolikšen kot je lahko po vertikali 
-const FISHEYE = 1.45;
+const FISHEYE = 1.5;
 const TELEANGLE = 0.3;
 let hrzRadsFrmCentr = FISHEYE;
 let vertRadsFrmCentr, factorX, factorY;
@@ -48,9 +48,17 @@ document.getElementById('mode').style.bottom = `${30 + modeRectHght + 25}px`;   
 //  - - - -   FUNKCIJE   - - - -
 
 function calcVertRadsFrmCentr(){    // kliče se vsakokrat, ko zamenjaš narrowAngle/fish eye;
-    vertRadsFrmCentr = (Math.round(10000 * (scrnMidPoint.y * hrzRadsFrmCentr) / scrnMidPoint.x)) / 10000;
+    let drawableYHeightHalved;
+    if (wdth > hght) {
+        vertRadsFrmCentr = toDecPlace((scrnMidPoint.y / scrnMidPoint.x) * hrzRadsFrmCentr, 4);
+        drawableYHeightHalved = scrnMidPoint.y;
+    } else {
+        vertRadsFrmCentr = hrzRadsFrmCentr;
+        drawableYHeightHalved = scrnMidPoint.x; 
+    }
+    console.log('vertRads:', vertRadsFrmCentr)
     factorX = scrnMidPoint.x / Math.sin(hrzRadsFrmCentr);
-    factorY = scrnMidPoint.y / Math.sin(vertRadsFrmCentr);
+    factorY = drawableYHeightHalved / Math.sin(vertRadsFrmCentr);
 
     // if (vertRadsFrmCentr > hrzRadsFrmCentr) vertRadsFrmCentr = hrzRadsFrmCentr; // čebi hotel dat to, bi moral omejit tudi višino, do katere sega canvas..
     // canvas bi v takem primeru moral naredit kvadrat, ker zdaj poskuša isti majhen kot raztegnit do vrha pokončnega telefona in tako sliko raztegne navzgor;
