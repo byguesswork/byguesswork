@@ -7,36 +7,40 @@
 // dodat kšne opise v index.html (recimo za fuel: I like its simplicity, maybe you will too)
 
 
-const wdth = document.documentElement.clientWidth - 5; // -5 , da ni skrolbara; prej je bilo window.innerWidth, ampak ni ok, vsaj višina ne, prevelika pride;
-const hght = document.documentElement.clientHeight - 5;
 const canvas = document.getElementById('canvas');
-canvas.height = hght;
-canvas.width = wdth;
 const ctx = canvas.getContext('2d');
+Thingy.meetCtx(ctx);
 const bckgndColr = '#4e4e4c';
 const lineColor = '#f0fff0';
-ctx.lineWidth = 1;
-ctx.strokeStyle = lineColor;
-Thingy.meetCtx(ctx);
-
+let wdth, hght, clientWidthWas;
+let orientationChkIsInMotion = null;
 const scrnMidPoint = {
-    x: wdth % 2 == 0 ? wdth / 2 : wdth / 2 + 0.5, 
-    y: hght % 2 == 0 ? hght / 2 : hght / 2 + 0.5
-}
+    x: 0, 
+    y: 0
+};
+initScrn();
+
 // koti; ekran od leve do desne je 3.0 radiana (malo manj kot 180', kao oponaša vidno polje človeka), pomeni da je scrnMidPoint.x = 1.5 (ali tam nekje); zdaj izračunamo še, kolikšen kot je lahko po vertikali 
-const FISHEYE = 1.5;
+const FISHEYE = Math.PI / 2;
 const TELEANGLE = 0.3;
-let hrzRadsFrmCentr = FISHEYE;
+let hrzRadsFrmCentr = TELEANGLE;
 let vertRadsFrmCentr, factorX, factorY;
 calcVertRadsFrmCentr();
 console.log(wdth, hght, scrnMidPoint, vertRadsFrmCentr);
 
-// najprej mobilca, ker to lahko spremeni postavitev;
+// najprej preverimo za mobilca, ker to lahko spremeni postavitev;
 let mobile = false;
 if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null || navigator.userAgentData.mobile == true) {
+    console.log('mobile');
     mobile = true;
     const spans2remv = [...document.getElementsByClassName('not_if_mobile')];
     spans2remv.forEach(el => el.classList.add('hidden'));
+
+    screen.orientation.addEventListener("change", () => {
+        orientationChkIsInMotion = setInterval(chkOnOrientationChgd, 50);
+        console.log('listener za obračanje se je sprožil')
+    });
+    
 }
 
 // šele po morebitni spremembi zaradi mobile umestimo zgornji okvir;
@@ -47,15 +51,41 @@ document.getElementById('mode').style.bottom = `${30 + modeRectHght + 25}px`;   
 
 //  - - - -   FUNKCIJE   - - - -
 
+function chkOnOrientationChgd(){
+    console.log('widthWas:', clientWidthWas, 'width is:', document.documentElement.clientWidth, 'interval:', orientationChkIsInMotion);
+    if (document.documentElement.clientWidth != clientWidthWas) {
+        clearInterval(orientationChkIsInMotion);
+        orientationChkIsInMotion = null;
+        initScrn();
+        calcVertRadsFrmCentr();
+        calcReltvSpcPtsAndDraw();
+    }
+}
+
+function initScrn(){
+    clientWidthWas = document.documentElement.clientWidth; // da bomo pozneje lahko preverjali orietn change na mobilcu;
+    wdth = clientWidthWas - 5; // -5 , da ni skrolbara; prej je bilo window.innerWidth, ampak ni ok, vsaj višina ne, prevelika pride;
+    hght = document.documentElement.clientHeight - 5;
+    scrnMidPoint.x = wdth % 2 == 0 ? wdth / 2 : wdth / 2 + 0.5;
+    scrnMidPoint.y = hght % 2 == 0 ? hght / 2 : hght / 2 + 0.5;
+ 
+    canvas.height = hght;
+    canvas.width = wdth;
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = lineColor;
+}
+
 function calcVertRadsFrmCentr(){    // kliče se vsakokrat, ko zamenjaš narrowAngle/fish eye;
     let drawableYHeightHalved;
-    if (wdth > hght) {
-        vertRadsFrmCentr = toDecPlace((scrnMidPoint.y / scrnMidPoint.x) * hrzRadsFrmCentr, 4);
-        drawableYHeightHalved = scrnMidPoint.y;
-    } else {
+
+    vertRadsFrmCentr = toDecPlace((scrnMidPoint.y / scrnMidPoint.x) * hrzRadsFrmCentr, 4);
+    drawableYHeightHalved = scrnMidPoint.y;
+    
+    if (vertRadsFrmCentr >= Math.PI / 2) {   // to se lahko zgodi pri pokočni postavitvi in fishEye;
         vertRadsFrmCentr = hrzRadsFrmCentr;
-        drawableYHeightHalved = scrnMidPoint.x; 
+        drawableYHeightHalved = scrnMidPoint.x; // da je slika enaka v širino in višino, ker že po širini zajame 180', višina pa je še višja;
     }
+
     console.log('vertRads:', vertRadsFrmCentr)
     factorX = scrnMidPoint.x / Math.sin(hrzRadsFrmCentr);
     factorY = drawableYHeightHalved / Math.sin(vertRadsFrmCentr);
@@ -227,7 +257,7 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
                     
         if (!allYNegAngular) {  // če so vse prostorske y-koordinate predmeta negativne, je predmet v celoti za hrbtom gledalca in ga ne rišemo;
             if (!atLeast1YNeg) {    // če niti ena prostorska y koordinata ni negativna, simple case;
-                spunItem.draw(calcScreenPts(item2Draw), false);
+                spunItem.draw(calcScreenPts(item2Draw, spunItem), false);
             } else { // če je kakšna y-koordinata prostorske točke negativna, je treba komplicirat, interpolirat y, da ni negativen..
                     // (zaradi kotnih preračunov se lahko stvari, ki jih imaš za hrbtom, narišejo pred tamo, zato je treba negativne y skenalsat pred kotnimi prer.); 
                 spunItem.draw(calcScreenPts(item2Draw, spunItem), true);
@@ -237,7 +267,7 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
 }
 
 
-//  - - - -  AJDE  - - -
+//  - - - - - - - - - - - - - - - - -  AKCIJA  - - - - - - - - - - - - - - - - - - - - -
 
 // - - - - - -  USTVARJANJE STVARI, KI BODO NA EKRANU - - - - - -
 const cubes = [];
@@ -257,22 +287,26 @@ const pickupTruckRotate = new Pickup(new SpacePoint(1, 5, 0));
 // rob ceste;
 const lines = [];
 // new Connection(new SpacePoint(-4, 0, 0), new SpacePoint(-4, 2000, 0));      // opazi, kako je line1 ravna in se ne ujema s segmentirano črto;
-lines.push(new Connection(new SpacePoint(-4, 0, 0), new SpacePoint(-4, 2, 0)));
-lines.push(new Connection(new SpacePoint(-4, 2, 0), new SpacePoint(-4, 4, 0)));
-lines.push(new Connection(new SpacePoint(-4, 4, 0), new SpacePoint(-4, 8, 0)));
-lines.push(new Connection(new SpacePoint(4, 0, 0), new SpacePoint(4, 2, 0)));
-lines.push(new Connection(new SpacePoint(4, 2, 0), new SpacePoint(4, 4, 0)));
-lines.push(new Connection(new SpacePoint(4, 4, 0), new SpacePoint(4, 8, 0)));
-for(let i = 1; i < 8; i++) {
-    lines.push(new Connection(new SpacePoint(-4, 8 + (i - 1) * 8, 0), new SpacePoint(-4, 8 + i * 8, 0)));
-    lines.push(new Connection(new SpacePoint(4, 8 + (i - 1) * 8, 0), new SpacePoint(4, 8 + i * 8, 0)));
+for(let i = 1; i <= 16; i++) {
+    lines.push(new Connection(new SpacePoint(-4, (i - 1) * 4, 0), new SpacePoint(-4, i * 4, 0)));
+    lines.push(new Connection(new SpacePoint(4, (i - 1) * 4, 0), new SpacePoint(4, i * 4, 0)));
+    lines.push(new Connection(new SpacePoint(-4, -(i - 1) * 4, 0), new SpacePoint(-4, -i * 4, 0)));
+    lines.push(new Connection(new SpacePoint(4, -(i - 1) * 4, 0), new SpacePoint(4, -i * 4, 0)));
 }
-lines.push(new Connection(new SpacePoint(-4, 64, 0), new SpacePoint(-4, 2000, 0)));
-lines.push(new Connection(new SpacePoint(4, 64, 0), new SpacePoint(4, 2000, 0)));
+for(let i = 1; i <= 4; i++) {
+    lines.push(new Connection(new SpacePoint(-4, 64 + (i - 1) * 16, 0), new SpacePoint(-4, 64 + i * 16, 0)));
+    lines.push(new Connection(new SpacePoint(4, 64 + (i - 1) * 16, 0), new SpacePoint(4, 64 + i * 16, 0)));
+    lines.push(new Connection(new SpacePoint(-4, -64 - (i - 1) * 16, 0), new SpacePoint(-4, -64 - i * 16, 0)));
+    lines.push(new Connection(new SpacePoint(4, -64 - (i - 1) * 16, 0), new SpacePoint(4, -64 - i * 16, 0)));
+}
+lines.push(new Connection(new SpacePoint(-4, 128, 0), new SpacePoint(-4, 2000, 0)));
+lines.push(new Connection(new SpacePoint(4, 128, 0), new SpacePoint(4, 2000, 0)));
+lines.push(new Connection(new SpacePoint(-4, -128, 0), new SpacePoint(-4, -2000, 0)));
+lines.push(new Connection(new SpacePoint(4, -128, 0), new SpacePoint(4, -2000, 0)));
 
 // črte na sredini ceste;
 const dividingLines = [];
-for (let i = 2; i <= 302; i += 10) {
+for (let i = -200; i <= 302; i += 10) {
     dividingLines.push(new HorzRectangle(new SpacePoint(-0.1, i, 0), 0.2, 3))
 };
 
@@ -288,7 +322,8 @@ const objRotateItems = [pickupTruckRotate];
 
 
 //  - - - - - -  USTVARJANJE GLEDALCEV (2: za pomikanje po pokrajini in za gledanje rotacije predmeta);
-const landscapeViewer = new Viewer(0, 0, 1.7);   // na začetku ima gledalec privzeto spacePoint 0,0,1.7 (kao visok 1.7m), gleda naravnost vzdolž osi y, torej v {0,neskončno,1.7}, tj. kot 0;
+const landscapeViewer = new Viewer(0, -9, 1.7);   // na začetku ima gledalec privzeto spacePoint 0,-9,1.7 (kao visok 1.7m), gleda naravnost vzdolž osi y, torej v {0,neskončno,1.7}, tj. kot 0;
+                                                    // y == 9, da je pri normal view videt del avta
 
 const obj2RotateViewer = new Viewer (0, 0, 1.7);
 const obj2Rotate = {    // gledalec za rotacijo potrebuje še ta objekt, v katerem so shranjeni parametri rotacije;
