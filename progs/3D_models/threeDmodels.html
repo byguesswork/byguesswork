@@ -25,7 +25,8 @@
             <p class="mode unselected">Rotate object</p>
         </div>
     </div>
-    <div id="controls">
+    <canvas id="controls_canvas"></canvas>
+    <!-- <div id="controls">
         <div id="proceed">
             <p class="proceed">Forward<span class="smaller not_if_mobile">&nbsp;&nbsp;(Arrow Up)</span></p>
             <p class="interstit">&nbsp;</p>
@@ -46,14 +47,19 @@
             <p class="interstit">&nbsp;</p>
             <p class="rotate">Anticlockwise<span class="not_if_mobile"> (I)</span></p>
         </div>
-    </div>
+    </div> -->
     <div id="home">
         <a href="/index.html" title="back to byGuesswork"><img src="/images/home.PNG" alt="home"></a>
-
     </div>
+    <div id="info_settings" class="info_settings_closed">
+        <div id="info_settings_content" class="info_settings_content_closed">i</div>
+        <div id="info_settings_OK" class="hidden align-right"></div>
+    </div>
+    <div id="joker" class="hidden"></div>
 
     <script src="utils.js"></script>
     <script src="classes.js"></script>
+    <script src="graphic_icons.js"></script>
     <script src="threeDmodels.js"></script>
 </body>
 </html>

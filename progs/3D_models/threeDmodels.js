@@ -6,19 +6,34 @@
 
 // dodat kšne opise v index.html (recimo za fuel: I like its simplicity, maybe you will too)
 
-
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
-Thingy.meetCtx(ctx);
+const controlsCanvas = document.getElementById('controls_canvas');
+const controlsCtx = controlsCanvas.getContext('2d');
+const infoSettgs = document.getElementById('info_settings');
+    const infoSettgsContent = document.getElementById('info_settings_content');
+    const infoSettgsOK = document.getElementById('info_settings_OK');
+const joker = document.getElementById('joker');
+
 const bckgndColr = '#4e4e4c';
 const lineColor = '#f0fff0';
-let wdth, hght, clientWidthWas;
+let wdth, hght, clientWidthWas;   // "was" se imenuje zato, ker se uporablja tudi v eni funkciji, kjer je pomembno, da je "was", sicer pa predstavlja tudi stanje "is";
 let orientationChkIsInMotion = null;
+let isInfoSettingsOpen = false;
+const lang = checkLang();
+const contrlsCnvsRect = {
+    left: 0,
+    top: 0,
+    right: 0,
+    bottom: 0
+}
 const scrnMidPoint = {
     x: 0, 
     y: 0
 };
+
 initScrn();
+drawControlsIcons();
 
 // koti; ekran od leve do desne je 3.0 radiana (malo manj kot 180', kao oponaša vidno polje človeka), pomeni da je scrnMidPoint.x = 1.5 (ali tam nekje); zdaj izračunamo še, kolikšen kot je lahko po vertikali 
 const FISHEYE = Math.PI / 2;
@@ -40,19 +55,35 @@ if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null || navigator.use
         orientationChkIsInMotion = setInterval(chkOnOrientationChgd, 50);
         console.log('listener za obračanje se je sprožil')
     });
-    
+
+    // če je mobile, ni info linka, ker ni kaj razlagat o tipkah;
+    infoSettgs.classList.add('hidden');
 }
 
-// šele po morebitni spremembi zaradi mobile umestimo zgornji okvir;
-const modeRectHght = document.getElementById('controls').getBoundingClientRect().height;
-document.getElementById('mode').style.bottom = `${30 + modeRectHght + 25}px`;   // 30 ker ima sklop pod njim bottom 30; 25 je arbitrarna meja med skopoma 
+infoSettgsContent.addEventListener('click', infoClicked);
+infoSettgsOK.addEventListener('click', infoCloseClicked);
 
+// šele po morebitni spremembi zaradi mobile umestimo zgornji okvir;
+document.getElementById('mode').style.bottom = `${30 + controlsCanvas.getBoundingClientRect().height + 25}px`;   // 30 ker ima sklop pod njim bottom 30; 25 je arbitrarna meja med skopoma 
+if (document.readyState == 'loading') { //.. in preberemo koordinate controlsRecta;
+    document.addEventListener("DOMContentLoaded", readcontrlsCnvsRect);  // domcontent loaded je lahko "complete" ali pa "interactive";
+} else {
+    readcontrlsCnvsRect();
+}
 
 
 //  - - - -   FUNKCIJE   - - - -
 
+function readcontrlsCnvsRect() {
+    contrlsCnvsRect.left = controlsCanvas.getBoundingClientRect().left;
+    contrlsCnvsRect.top = controlsCanvas.getBoundingClientRect().top;
+    contrlsCnvsRect.right = controlsCanvas.getBoundingClientRect().right;
+    contrlsCnvsRect.bottom = controlsCanvas.getBoundingClientRect().bottom;
+    console.log('rect:', contrlsCnvsRect.left, contrlsCnvsRect.top)
+}
+
 function chkOnOrientationChgd(){
-    console.log('widthWas:', clientWidthWas, 'width is:', document.documentElement.clientWidth, 'interval:', orientationChkIsInMotion);
+    // console.log('widthWas:', clientWidthWas, 'width is:', document.documentElement.clientWidth, 'interval:', orientationChkIsInMotion);
     if (document.documentElement.clientWidth != clientWidthWas) {
         clearInterval(orientationChkIsInMotion);
         orientationChkIsInMotion = null;
@@ -64,11 +95,13 @@ function chkOnOrientationChgd(){
 
 function initScrn(){
     clientWidthWas = document.documentElement.clientWidth; // da bomo pozneje lahko preverjali orietn change na mobilcu;
+    
     wdth = clientWidthWas - 5; // -5 , da ni skrolbara; prej je bilo window.innerWidth, ampak ni ok, vsaj višina ne, prevelika pride;
     hght = document.documentElement.clientHeight - 5;
     scrnMidPoint.x = wdth % 2 == 0 ? wdth / 2 : wdth / 2 + 0.5;
     scrnMidPoint.y = hght % 2 == 0 ? hght / 2 : hght / 2 + 0.5;
- 
+    
+    Thingy.meetCtx(ctx);
     canvas.height = hght;
     canvas.width = wdth;
     ctx.lineWidth = 1;
@@ -267,7 +300,7 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
 }
 
 
-//  - - - - - - - - - - - - - - - - -  AKCIJA  - - - - - - - - - - - - - - - - - - - - -
+//  - - - - - - - - - - - - - - - - -  PRIPRAVA  - - - - - - - - - - - - - - - - - - - - -
 
 // - - - - - -  USTVARJANJE STVARI, KI BODO NA EKRANU - - - - - -
 const cubes = [];
@@ -336,39 +369,56 @@ let activeItems = landscapeItems;
 let activeViewer = landscapeViewer;
 
 
-//  - - - - - -   ZAČETNI IZRIS PRIVZETEGA KATALOGA   - - - - - -
-calcReltvSpcPtsAndDraw();
+//  - - - - - - - - - - - - - - - - -  AKCIJA  - - - - - - - - - - - - - - - - - - - - -
+calcReltvSpcPtsAndDraw();   // začetni izris izbranega kataloga;
+
+let mousePressIsValid = false;  // če true, pove, da je dotik v teku in da je na veljavnem mestu;
+let intervalChecker = null;
+let mouseOrTchPosOnCtrls = {
+    x : 0,
+    y : 0,
+    btn : 'none'
+}
+
 
 
 // - - - -  CONTROLS  - - - - - -
-document.addEventListener('keydown', atKeyPress);
+
 const LEFT = 'l';
 const RIGHT = "r";
-const FORWARD = "c";
-const BACK = 'f';
+const FORWARD = "c";    // izvirno je bilo closer
+const BACK = 'f';       // izvirno je bilo far
 const UP = 'u';
 const DOWN = 'd';
 const CLOCKW = 'cw';
 const ANTICLOCKW = 'acw';
+const INVALID = 'inv';  // neveljaven klik
 
-function moveViewer(toWhere){
-    activeViewer.move(toWhere, activeViewer);
-    console.log(toDecPlace(activeViewer.posIn3D.x), toDecPlace(activeViewer.posIn3D.y), toDecPlace(activeViewer.posIn3D.z), 'kot:', toDecPlace(activeViewer.angle));
-    calcReltvSpcPtsAndDraw();
+const lensBtns = document.getElementsByClassName('lens');
+const modeBtns = document.getElementsByClassName('mode');
+
+//   - - - - - -    listenerji
+// tipke;
+document.addEventListener('keydown', atKeyPress);
+// besedilni gumbi;
+lensBtns[0].addEventListener('click', lensBtnOprtn);
+lensBtns[1].addEventListener('click', lensBtnOprtn);
+modeBtns[0].addEventListener('click', modeBtnOprtn);
+modeBtns[1].addEventListener('click', modeBtnOprtn);
+// grafični gumbi;
+if (!mobile) {  // poslušalci za ikone krmiljenja če miška;
+    controlsCanvas.addEventListener('mousedown', (e) => {mouseDownOprtn(e)});
+    controlsCanvas.addEventListener('mouseleave', (e) => {mouseLeaveOprtn(e)});
+    controlsCanvas.addEventListener('mouseup', (e) => {mouseUpOprtn(e)});
+    controlsCanvas.addEventListener('mousemove', (e) => {mouseMoveOprtn(e)});
+} else {
+    controlsCanvas.addEventListener('touchstart', (e) => {touchStartOprtn(e)}, {passive : false});
+    controlsCanvas.addEventListener('touchmove', (e) => {touchMoveOprtn(e)}, {passive : false});
+    controlsCanvas.addEventListener('touchend', (e) => {touchEndOprtn(e)}, {passive : false});
+
 }
 
-function rotateViewer(dir){
-    activeViewer.rotate(dir);   // samo landscapeViewer pride sem;
-    // console.log(toDecPlace(activeViewer.posIn3D.x), toDecPlace(activeViewer.posIn3D.y), toDecPlace(activeViewer.posIn3D.z), 'kot:', toDecPlace(activeViewer.angle));
-    calcReltvSpcPtsAndDraw();
-}
-
-function rotateObj(dir){
-    if (dir == ANTICLOCKW) obj2Rotate.angle += obj2Rotate.rotnAngleIncrmnt;
-        else obj2Rotate.angle -= obj2Rotate.rotnAngleIncrmnt;
-    calcReltvSpcPtsAndDraw();
-}
-
+//  - - - - - -    funkcije
 function atKeyPress(e){
     if (e.key == 'ArrowLeft') { moveViewer(LEFT) }
     else if (e.key == 'ArrowRight') { moveViewer(RIGHT);}
@@ -389,9 +439,45 @@ function atKeyPress(e){
     }
 }
 
-const modeBtns = document.getElementsByClassName('mode');
-modeBtns[0].addEventListener('click', modeBtnOprtn);
-modeBtns[1].addEventListener('click', modeBtnOprtn);
+function moveViewer(toWhere){
+    activeViewer.move(toWhere, activeViewer);
+    console.log(toDecPlace(activeViewer.posIn3D.x), toDecPlace(activeViewer.posIn3D.y), toDecPlace(activeViewer.posIn3D.z), 'kot:', toDecPlace(activeViewer.angle));
+    calcReltvSpcPtsAndDraw();
+}
+
+function rotateViewer(dir){
+    activeViewer.rotate(dir);   // samo landscapeViewer pride sem;
+    // console.log(toDecPlace(activeViewer.posIn3D.x), toDecPlace(activeViewer.posIn3D.y), toDecPlace(activeViewer.posIn3D.z), 'kot:', toDecPlace(activeViewer.angle));
+    calcReltvSpcPtsAndDraw();
+}
+
+function rotateObj(dir){
+    if (dir == ANTICLOCKW) obj2Rotate.angle += obj2Rotate.rotnAngleIncrmnt;
+        else obj2Rotate.angle -= obj2Rotate.rotnAngleIncrmnt;
+    calcReltvSpcPtsAndDraw();
+}
+
+// - - - -  gumba FISH EYE/NARROW;
+function changeLens(doFish){    // to lahko kličeš tudi s tipkami;
+    lensBtns[0].classList.toggle('selected');
+    lensBtns[1].classList.toggle('selected');
+    lensBtns[0].classList.toggle('unselected');
+    lensBtns[1].classList.toggle('unselected');
+    if (doFish) hrzRadsFrmCentr = FISHEYE;
+    else hrzRadsFrmCentr = TELEANGLE;
+    calcVertRadsFrmCentr();
+    calcReltvSpcPtsAndDraw();
+}
+
+function lensBtnOprtn(evt){
+    if (evt.target.classList.contains('unselected') || evt.target.parentElement.classList.contains('unselected')) {
+        if (lensBtns[0].classList.contains('selected')) {
+            changeLens(true);
+        } else changeLens(false);
+    }
+}
+
+//  - - - - -  gumba LANDSCAPE/ROTATE;
 function modeBtnOprtn(evt){
     if (evt.target.classList.contains('unselected')) {
         if (modeBtns[0].classList.contains('selected')) {
@@ -415,73 +501,163 @@ function modeBtnOprtn(evt){
     }
 }
 
-//  - - - - - - - - - 2 povezani funkciji
-function changeLens(doFish){    // to lahko kličeš tudi s tipkamiM
-    lensBtns[0].classList.toggle('selected');
-    lensBtns[1].classList.toggle('selected');
-    lensBtns[0].classList.toggle('unselected');
-    lensBtns[1].classList.toggle('unselected');
-    if (doFish) hrzRadsFrmCentr = FISHEYE;
-    else hrzRadsFrmCentr = TELEANGLE;
-    calcVertRadsFrmCentr();
-    calcReltvSpcPtsAndDraw();
-}
+//  - -  grafične ikone za premikanje;      - - - - - - -
+// če mobile
 
-const lensBtns = document.getElementsByClassName('lens');
-lensBtns[0].addEventListener('click', lensBtnOprtn);
-lensBtns[1].addEventListener('click', lensBtnOprtn);
-function lensBtnOprtn(evt){
-    if (evt.target.classList.contains('unselected') || evt.target.parentElement.classList.contains('unselected')) {
-        if (lensBtns[0].classList.contains('selected')) {
-            changeLens(true);
-        } else changeLens(false);
-    }
-}
-//  - - - - - - - - - !2 povezani funkciji
-
-const rotateBtns = document.getElementsByClassName('rotate');
-rotateBtns[0].addEventListener('click', rotateBtnsOprtn);
-rotateBtns[1].addEventListener('click', rotateBtnsOprtn);
-function rotateBtnsOprtn(e){
-    if (e.target == rotateBtns[0] || e.target.parentElement == rotateBtns[0]) {
-        if (activeItems == landscapeItems) rotateViewer(CLOCKW);
-        else rotateObj(CLOCKW);
+function touchStartOprtn(e) {
+    if (!mousePressIsValid) {   // to naj bi bilo zato, da za zdaj je mogoče le en dotik naenkrat;
+        mouseDownOprtn(e);  // lahko uporabimo isto funkcijo;
     } else {
-        if (activeItems == landscapeItems) rotateViewer(ANTICLOCKW);
-        else rotateObj(ANTICLOCKW);
+        joker.classList.remove('hidden');
+        joker.innerHTML = "second touch";
+        setTimeout(() => { joker.classList.add('hidden'); }, 1000);
     }
 }
 
-const proceedBtns = document.getElementsByClassName('proceed');
-
-// test
-// proceedBtns[0].addEventListener('click', () => console.log('click'));
-// proceedBtns[0].addEventListener('mousedown', (e) => console.log('mouseDown', e));
-// proceedBtns[0].addEventListener('mouseup', () => console.log('mouseup'));
-// proceedBtns[0].addEventListener('touchstart', (e) => console.log('touchstart', e));
-// proceedBtns[0].addEventListener('touchmove', () => console.log('touchmove'));
-// proceedBtns[0].addEventListener('touchend', () => console.log('touchend'));
-// !test
-
-proceedBtns[0].addEventListener('click', proceedBtnsOprtn);
-proceedBtns[1].addEventListener('click', proceedBtnsOprtn);
-function proceedBtnsOprtn(e){
-    if (e.target == proceedBtns[0] || e.target.parentElement == proceedBtns[0]) { moveViewer(FORWARD); }
-    else { moveViewer(BACK); }
+function touchEndOprtn(e) {
+    e.preventDefault();
+    // console.log('touchsend');
+    mouseUpOprtn(); // lahko uporabimo isto funkcijo;
 }
 
-const panBtns = document.getElementsByClassName('pan');
-panBtns[0].addEventListener('click', panBtnsOprtn);
-panBtns[1].addEventListener('click', panBtnsOprtn);
-function panBtnsOprtn(e){
-    if (e.target == panBtns[0] || e.target.parentElement == panBtns[0]) { moveViewer(RIGHT); }
-    else { moveViewer(LEFT); }
+function touchMoveOprtn(e) {
+    e.preventDefault();
+    if (e.changedTouches[0].clientX < contrlsCnvsRect.left || e.changedTouches[0].clientX > contrlsCnvsRect.right
+        || e.changedTouches[0].clientY < contrlsCnvsRect.top || e.changedTouches[0].clientY > contrlsCnvsRect.bottom) {
+        // if (mousePressIsValid) console.log('invalidated, ker zdrsnil s controls');
+        invldteCtrlsClick();
+    } else {
+        mouseMoveOprtn(e);   // lahko uporabimo kar od miši;
+    }
 }
 
-const riseBtns = document.getElementsByClassName('rise');
-riseBtns[0].addEventListener('click', riseBtnsOprtn);
-riseBtns[1].addEventListener('click', riseBtnsOprtn);
-function riseBtnsOprtn(e){
-    if (e.target == riseBtns[0] || e.target.parentElement == riseBtns[0]) { moveViewer(UP); }
-    else { moveViewer(DOWN); }
+// - -  če miška     - - - - - - - - - - - - 
+function mouseDownOprtn(e){
+    const reslt = determineMousPosOnCtrlsCnvs(e);
+    // console.log(reslt)
+    if (reslt == INVALID) {
+        invldteCtrlsClick();
+    } else {
+        mousePressIsValid = true;
+        mouseOrTchPosOnCtrls.btn = reslt;
+        if (reslt != CLOCKW && reslt != ANTICLOCKW) {
+            desktopMovingHelper();
+            intervalChecker = setInterval(desktopMovingHelper, 30);
+        } else {
+            desktopRotationHelper();
+            intervalChecker = setInterval(desktopRotationHelper, 50);
+        }
+    }
 }
+
+function mouseMoveOprtn(e) {
+    if (mousePressIsValid) {
+        const reslt = determineMousPosOnCtrlsCnvs(e);
+        if (reslt != mouseOrTchPosOnCtrls.btn) {
+            invldteCtrlsClick();
+            // console.log('invalidated pri premiku z gumba')
+        }
+    }
+}
+
+function mouseUpOprtn() {
+    if (mousePressIsValid) invldteCtrlsClick();
+}
+
+function mouseLeaveOprtn() {
+    if (mousePressIsValid) invldteCtrlsClick();
+}
+
+function determineMousPosOnCtrlsCnvs(e) {
+    if (!mobile) {
+        mouseOrTchPosOnCtrls.x = e.clientX - contrlsCnvsRect.left;
+        mouseOrTchPosOnCtrls.y = e.clientY - contrlsCnvsRect.top;
+    } else {
+        mouseOrTchPosOnCtrls.x = e.changedTouches[0].clientX - contrlsCnvsRect.left;
+        mouseOrTchPosOnCtrls.y = e.changedTouches[0].clientY - contrlsCnvsRect.top;
+    }
+    
+    if (mouseOrTchPosOnCtrls.y < 50) {  // zgornja vrstica
+        return whichBtnInRow(true);
+    } else if (mouseOrTchPosOnCtrls.y > 55) {   // spodnja vrstica
+        return whichBtnInRow(false);
+    } else return INVALID;
+
+    function whichBtnInRow(isUpper) {   // če true, zgornja vrstica, sicer spodnja;
+        if (mouseOrTchPosOnCtrls.x < 105) { // leva polovica
+            if (mouseOrTchPosOnCtrls.x < 49) {  // 1. četrtina;
+                if (isUpper) return ANTICLOCKW;
+                else return LEFT;
+            } else if (mouseOrTchPosOnCtrls.x > 55) {   // 2. četrtina
+                if (isUpper) return FORWARD;
+                else return BACK;
+            } else return INVALID;
+        } else if (mouseOrTchPosOnCtrls.x > 111) { // desna polovica;
+            if (mouseOrTchPosOnCtrls.x < 161) { // 3. četrtina;
+                if (isUpper) return CLOCKW;
+                else return RIGHT;
+            } else if (mouseOrTchPosOnCtrls.x > 179) {  // 4. četrtina;
+                if (isUpper) return UP;
+                else return DOWN;
+            } else return INVALID;
+        } else return INVALID;
+    }
+}
+
+function invldteCtrlsClick() {
+    mousePressIsValid = false;
+    if (intervalChecker != null) {
+        clearInterval(intervalChecker);
+        intervalChecker = null;
+    }
+}
+
+function desktopMovingHelper() {
+    moveViewer(mouseOrTchPosOnCtrls.btn);
+}
+
+function desktopRotationHelper() {
+    if (activeItems == landscapeItems) rotateViewer(mouseOrTchPosOnCtrls.btn);
+        else rotateObj(mouseOrTchPosOnCtrls.btn);
+}
+
+
+
+//  - - - - -   Legacy koda za upravljanje z gumbi;
+
+// const proceedBtns = document.getElementsByClassName('proceed');
+// proceedBtns[0].addEventListener('click', proceedBtnsOprtn);
+// proceedBtns[1].addEventListener('click', proceedBtnsOprtn);
+// function proceedBtnsOprtn(e){
+//     if (e.target == proceedBtns[0] || e.target.parentElement == proceedBtns[0]) { moveViewer(FORWARD); }
+//     else { moveViewer(BACK); }
+// }
+
+// const panBtns = document.getElementsByClassName('pan');
+// panBtns[0].addEventListener('click', panBtnsOprtn);
+// panBtns[1].addEventListener('click', panBtnsOprtn);
+// function panBtnsOprtn(e){
+//     if (e.target == panBtns[0] || e.target.parentElement == panBtns[0]) { moveViewer(RIGHT); }
+//     else { moveViewer(LEFT); }
+// }
+
+// const riseBtns = document.getElementsByClassName('rise');
+// riseBtns[0].addEventListener('click', riseBtnsOprtn);
+// riseBtns[1].addEventListener('click', riseBtnsOprtn);
+// function riseBtnsOprtn(e){
+//     if (e.target == riseBtns[0] || e.target.parentElement == riseBtns[0]) { moveViewer(UP); }
+//     else { moveViewer(DOWN); }
+// }
+
+// const rotateBtns = document.getElementsByClassName('rotate');
+// rotateBtns[0].addEventListener('click', rotateBtnsOprtn);
+// rotateBtns[1].addEventListener('click', rotateBtnsOprtn);
+// function rotateBtnsOprtn(e){
+//     if (e.target == rotateBtns[0] || e.target.parentElement == rotateBtns[0]) {
+//         if (activeItems == landscapeItems) rotateViewer(CLOCKW);
+//         else rotateObj(CLOCKW);
+//     } else {
+//         if (activeItems == landscapeItems) rotateViewer(ANTICLOCKW);
+//         else rotateObj(ANTICLOCKW);
+//     }
+// }

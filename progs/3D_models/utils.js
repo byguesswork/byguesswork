@@ -23,3 +23,15 @@ function interpolateToYAbvZero(x1, y1, x2, y2){ // x1, in y1 sta koordinato toč
     const targetX = x1 + (x2 - x1) * ratio;
     return([targetX, targetY]); // ta x in y nista koordinati screenPointa, ampak spacePointa!!!
 }
+
+function checkLang(){   // deluje samo za SL in EN;
+    let checkLangStr = 'en';
+    if (navigator.language != '') {
+        checkLangStr = navigator.language;
+    } else if (navigator.userLanguage != '') {
+        checkLangStr = navigator.userLanguage;
+    };
+    if (checkLangStr == 'sl' || checkLangStr == 'sl-si' || checkLangStr == 'sl-SI' || checkLangStr == 'si') {
+        return 'sl' 
+    } else return 'en';
+}
