@@ -224,31 +224,9 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
     // ker bomo na koncu risali, moramo na začetku vse izbrisat;
     clearCanvas();
 
-    // določimo center vrtenja in kot, kar je odvisno od tega al landscape ali objRotate;
-    let viewngAngle, center;
-    if (activeItems == landscapeItems) {
-        center = {x: activeViewer.posIn3D.x, y: activeViewer.posIn3D.y};    // activeViewer je v tem primeru itak landscapeViewer;
-        viewngAngle = activeViewer.angle;
-    } else {
-        if (obj2Rotate.center == undefined) {
-            // s simple aritmetično sredino največjih in najmanjših;
-            let xMin = activeItems[0].spacePoints[0].x;
-            let xMax = activeItems[0].spacePoints[0].x;    // za zdaj so lahko enaki, se bojo spremenili med naslednjo primerjavo;
-            let yMin = activeItems[0].spacePoints[0].y;
-            let yMax = activeItems[0].spacePoints[0].y;
-            activeItems[0].spacePoints.forEach(el => {
-                //x, lahko z elsom;
-                if (el.x < xMin) xMin = el.x;
-                else if (el.x > xMax) xMax = el.x;
-                // y;
-                if (el.y < yMin) yMin = el.y;
-                else if (el.y > yMax) yMax = el.y;
-            });
-            obj2Rotate.center = {x: (xMin + xMax) / 2, y: (yMin + yMax) / 2};
-        }
-        center = obj2Rotate.center;
-        viewngAngle = obj2Rotate.angle;
-    }
+    // določimo center vrtenja in kot; slednje je odvisno od tega al landscape ali objRotate;
+    const center = {x: activeViewer.posIn3D.x, y: activeViewer.posIn3D.y};
+    const viewngAngle = activeItems == landscapeItems ? activeViewer.angle : 0;
 
     activeItems.forEach(spunItem => {
         // preslikava prostorskih točk na dvodimenzionalno ravnino, ..
@@ -278,10 +256,6 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
             //zdaj, ko smo dobili nov kot, že kar lahko izračunamo nov x in nov y (prostorske) relativne točke, ki bo izrisana;
             x = r * Math.sin(angle);
             y = r * Math.cos(angle);
-            if (activeItems == objRotateItems) {    // to je potrebno samo pri objRotate ! ! ! ker tam se relativizacija zgodi glede na središče vrtenja;
-                x += center.x - activeViewer.posIn3D.x;
-                y += center.y - activeViewer.posIn3D.y;
-            }
             if (y > 0) allYNegAngular = false;
             else if (y < 0) atLeast1YNeg = true;
             item2Draw.push(new SpacePoint(x, y, spcPt.z + activeViewer.posIn3D.z)); // z-ja ni treba nič preračunavat
@@ -315,6 +289,7 @@ for (let i = 10; i <= 46; i += 4) {
 
 // kesonar;
 const pickupTruckLndscp = new Pickup(new SpacePoint(5, 5, 0));
+const othrPickupTruckLndscp = new Pickup(new SpacePoint(-9, 24, 0), 4.71);
 const pickupTruckRotate = new Pickup(new SpacePoint(1, 5, 0));
 
 // rob ceste;
@@ -344,7 +319,7 @@ for (let i = -200; i <= 302; i += 10) {
 };
 
 // - - - - - -  DODAJANJE STVARI V KATALOGE  - - - - - -
-const landscapeItems = [...lines, ...dividingLines, ...cubes, pickupTruckLndscp];
+const landscapeItems = [...lines, ...dividingLines, ...cubes, pickupTruckLndscp, othrPickupTruckLndscp];
 
 // spodnje so za testiranje;
 // const landscapeItems = [pickupTruckLndscp];
@@ -359,11 +334,6 @@ const landscapeViewer = new Viewer(0, -9, 1.7);   // na začetku ima gledalec pr
                                                     // y == 9, da je pri normal view videt del avta
 
 const obj2RotateViewer = new Viewer (0, 0, 1.7);
-const obj2Rotate = {    // gledalec za rotacijo potrebuje še ta objekt, v katerem so shranjeni parametri rotacije;
-    angle : 0,  // kot 0 gleda vzdolž osi y, v smeri naraščanja y;
-    rotnAngleIncrmnt : Math.PI/30,
-    center: undefined
-};
 
 let activeItems = landscapeItems;
 let activeViewer = landscapeViewer;
@@ -447,13 +417,12 @@ function moveViewer(toWhere){
 
 function rotateViewer(dir){
     activeViewer.rotate(dir);   // samo landscapeViewer pride sem;
-    // console.log(toDecPlace(activeViewer.posIn3D.x), toDecPlace(activeViewer.posIn3D.y), toDecPlace(activeViewer.posIn3D.z), 'kot:', toDecPlace(activeViewer.angle));
     calcReltvSpcPtsAndDraw();
 }
 
 function rotateObj(dir){
-    if (dir == ANTICLOCKW) obj2Rotate.angle += obj2Rotate.rotnAngleIncrmnt;
-        else obj2Rotate.angle -= obj2Rotate.rotnAngleIncrmnt;
+    if (dir == CLOCKW) activeItems[0].rotate(true); // true za clockwise, sicer false;
+        else activeItems[0].rotate(false);
     calcReltvSpcPtsAndDraw();
 }
 
@@ -508,9 +477,12 @@ function touchStartOprtn(e) {
     if (!mousePressIsValid) {   // to naj bi bilo zato, da za zdaj je mogoče le en dotik naenkrat;
         mouseDownOprtn(e);  // lahko uporabimo isto funkcijo;
     } else {
-        joker.classList.remove('hidden');
-        joker.innerHTML = "second touch";
-        setTimeout(() => { joker.classList.add('hidden'); }, 1000);
+        // za zdaj še ne podpira več dotikov hkrati;
+        // je pa trenutno tako, da se izvirno gibanje ustavi, ko takneš še nekaj drugega; se mi zdi
+
+        // joker.classList.remove('hidden');
+        // joker.innerHTML = "second touch";
+        // setTimeout(() => { joker.classList.add('hidden'); }, 1000);
     }
 }
 
@@ -542,7 +514,9 @@ function mouseDownOprtn(e){
         mouseOrTchPosOnCtrls.btn = reslt;
         if (reslt != CLOCKW && reslt != ANTICLOCKW) {
             desktopMovingHelper();
-            intervalChecker = setInterval(desktopMovingHelper, 30);
+            if (reslt == FORWARD || reslt == BACK) intervalChecker = setInterval(desktopMovingHelper, 30);
+            else if (reslt == LEFT || reslt == RIGHT) intervalChecker = setInterval(desktopMovingHelper, 45);
+            else intervalChecker = setInterval(desktopMovingHelper, 55);
         } else {
             desktopRotationHelper();
             intervalChecker = setInterval(desktopRotationHelper, 50);

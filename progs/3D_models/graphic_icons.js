@@ -143,14 +143,14 @@ function infoClicked() {
         infoSettgs.className = 'info_settings_open';
         infoSettgsContent.className = 'info_settings_content_open';
         if (lang === 'en') {
-            infoSettgsContent.innerHTML = `Instructions<br><br><div style="font-size:0.9em;"><strong>Move left/right/ahead/back:</strong> Use arrow keys (or icons below)<br><p class="interstit">&nbsp;</p>
+            infoSettgsContent.innerHTML = `Instructions<br><br><div style="font-size:0.9em;"><strong>Move left/right/forward/back:</strong> Use arrow keys (or icons below)<br><p class="interstit">&nbsp;</p>
             <strong>Rotate left/right:</strong> I / O (or use icons below)<br><p class="interstit">&nbsp;</p>
-            <strong>Up/down:</strong> U / J<br><br>`;
+            <strong>Up/down:</strong> U / J (you get the drill)<br><br>`;
             infoSettgsOK.innerHTML = 'OK';
         } else {
             infoSettgsContent.innerHTML = `Navodila<br><br><div style="font-size:0.9em;"><strong>Premik levo/desno/naprej/nazaj:</strong> smerne tipke (ali kliknite ustrezno ikono spodaj)<br><p class="interstit">&nbsp;</p>
             <strong>Obračanje levo/desno:</strong> I / O (ali kliknite ustrezno ikono spodaj)<br><p class="interstit">&nbsp;</p>
-            <strong>Gor/dol:</strong> U / J<br><br>`;
+            <strong>Gor/dol:</strong> U / J (bla bla bla ...)<br><br>`;
             infoSettgsOK.innerHTML = 'V redu';
         }
         infoSettgsOK.className = 'align-right';

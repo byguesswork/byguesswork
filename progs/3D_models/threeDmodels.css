@@ -110,7 +110,7 @@ body {
 /* izposojeno od mobile tetris */
 .info_settings_closed {
     position: absolute;
-    top: 65px;
+    top: 60px;
     left: 20px;
     height: 1.1em;
     width: 1.1em;

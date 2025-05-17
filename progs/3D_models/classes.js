@@ -18,9 +18,11 @@ class ScreenPoint{
 class Thingy {
 
     static ctx;
+    static rotationAngleIncrmnt = Math.PI/30;
 
     constructor() {
-        // prazen;
+        // this.angle = 0;  kot se za zdaj še ne rabi; rabil bi se, če bi se stvari premikale in bi moral poznat njihovo usmeritev, da bi jih pravilno premaknil; 
+        this.center = undefined
     }
 
     draw(screenPoints, usesAlt) {
@@ -37,7 +39,6 @@ class Thingy {
             });
         } else {
             this.connectionsAlt.forEach(element => {
-                // console.log(screenPoints)
                 if (screenPoints[element[0]].x != undefined && screenPoints[element[1]].x != undefined) {   // rišemo samo če imamo obe piki;
                     ctx.moveTo(screenPoints[element[0]].x, screenPoints[element[0]].y);
                     ctx.lineTo(screenPoints[element[1]].x, screenPoints[element[1]].y);
@@ -45,6 +46,55 @@ class Thingy {
             });
         }
         Thingy.ctx.stroke();
+    }
+
+    rotate(passedAngle){    // poda se (1) true/false za clockwise/anticlockwise ali (2) število za delto kota;
+        if (this.center == undefined) {
+            // če center ni določen, ga določimo s simple aritmetično sredino največjih in najmanjših;
+            let xMin = this.spacePoints[0].x;
+            let xMax = this.spacePoints[0].x;    // za zdaj so lahko enaki, se bojo spremenili med naslednjo primerjavo;
+            let yMin = this.spacePoints[0].y;
+            let yMax = this.spacePoints[0].y;
+            this.spacePoints.forEach(spcPt => {
+                //x, lahko z elsom;
+                if (spcPt.x < xMin) xMin = spcPt.x;
+                else if (spcPt.x > xMax) xMax = spcPt.x;
+                // y;
+                if (spcPt.y < yMin) yMin = spcPt.y;
+                else if (spcPt.y > yMax) yMax = spcPt.y;
+            });
+            this.center = { // to poda dvodimenzionalne koordinate, na vodoravni ravnini, kjer se bo odvijalo vrtenje;
+                x: (xMin + xMax) / 2,
+                y: (yMin + yMax) / 2
+            };
+        }
+
+        let diffAngle;
+        if (typeof passedAngle == 'boolean') {
+            if (passedAngle) diffAngle = Thingy.rotationAngleIncrmnt;
+            else diffAngle = -Thingy.rotationAngleIncrmnt;
+        } else diffAngle = passedAngle;
+
+        this.spacePoints.forEach((spcPt) => {
+            let x = spcPt.x - this.center.x;  // x in y relativiziramo; to sta x in y koordinati PROSTORSKE točke
+            let y = spcPt.y - this.center.y;    // ampak uporabljamo samo x in y, ker vrtimo samo po eni osi, na eni ravnini;
+            const r = (x**2 + y**2)**(0.5);
+            
+            let angle;
+            if (y > 0) {
+                angle = Math.asin(x/r) + diffAngle;   // izračunamo kot od središča do točke in HKRATI prištejemo še spremembo kota;
+            } else if (y < 0) {
+                angle = Math.PI - Math.asin(x/r) + diffAngle;
+            } else if (y == 0) {
+                if (x < 0) angle = 1.5 * Math.PI + diffAngle;
+                else angle = 0.5 * Math.PI + diffAngle;
+            }
+            
+            //zdaj, ko smo dobili nov kot, že kar lahko izračunamo nov x in nov y (prostorske) relativne točke, ki bo izrisana;
+            spcPt.x = r * Math.sin(angle) + this.center.x;
+            spcPt.y = r * Math.cos(angle) + this.center.y;
+        })
+
     }
 
     static meetCtx(passedCtx){
@@ -58,7 +108,7 @@ class Viewer {
     constructor(x, y, z){
         this.posIn3D = new SpacePoint(x, y, z)
         this.angle = 0; // kot 0 gleda vzdolž osi y, v smeri naraščanja y;
-        this.rotnAngleIncrmnt = Math.PI/90;
+        this.rotationAngleIncrmnt = Math.PI/90;
     }
 
     move(dir, viewer){
@@ -83,9 +133,9 @@ class Viewer {
 
     rotate(dir){
         if (dir == ANTICLOCKW) {
-            this.angle -= this.rotnAngleIncrmnt;
+            this.angle -= this.rotationAngleIncrmnt;
         } else {
-            this.angle += this.rotnAngleIncrmnt;
+            this.angle += this.rotationAngleIncrmnt;
         }
         this.angle = rangeAngle(this.angle);
     }
@@ -183,7 +233,9 @@ class Cube extends Thingy {
 
 
 class Pickup extends Thingy {
-    constructor(passedSpacePoint){  // gledan od spredaj, točka spodaj levo
+    constructor(passedSpacePoint, passedAngle){  // gledan od spredaj, točka spodaj levo; 
+                                                // passed angle se rabi, če želiš predmet zarotirati takoj ob stvaritvi;
+                                                // če passed angle ni podan, je undefined, preverjeno;
         super();
 
         this.spacePoints = new Array(8);
@@ -195,6 +247,7 @@ class Pickup extends Thingy {
          [18, 19], [19, 16], [20, 21], [21, 22], [22, 23], [23, 20]];
 
         this.createPoints(passedSpacePoint);
+        if (passedAngle != undefined && passedAngle != 0) this.rotate(passedAngle);
     }
 
     createPoints(spacePoint){
