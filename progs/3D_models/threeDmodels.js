@@ -1,8 +1,8 @@
 'use strict';
 
-// ikone za upravljanje v mobile
+// nadaljuj delo v calcReltvSpcPtsAndDraw, točneje  if (spunItem.spcPtsData.fillInfo[k].anteCentrum === true) {
+                    // console.log(k, spunItem.spcPtsData.fillInfo[k].anteCentrum)
 
-// da deluje podaljšan pritisk; - https://developer.mozilla.org/en-US/docs/Web/API/Touch_events
 
 // dodat kšne opise v index.html (recimo za fuel: I like its simplicity, maybe you will too)
 
@@ -138,26 +138,26 @@ function clearCanvas() {
     ctx.strokeStyle = lineColor;
 }
 
-function calcScreenPts(spacePoints, parentObj) {   // prejme relativne koordinate!, položaj viewerja mora torej biti že odštet;
+function calcScreenPts(spacePoints, connctnsRange) {   // prejme relativne koordinate!, položaj viewerja mora torej biti že odštet;
 
     function chk4Intrpolate(i, j){    // to samo interpolira x in y od SpacePOinta (ne ScreenPointa!!!) in vrne x in y SpacePointa!;
         // console.log('i:',i, 'j:', j)
-        if (parentObj.connectionsAlt[j][0] == i) { // spcPt[i] se uporablja kot začetni element črte, ki jo opredeljuje connsAlt[j]; 
-            if (spacePoints[parentObj.connectionsAlt[j][1]].y > 0) {
+        if (connctnsRange[j][0] == i) { // spcPt[i] se uporablja kot začetni element črte, ki jo opredeljuje connsAlt[j]; 
+            if (spacePoints[connctnsRange[j][1]].y > 0) {
                 startRoll = j;   // zabeležimo, da smo tle že našli, ker vsako točko interpoliramo samo enkrat, kljub temu da morda sodeluje v več povezavah;
                 // console.log('negativna točka je prva točka povezave in jo lahko interpoliramo - BREAK')
-                return interpolateToYAbvZero(spacePoints[parentObj.connectionsAlt[j][0]].x, spacePoints[parentObj.connectionsAlt[j][0]].y,
-                    spacePoints[parentObj.connectionsAlt[j][1]].x, spacePoints[parentObj.connectionsAlt[j][1]].y);
+                return interpolateToYAbvZero(spacePoints[connctnsRange[j][0]].x, spacePoints[connctnsRange[j][0]].y,
+                    spacePoints[connctnsRange[j][1]].x, spacePoints[connctnsRange[j][1]].y);
             } else {
                 // console.log('negativna točka je prva točka povezave, ampak tudi druga je negativna;')
                 return false;
             }
-        } else if (parentObj.connectionsAlt[j][1] == i) {   // spcPt[i] se uporablja kot končni element črte, ki jo opredeljuje connsAlt[j]; 
-            if (spacePoints[parentObj.connectionsAlt[j][0]].y > 0) {
+        } else if (connctnsRange[j][1] == i) {   // spcPt[i] se uporablja kot končni element črte, ki jo opredeljuje connsAlt[j]; 
+            if (spacePoints[connctnsRange[j][0]].y > 0) {
                 startRoll = j;   // zabeležimo, da smo tle že našli, ker vsako točko interpoliramo samo enkrat, kljub temu da morda sodeluje v več povezavah;
                 // console.log('negativna točka je končna točka povezave in jo lahko interpoliramo - BREAK')
-                return interpolateToYAbvZero(spacePoints[parentObj.connectionsAlt[j][1]].x, spacePoints[parentObj.connectionsAlt[j][1]].y,
-                    spacePoints[parentObj.connectionsAlt[j][0]].x, spacePoints[parentObj.connectionsAlt[j][0]].y);
+                return interpolateToYAbvZero(spacePoints[connctnsRange[j][1]].x, spacePoints[connctnsRange[j][1]].y,
+                    spacePoints[connctnsRange[j][0]].x, spacePoints[connctnsRange[j][0]].y);
             } else {
                 // console.log('negativna točka je druga točka povezave, ampak tudi prva je negativna;')
                 return false;
@@ -188,14 +188,14 @@ function calcScreenPts(spacePoints, parentObj) {   // prejme relativne koordinat
         if (spcPt.y > 0) {   // neproblematična varianta, tj. če imaš stvar pred sabo;
             scrnPts.push(frmSpcPtToScrnPt(spcPt.x, spcPt.y, spcPt.z));
             // if(parentObj != undefined) console.log('i:', i, 'Y je OK')
-        } else {    // če prideš v else, je bil podan tudi parentObj;
+        } else {    // če prideš v else, je bil podan tudi parentObj oz. po novem connctnsRange;
             if (!testShown) {   // samo za potrebe debuganja;
                 testShown = true;
                 // console.log(spacePoints, parentObj.connectionsAlt);
             }
-            // najst, kje v parentObj.connectionsAlt je taka točka (y < 0 in ima povezavo, na osnovi katere, ga je mogoče interpolirati);
+            // najst, kje v parentObj.connectionsAlt (oz. connctnsRange) je taka točka (y < 0 in ima povezavo, na osnovi katere, ga je mogoče interpolirati);
             let found = false;
-            for (let j = startRoll; j < parentObj.connectionsAlt.length; j++) {
+            for (let j = startRoll; j < connctnsRange.length; j++) {
                 const retrndValue = chk4Intrpolate(i, j); // če je mogoče interpolirati negativni y, vrne novi x in y koordinati spacePointa (space, ne screen) v arrayu;
                 if (typeof retrndValue == 'object') {
                     found = true;
@@ -221,53 +221,114 @@ function calcScreenPts(spacePoints, parentObj) {   // prejme relativne koordinat
 
 function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od viewerja do predmetov;
     
+    // helper funkcije;
+    function doXYR(spcPt) {
+        x = spcPt.x - viewPoint.x;  // x in y relativiziramo;
+        y = spcPt.y - viewPoint.y;
+        r = (x**2 + y**2)**(0.5);
+    }
+
+    function helper(spcPt, item2Draw, constraints) {
+        x = spcPt.x - viewPoint.x;  // x in y relativiziramo;
+        y = spcPt.y - viewPoint.y;
+        r = (x**2 + y**2)**(0.5);
+        
+        angle;
+        if (y > 0) {
+            angle = Math.asin(x/r) - viewngAngle;   // pri izračunu kota, pod katerim gledamo neko točko, je treba upoštevati, kam je usmerjen pogled gledalva (viewAngle)..;
+        } else if (y < 0) {                             // ..pri rotaciji (objRotate) je sicer viewAngle kot, za koliko je zarotiran predmet ! ! !;
+            angle = Math.PI - Math.asin(x/r) - viewngAngle;
+        } else if (y == 0) {
+            if (x < 0) angle = 1.5 * Math.PI - viewngAngle;
+            else angle = 0.5 * Math.PI - viewngAngle;
+        }
+        
+        //zdaj, ko smo dobili nov kot, že kar lahko izračunamo nov x in nov y (prostorske) relativne točke, ki bo izrisana;
+        x = r * Math.sin(angle);
+        y = r * Math.cos(angle);
+        if (y > 0) constraints.allYNegAngular = false;
+        else if (y < 0) constraints.atLeast1YNeg = true;
+        item2Draw.push(new SpacePoint(x, y, spcPt.z + activeViewer.posIn3D.z)); // z-ja ni treba nič preračunavat
+    }
+
+    // začetek dogajanja;
+    let x, y, r, angle;
+
     // ker bomo na koncu risali, moramo na začetku vse izbrisat;
     clearCanvas();
 
-    // določimo center vrtenja in kot; slednje je odvisno od tega al landscape ali objRotate;
-    const center = {x: activeViewer.posIn3D.x, y: activeViewer.posIn3D.y};
-    const viewngAngle = activeItems == landscapeItems ? activeViewer.angle : 0;
+    // določimo izhodišče pogleda in kot; slednje je odvisno od tega al landscape ali objRotate;
+    const viewPoint = {x: activeViewer.posIn3D.x, y: activeViewer.posIn3D.y};   // točka, iz katere gledamo;
+    const viewngAngle = activeItems == landscapeItems ? activeViewer.angle : 0; // kot pod katerim gledamo; N == 0;
 
     activeItems.forEach(spunItem => {
         // preslikava prostorskih točk na dvodimenzionalno ravnino, ..
         // ..toda ne navpično ravnino, kot je monitor, ampak vodoravno (x rase proti desno, y raste stran od gledalca);
         // kot pogleda je zelo pomemben; risanja ne moreš izvajat brez preračunavanja kota, tudi če je kot == 0,..
-        // .. ker če imaš zadevo za hrbtom, tudi če gledaš direkt proti S (kot == 0), zadeve ne moreš izrisat;
+        // .. ker če imaš zadevo za hrbtom, tudi če gledaš direkt proti S (kot == 0), zadeve ne smeš izrisat, ker je ne moreš videt;
         
-        const item2Draw = new Array();   // item2Draw je nov objekt, da ne spreminjamo dejanskih koordinat teles v prostoru (telesa ostajajo na istih točkah),..
-                                        // ..ampak da dobimo relativne koordinate glede na center vrtenja in jih podamo v spunItem.draw (in tako dobimo na voljo še connections);
-        let allYNegAngular = true;  // beleži, ali so vse y koordinate nekega predmeta negativne, tj. gledalcu za hrbtom; če tako, ničesar ne izrišemo, ker gre le za zrcalno sliko, ki je za hrbtom;
-        let atLeast1YNeg = false;   // beleži, al ti je vsaj ena koordinata za hrbtom;
-        spunItem.spacePoints.forEach((spcPt) => {
-            let x = spcPt.x - center.x;  // x in y relativiziramo;
-            let y = spcPt.y - center.y;
-            const r = (x**2 + y**2)**(0.5);
+        function calcRforCenter() {
+            const x = spunItem.center.x - viewPoint.x;  // x in y relativiziramo;
+            const y = spunItem.center.y - viewPoint.y;
+            return (x**2 + y**2)**(0.5);
+        }
+
+        // če ima zadeva segmentirane podatke o risanju (podane obsege risanja za namen določitve fill/stroke za posamičen obseg);
+        if (spunItem.spcPtsData != undefined) {
             
-            let angle;
-            if (y > 0) {
-                angle = Math.asin(x/r) - viewngAngle;   // pri izračunu kota, pod katerim gledamo neko točko, je treba upoštevati, kam je usmerjen pogled gledalva (viewAngle)..;
-            } else if (y < 0) {                             // ..pri rotaciji (objRotate) je sicer viewAngle kot, za koliko je zarotiran predmet ! ! !;
-                angle = Math.PI - Math.asin(x/r) - viewngAngle;
-            } else if (y == 0) {
-                if (x < 0) angle = 1.5 * Math.PI - viewngAngle;
-                else angle = 0.5 * Math.PI - viewngAngle;
+            function oneLoop(segIdx) {   // prejme index segmenta;
+                const item2Draw = new Array();   // item2Draw je nov objekt, da ne spreminjamo dejanskih koordinat teles v prostoru (telesa ostajajo na istih točkah),..
+                                        // ..ampak da dobimo relativne koordinate glede na center vrtenja in jih podamo v spunItem.draw (in tako dobimo na voljo še connections);
+                const constraints = {
+                    allYNegAngular : true,  // beleži, ali so vse y koordinate nekega predmeta negativne, tj. gledalcu za hrbtom; če tako, ničesar ne izrišemo, ker gre le za zrcalno sliko, ki je za hrbtom;
+                    atLeast1YNeg : false   // beleži, al ti je vsaj ena koordinata za hrbtom;
+                }
+
+                spunItem.spcPtsData.spacePoints[segIdx].forEach((spcPt) => { helper(spcPt, item2Draw, constraints) })
+
+                if (!constraints.allYNegAngular) {  // če so vse prostorske y-koordinate predmeta negativne, je predmet v celoti za hrbtom gledalca in ga ne rišemo;
+                    if (!constraints.atLeast1YNeg) {    // če niti ena prostorska y koordinata ni negativna, simple case;
+                        spunItem.draw(calcScreenPts(item2Draw, spunItem.connectionsAltSegmtd[segIdx]), false, segIdx);
+                    } else { // če je kakšna y-koordinata prostorske točke negativna, je treba komplicirat, interpolirat y, da ni negativen..
+                            // (zaradi kotnih preračunov se lahko stvari, ki jih imaš za hrbtom, narišejo pred tamo, zato je treba negativne y skenalsat pred kotnimi prer.); 
+                        spunItem.draw(calcScreenPts(item2Draw, spunItem.connectionsAltSegmtd[segIdx]), true, segIdx);
+                    }
+                }
             }
             
-            //zdaj, ko smo dobili nov kot, že kar lahko izračunamo nov x in nov y (prostorske) relativne točke, ki bo izrisana;
-            x = r * Math.sin(angle);
-            y = r * Math.cos(angle);
-            if (y > 0) allYNegAngular = false;
-            else if (y < 0) atLeast1YNeg = true;
-            item2Draw.push(new SpacePoint(x, y, spcPt.z + activeViewer.posIn3D.z)); // z-ja ni treba nič preračunavat
+            // začetek dogajanj,a če spcPtsData;
+            const stillToDraw = [] // sem shranimo indexe teh, ki jih je teba še narisat po začetnih izrisih
+            // v prvi pasaži narišemo tiste segmente, ki se narišejo vedno;
+            for (let k = 0; k < spunItem.spcPtsData.spacePoints.length; k++) {
+                if (spunItem.spcPtsData.fillInfo[k].anteCentrum != true) {
+                    oneLoop(k)
+                } else stillToDraw.push(k); // zabeležimo "probematične segmente";
+            } 
+            // potencialna 2. pasaža, segmenti, ki imajo antecentrum true;
+            if (stillToDraw.length > 0) {
+                for (let k = 0; k < stillToDraw.length; k++) {
+                    doXYR(spunItem.spcPtsData.spacePoints[stillToDraw[k]][0]);  // [stillToDraw[k]][0], ker gledamo prvo točko; to je malo zasilno, bis e dalo izpopolnit;
+                    const rC = calcRforCenter();
+                    if (r < rC) oneLoop(stillToDraw[k]);    // oneLoop prejme index segmenta, zato stillToDraw[k];
+                }
+            }
+        }
         
-        })
-                    
-        if (!allYNegAngular) {  // če so vse prostorske y-koordinate predmeta negativne, je predmet v celoti za hrbtom gledalca in ga ne rišemo;
-            if (!atLeast1YNeg) {    // če niti ena prostorska y koordinata ni negativna, simple case;
-                spunItem.draw(calcScreenPts(item2Draw, spunItem), false);
-            } else { // če je kakšna y-koordinata prostorske točke negativna, je treba komplicirat, interpolirat y, da ni negativen..
-                    // (zaradi kotnih preračunov se lahko stvari, ki jih imaš za hrbtom, narišejo pred tamo, zato je treba negativne y skenalsat pred kotnimi prer.); 
-                spunItem.draw(calcScreenPts(item2Draw, spunItem), true);
+        // varianta če ima cel item samo en obseg točk za izrisat;
+        else {    
+            const item2Draw = new Array();
+            const constraints = {
+                    allYNegAngular : true,
+                    atLeast1YNeg : false
+                }
+            spunItem.spacePoints.forEach((spcPt) => { helper(spcPt, item2Draw, constraints) })
+                        
+            if (!constraints.allYNegAngular) {
+                if (!constraints.atLeast1YNeg) {
+                    spunItem.draw(calcScreenPts(item2Draw, spunItem), false);
+                } else {                        
+                    spunItem.draw(calcScreenPts(item2Draw, spunItem), true);
+                }
             }
         }
     })
@@ -315,13 +376,14 @@ lines.push(new Connection(new SpacePoint(4, -128, 0), new SpacePoint(4, -2000, 0
 // črte na sredini ceste;
 const dividingLines = [];
 for (let i = -200; i <= 302; i += 10) {
-    dividingLines.push(new HorzRectangle(new SpacePoint(-0.1, i, 0), 0.2, 3))
+    dividingLines.push(new HorzRectangle(new SpacePoint(-0.1, i, 0), 0.2, 3));
 };
+
 
 // - - - - - -  DODAJANJE STVARI V KATALOGE  - - - - - -
 const landscapeItems = [...lines, ...dividingLines, ...cubes, pickupTruckLndscp, othrPickupTruckLndscp];
 
-// spodnje so za testiranje;
+// spodnje so za TESTIRANJE  - - 
 // const landscapeItems = [pickupTruckLndscp];
 // const landscapeItems = [...dividingLines];
 // const landscapeItems = [new HorzRectangle(new SpacePoint(-0.1, 2, 0), 0.2, 3)]
@@ -488,7 +550,6 @@ function touchStartOprtn(e) {
 
 function touchEndOprtn(e) {
     e.preventDefault();
-    // console.log('touchsend');
     mouseUpOprtn(); // lahko uporabimo isto funkcijo;
 }
 
@@ -506,7 +567,6 @@ function touchMoveOprtn(e) {
 // - -  če miška     - - - - - - - - - - - - 
 function mouseDownOprtn(e){
     const reslt = determineMousPosOnCtrlsCnvs(e);
-    // console.log(reslt)
     if (reslt == INVALID) {
         invldteCtrlsClick();
     } else {

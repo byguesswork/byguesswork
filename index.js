@@ -17,7 +17,6 @@ const logo = document.querySelector('.logo'); // querySelector, ker je class; č
 const themePic = document.getElementById('theme');
 const themedLks = document.getElementsByClassName('themed_link');
 const tetrisLink = document.getElementById('tetrisLink');
-const letsplayLink = document.getElementById('letsplayLink');
 const fuelLink = document.getElementById('fuelLink');
 
 const hideIf1col = document.querySelectorAll('.hide_if_1_col');
@@ -141,7 +140,7 @@ function init() {
   }
 
   // dinamično nastavit linke za appe (samo na strani index.html);
-  if (fuelLink != null || letsplayLink != null) {
+  if (fuelLink != null) {
     let langString = 'en';
     if (navigator.language != '') {
       langString = navigator.language;
@@ -149,11 +148,9 @@ function init() {
       langString = navigator.userLanguage;
     };
     if (langString == 'sl' || langString == 'sl-si' || langString == 'sl-SI' || langString == 'si') {
-      if (letsplayLink != null) letsplayLink.href = "app/igrajmose/sl/index.html";
-      if (fuelLink != null) fuelLink.href = "app/fuel/sl/index.html";
+      fuelLink.href = "app/fuel/sl/index.html";
     } else {
-      if (letsplayLink != null) letsplayLink.href = "app/igrajmose/en/index.html";
-      if (fuelLink != null) fuelLink.href = "app/fuel/en/index.html";
+      fuelLink.href = "app/fuel/en/index.html";
     }
   } 
 

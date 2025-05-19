@@ -10,5 +10,4 @@ https://byguesswork.org/risar/sorta-paint_EN.html
 https://byguesswork.org/tetris/tetris_EN.html
 https://byguesswork.org/klasifikator/index.html
 https://byguesswork.org/progs/color_circle/color_circle.html
-https://byguesswork.org/app/igrajmose/en/index.html
-https://byguesswork.org/app/igrajmose/sl/index.html
+
