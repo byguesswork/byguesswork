@@ -108,7 +108,7 @@ function doBlue () {
 
 function init() {
   // if (forTest != null) forTest.innerHTML = `forDebug`;
-  if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null || navigator.userAgentData.mobile == true) {    // todo to bi veljalo izboljšat s čekiranjem še širine
+  if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null) {    // todo to bi veljalo izboljšat s čekiranjem še širine
     isMobile = true;
     // dinamično nastavimo href takoj po prihodu na stran (samo na index.html);
     if (tetrisLink != null) tetrisLink.href = "tetris/m/tetris.html";

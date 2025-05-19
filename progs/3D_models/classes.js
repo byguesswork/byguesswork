@@ -49,6 +49,7 @@ class Thingy {
             if (whichSegmnt != undefined && this.spcPtsData.fillInfo[whichSegmnt].doFill) {  // če imamo strukturirano tako, da imamo podatke za fill, in je fill true;
                 ctx.fillStyle = this.spcPtsData.fillInfo[whichSegmnt].color;
                 ctx.fill();
+                return; // da ne naredi stroke, torej obrobe okoli obarvane površine;
             }
         } else {
             const target = whichSegmnt != undefined ? this.connectionsAltSegmtd[whichSegmnt] : this.connectionsAlt;
@@ -61,6 +62,7 @@ class Thingy {
             if (whichSegmnt != undefined && this.spcPtsData.fillInfo[whichSegmnt].doFill) {
                 ctx.fillStyle = this.spcPtsData.fillInfo[whichSegmnt].color;
                 ctx.fill();
+                return;
             }
         }
         ctx.stroke();
@@ -140,6 +142,28 @@ class Thingy {
 
     static meetCtx(passedCtx){
         Thingy.ctx = passedCtx;
+    }
+
+    static caclPlanarCtr(passdArr) {    // prejme array (verjetno) spacePointov, morda lahko tudi kaj drugea, kar ima not x in y;
+        let xMin = passdArr[0].x;
+        let xMax = passdArr[0].x;
+        let yMin = passdArr[0].y;
+        let yMax = passdArr[0].y;
+        passdArr.forEach(spcPt => {
+            if (spcPt.x < xMin) xMin = spcPt.x;
+            else if (spcPt.x > xMax) xMax = spcPt.x;
+            // y;
+            if (spcPt.y < yMin) yMin = spcPt.y;
+            else if (spcPt.y > yMax) yMax = spcPt.y;
+        });
+        return { // to poda dvodimenzionalne koordinate, na vodoravni ravnini, kjer se bo odvijalo vrtenje;
+            x: (xMin + xMax) / 2,
+            y: (yMin + yMax) / 2
+        };
+    }
+
+    static calcRFromSpcPt(passdObj, passdViewrObj) {   // v resnici iz katerihkoli 2 objektov, ki na prvem nivoju vsebujeta propertija x in y;
+        return ((passdObj.x - passdViewrObj.x)**2 + (passdObj.y - passdViewrObj.y)**2)**(0.5);
     }
 }
 
@@ -275,7 +299,7 @@ class Cube extends Thingy {
 
 
 class Pickup extends Thingy {
-    constructor(passedSpacePoint, passedAngle){  // gledan od spredaj, točka spodaj levo; 
+    constructor(passedSpacePoint, bodyColr = 'grey', passedAngle){  // gledan od spredaj, točka spodaj levo; 
                                                 // passed angle se rabi, če želiš predmet zarotirati takoj ob stvaritvi;
                                                 // če passed angle ni podan, je undefined, preverjeno;
         super();
@@ -284,21 +308,42 @@ class Pickup extends Thingy {
         // ALI spacePoints, connections in connectionsAlt
         // ALI spcPtsData, connectionsSegmtd in connectionsAltSegmtd
         this.spcPtsData = {
-            spacePoints : [new Array(new SpacePoint())], // ja, array arrayev;
+            spacePoints : [new Array()], // ja, array arrayev;
             fillInfo : [],    // v array se bo podajalo instance FillInfo ;
         }
         this.connectionsSegmtd = [
-          [  [1], [2], [3], [0], [4, 5], [6], [7], [4], [0, 4], [1, 5], [2, 6], [3, 7], [3, 8], [2, 9],
-         [8, 9], [10], [11], [8], [10, 12], [13], [11], [13, 15], [14], [12] ],
+         [ [1], [5], [4], [0], [3, 2], [6], [7], [3]],  // 0, črna
+         [ [1], [2], [3], [0], [4, 5], [6], [7], [4], [0, 4], [1, 5], [2, 6], [3, 7], [3, 8], [2, 9],
+         [8, 9], [10], [11], [8], [10, 12], [13], [11], [13, 15], [14], [12] ],  // 1, oris vsega
+         [ [1], [2], [3], [0]],  // 2, karoserija (prednja ploskev)
+         [ [1], [2], [3], [0]],  // 3, karoserija (desna ploskev)
+         [ [1], [2], [3], [0]],  // 4, karoserija (leva ploskev)
+         [ [1], [2], [3], [0]],  // 5, karoserija (zadnja ploskev)
+         [ [1], [3], [2], [0]],  // 6, karoserija (havba)
+         [ [1], [2], [3], [0]],  // 7, karoserija (desni filer)
+         [ [1], [2], [3], [0]],  // 8, karoserija (desni filer)
+         [ [1], [2], [3], [0]],  // 9, prednje steklo
+         [ [1], [2], [3], [0]],  // 10, desno steklo
          [ [0, 1], [2], [3], [0], [4, 5], [6], [7], [4] ],
          [ [0, 1], [2], [3], [0], [4, 5], [6], [7], [4] ]
         ];
         this.connectionsAltSegmtd = [
-          [  [0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7], [3, 8], [2, 9],
+         [ [0, 1], [1, 5], [5, 4], [4, 0], [3, 2], [2, 6], [6, 7], [7, 3] ],
+         [ [0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7], [3, 8], [2, 9],
          [8, 9], [9, 10], [10, 11], [11, 8], [10, 12], [12, 13], [13, 11], [13, 15], [15, 14], [14, 12] ],
+         [ [0, 1], [1, 2], [2, 3], [3, 0]],  // 2, siva (prednja ploskev)
+         [ [0, 1], [1, 2], [2, 3], [3, 0]],  // 3, karoserija (prednja ploskev)
+         [ [0, 1], [1, 2], [2, 3], [3, 0]],  // 4, karoserija (prednja ploskev)
+         [ [0, 1], [1, 2], [2, 3], [3, 0]],  // 5, karoserija (zadnja ploskev)
+         [ [0, 1], [1, 3], [3, 2], [2, 0]],  // 6, karoserija (havba)
+         [ [0, 1], [1, 2], [2, 3], [3, 0]],  // 7, karoserija (desni filer)
+         [ [0, 1], [1, 2], [2, 3], [3, 0]],  // 8, karoserija (desni filer)
+         [ [0, 1], [1, 2], [2, 3], [3, 0]],  // 9, prednje steklo
+         [ [0, 1], [1, 2], [2, 3], [3, 0]],  // 10, prednje steklo
          [ [0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4] ],
          [ [0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4] ]
         ];
+        this.bodyColor = bodyColr;
 
         this.createPoints(passedSpacePoint);
         this.calcCenter();
@@ -307,12 +352,10 @@ class Pickup extends Thingy {
 
     createPoints(spacePoint){
 
-        this.spcPtsData.fillInfo.push(new FillInfo(false));
+        // črna notranjost kabine (pokrov kesona in dno podvozja);
+        this.spcPtsData.fillInfo.push(new FillInfo(true, 'black', false));
         // prednji pravokotnik (maska);
-        this.spcPtsData.spacePoints[0][0].x = spacePoint.x; // 0 je spodnji levi kot karoserije, gledano od sprefaj;
-        this.spcPtsData.spacePoints[0][0].y = spacePoint.y;
-        this.spcPtsData.spacePoints[0][0].z = - spacePoint.z; // z-je treba podajat negativno !!!! ker se prostorska z os preslika v y os na zaslonu, y pa narašća navzdol; za razlago glej Cube;
-    
+        this.spcPtsData.spacePoints[0].push(new SpacePoint(spacePoint.x, spacePoint.y, -spacePoint.z)); // 0 je spodnji levi kot karoserije, gledano od sprefaj;
         this.spcPtsData.spacePoints[0].push(new SpacePoint(spacePoint.x + 2, spacePoint.y, -spacePoint.z)); // 1
         this.spcPtsData.spacePoints[0].push(new SpacePoint(spacePoint.x + 2, spacePoint.y, -spacePoint.z - 0.9));
         this.spcPtsData.spacePoints[0].push(new SpacePoint(spacePoint.x, spacePoint.y, -spacePoint.z - 0.9));
@@ -322,45 +365,139 @@ class Pickup extends Thingy {
         this.spcPtsData.spacePoints[0].push(new SpacePoint(spacePoint.x + 2, spacePoint.y + 5, -spacePoint.z)); // 
         this.spcPtsData.spacePoints[0].push(new SpacePoint(spacePoint.x + 2, spacePoint.y + 5, -spacePoint.z - 0.9));
         this.spcPtsData.spacePoints[0].push(new SpacePoint(spacePoint.x, spacePoint.y + 5, -spacePoint.z - 0.9));
+
+        // 1: oris vsega;
+        this.spcPtsData.spacePoints.push(new Array());  // 1
+        this.spcPtsData.fillInfo.push(new FillInfo(false));
+        // z-je treba podajat negativno !!!! ker se prostorska z os preslika v y os na zaslonu, y pa narašća navzdol; za razlago glej Cube;
+        // prednji pravokotnik (maska);
+        this.spcPtsData.spacePoints[1].push(new SpacePoint(spacePoint.x, spacePoint.y, -spacePoint.z)); // 0 je spodnji levi kot karoserije, gledano od sprefaj;
+        this.spcPtsData.spacePoints[1].push(new SpacePoint(spacePoint.x + 2, spacePoint.y, -spacePoint.z)); // 1
+        this.spcPtsData.spacePoints[1].push(new SpacePoint(spacePoint.x + 2, spacePoint.y, -spacePoint.z - 0.9));
+        this.spcPtsData.spacePoints[1].push(new SpacePoint(spacePoint.x, spacePoint.y, -spacePoint.z - 0.9));
+    
+        // zadnji kvadrat karoserije;
+        this.spcPtsData.spacePoints[1].push(new SpacePoint(spacePoint.x, spacePoint.y + 5, -spacePoint.z)); // 4
+        this.spcPtsData.spacePoints[1].push(new SpacePoint(spacePoint.x + 2, spacePoint.y + 5, -spacePoint.z)); // 
+        this.spcPtsData.spacePoints[1].push(new SpacePoint(spacePoint.x + 2, spacePoint.y + 5, -spacePoint.z - 0.9));
+        this.spcPtsData.spacePoints[1].push(new SpacePoint(spacePoint.x, spacePoint.y + 5, -spacePoint.z - 0.9));
     
         // kabina
-        this.spcPtsData.spacePoints[0].push(new SpacePoint(spacePoint.x + 0.05, spacePoint.y + 1.0, - spacePoint.z - 1.1)); // 8   ; 0,1, da je malo ožje kot karoserija spodaj
-        this.spcPtsData.spacePoints[0].push(new SpacePoint(spacePoint.x + 1.95, spacePoint.y + 1.0, - spacePoint.z - 1.1));    // 9 ; 1.75, da je malo ožje kot karoserija spodaj (1,85); točki pregiba preden se havba, ki se dviguje, začne dvigovat v steklo;
-        this.spcPtsData.spacePoints[0].push(new SpacePoint(spacePoint.x + 1.9, spacePoint.y + 1.7, - spacePoint.z - 1.8)); // 10   ; desna zgornja točka stekla (gledano od spredaj); dolžina tega dela: 0,7, končan višina: 1,8
-        this.spcPtsData.spacePoints[0].push(new SpacePoint(spacePoint.x + 0.1, spacePoint.y + 1.7, - spacePoint.z - 1.8));    // 11 ; leva zgornja stekla
-        this.spcPtsData.spacePoints[0].push(new SpacePoint(spacePoint.x + 1.9, spacePoint.y + 2.4, - spacePoint.z - 1.8)); // 12   ; desna zadnja zgornja točka kabine (gledano od spredaj); ravna streha kabine dolga 0,7
-        this.spcPtsData.spacePoints[0].push(new SpacePoint(spacePoint.x + 0.1, spacePoint.y + 2.4, - spacePoint.z - 1.8));    // 13 ; leva zadnja zgornja kabine
-        this.spcPtsData.spacePoints[0].push(new SpacePoint(spacePoint.x + 2, spacePoint.y + 2.4, - spacePoint.z - 0.9)); // 14   ; desna zadnja spodnja točka kabine (na sredini karoserije, na pol poti od tli do vrha; gledano od spredaj)
-        this.spcPtsData.spacePoints[0].push(new SpacePoint(spacePoint.x + 0.0, spacePoint.y + 2.4, - spacePoint.z - 0.9));    // 15 ; leva zadnja spodnja kabine (na sredini med tlemi in vrhom kabine)
+        this.spcPtsData.spacePoints[1].push(new SpacePoint(spacePoint.x + 0.05, spacePoint.y + 1.0, - spacePoint.z - 1.1)); // 8   ; 0,1, da je malo ožje kot karoserija spodaj
+        this.spcPtsData.spacePoints[1].push(new SpacePoint(spacePoint.x + 1.95, spacePoint.y + 1.0, - spacePoint.z - 1.1));    // 9 ; 1.95, da je malo ožje kot karoserija spodaj (1,85); točki pregiba preden se havba, ki se dviguje, začne dvigovat v steklo;
+        this.spcPtsData.spacePoints[1].push(new SpacePoint(spacePoint.x + 1.9, spacePoint.y + 1.7, - spacePoint.z - 1.8)); // 10   ; desna zgornja točka stekla (gledano od spredaj); dolžina tega dela: 0,7, končan višina: 1,8
+        this.spcPtsData.spacePoints[1].push(new SpacePoint(spacePoint.x + 0.1, spacePoint.y + 1.7, - spacePoint.z - 1.8));    // 11 ; leva zgornja stekla
+        this.spcPtsData.spacePoints[1].push(new SpacePoint(spacePoint.x + 1.9, spacePoint.y + 2.4, - spacePoint.z - 1.8)); // 12   ; desna zadnja zgornja točka kabine (gledano od spredaj); ravna streha kabine dolga 0,7
+        this.spcPtsData.spacePoints[1].push(new SpacePoint(spacePoint.x + 0.1, spacePoint.y + 2.4, - spacePoint.z - 1.8));    // 13 ; leva zadnja zgornja kabine
+        this.spcPtsData.spacePoints[1].push(new SpacePoint(spacePoint.x + 2, spacePoint.y + 2.4, - spacePoint.z - 0.9)); // 14   ; desna zadnja spodnja točka kabine (na sredini karoserije, na pol poti od tli do vrha; gledano od spredaj)
+        this.spcPtsData.spacePoints[1].push(new SpacePoint(spacePoint.x + 0.0, spacePoint.y + 2.4, - spacePoint.z - 0.9));    // 15 ; leva zadnja spodnja kabine (na sredini med tlemi in vrhom kabine)
         // konec ene skupine;
     
-        // nova skupina;
-        this.spcPtsData.spacePoints.push(new Array());  // 1
-        this.spcPtsData.fillInfo.push(new FillInfo(true, '#dffdff', true));    //1
-        // luči spredaj;
-        this.spcPtsData.spacePoints[1].push(new SpacePoint(spacePoint.x + 0.15, spacePoint.y, - spacePoint.z - 0.60)); //0
-        this.spcPtsData.spacePoints[1].push(new SpacePoint(spacePoint.x + 0.60, spacePoint.y, - spacePoint.z - 0.60));
-        this.spcPtsData.spacePoints[1].push(new SpacePoint(spacePoint.x + 0.60, spacePoint.y, - spacePoint.z - 0.80));
-        this.spcPtsData.spacePoints[1].push(new SpacePoint(spacePoint.x + 0.15, spacePoint.y, - spacePoint.z - 0.80)); //3
-    
-        this.spcPtsData.spacePoints[1].push(new SpacePoint(spacePoint.x + 1.4, spacePoint.y, - spacePoint.z - 0.60)); //4
-        this.spcPtsData.spacePoints[1].push(new SpacePoint(spacePoint.x + 1.85, spacePoint.y, - spacePoint.z - 0.60));
-        this.spcPtsData.spacePoints[1].push(new SpacePoint(spacePoint.x + 1.85, spacePoint.y, - spacePoint.z - 0.80));
-        this.spcPtsData.spacePoints[1].push(new SpacePoint(spacePoint.x + 1.4, spacePoint.y, - spacePoint.z - 0.80)); //7
-
-        // nova skupina;
+        // 2: prednja ploskev; 
         this.spcPtsData.spacePoints.push(new Array());  // 2
-        this.spcPtsData.fillInfo.push(new FillInfo(true, '#d11515', true));    //2
-        // luči zadaj;
-        this.spcPtsData.spacePoints[2].push(new SpacePoint(spacePoint.x + 0.15, spacePoint.y + 5, - spacePoint.z - 0.60)); //0
-        this.spcPtsData.spacePoints[2].push(new SpacePoint(spacePoint.x + 0.60, spacePoint.y + 5, - spacePoint.z - 0.60));
-        this.spcPtsData.spacePoints[2].push(new SpacePoint(spacePoint.x + 0.60, spacePoint.y + 5, - spacePoint.z - 0.80));
-        this.spcPtsData.spacePoints[2].push(new SpacePoint(spacePoint.x + 0.15, spacePoint.y + 5, - spacePoint.z - 0.80)); //3
+        this.spcPtsData.fillInfo.push(new FillInfo(true, this.bodyColor, true));    //2
+         // prednji pravokotnik (maska);
+        this.spcPtsData.spacePoints[2].push(new SpacePoint(spacePoint.x, spacePoint.y, -spacePoint.z)); // 0 je spodnji levi kot karoserije, gledano od sprefaj;
+        this.spcPtsData.spacePoints[2].push(new SpacePoint(spacePoint.x + 2, spacePoint.y, -spacePoint.z)); // 1
+        this.spcPtsData.spacePoints[2].push(new SpacePoint(spacePoint.x + 2, spacePoint.y, -spacePoint.z - 0.9));
+        this.spcPtsData.spacePoints[2].push(new SpacePoint(spacePoint.x, spacePoint.y, -spacePoint.z - 0.9));
+
+        // 3: desna ploskev;
+        this.spcPtsData.spacePoints.push(new Array());  // 3
+        this.spcPtsData.fillInfo.push(new FillInfo(true, this.bodyColor, true));    //3
+         // desni pravokotnik;
+        this.spcPtsData.spacePoints[3].push(new SpacePoint(spacePoint.x, spacePoint.y, -spacePoint.z)); // 0;
+        this.spcPtsData.spacePoints[3].push(new SpacePoint(spacePoint.x, spacePoint.y, -spacePoint.z - 0.9)); // 1 navzgor, potem bazaj
+        this.spcPtsData.spacePoints[3].push(new SpacePoint(spacePoint.x, spacePoint.y + 5, -spacePoint.z - 0.9));
+        this.spcPtsData.spacePoints[3].push(new SpacePoint(spacePoint.x, spacePoint.y + 5, -spacePoint.z));
+
+        // 4: leva ploskev;
+        this.spcPtsData.spacePoints.push(new Array());  // 4
+        this.spcPtsData.fillInfo.push(new FillInfo(true, this.bodyColor, true));    //4
+         // desni pravokotnik;
+        this.spcPtsData.spacePoints[4].push(new SpacePoint(spacePoint.x + 2, spacePoint.y, -spacePoint.z)); // 0;
+        this.spcPtsData.spacePoints[4].push(new SpacePoint(spacePoint.x + 2, spacePoint.y, -spacePoint.z - 0.9)); // 1 navzgor, potem bazaj
+        this.spcPtsData.spacePoints[4].push(new SpacePoint(spacePoint.x + 2, spacePoint.y + 5, -spacePoint.z - 0.9));
+        this.spcPtsData.spacePoints[4].push(new SpacePoint(spacePoint.x + 2, spacePoint.y + 5, -spacePoint.z));
+
+        // 5: zadnja ploskev; 
+        this.spcPtsData.spacePoints.push(new Array());  // 5
+        this.spcPtsData.fillInfo.push(new FillInfo(true, this.bodyColor, true));    // 5
+         // prednji pravokotnik (maska);
+        this.spcPtsData.spacePoints[5].push(new SpacePoint(spacePoint.x, spacePoint.y + 5, -spacePoint.z)); // 0 je spodnji levi kot karoserije, gledano od sprefaj;
+        this.spcPtsData.spacePoints[5].push(new SpacePoint(spacePoint.x + 2, spacePoint.y + 5, -spacePoint.z)); // 1
+        this.spcPtsData.spacePoints[5].push(new SpacePoint(spacePoint.x + 2, spacePoint.y + 5, -spacePoint.z - 0.9));
+        this.spcPtsData.spacePoints[5].push(new SpacePoint(spacePoint.x, spacePoint.y + 5, -spacePoint.z - 0.9));
+
+        // 6: havba; 
+        this.spcPtsData.spacePoints.push(new Array());  // 6
+        this.spcPtsData.fillInfo.push(new FillInfo(true, this.bodyColor, true));    // 6
+         // prednji pravokotnik (maska);
+        this.spcPtsData.spacePoints[6].push(new SpacePoint(spacePoint.x, spacePoint.y, -spacePoint.z - 0.9)); // 0 je spodnji levi kot karoserije, gledano od sprefaj;
+        this.spcPtsData.spacePoints[6].push(new SpacePoint(spacePoint.x + 2, spacePoint.y, -spacePoint.z - 0.9)); // 1
+        this.spcPtsData.spacePoints[6].push(new SpacePoint(spacePoint.x + 0.05, spacePoint.y + 1.0, - spacePoint.z - 1.1)); //    ; 0,1, da je malo ožje kot karoserija spodaj
+        this.spcPtsData.spacePoints[6].push(new SpacePoint(spacePoint.x + 1.95, spacePoint.y + 1.0, - spacePoint.z - 1.1));    //  ; 1.95, da je malo ožje kot karoserija spodaj (1,85); točki pregiba preden se havba, ki se dviguje, začne dvigovat v steklo;
+
+        // 7: desni filer; 
+        this.spcPtsData.spacePoints.push(new Array());  // 7
+        this.spcPtsData.fillInfo.push(new FillInfo(true, this.bodyColor, false));    // 7
+         // nepravilna oblika;
+        this.spcPtsData.spacePoints[7].push(new SpacePoint(spacePoint.x, spacePoint.y + 2.4, - spacePoint.z - 0.9));
+        this.spcPtsData.spacePoints[7].push(new SpacePoint(spacePoint.x, spacePoint.y, -spacePoint.z -0.9));
+        this.spcPtsData.spacePoints[7].push(new SpacePoint(spacePoint.x + 0.05, spacePoint.y + 1.0, -spacePoint.z - 1.1)); //    ; 0,1, da je malo ožje kot karoserija spodaj
+        this.spcPtsData.spacePoints[7].push(new SpacePoint(spacePoint.x + 0.022, spacePoint.y + 2.4, -spacePoint.z - 1.1)); //    ; 0,1, da je malo ožje kot karoserija spodaj
+
+        // 8: levi filer; 
+        this.spcPtsData.spacePoints.push(new Array());  // 8
+        this.spcPtsData.fillInfo.push(new FillInfo(true, this.bodyColor, false));    // 8
+         // nepravilna oblika;
+        this.spcPtsData.spacePoints[8].push(new SpacePoint(spacePoint.x + 2, spacePoint.y, -spacePoint.z -0.9));
+        this.spcPtsData.spacePoints[8].push(new SpacePoint(spacePoint.x + 1.95, spacePoint.y + 1.0, -spacePoint.z - 1.1)); //    ; 0,1, da je malo ožje kot karoserija spodaj
+        this.spcPtsData.spacePoints[8].push(new SpacePoint(spacePoint.x + 2 - 0.022, spacePoint.y + 2.4, -spacePoint.z - 1.1)); //    ; 0,1, da je malo ožje kot karoserija spodaj
+        this.spcPtsData.spacePoints[8].push(new SpacePoint(spacePoint.x + 2, spacePoint.y + 2.4, - spacePoint.z - 0.9));
+
+        // 9: prednje steklo; 
+        this.spcPtsData.spacePoints.push(new Array());  // 9
+        this.spcPtsData.fillInfo.push(new FillInfo(true, '#caebf5', true));    // 9
+        this.spcPtsData.spacePoints[9].push(new SpacePoint(spacePoint.x + 0.05, spacePoint.y + 1.0, - spacePoint.z - 1.1)); // 8   ; 0,1, da je malo ožje kot karoserija spodaj
+        this.spcPtsData.spacePoints[9].push(new SpacePoint(spacePoint.x + 1.95, spacePoint.y + 1.0, - spacePoint.z - 1.1));    // 9 ; 1.95, da je malo ožje kot karoserija spodaj (1,85); točki pregiba preden se havba, ki se dviguje, začne dvigovat v steklo;
+        this.spcPtsData.spacePoints[9].push(new SpacePoint(spacePoint.x + 1.9, spacePoint.y + 1.7, - spacePoint.z - 1.8)); // 10   ; desna zgornja točka stekla (gledano od spredaj); dolžina tega dela: 0,7, končan višina: 1,8
+        this.spcPtsData.spacePoints[9].push(new SpacePoint(spacePoint.x + 0.1, spacePoint.y + 1.7, - spacePoint.z - 1.8));    // 11 ; leva zgornja stekla
+
+        // 10: desno steklo; 
+        this.spcPtsData.spacePoints.push(new Array());  // 10
+        this.spcPtsData.fillInfo.push(new FillInfo(true, '#caebf5', true));
+        this.spcPtsData.spacePoints[10].push(new SpacePoint(spacePoint.x + 0.022, spacePoint.y + 2.4, -spacePoint.z - 1.1)); //    ; 0,1, da je malo ožje kot karoserija spodaj
+        this.spcPtsData.spacePoints[10].push(new SpacePoint(spacePoint.x + 0.05, spacePoint.y + 1.0, - spacePoint.z - 1.1)); // 8   ; 0,1, da je malo ožje kot karoserija spodaj
+        this.spcPtsData.spacePoints[10].push(new SpacePoint(spacePoint.x + 0.1, spacePoint.y + 1.7, - spacePoint.z - 1.8));    // 11 ; leva zgornja stekla
+        this.spcPtsData.spacePoints[10].push(new SpacePoint(spacePoint.x + 0.1, spacePoint.y + 2.4, - spacePoint.z - 1.8));    // 13 ; leva zadnja zgornja kabine
+
+         // luči spredaj;
+        this.spcPtsData.spacePoints.push(new Array());  // 6
+        this.spcPtsData.fillInfo.push(new FillInfo(true, '#fffdf0', true));    // 6
+        this.spcPtsData.spacePoints[11].push(new SpacePoint(spacePoint.x + 0.15, spacePoint.y, - spacePoint.z - 0.60)); //0
+        this.spcPtsData.spacePoints[11].push(new SpacePoint(spacePoint.x + 0.60, spacePoint.y, - spacePoint.z - 0.60));
+        this.spcPtsData.spacePoints[11].push(new SpacePoint(spacePoint.x + 0.60, spacePoint.y, - spacePoint.z - 0.80));
+        this.spcPtsData.spacePoints[11].push(new SpacePoint(spacePoint.x + 0.15, spacePoint.y, - spacePoint.z - 0.80)); //3
     
-        this.spcPtsData.spacePoints[2].push(new SpacePoint(spacePoint.x + 1.4, spacePoint.y + 5, - spacePoint.z - 0.60)); //4
-        this.spcPtsData.spacePoints[2].push(new SpacePoint(spacePoint.x + 1.85, spacePoint.y + 5, - spacePoint.z - 0.60));
-        this.spcPtsData.spacePoints[2].push(new SpacePoint(spacePoint.x + 1.85, spacePoint.y + 5, - spacePoint.z - 0.80));
-        this.spcPtsData.spacePoints[2].push(new SpacePoint(spacePoint.x + 1.4, spacePoint.y + 5, - spacePoint.z - 0.80)); //7
+        this.spcPtsData.spacePoints[11].push(new SpacePoint(spacePoint.x + 1.4, spacePoint.y, - spacePoint.z - 0.60)); //4
+        this.spcPtsData.spacePoints[11].push(new SpacePoint(spacePoint.x + 1.85, spacePoint.y, - spacePoint.z - 0.60));
+        this.spcPtsData.spacePoints[11].push(new SpacePoint(spacePoint.x + 1.85, spacePoint.y, - spacePoint.z - 0.80));
+        this.spcPtsData.spacePoints[11].push(new SpacePoint(spacePoint.x + 1.4, spacePoint.y, - spacePoint.z - 0.80)); //7
+
+        // luči zadaj;
+        this.spcPtsData.spacePoints.push(new Array());  // 7
+        this.spcPtsData.fillInfo.push(new FillInfo(true, '#d11515', true));    // 7
+        this.spcPtsData.spacePoints[12].push(new SpacePoint(spacePoint.x + 0.15, spacePoint.y + 5, - spacePoint.z - 0.60)); //0
+        this.spcPtsData.spacePoints[12].push(new SpacePoint(spacePoint.x + 0.60, spacePoint.y + 5, - spacePoint.z - 0.60));
+        this.spcPtsData.spacePoints[12].push(new SpacePoint(spacePoint.x + 0.60, spacePoint.y + 5, - spacePoint.z - 0.80));
+        this.spcPtsData.spacePoints[12].push(new SpacePoint(spacePoint.x + 0.15, spacePoint.y + 5, - spacePoint.z - 0.80)); //3
+    
+        this.spcPtsData.spacePoints[12].push(new SpacePoint(spacePoint.x + 1.4, spacePoint.y + 5, - spacePoint.z - 0.60)); //4
+        this.spcPtsData.spacePoints[12].push(new SpacePoint(spacePoint.x + 1.85, spacePoint.y + 5, - spacePoint.z - 0.60));
+        this.spcPtsData.spacePoints[12].push(new SpacePoint(spacePoint.x + 1.85, spacePoint.y + 5, - spacePoint.z - 0.80));
+        this.spcPtsData.spacePoints[12].push(new SpacePoint(spacePoint.x + 1.4, spacePoint.y + 5, - spacePoint.z - 0.80)); //7
+
     }
 }
 

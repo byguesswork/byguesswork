@@ -5,7 +5,7 @@ const appName = document.getElementsByTagName('body')[0].dataset.app;
 // let debugData = 'debug: <br>';
 
 let isMobile;
-if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null || navigator.userAgentData.mobile == true) {
+if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null) {
     isMobile = true;
 } else {
     isMobile = false;

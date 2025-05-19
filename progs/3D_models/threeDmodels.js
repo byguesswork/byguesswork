@@ -45,7 +45,7 @@ console.log(wdth, hght, scrnMidPoint, vertRadsFrmCentr);
 
 // najprej preverimo za mobilca, ker to lahko spremeni postavitev;
 let mobile = false;
-if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null || navigator.userAgentData.mobile == true) {
+if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null) {
     console.log('mobile');
     mobile = true;
     const spans2remv = [...document.getElementsByClassName('not_if_mobile')];
@@ -222,11 +222,6 @@ function calcScreenPts(spacePoints, connctnsRange) {   // prejme relativne koord
 function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od viewerja do predmetov;
     
     // helper funkcije;
-    function doXYR(spcPt) {
-        x = spcPt.x - viewPoint.x;  // x in y relativiziramo;
-        y = spcPt.y - viewPoint.y;
-        r = (x**2 + y**2)**(0.5);
-    }
 
     function helper(spcPt, item2Draw, constraints) {
         x = spcPt.x - viewPoint.x;  // x in y relativiziramo;
@@ -267,12 +262,6 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
         // kot pogleda je zelo pomemben; risanja ne moreš izvajat brez preračunavanja kota, tudi če je kot == 0,..
         // .. ker če imaš zadevo za hrbtom, tudi če gledaš direkt proti S (kot == 0), zadeve ne smeš izrisat, ker je ne moreš videt;
         
-        function calcRforCenter() {
-            const x = spunItem.center.x - viewPoint.x;  // x in y relativiziramo;
-            const y = spunItem.center.y - viewPoint.y;
-            return (x**2 + y**2)**(0.5);
-        }
-
         // če ima zadeva segmentirane podatke o risanju (podane obsege risanja za namen določitve fill/stroke za posamičen obseg);
         if (spunItem.spcPtsData != undefined) {
             
@@ -301,15 +290,17 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
             // v prvi pasaži narišemo tiste segmente, ki se narišejo vedno;
             for (let k = 0; k < spunItem.spcPtsData.spacePoints.length; k++) {
                 if (spunItem.spcPtsData.fillInfo[k].anteCentrum != true) {
-                    oneLoop(k)
+                    oneLoop(k);
                 } else stillToDraw.push(k); // zabeležimo "probematične segmente";
             } 
-            // potencialna 2. pasaža, segmenti, ki imajo antecentrum true;
+            // potencialna 2. pasaža, segmenti, ki imajo anteCentrum true;
+            // anteCentrum true ploskve narišemo le, če je razdalja do planarnega središča ploskve manjša od razdalje do planarnega središča celega predmeta;
             if (stillToDraw.length > 0) {
+                const rCtrSpunItem = Thingy.calcRFromSpcPt(spunItem.center, viewPoint) // poda dolžino daljice od gledalca do srewdišča celega predmeta;
                 for (let k = 0; k < stillToDraw.length; k++) {
-                    doXYR(spunItem.spcPtsData.spacePoints[stillToDraw[k]][0]);  // [stillToDraw[k]][0], ker gledamo prvo točko; to je malo zasilno, bis e dalo izpopolnit;
-                    const rC = calcRforCenter();
-                    if (r < rC) oneLoop(stillToDraw[k]);    // oneLoop prejme index segmenta, zato stillToDraw[k];
+                    const srfceCtrXY = Thingy.caclPlanarCtr(spunItem.spcPtsData.spacePoints[stillToDraw[k]]);
+                    const rSrfceCtrXY = Thingy.calcRFromSpcPt(srfceCtrXY, viewPoint);   // poda dolžino daljice od gledalca (viewPoint) do središča ploskve (srfceCtrXY);
+                    if (rSrfceCtrXY < rCtrSpunItem) oneLoop(stillToDraw[k]);    // oneLoop prejme index segmenta, zato stillToDraw[k];
                 }
             }
         }
@@ -349,8 +340,8 @@ for (let i = 10; i <= 46; i += 4) {
 };
 
 // kesonar;
-const pickupTruckLndscp = new Pickup(new SpacePoint(5, 5, 0));
-const othrPickupTruckLndscp = new Pickup(new SpacePoint(-9, 24, 0), 4.71);
+const pickupTruckLndscp = new Pickup(new SpacePoint(5, 5, 0), 'grey');
+const othrPickupTruckLndscp = new Pickup(new SpacePoint(-9, 24, 0), '#0f3477', 4.71);
 const pickupTruckRotate = new Pickup(new SpacePoint(1, 5, 0));
 
 // rob ceste;
@@ -385,6 +376,7 @@ const landscapeItems = [...lines, ...dividingLines, ...cubes, pickupTruckLndscp,
 
 // spodnje so za TESTIRANJE  - - 
 // const landscapeItems = [pickupTruckLndscp];
+// const landscapeItems = [othrPickupTruckLndscp];
 // const landscapeItems = [...dividingLines];
 // const landscapeItems = [new HorzRectangle(new SpacePoint(-0.1, 2, 0), 0.2, 3)]
 
