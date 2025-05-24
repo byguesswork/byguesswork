@@ -17,6 +17,10 @@ class FillInfo{
     constructor(type, doFill, color) {  // če ne rabiš, lahko pustiš vse prazno
         if (type == undefined || type == false) {
             this.doFill = false;    // doFill je najpomembnejši; zadostuje, da je doFill false, pa so ostali nerelevantni;
+        } else if (type == true) {  // predpostavljamo, da smo preskočili type in kot prvo navedli kar doFill;
+            this.doFill = type;
+            this.color = doFill;    // predpostavljamo, da kot drugo navedemo barvo;
+            // this.type ne deklariramo;
         } else {
             this.typ = type // glej konstante;
             this.doFill = doFill;   // true/false; če false, naj ostale ostanejo undefined;
@@ -547,7 +551,7 @@ class Connection extends Thingy {
         
         this.segments = new Array(new Segment(
             this.spacePoints,
-            false,
+            new FillInfo(),
             [[0, 1]]
         ));
 
@@ -572,7 +576,7 @@ class HorzRectangle extends Thingy {
         ];
  
         this.segments = [
-            new Segment(this.spacePoints, new FillInfo(BASE, true, 'white'))
+            new Segment(this.spacePoints, new FillInfo(true, 'white'))
         ];
 
         Thingy.createConns4CalcScrnPts(this.segments);

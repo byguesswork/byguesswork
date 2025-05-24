@@ -49,8 +49,11 @@ if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null) {
     spans2remv.forEach(el => el.classList.add('hidden'));
 
     screen.orientation.addEventListener("change", () => {
-        orientationChkIsInMotion = setInterval(chkOnOrientationChgd, 50);
-        console.log('listener za obračanje se je sprožil')
+        
+        // ne dela dobro, bi rablo mal več testiranja, damo kar reload
+        // orientationChkIsInMotion = setInterval(chkOnOrientationChgd, 50);
+        // console.log('listener za obračanje se je sprožil')
+        location.reload();
     });
 
     // če je mobile, ni info linka, ker ni kaj razlagat o tipkah;
@@ -289,7 +292,8 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
         const proximals = []; // sem shranimo indexe ploskev tipa PROXIMAL, ki bodo izrisane pozneje;
         // v prvi pasaži narišemo tiste segmente, ki se narišejo vedno;
         for (let k = 0; k < spunItem.segments.length; k++) {
-            if (spunItem.segments[k].fillInfo == undefined || spunItem.segments[k].fillInfo.doFill == false || spunItem.segments[k].fillInfo.typ == BASE) {
+            
+            if (spunItem.segments[k].fillInfo.typ == undefined || spunItem.segments[k].fillInfo.typ != PROXIMAL) {
                 oneLoop(k);
             } else {    // zabeležimo segmente za naslednje pasaže ;
                 if (spunItem.segments[k].fillInfo.typ == PROXIMAL) {
@@ -373,6 +377,8 @@ const landObjects = [...cubes, pickupTruckLndscp, othrPickupTruckLndscp];
 
 // TESTNA VARIANTA;
 // const landscape = [];
+// const landscape = [...lines, ...dividingLines];
+// const landObjects = [];
 // const landObjects = [othrPickupTruckLndscp];
 // const landObjects = [new Cube(new SpacePoint(-4, 10, 1.7), 4)]
 
