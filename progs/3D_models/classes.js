@@ -14,10 +14,14 @@ class ScreenPoint{
 }
 
 class FillInfo{
-    constructor(doFill, color, type) {  // slednja dva lahko pustiš prazna, če ju ne rabiš;
-        this.doFill = doFill;   // true/false; če false, naj ostale ostanejo undefined;
-        this.color = color;  // barva obarvanja ploskve; lahko pustiš prazno, če je prvi false;
-        this.typ = type // glej konstante; lahko pustiš prazno, če je prvi false;
+    constructor(type, doFill, color) {  // če ne rabiš, lahko pustiš vse prazno
+        if (type == undefined || type == false) {
+            this.doFill = false;    // doFill je najpomembnejši; zadostuje, da je doFill false, pa so ostali nerelevantni;
+        } else {
+            this.typ = type // glej konstante;
+            this.doFill = doFill;   // true/false; če false, naj ostale ostanejo undefined;
+            this.color = color;  // barva obarvanja ploskve; lahko pustiš prazno, če je prvi false;
+        }
     }
 }
 
@@ -27,9 +31,11 @@ class Segment{
         allSpcPtsRef,   // ref na spacePoints od predmeta;  
         fillInfo,       // če undefined/false, se nastavi fillInfo.doFill = false;
         connections,    // če undefined, se nastavi na obrazec povezave, ki opiše štirikotnik;
-        spcPtsIdxs) {   // spcPtsIdxs je array indeksov, na osnovi katerega bo nastal podnabor točk za to ploskev; če UNDEFINED, se nastavi na allSpcPtsRef;
+        spcPtsIdxs,     // spcPtsIdxs je array indeksov, na osnovi katerega bo nastal podnabor točk za to ploskev; če UNDEFINED, se nastavi na allSpcPtsRef;
+        spatlDiffFrmCtr) {  // SpacePoint, ki pove, koliko je od prostorsekga centra oddaljena točka, s katero bomo preverjali, al prej vidiš prostorski center ploskve al tisto točko; za PROXIMAL-e;
         
         this.spcPts;
+        this.spatialCtr;
         this.conns4CalcScrnPts = new Array();   // tega se zapolni v konstruktorju od predmeta s klicem createConns4CalcScrnPts();
 
         if (fillInfo == undefined || fillInfo == false) this.fillInfo = new FillInfo(false);
@@ -45,14 +51,23 @@ class Segment{
                 this.spcPts.push(allSpcPtsRef[idx]);
             })
         }
+
+        if (this.fillInfo.typ == PROXIMAL) {
+            this.spatialCtr = Thingy.calcSpatialCtr(this.spcPts);
+            if (spatlDiffFrmCtr == undefined) { spatlDiffFrmCtr = new SpacePoint(0, 0, 0); }
+            this.distlSptlCtr = new SpacePoint(
+                this.spatialCtr.x + spatlDiffFrmCtr.x, 
+                this.spatialCtr.y + spatlDiffFrmCtr.y,
+                this.spatialCtr.z + spatlDiffFrmCtr.z,  
+            )
+        }
     }
 }
 
 //konstante
 // tipi za FillInfo.typ
-const ANTECENTRUM = 'ac';   // če tak tip, se ploskev izriše samo, če je bliže gledalcu od (ploskovnega) centra objekta; te se izrisujejo zadnje;
-const ORBITAL = 'o'; // ploskve takega tipa se v posebni pasaži izrisujejo od planarno najbolj oddaljene od gledalca (glede na r) do najbližje
-const BASE = 'b';   // te ploskeve se izrišejo prve in vedno; NAJPREJ DAJ ČRNE BASE, potem oris!!
+const BASE = 'b';   // te ploskve se izrišejo prve in vedno; NAJPREJ DAJ ČRNE BASE, potem oris!!
+const PROXIMAL = 'p'; // se izrišejo, če so pred določeno prostorsko točko;
 // barva;
 const GLASS = '#caebf555'; // barva stekla;
 
@@ -61,17 +76,18 @@ class Thingy {
 
     static ctx;
     static rotationAngleIncrmnt = Math.PI/30;
-    static defaultConnections = [ [0, 1], [2], [3], [0]];
+    static defaultConnections = [ [0, 1], [2], [3], [0]];   // čeprav fill() samodejno potegne do izhodiščne točke (in bi ne rabil napisat ta četrtega [0]), imaš recimo primere, ko imaš like,..
+    //                                        .. jih pa ne filaš, tam bi potem ne povezalo; ne želim pa po defaultu rabit closePath, ker ta v nekaterih primerih še enkrat potegne še eno črto;
 
     constructor() {
         // this.angle = 0;  kot se za zdaj še ne rabi; rabil bi se, če bi se stvari premikale in bi moral poznat njihovo usmeritev, da bi jih pravilno premaknil; 
-        this.center = undefined // središče telesa na vodoravni ravnini, gledano s ptičje perspektive
+        this.planrCentr = undefined // središče telesa na vodoravni ravnini, gledano s ptičje perspektive
 
         // KO INSTANCIIRAŠ OBJEKT, KI EXTENDA THINGY, OBVEZNO ustvari/zaženi:
-            // - spacePoints
+            // - spacePoints - // OPOMBA: podana točka običajno pomeni spodnjo levo točko spredaj, ostale izhajajo iz nje;
             // - segments
-            // - calcRFromSpcPt
-            // - center je obvezen, če podaš kak drug tip kot BASE
+            // - createConns4CalcScrnPts
+            // - planarcenter je obvezen, če gre za telo, ker telesa je treba izrisovat odvisno od razdalje od gledalca;
             // drugo je optional (center, barva, rotate, ...)
     }
 
@@ -89,7 +105,7 @@ class Thingy {
         if (this.segments[whichSegmnt].fillInfo.doFill) {
             ctx.fillStyle = this.segments[whichSegmnt].fillInfo.color;
             ctx.fill();
-            if (this.segments[whichSegmnt].fillInfo.typ == ANTECENTRUM) {
+            if (this.segments[whichSegmnt].fillInfo.typ == PROXIMAL) {
                 ctx.strokeStyle = this.segments[whichSegmnt].fillInfo.color;
                 ctx.lineWidth = 0.5;
                 ctx.stroke();
@@ -98,6 +114,7 @@ class Thingy {
             }
             return; // da ne naredi stroke, torej obrobe okoli obarvane površine;
         }
+        // ctx.closePath(); // če daš tle closePath, postanejo nekatere črte bolj izrazite, namreč class Connection, ki izvirno potegne črto od A do B, closePath pa potem še od B nazaj k A;
         ctx.stroke();
     }
 
@@ -105,8 +122,8 @@ class Thingy {
         
         // najprej helper
         function helper(spcPt, passedThis) {
-            let x = spcPt.x - passedThis.center.x;  // x in y relativiziramo; to sta x in y koordinati PROSTORSKE točke
-            let y = spcPt.y - passedThis.center.y;    // ampak uporabljamo samo x in y, ker vrtimo samo po eni osi, na eni ravnini;
+            let x = spcPt.x - passedThis.planrCentr.x;  // x in y relativiziramo; to sta x in y koordinati PROSTORSKE točke
+            let y = spcPt.y - passedThis.planrCentr.y;    // ampak uporabljamo samo x in y, ker vrtimo samo po eni osi, na eni ravnini;
             const r = (x**2 + y**2)**(0.5);
             
             let angle;
@@ -120,12 +137,12 @@ class Thingy {
             }
             
             //zdaj, ko smo dobili nov kot, že kar lahko izračunamo nov x in nov y (prostorske) relativne točke, ki bo izrisana;
-            spcPt.x = r * Math.sin(angle) + passedThis.center.x;
-            spcPt.y = r * Math.cos(angle) + passedThis.center.y;
+            spcPt.x = r * Math.sin(angle) + passedThis.planrCentr.x;
+            spcPt.y = r * Math.cos(angle) + passedThis.planrCentr.y;
         }
         
         // začetek dogajanja;
-        if (this.center == undefined) { this.center = Thingy.calcPlanarCtr(this.spacePoints); }
+        if (this.planrCentr == undefined) { this.planrCentr = Thingy.calcPlanarCtr(this.spacePoints); }
 
         let diffAngle;
         if (typeof passedAngle == 'boolean') {
@@ -135,6 +152,12 @@ class Thingy {
 
         // glavna akcija (ki se seveda odvija v helper, tle je samo disambiguacija;)
         this.spacePoints.forEach(spcPt => { helper(spcPt, this); })
+        this.segments.forEach(segment => {
+            if (segment.fillInfo.typ == PROXIMAL) {
+                helper(segment.spatialCtr, this);
+                helper(segment.distlSptlCtr, this);
+            }
+        })
     }
 
     static createConns4CalcScrnPts(passdSegments) {
@@ -156,7 +179,6 @@ class Thingy {
     }
 
     static calcPlanarCtr(passdArr) {    // prejme array (verjetno) spacePointov, morda lahko tudi kaj drugea, kar ima not x in y;
-        // console.log(passdArr)
         let xMin = passdArr[0].x;
         let xMax = passdArr[0].x;
         let yMin = passdArr[0].y;
@@ -174,10 +196,40 @@ class Thingy {
         };
     }
 
-    // izračuna daljico r med dvema točkama; referenca na obj je samo zato, ker gre za strukturirane podatke, ki vsebujejo x in y, objekt ne pomeni predmeta v prostoru;
-    static calcRFromSpcPt(passdObj, passdViewrObj) {   // v resnici iz katerihkoli 2 objektov, ki na prvem nivoju vsebujeta propertija x in y;
+    static calcSpatialCtr(passdArr) {   // prejme array (verjetno) spacePointov
+        let xMin = passdArr[0].x;
+        let xMax = passdArr[0].x;
+        let yMin = passdArr[0].y;
+        let yMax = passdArr[0].y;
+        let zMin = passdArr[0].z;
+        let zMax = passdArr[0].z;
+        passdArr.forEach(spcPt => {
+            if (spcPt.x < xMin) xMin = spcPt.x;
+            else if (spcPt.x > xMax) xMax = spcPt.x;
+            // y;
+            if (spcPt.y < yMin) yMin = spcPt.y;
+            else if (spcPt.y > yMax) yMax = spcPt.y;
+            // z;
+            if (spcPt.z < zMin) zMin = spcPt.z;
+            else if (spcPt.z > zMax) zMax = spcPt.z;
+        });
+        return { // to poda tridimenzionalne koordinate v prostoru, kljer je središče plsokve;
+            x: (xMin + xMax) / 2,
+            y: (yMin + yMax) / 2,
+            z: (zMin + zMax) / 2
+        };
+    }
+
+    // izračuna daljico r med dvema točkama na VODORAVNI RAVNINI; referenca na obj je samo zato, ker gre za strukturirane podatke, ki vsebujejo x in y, objekt ne pomeni predmeta v prostoru;
+    static calcPlanarRFromSpcPt(passdObj, passdViewrObj) {   // v resnici iz katerihkoli 2 objektov, ki na prvem nivoju vsebujeta propertija x in y;
         return ((passdObj.x - passdViewrObj.x)**2 + (passdObj.y - passdViewrObj.y)**2)**(0.5);
     }
+
+    // izračuna daljico r med dvema točkama V PROSTORU;
+    static calcSpatialRFromSpcPt(passdObj, passdViewrObj) {
+        return ((passdObj.x - passdViewrObj.x)**2 + (passdObj.y - passdViewrObj.y)**2 + (passdObj.z - passdViewrObj.z)**2)**(0.5);
+    }
+
 }
 
 
@@ -265,21 +317,23 @@ class Cube extends Thingy {
         
         this.side = side;
 
+        // OPOMBA: običajno podana točka pomeni spodnjo levo točko spredaj, ostale izhajajo iz nje;
+
         this.spacePoints = [
             // prednji kvadrat;
-            new SpacePoint(passedSpacePoint.x, passedSpacePoint.y, -passedSpacePoint.z),    // 0
-            new SpacePoint(passedSpacePoint.x + this.side, passedSpacePoint.y, -passedSpacePoint.z),
-            new SpacePoint(passedSpacePoint.x + this.side, passedSpacePoint.y, -passedSpacePoint.z - this.side),
-            new SpacePoint(passedSpacePoint.x, passedSpacePoint.y, -passedSpacePoint.z - this.side),
+            new SpacePoint(passedSpacePoint.x, passedSpacePoint.y, passedSpacePoint.z),    // 0
+            new SpacePoint(passedSpacePoint.x + this.side, passedSpacePoint.y, passedSpacePoint.z),
+            new SpacePoint(passedSpacePoint.x + this.side, passedSpacePoint.y, passedSpacePoint.z + this.side),
+            new SpacePoint(passedSpacePoint.x, passedSpacePoint.y, passedSpacePoint.z + this.side),
             // zadnji kvadrat (oddaljenejši)
-            new SpacePoint(passedSpacePoint.x, passedSpacePoint.y + this.side, -passedSpacePoint.z),  // 4;
-            new SpacePoint(passedSpacePoint.x + this.side, passedSpacePoint.y + this.side, -passedSpacePoint.z),
-            new SpacePoint(passedSpacePoint.x + this.side, passedSpacePoint.y + this.side, -passedSpacePoint.z - this.side),
-            new SpacePoint(passedSpacePoint.x, passedSpacePoint.y + this.side, -passedSpacePoint.z - this.side),
-            new SpacePoint(passedSpacePoint.x, passedSpacePoint.y + this.side, -passedSpacePoint.z),
+            new SpacePoint(passedSpacePoint.x, passedSpacePoint.y + this.side, passedSpacePoint.z),  // 4;
+            new SpacePoint(passedSpacePoint.x + this.side, passedSpacePoint.y + this.side, passedSpacePoint.z),
+            new SpacePoint(passedSpacePoint.x + this.side, passedSpacePoint.y + this.side, passedSpacePoint.z + this.side),
+            new SpacePoint(passedSpacePoint.x, passedSpacePoint.y + this.side, passedSpacePoint.z + this.side),
+            new SpacePoint(passedSpacePoint.x, passedSpacePoint.y + this.side, passedSpacePoint.z),
         ]
 
-        this.center = Thingy.calcPlanarCtr(this.spacePoints);
+        this.planrCentr = Thingy.calcPlanarCtr(this.spacePoints);
 
         this.segments = [];
 
@@ -303,166 +357,178 @@ class Pickup extends Thingy {
         this.spacePoints = [
         // OPISI PODANI GLEDANO OD SPREDAJ PROTI SEVERU;
         // prednji kvadrat karoserije;
-        new SpacePoint(passedSpacePoint.x, passedSpacePoint.y, -passedSpacePoint.z), // 0 je spodnji levi kot karoserije, gledano od spredaj;
-        new SpacePoint(passedSpacePoint.x + 2, passedSpacePoint.y, -passedSpacePoint.z), // 1
-        new SpacePoint(passedSpacePoint.x + 2, passedSpacePoint.y, -passedSpacePoint.z - 0.9),
-        new SpacePoint(passedSpacePoint.x, passedSpacePoint.y, -passedSpacePoint.z - 0.9),
+        new SpacePoint(passedSpacePoint.x, passedSpacePoint.y, passedSpacePoint.z), // 0 je spodnji levi kot karoserije, gledano od spredaj;
+        new SpacePoint(passedSpacePoint.x + 2, passedSpacePoint.y, passedSpacePoint.z), // 1
+        new SpacePoint(passedSpacePoint.x + 2, passedSpacePoint.y, passedSpacePoint.z + 0.9),
+        new SpacePoint(passedSpacePoint.x, passedSpacePoint.y, passedSpacePoint.z + 0.9),
     
         // zadnji kvadrat karoserije;
-        new SpacePoint(passedSpacePoint.x, passedSpacePoint.y + 5, -passedSpacePoint.z), // 4
-        new SpacePoint(passedSpacePoint.x + 2, passedSpacePoint.y + 5, -passedSpacePoint.z), // 
-        new SpacePoint(passedSpacePoint.x + 2, passedSpacePoint.y + 5, -passedSpacePoint.z - 0.9),
-        new SpacePoint(passedSpacePoint.x, passedSpacePoint.y + 5, -passedSpacePoint.z - 0.9),
+        new SpacePoint(passedSpacePoint.x, passedSpacePoint.y + 5, passedSpacePoint.z), // 4
+        new SpacePoint(passedSpacePoint.x + 2, passedSpacePoint.y + 5, passedSpacePoint.z), // 
+        new SpacePoint(passedSpacePoint.x + 2, passedSpacePoint.y + 5, passedSpacePoint.z + 0.9),
+        new SpacePoint(passedSpacePoint.x, passedSpacePoint.y + 5, passedSpacePoint.z + 0.9),
     
         // kabina
-        new SpacePoint(passedSpacePoint.x + 0.05, passedSpacePoint.y + 1.0, - passedSpacePoint.z - 1.1), // 8   ; 0,1, da je malo ožje kot karoserija spodaj
-        new SpacePoint(passedSpacePoint.x + 1.95, passedSpacePoint.y + 1.0, - passedSpacePoint.z - 1.1),    // 9 ; 1.95, da je malo ožje kot karoserija spodaj (1,85, točki pregiba preden se havba, ki se dviguje, začne dvigovat v steklo;
-        new SpacePoint(passedSpacePoint.x + 1.9, passedSpacePoint.y + 1.7, - passedSpacePoint.z - 1.8), // 10   ; desna zgornja točka stekla (gledano od spredaj, dolžina tega dela: 0,7, končan višina: 1,8
-        new SpacePoint(passedSpacePoint.x + 0.1, passedSpacePoint.y + 1.7, - passedSpacePoint.z - 1.8),    // 11 ; leva zgornja stekla
-        new SpacePoint(passedSpacePoint.x + 1.9, passedSpacePoint.y + 2.4, - passedSpacePoint.z - 1.8), // 12   ; desna zadnja zgornja točka kabine (gledano od spredaj, ravna streha kabine dolga 0,7
-        new SpacePoint(passedSpacePoint.x + 0.1, passedSpacePoint.y + 2.4, - passedSpacePoint.z - 1.8),    // 13 ; leva zadnja zgornja kabine
-        new SpacePoint(passedSpacePoint.x + 2, passedSpacePoint.y + 2.4, - passedSpacePoint.z - 0.9), // 14   ; desna zadnja spodnja točka kabine (na sredini karoserije, na pol poti od tli do vrha; gledano od spredaj)
-        new SpacePoint(passedSpacePoint.x + 0.0, passedSpacePoint.y + 2.4, - passedSpacePoint.z - 0.9),    // 15 ; leva zadnja spodnja kabine (na sredini med tlemi in vrhom kabine)
+        new SpacePoint(passedSpacePoint.x + 0.03, passedSpacePoint.y + 1.0, passedSpacePoint.z + 1.1), // 8   ; 0,1, da je malo ožje kot karoserija spodaj
+        new SpacePoint(passedSpacePoint.x + 1.97, passedSpacePoint.y + 1.0, passedSpacePoint.z + 1.1),    // 9 ; 1.95, da je malo ožje kot karoserija spodaj (1,85, točki pregiba preden se havba, ki se dviguje, začne dvigovat v steklo;
+        new SpacePoint(passedSpacePoint.x + 1.9, passedSpacePoint.y + 1.7, passedSpacePoint.z + 1.8), // 10   ; desna zgornja točka stekla (gledano od spredaj, dolžina tega dela: 0,7, končan višina: 1,8
+        new SpacePoint(passedSpacePoint.x + 0.1, passedSpacePoint.y + 1.7, passedSpacePoint.z + 1.8),    // 11 ; leva zgornja stekla
+        new SpacePoint(passedSpacePoint.x + 1.9, passedSpacePoint.y + 2.4, passedSpacePoint.z + 1.8), // 12   ; desna zadnja zgornja točka kabine (gledano od spredaj, ravna streha kabine dolga 0,7
+        new SpacePoint(passedSpacePoint.x + 0.1, passedSpacePoint.y + 2.4, passedSpacePoint.z + 1.8),    // 13 ; leva zadnja zgornja kabine
+        new SpacePoint(passedSpacePoint.x + 2, passedSpacePoint.y + 2.4, passedSpacePoint.z + 0.9), // 14   ; desna zadnja spodnja točka kabine (na sredini karoserije, na pol poti od tli do vrha; gledano od spredaj)
+        new SpacePoint(passedSpacePoint.x + 0.0, passedSpacePoint.y + 2.4, passedSpacePoint.z + 0.9),    // 15 ; leva zadnja spodnja kabine (na sredini med tlemi in vrhom kabine)
 
         // luči spredaj
-        new SpacePoint(passedSpacePoint.x + 0.15, passedSpacePoint.y, - passedSpacePoint.z - 0.60), // 16
-        new SpacePoint(passedSpacePoint.x + 0.60, passedSpacePoint.y, - passedSpacePoint.z - 0.60),
-        new SpacePoint(passedSpacePoint.x + 0.60, passedSpacePoint.y, - passedSpacePoint.z - 0.80),
-        new SpacePoint(passedSpacePoint.x + 0.15, passedSpacePoint.y, - passedSpacePoint.z - 0.80), //
+        new SpacePoint(passedSpacePoint.x + 0.15, passedSpacePoint.y, passedSpacePoint.z + 0.60), // 16
+        new SpacePoint(passedSpacePoint.x + 0.60, passedSpacePoint.y, passedSpacePoint.z + 0.60),
+        new SpacePoint(passedSpacePoint.x + 0.60, passedSpacePoint.y, passedSpacePoint.z + 0.80),
+        new SpacePoint(passedSpacePoint.x + 0.15, passedSpacePoint.y, passedSpacePoint.z + 0.80), //
     
-        new SpacePoint(passedSpacePoint.x + 1.4, passedSpacePoint.y, - passedSpacePoint.z - 0.60), // 20
-        new SpacePoint(passedSpacePoint.x + 1.85, passedSpacePoint.y, - passedSpacePoint.z - 0.60),
-        new SpacePoint(passedSpacePoint.x + 1.85, passedSpacePoint.y, - passedSpacePoint.z - 0.80),
-        new SpacePoint(passedSpacePoint.x + 1.4, passedSpacePoint.y, - passedSpacePoint.z - 0.80), //
+        new SpacePoint(passedSpacePoint.x + 1.4, passedSpacePoint.y, passedSpacePoint.z + 0.60), // 20
+        new SpacePoint(passedSpacePoint.x + 1.85, passedSpacePoint.y, passedSpacePoint.z + 0.60),
+        new SpacePoint(passedSpacePoint.x + 1.85, passedSpacePoint.y, passedSpacePoint.z + 0.80),
+        new SpacePoint(passedSpacePoint.x + 1.4, passedSpacePoint.y, passedSpacePoint.z + 0.80), //
 
         // luči zadaj
-        new SpacePoint(passedSpacePoint.x + 0.15, passedSpacePoint.y + 5, - passedSpacePoint.z - 0.60), // 24
-        new SpacePoint(passedSpacePoint.x + 0.60, passedSpacePoint.y + 5, - passedSpacePoint.z - 0.60),
-        new SpacePoint(passedSpacePoint.x + 0.60, passedSpacePoint.y + 5, - passedSpacePoint.z - 0.80),
-        new SpacePoint(passedSpacePoint.x + 0.15, passedSpacePoint.y + 5, - passedSpacePoint.z - 0.80), //
+        new SpacePoint(passedSpacePoint.x + 0.15, passedSpacePoint.y + 5, passedSpacePoint.z + 0.60), // 24
+        new SpacePoint(passedSpacePoint.x + 0.60, passedSpacePoint.y + 5, passedSpacePoint.z + 0.60),
+        new SpacePoint(passedSpacePoint.x + 0.60, passedSpacePoint.y + 5, passedSpacePoint.z + 0.80),
+        new SpacePoint(passedSpacePoint.x + 0.15, passedSpacePoint.y + 5, passedSpacePoint.z + 0.80), //
     
-        new SpacePoint(passedSpacePoint.x + 1.4, passedSpacePoint.y + 5, - passedSpacePoint.z - 0.60), // 28
-        new SpacePoint(passedSpacePoint.x + 1.85, passedSpacePoint.y + 5, - passedSpacePoint.z - 0.60),
-        new SpacePoint(passedSpacePoint.x + 1.85, passedSpacePoint.y + 5, - passedSpacePoint.z - 0.80),
-        new SpacePoint(passedSpacePoint.x + 1.4, passedSpacePoint.y + 5, - passedSpacePoint.z - 0.80), //7
+        new SpacePoint(passedSpacePoint.x + 1.4, passedSpacePoint.y + 5, passedSpacePoint.z + 0.60), // 28
+        new SpacePoint(passedSpacePoint.x + 1.85, passedSpacePoint.y + 5, passedSpacePoint.z + 0.60),
+        new SpacePoint(passedSpacePoint.x + 1.85, passedSpacePoint.y + 5, passedSpacePoint.z + 0.80),
+        new SpacePoint(passedSpacePoint.x + 1.4, passedSpacePoint.y + 5, passedSpacePoint.z + 0.80), //7
 
-        new SpacePoint(passedSpacePoint.x + 0.022, passedSpacePoint.y + 2.4, -passedSpacePoint.z - 1.1), // 32 točka na desnem B strebričku (na levi strani, gledano od spredaj), enako visoka kot vrh havbe;
-        new SpacePoint(passedSpacePoint.x + 2 - 0.022, passedSpacePoint.y + 2.4, -passedSpacePoint.z - 1.1), // ista ne levem strebričku
+        new SpacePoint(passedSpacePoint.x + 0.03, passedSpacePoint.y + 2.4, passedSpacePoint.z + 1.1), // 32 leva točka na (de facto desnem) B strebričku, enako visoka kot vrh havbe;
+        new SpacePoint(passedSpacePoint.x + 1.97, passedSpacePoint.y + 2.4, passedSpacePoint.z + 1.1), // ista ne desni strani (de f levi strebričk);
 
-        new SpacePoint(passedSpacePoint.x + 2, passedSpacePoint.y + 2.4, -passedSpacePoint.z - 0.2), // 34   ; desna zadnja spodnja točka kesona (na sredini karoserije, na dnu avta; gledano od spredaj)
-        new SpacePoint(passedSpacePoint.x + 0.0, passedSpacePoint.y + 2.4, - passedSpacePoint.z - 0.2),    // 35 ; leva zadnja spodnja kesona (na dnu avta)
+        new SpacePoint(passedSpacePoint.x + 2, passedSpacePoint.y + 2.4, passedSpacePoint.z + 0.2), // 34   ; desna zadnja spodnja točka kesona (na sredini karoserije, na dnu avta; gledano od spredaj)
+        new SpacePoint(passedSpacePoint.x + 0.0, passedSpacePoint.y + 2.4, passedSpacePoint.z + 0.2),    // 35 ; leva zadnja spodnja kesona (na dnu avta)
         ];
 
-        this.center = Thingy.calcPlanarCtr(this.spacePoints);
+        this.planrCentr = Thingy.calcPlanarCtr(this.spacePoints);
         this.bodyColor = bodyColr;
 
         this.segments = [];
 
         // NAJPREJ DAJ ČRNE BASE, potem oris!!
 
-        // črno
+        // črno (spodnji del avta, cel zgornji del v višini vrha kesona (v dveh delih), havba od zadaj)
         this.segments.push(new Segment( 
             this.spacePoints,   // to se poda samo za referenco, ne bo nikjer shranjeno
-            new FillInfo(true, 'black', BASE),
-            [ [0, 1], [5], [4], [0], [3, 2], [6], [7], [3] ],
-            [0, 1, 2, 3, 4, 5, 6, 7]
-        ));
-
-         // havba kot base (če gledaš od zadaj in jo vidiš od noter);
-        this.segments.push(new Segment( this.spacePoints,
-            new FillInfo(true, 'black', BASE), 
-            undefined,  // če podajaš povezavo, ki opisuje štirikotnik, lahko podaš undefined;
-            [ 3, 2, 9, 8]
+            new FillInfo(BASE, true, 'black'),
+            [ [0, 1], [5], [4], [3, 2], [8], [9], [7, 6], [8], [9], [3, 2], [10], [11]],
+            [0, 1, 2, 3, 4, 5, 6, 7, 14, 15, 9, 8]
         ));
 
          // filerji kot base;
         this.segments.push(new Segment( this.spacePoints,
-            new FillInfo(true, 'black', BASE),
-            [ [0, 1], [2], [3], [0], [4, 5], [6], [7], [4]], 
+            new FillInfo(BASE, true, 'black'),
+            [ [0, 1], [2], [3], [4, 5], [6], [7]], 
             [ 15, 3, 8, 32, 2, 9, 33, 14]
         ));
 
         // // glavni oris (oris mora vedno slediti črnemu baseu)
         this.segments.push(new Segment( this.spacePoints,
-            new FillInfo(false, undefined, BASE),
-            [ [0, 1], [2], [3], [0], [4, 5], [6], [7], [4], [0, 4], [1, 5], [2, 6], [3, 7], [3, 8], [2, 9],
-            [8, 9], [10], [11], [8], [10, 12], [13], [11], [13, 15], [14], [12], [15, 18], [14, 17] ],
-            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 34, 35],
+            new FillInfo(BASE, false, undefined),
+            [ [0, 1], [2], [3], [0], [4, 5], [6], [7], [4], [0, 4], [1, 5], [2, 14], [6], [3, 15], [7], [3, 8], [2, 9],
+            [8, 9], [10,11], [10, 12], [13], [11], [13, 19], [20], [12], [15, 18], [14, 17] ],
+            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 34, 35, 32/*19*/, 33],
         ))
 
         // prednja stena kesona; ta sledi orisu, ker če ne je oris notranjosti kabine videt skozi pregrado;
         this.segments.push(new Segment( this.spacePoints,
-            new FillInfo(true, 'blask', BASE), undefined,[ 15, 14, 34, 35]
+            new FillInfo(BASE, true, 'black'), undefined,[ 15, 14, 34, 35]
         ));
+
+        //ploskev pod zadnjim steklom
+        this.segments.push(new Segment(this.spacePoints,
+            new FillInfo(BASE, true, 'black'), undefined, [15, 14, 33, 32])
+        );
+
+        // dodatni oris, ker sta 2 dela predelne stene kesona prebarvala del orisa;
+        this.segments.push(new Segment(this.spacePoints,
+            new FillInfo(BASE, false, undefined),
+            [[3, 0], [1], [2], [4, 5]],  // povezave
+            [8,9,10,11, 14, 15]
+        ))
 
         // prednja ploskev;
         this.segments.push(new Segment( this.spacePoints,
-            new FillInfo(true, this.bodyColor, ANTECENTRUM), undefined, [ 0, 1, 2, 3 ]
+            new FillInfo(PROXIMAL, true, this.bodyColor), undefined, [ 0, 1, 2, 3 ], new SpacePoint(0, 0.03, 0)
         ));
 
-        // desna ploskev;
+        // desna ploskev (vozila, sicer na levi strani koordinatnega sistema);
         this.segments.push(new Segment( this.spacePoints,
-            new FillInfo(true, this.bodyColor, ANTECENTRUM), undefined, [ 4, 0, 3, 7 ]
+            new FillInfo(PROXIMAL, true, this.bodyColor), undefined, [ 4, 0, 3, 7 ], new SpacePoint(0.03, 0, 0)
         ));
 
         // leva ploskev;
         this.segments.push(new Segment( this.spacePoints,
-            new FillInfo(true, this.bodyColor, ANTECENTRUM), undefined, [ 5, 1, 2, 6]
+            new FillInfo(PROXIMAL, true, this.bodyColor), undefined, [ 5, 1, 2, 6], new SpacePoint(-0.03, 0, 0)
         ));
 
         // zadnja ploskev;
         this.segments.push(new Segment( this.spacePoints,
-            new FillInfo(true, this.bodyColor, ANTECENTRUM), undefined, [ 4, 5, 6, 7]
+            new FillInfo(PROXIMAL, true, this.bodyColor), undefined, [ 4, 5, 6, 7], new SpacePoint(0, -0.03, 0)
         ));
 
         // havba;
         this.segments.push(new Segment( this.spacePoints,
-            new FillInfo(true, this.bodyColor, ANTECENTRUM), undefined, [ 3, 2, 9, 8]
+            new FillInfo(PROXIMAL, true, this.bodyColor), undefined, [ 3, 2, 9, 8], new SpacePoint(0, 0.01, -0.05)
         ));
 
-        // desni filer;
+        // desni filer (na desni strani vozila, sicer levo v smislu koordinate x);
         this.segments.push(new Segment( this.spacePoints,
-            new FillInfo(true, this.bodyColor, ORBITAL), undefined, [ 15, 3, 8, 32]
+            new FillInfo(PROXIMAL, true, this.bodyColor), undefined, [ 15, 3, 8, 32], new SpacePoint(0.03, 0, -0.01)
         ));
 
         // levi filer;
         this.segments.push(new Segment( this.spacePoints,
-            new FillInfo(true, this.bodyColor, ORBITAL), undefined, [ 2, 9, 33, 14]
+            new FillInfo(PROXIMAL, true, this.bodyColor), undefined, [ 2, 9, 33, 14], new SpacePoint(-0.03, 0, -0.01)
         ));
 
         // prednje steklo;
         this.segments.push(new Segment( this.spacePoints,
-            new FillInfo(true, GLASS, BASE), undefined, [ 8, 9, 10, 11]
+            new FillInfo(BASE, true, GLASS), undefined, [ 8, 9, 10, 11]
         ));
 
         // desno steklo;
         this.segments.push(new Segment( this.spacePoints,
-            new FillInfo(true, GLASS, BASE), undefined, [ 32, 8, 11, 13]
+            new FillInfo(BASE, true, GLASS), undefined, [ 32, 8, 11, 13]
         ));
 
         // levo steklo;
         this.segments.push(new Segment( this.spacePoints,
-            new FillInfo(true, GLASS, BASE), undefined, [ 9, 10, 12, 33]
+            new FillInfo(BASE, true, GLASS), undefined, [ 9, 10, 12, 33]
         ));
 
         // zadnje steklo;
         this.segments.push(new Segment( this.spacePoints,
-            new FillInfo(true, GLASS, BASE), undefined, [ 14, 15, 13, 12]
+            new FillInfo(BASE, true, GLASS), undefined, [ 12, 13, 32, 33]
         ));
 
         // luči spredaj;
         this.segments.push(new Segment( this.spacePoints,
-            new FillInfo(true, '#fffdf0', ANTECENTRUM),
+            new FillInfo(PROXIMAL, true, '#fffdf0'),
             [ [0, 1], [2], [3], [0], [4, 5], [6], [7], [4]],
-            [ 16, 17, 18, 19, 20, 21, 22, 23]
+            [ 16, 17, 18, 19, 20, 21, 22, 23],
+            new SpacePoint(0, 0.03, 0)
         ));
 
         // luči zadaj;
         this.segments.push(new Segment( this.spacePoints,
-            new FillInfo(true, '#d11515', ANTECENTRUM),
+            new FillInfo(PROXIMAL, true, '#d11515'),
             [ [0, 1], [2], [3], [0], [4, 5], [6], [7], [4]],
-            [ 24, 25, 26, 27, 28, 29, 30, 31]
+            [ 24, 25, 26, 27, 28, 29, 30, 31],
+            new SpacePoint(0, -0.03, 0)
         ));
+
+        //ozka ploskev pod zadnjim steklom
+        this.segments.push(new Segment(this.spacePoints,
+            new FillInfo(PROXIMAL, true, this.bodyColor), undefined, [15, 14, 33, 32], new SpacePoint(0, -0.03, 0))
+        );
 
         // ustvarimo še povezave napisane na tak način, da se lahko lažje uporabi pri interpolaciji
         Thingy.createConns4CalcScrnPts(this.segments);
@@ -506,7 +572,7 @@ class HorzRectangle extends Thingy {
         ];
  
         this.segments = [
-            new Segment(this.spacePoints, new FillInfo(true, 'white', BASE))
+            new Segment(this.spacePoints, new FillInfo(BASE, true, 'white'))
         ];
 
         Thingy.createConns4CalcScrnPts(this.segments);

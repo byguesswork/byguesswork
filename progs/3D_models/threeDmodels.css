@@ -135,7 +135,7 @@ body {
     position: absolute;
     top: 120px;
     left: 120px;
-    right: 120px;
+    /* right: 120px; */
     padding: 20px;
     text-align: left;
     background-color: #4e4e4c;

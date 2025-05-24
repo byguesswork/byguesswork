@@ -168,11 +168,11 @@ function calcScreenPts(spacePoints, connctnsRange) {   // prejme relativne koord
 
     function frmSpcPtToScrnPt(x, y, z) {
         const scrnPt = new ScreenPoint();
-        // stara linearna oblika;
-        // scrnPt.x = scrnMidPoint.x + (Math.atan2(x, (y**2 + z**2 )**(1/2))/hrzRadsFrmCentr) * scrnMidPoint.x;
-        // scrnPt.y = scrnMidPoint.y + (Math.atan2(z, (y**2  + x**2 )**(1/2))/vertRadsFrmCentr) * scrnMidPoint.y;
         scrnPt.x = scrnMidPoint.x +  Math.sin(Math.atan2(x, (y**2 + z**2 )**(1/2))) * factorX;
-        scrnPt.y = scrnMidPoint.y +  Math.sin(Math.atan2(z, (y**2  + x**2 )**(1/2))) * factorY;
+        // /*1*/ scrnPt.y = scrnMidPoint.y +  Math.sin(Math.atan2(z, (y**2  + x**2 )**(1/2))) * factorY;
+        /*2*/ scrnPt.y = scrnMidPoint.y +  Math.sin(Math.atan2(-z, (y**2  + x**2 )**(1/2))) * factorY;
+        // /*3*/ scrnPt.y = scrnMidPoint.y -  Math.sin(Math.atan2(z, (y**2  + x**2 )**(1/2))) * factorY;
+        // /*4*/ scrnPt.y = scrnMidPoint.y -  Math.sin(Math.atan2(-z, (y**2  + x**2 )**(1/2))) * factorY;
         return scrnPt;
     }
 
@@ -236,7 +236,16 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
         y = r * Math.cos(angle);
         if (y > 0) constraints.allYNegAngular = false;
         else if (y < 0) constraints.atLeast1YNeg = true;
-        item2Draw.push(new SpacePoint(x, y, spcPt.z + activeViewer.posIn3D.z)); // z-ja ni treba nič preračunavat
+        // /*1*/ item2Draw.push(new SpacePoint(x, y, spcPt.z + viewPoint.z));
+        // /*2*/ item2Draw.push(new SpacePoint(x, y, -spcPt.z + viewPoint.z));
+        /*3*/ item2Draw.push(new SpacePoint(x, y, spcPt.z - viewPoint.z)); // z-ju ni treba preračunavat kota
+        // /*4*/ item2Draw.push(new SpacePoint(x, y, -spcPt.z - viewPoint.z));
+
+        // rezultati testov preračunov zaslonskih koordinat - Prva cifra pomeni kalkulacijo y v frmSpcPtToScrnPt oz. v calcScreenPts;:
+        // 1-1 prenizko; 1-2 OK   !!; 1-3 ni ok; 1-4 previsoko;
+        // 2-1 previsoko; 2-2 na spodnji strani; 2-3 OK!!; 2-4 prenizko;
+        // 3-1 previsoko; 3-2 spodaj; 3-3 OK !!; 3-4 prenizko;
+        // 4-1 prenizko; 4-2 OK; 4-3 spodaj; 4-4 previsoko;
     }
 
     // začetek dogajanja;
@@ -246,7 +255,7 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
     clearCanvas();
 
     // določimo izhodišče pogleda in kot; slednje je odvisno od tega al landscape ali objRotate;
-    const viewPoint = {x: activeViewer.posIn3D.x, y: activeViewer.posIn3D.y};   // točka, iz katere gledamo;
+    const viewPoint = activeViewer.posIn3D;   // točka, iz katere gledamo;
     const viewngAngle = isLandscapeMode == true ? activeViewer.angle : 0; // kot pod katerim gledamo; N == 0;
 
     activeItems.forEach(spunItem => {
@@ -277,60 +286,24 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
         }
         
         // začetek dogajanja;
-        const anteCentrums = [], orbitals = []; // sem shranimo indexe ploskev tipa ANTECENTRUM, ki bodo izrisane pozneje;
+        const proximals = []; // sem shranimo indexe ploskev tipa PROXIMAL, ki bodo izrisane pozneje;
         // v prvi pasaži narišemo tiste segmente, ki se narišejo vedno;
         for (let k = 0; k < spunItem.segments.length; k++) {
-            if (spunItem.segments[k].fillInfo == undefined || spunItem.segments[k].fillInfo.typ == BASE || spunItem.segments[k].fillInfo.typ == undefined) {
+            if (spunItem.segments[k].fillInfo == undefined || spunItem.segments[k].fillInfo.doFill == false || spunItem.segments[k].fillInfo.typ == BASE) {
                 oneLoop(k);
             } else {    // zabeležimo segmente za naslednje pasaže ;
-                if (spunItem.segments[k].fillInfo.typ == ANTECENTRUM) {
-                    anteCentrums.push(k);
-                } else {
-                    orbitals.push([k, 0]);
+                if (spunItem.segments[k].fillInfo.typ == PROXIMAL) {
+                    proximals.push(k);
                 }
             }
         } 
         
-        // potencialna 2. pasaža, segmenti, ki imajo typ == orbital; ti se izrišejo od najoddaljenejšega proti najbližjemu;
-        if (orbitals.length > 0) {
-
-            // mehanizem za sortiranje, sicer neuporabljen
-
-            const rs = [];
-            for (let k = 0; k < orbitals.length; k++) {
-                const srfceCtrXY = Thingy.calcPlanarCtr(spunItem.segments[orbitals[k][0]].spcPts); // oneLoop prejme index segmenta, zato orbitals[k];
-                const rSrfceCtr = Thingy.calcRFromSpcPt(srfceCtrXY, viewPoint)
-                rs.push(rSrfceCtr);
-                orbitals[k][1] = rSrfceCtr;
-            }
-            // opcija če samo 2 elementa;
-            if (orbitals[0][1] < orbitals[1][1]) oneLoop(orbitals[0][0]);   // primerjamo 2. nivo, izrišemo pa prvega;
-                else oneLoop(orbitals[1][0]);
-            // opcija s sortitanjem
-            // rs.sort();
-            // const sortdIdxs = [];
-            // for (let k = 0; k < orbitals.length; k++) {
-            //     sortdIdxs.push(orbitals.findIndex(curr => { return curr[1] == rs[k] })) 
-            // }
-            // for (let k = orbitals.length - 1; k >= 0; k--) {
-            //     oneLoop(orbitals[sortdIdxs[k]][0]); 
-            // }
-
-            // for (let k = 0; k < orbitals.length; k++) {
-            //     oneLoop(orbitals[k][0]);
-            // }
-
-        }
-
-        // potencialna 3. pasaža, segmenti, ki imajo typ == anteCentrum;
-        // anteCentrum  ploskve narišemo le, če je razdalja do planarnega središča ploskve manjša od razdalje do planarnega središča celega predmeta;
-        if (anteCentrums.length > 0) {
-            // načeloma bi bilo treba preverit, al ima spunItem znan center; za zdaj se zanašam, da bom vedno ob ustvarjanju predmeta tipy ANTE zagnal ustvarjanje centra; 
-            const rSpunItemCtr = Thingy.calcRFromSpcPt(spunItem.center, viewPoint) // poda dolžino daljice od gledalca do srewdišča celega predmeta;
-            for (let k = 0; k < anteCentrums.length; k++) {
-                const srfceCtrXY = Thingy.calcPlanarCtr(spunItem.segments[anteCentrums[k]].spcPts);
-                const rSrfceCtr = Thingy.calcRFromSpcPt(srfceCtrXY, viewPoint);   // poda dolžino daljice od gledalca (viewPoint) do središča ploskve (srfceCtrXY);
-                if (rSrfceCtr < rSpunItemCtr) { oneLoop(anteCentrums[k]); } // oneLoop prejme index segmenta, zato anteCentrums[k];
+        if (proximals.length > 0) {
+            for (let k = 0; k < proximals.length; k++) {
+                const rSrfcSptlCtr = Thingy.calcSpatialRFromSpcPt(spunItem.segments[proximals[k]].spatialCtr, viewPoint) // poda dolžino daljice od gledalca do srewdišča celega predmeta;
+                const rSrfcDistlSptlCtr = Thingy.calcSpatialRFromSpcPt(spunItem.segments[proximals[k]].distlSptlCtr, viewPoint);
+                // console.log(rSrfcSptlCtr, rSrfcDistlSptlCtr)
+                if (rSrfcSptlCtr < rSrfcDistlSptlCtr) { oneLoop(proximals[k]); } // oneLoop prejme index segmenta, zato proximals[k];
             }
         }
     })
@@ -351,8 +324,8 @@ for (let i = 10; i <= 46; i += 4) {
 };
 
 // kesonar;
-const pickupTruckLndscp = new Pickup(new SpacePoint(5, 5, 0), 'grey');
-const othrPickupTruckLndscp = new Pickup(new SpacePoint(-9, 24, 0), '#0f3477', 4.71);
+const pickupTruckLndscp = new Pickup(new SpacePoint(5, 5, 0.2), 'grey');
+const othrPickupTruckLndscp = new Pickup(new SpacePoint(-9, 24, 0.2), '#0f3477', 4.71);
 const pickupTruckRotate = new Pickup(new SpacePoint(1, 5, 0));
 
 // rob ceste;
@@ -384,7 +357,7 @@ for (let i = -200; i <= 302; i += 10) {
 function getLandscItems() {
     // sortiranje landObjectsov;
     landObjects.forEach(el => { // najprej vsakemu določima razdaljo do viewerja;
-        el.r = Thingy.calcRFromSpcPt(el.center, activeViewer.posIn3D)
+        el.r = Thingy.calcPlanarRFromSpcPt(el.planrCentr, activeViewer.posIn3D)
     })
     landObjects.sort((a, b) => b.r - a.r)   // to je vsa fora da objekte posortiraš od najbolj oddaljenega proti najbližjemu
 
@@ -393,9 +366,15 @@ function getLandscItems() {
 }
 
 // - - - - - -  DODAJANJE STVARI V KATALOGE  - - - - - -
-// to dovoje sestavlja kar bi bilo "landscapeItems"; landscape je vedno isto, vsebinolandObjects pa pri premikanju gledalca sortiramo po oddaljenosti
+// če gledaš pokrajino - definirana morata biti dva arraya, ki morta biti vsaj prazna; vsebinolandObjects pri premikanju gledalca sortiramo po oddaljenosti;
+// DELOVNA VARIANTA 
 const landscape = [...lines, ...dividingLines];
 const landObjects = [...cubes, pickupTruckLndscp, othrPickupTruckLndscp];
+
+// TESTNA VARIANTA;
+// const landscape = [];
+// const landObjects = [othrPickupTruckLndscp];
+// const landObjects = [new Cube(new SpacePoint(-4, 10, 1.7), 4)]
 
 const objRotateItems = [pickupTruckRotate];
 
@@ -513,6 +492,7 @@ function changeLens(doFish){    // to lahko kličeš tudi s tipkami;
 }
 
 function lensBtnOprtn(evt){
+    //  evt.target.parentElement čekiramo, ker lahko klikneš span comment znotraj gumba in v tem primeru je ta span target, zato moramo skočit na parent;
     if (evt.target.classList.contains('unselected') || evt.target.parentElement.classList.contains('unselected')) {
         if (lensBtns[0].classList.contains('selected')) {
             changeLens(true);
@@ -538,7 +518,7 @@ function modeBtnOprtn(evt){
             activeViewer = obj2RotateViewer;
             isLandscapeMode = false;
         } else {
-            activeItems = landscape.concat(landObjects);   // to nastavi activeItems na pravo stvar
+            activeItems = landscape.concat(landObjects);   // to nastavi activeItems na pravo stvar; ni treba getLandscItems, ker bi po nepotrebnem sortiralo;
             activeViewer = landscapeViewer;
             isLandscapeMode = true;
         }
@@ -669,44 +649,3 @@ function desktopRotationHelper() {
     if (isLandscapeMode) rotateViewer(mouseOrTchPosOnCtrls.btn);
         else rotateObj(mouseOrTchPosOnCtrls.btn);
 }
-
-
-
-//  - - - - -   Legacy koda za upravljanje z gumbi;
-
-// const proceedBtns = document.getElementsByClassName('proceed');
-// proceedBtns[0].addEventListener('click', proceedBtnsOprtn);
-// proceedBtns[1].addEventListener('click', proceedBtnsOprtn);
-// function proceedBtnsOprtn(e){
-//     if (e.target == proceedBtns[0] || e.target.parentElement == proceedBtns[0]) { moveViewer(FORWARD); }
-//     else { moveViewer(BACK); }
-// }
-
-// const panBtns = document.getElementsByClassName('pan');
-// panBtns[0].addEventListener('click', panBtnsOprtn);
-// panBtns[1].addEventListener('click', panBtnsOprtn);
-// function panBtnsOprtn(e){
-//     if (e.target == panBtns[0] || e.target.parentElement == panBtns[0]) { moveViewer(RIGHT); }
-//     else { moveViewer(LEFT); }
-// }
-
-// const riseBtns = document.getElementsByClassName('rise');
-// riseBtns[0].addEventListener('click', riseBtnsOprtn);
-// riseBtns[1].addEventListener('click', riseBtnsOprtn);
-// function riseBtnsOprtn(e){
-//     if (e.target == riseBtns[0] || e.target.parentElement == riseBtns[0]) { moveViewer(UP); }
-//     else { moveViewer(DOWN); }
-// }
-
-// const rotateBtns = document.getElementsByClassName('rotate');
-// rotateBtns[0].addEventListener('click', rotateBtnsOprtn);
-// rotateBtns[1].addEventListener('click', rotateBtnsOprtn);
-// function rotateBtnsOprtn(e){
-//     if (e.target == rotateBtns[0] || e.target.parentElement == rotateBtns[0]) {
-//         if (activeItems == landscapeItems) rotateViewer(CLOCKW);
-//         else rotateObj(CLOCKW);
-//     } else {
-//         if (activeItems == landscapeItems) rotateViewer(ANTICLOCKW);
-//         else rotateObj(ANTICLOCKW);
-//     }
-// }

@@ -35,3 +35,25 @@ function checkLang(){   // deluje samo za SL in EN;
         return 'sl' 
     } else return 'en';
 }
+
+//  - - -  MEHANIZEM ZA SORTIRANJE, sicer neuporabljen  - - -
+
+        // const rs = [];
+        // for (let k = 0; k < orbitals.length; k++) {
+        //     const srfceCtrXY = Thingy.calcPlanarCtr(spunItem.segments[orbitals[k][0]].spcPts); // oneLoop prejme index segmenta, zato orbitals[k];
+        //     const rSrfceCtr = Thingy.calcPlanarRFromSpcPt(srfceCtrXY, viewPoint)
+        //     rs.push(rSrfceCtr);
+        //     orbitals[k][1] = rSrfceCtr;
+        // }
+        // rs.sort();
+        // const sortdIdxs = [];
+        // for (let k = 0; k < orbitals.length; k++) {
+        //     sortdIdxs.push(orbitals.findIndex(curr => { return curr[1] == rs[k] })) 
+        // }
+        // for (let k = orbitals.length - 1; k >= 0; k--) {
+        //     oneLoop(orbitals[sortdIdxs[k]][0]); 
+        // }
+
+        // for (let k = 0; k < orbitals.length; k++) {
+        //     oneLoop(orbitals[k][0]);
+        // }
