@@ -36,7 +36,8 @@ class Segment{
         fillInfo,       // če undefined/false, se nastavi fillInfo.doFill = false;
         connections,    // če undefined, se nastavi na obrazec povezave, ki opiše štirikotnik;
         spcPtsIdxs,     // spcPtsIdxs je array indeksov, na osnovi katerega bo nastal podnabor točk za to ploskev; če UNDEFINED, se nastavi na allSpcPtsRef;
-        spatlDiffFrmCtr) {  // SpacePoint, ki pove, koliko je od prostorsekga centra oddaljena točka, s katero bomo preverjali, al prej vidiš prostorski center ploskve al tisto točko; za PROXIMAL-e;
+        spatlDiffFrmCtr,    // SpacePoint, ki pove, koliko je od prostorsekga centra oddaljena točka, s katero bomo preverjali, al prej vidiš prostorski center ploskve al tisto točko; za PROXIMAL-e;
+        rArc) {     // polmer kroga, če krog
         
         this.spcPts;
         this.spatialCtr;
@@ -65,6 +66,8 @@ class Segment{
                 this.spatialCtr.z + spatlDiffFrmCtr.z,  
             )
         }
+
+        if (rArc != undefined) this.rArc = rArc;
     }
 }
 
@@ -84,7 +87,6 @@ class Thingy {
     //                                        .. jih pa ne filaš, tam bi potem ne povezalo; ne želim pa po defaultu rabit closePath, ker ta v nekaterih primerih še enkrat potegne še eno črto;
 
     constructor() {
-        // this.angle = 0;  kot se za zdaj še ne rabi; rabil bi se, če bi se stvari premikale in bi moral poznat njihovo usmeritev, da bi jih pravilno premaknil; 
         this.planrCentr = undefined // središče telesa na vodoravni ravnini, gledano s ptičje perspektive
 
         // KO INSTANCIIRAŠ OBJEKT, KI EXTENDA THINGY, OBVEZNO ustvari/zaženi:
@@ -98,14 +100,22 @@ class Thingy {
     draw(screenPoints, whichSegmnt) { //    ! !  PAZI ! !  riše s screenPts, ne spacePts ! !
 
         ctx.beginPath();
-        this.segments[whichSegmnt].conns.forEach(connctn => {
-            if (connctn.length == 1) {  // če je array connctn (ki je del arraya connections) dolg 1, podaja samo končno točko poteze (vzeto iz arraya scrnPts);
-                ctx.lineTo(screenPoints[connctn[0]].x, screenPoints[connctn[0]].y);
-            } else {    // če je array connctn (ki je del arraya connections) dolg 2, podaja novo izhodišče in nato končno točko poteze;
-                ctx.moveTo(screenPoints[connctn[0]].x, screenPoints[connctn[0]].y);
-                ctx.lineTo(screenPoints[connctn[1]].x, screenPoints[connctn[1]].y);
-            }
-        });
+        if (this.segments[whichSegmnt].rArc == undefined) {
+            this.segments[whichSegmnt].conns.forEach(connctn => {
+                if (connctn.length == 1) {  // če je array connctn (ki je del arraya connections) dolg 1, podaja samo končno točko poteze (vzeto iz arraya scrnPts);
+                    ctx.lineTo(screenPoints[connctn[0]].x, screenPoints[connctn[0]].y);
+                } else {    // če je array connctn (ki je del arraya connections) dolg 2, podaja novo izhodišče in nato končno točko poteze;
+                    ctx.moveTo(screenPoints[connctn[0]].x, screenPoints[connctn[0]].y);
+                    ctx.lineTo(screenPoints[connctn[1]].x, screenPoints[connctn[1]].y);
+                }
+            });
+        } else {
+            const rX = Math.abs(screenPoints[1].x - screenPoints[0].x);
+            const rY = Math.abs(screenPoints[2].y - screenPoints[0].y);
+            ctx.ellipse(screenPoints[0].x, screenPoints[0].y, rX, rY, 0, 0, 6.3);
+            ctx.fillStyle = this.segments[whichSegmnt].fillInfo.color;
+            ctx.fill();
+        }
         if (this.segments[whichSegmnt].fillInfo.doFill) {
             ctx.fillStyle = this.segments[whichSegmnt].fillInfo.color;
             ctx.fill();
@@ -409,6 +419,69 @@ class Pickup extends Thingy {
 
         new SpacePoint(passedSpacePoint.x + 2, passedSpacePoint.y + 2.4, passedSpacePoint.z + 0.2), // 34   ; desna zadnja spodnja točka kesona (na sredini karoserije, na dnu avta; gledano od spredaj)
         new SpacePoint(passedSpacePoint.x + 0.0, passedSpacePoint.y + 2.4, passedSpacePoint.z + 0.2),    // 35 ; leva zadnja spodnja kesona (na dnu avta)
+
+        // GUME
+        new SpacePoint(passedSpacePoint.x, passedSpacePoint.y + 0.75, passedSpacePoint.z),    // 36; (levo) kao desna sprednja guma ; središče, postavimo ga na spodnji rob karoserije;
+        new SpacePoint(passedSpacePoint.x, passedSpacePoint.y + 0.75 - 0.4, passedSpacePoint.z),    // točka pred gumo; 0.4 ker toliko polmer
+        new SpacePoint(passedSpacePoint.x, passedSpacePoint.y + 0.75, passedSpacePoint.z + 0.4),    // točka na vrhu gume;
+
+        new SpacePoint(passedSpacePoint.x, passedSpacePoint.y + 3.9, passedSpacePoint.z),    // 39; (levo) desna zadnja guma ;
+        new SpacePoint(passedSpacePoint.x, passedSpacePoint.y + 3.9 - 0.4, passedSpacePoint.z),    // točka pred gumo; 0.42 ker toliko polmer
+        new SpacePoint(passedSpacePoint.x, passedSpacePoint.y + 3.9, passedSpacePoint.z + 0.4),    // točka na vrhu gume;
+
+        // pravokotniki za gume (podaš spodnjo levo točko pravokotnika)
+        new SpacePoint(passedSpacePoint.x, passedSpacePoint.y + 0.75, passedSpacePoint.z - 0.4),    // 42; (spredaj levo) PD guma; 0.4, kolikor polmer
+        new SpacePoint(passedSpacePoint.x + 0.25, passedSpacePoint.y + 0.75, passedSpacePoint.z - 0.4),    // 0.25, kolikor širina gum
+        new SpacePoint(passedSpacePoint.x + 0.25, passedSpacePoint.y + 0.75, passedSpacePoint.z + 0.4),    //
+        new SpacePoint(passedSpacePoint.x, passedSpacePoint.y + 0.75, passedSpacePoint.z + 0.4),    // 45;
+
+        // shadow gume (krog ki prikazuje okroglo ploskev gume na zadnji strani gume)
+        new SpacePoint(passedSpacePoint.x + 0.25, passedSpacePoint.y + 0.75, passedSpacePoint.z),    // 46; (levo) kao desna sprednja guma ; središče, postavimo ga na spodnji rob karoserije;
+        new SpacePoint(passedSpacePoint.x + 0.25, passedSpacePoint.y + 0.75 - 0.4, passedSpacePoint.z),    // točka pred gumo; 0.4 ker toliko polmer
+        new SpacePoint(passedSpacePoint.x + 0.25, passedSpacePoint.y + 0.75, passedSpacePoint.z + 0.4),    // točka na vrhu gume;
+
+        // shadow (levo) PD guma
+        new SpacePoint(passedSpacePoint.x + 0.25, passedSpacePoint.y + 3.9, passedSpacePoint.z),    // 49; (levo) desna zadnja guma ;
+        new SpacePoint(passedSpacePoint.x + 0.25, passedSpacePoint.y + 3.9 - 0.4, passedSpacePoint.z),
+        new SpacePoint(passedSpacePoint.x + 0.25, passedSpacePoint.y + 3.9, passedSpacePoint.z + 0.4),
+
+        // pravokotnik ZD gume (na levi)
+        new SpacePoint(passedSpacePoint.x, passedSpacePoint.y + 3.9, passedSpacePoint.z - 0.4),  // 52; (zadaj levo) ZD guma
+        new SpacePoint(passedSpacePoint.x + 0.25, passedSpacePoint.y + 3.9, passedSpacePoint.z - 0.4), 
+        new SpacePoint(passedSpacePoint.x + 0.25, passedSpacePoint.y + 3.9, passedSpacePoint.z + 0.4), 
+        new SpacePoint(passedSpacePoint.x, passedSpacePoint.y + 3.9, passedSpacePoint.z + 0.4), // 55
+
+        // (desno) SL guma
+        new SpacePoint(passedSpacePoint.x + 2, passedSpacePoint.y + 0.75, passedSpacePoint.z),    // 56; (levo) kao desna sprednja guma ; središče, postavimo ga na spodnji rob karoserije;
+        new SpacePoint(passedSpacePoint.x + 2, passedSpacePoint.y + 0.75 - 0.4, passedSpacePoint.z),    // točka pred gumo; 0.4 ker toliko polmer
+        new SpacePoint(passedSpacePoint.x + 2, passedSpacePoint.y + 0.75, passedSpacePoint.z + 0.4),    // točka na vrhu gume;
+
+        // (desno) SL guma - shadow
+        new SpacePoint(passedSpacePoint.x + 2 - 0.25, passedSpacePoint.y + 0.75, passedSpacePoint.z),    // 59; (levo) kao desna sprednja guma ; središče, postavimo ga na spodnji rob karoserije;
+        new SpacePoint(passedSpacePoint.x + 1.75, passedSpacePoint.y + 0.75 - 0.4, passedSpacePoint.z),    // točka pred gumo; 0.4 ker toliko polmer
+        new SpacePoint(passedSpacePoint.x + 1.75, passedSpacePoint.y + 0.75, passedSpacePoint.z + 0.4),    // točka na vrhu gume;
+
+        // pravokotnik SL gume (na desni)
+        new SpacePoint(passedSpacePoint.x + 2 - 0.25, passedSpacePoint.y + 0.75, passedSpacePoint.z - 0.4),  // 62 (spredaj levo, na desni);
+        new SpacePoint(passedSpacePoint.x + 2, passedSpacePoint.y + 0.75, passedSpacePoint.z - 0.4),
+        new SpacePoint(passedSpacePoint.x + 2, passedSpacePoint.y + 0.75, passedSpacePoint.z + 0.4),
+        new SpacePoint(passedSpacePoint.x + 1.75, passedSpacePoint.y + 0.75, passedSpacePoint.z + 0.4), // 65
+
+        // (desno) ZL guma
+        new SpacePoint(passedSpacePoint.x + 2, passedSpacePoint.y + 3.9, passedSpacePoint.z),    // 66; (desno) kao leva zadnja guma; središče, postavimo ga na spodnji rob karoserije;
+        new SpacePoint(passedSpacePoint.x + 2, passedSpacePoint.y + 3.9 - 0.4, passedSpacePoint.z),    // točka pred gumo; 0.4 ker toliko polmer
+        new SpacePoint(passedSpacePoint.x + 2, passedSpacePoint.y + 3.9, passedSpacePoint.z + 0.4),    // točka na vrhu gume;
+
+        // (desno) ZL guma - shadow
+        new SpacePoint(passedSpacePoint.x + 2 - 0.25, passedSpacePoint.y + 3.9, passedSpacePoint.z),    // 69;
+        new SpacePoint(passedSpacePoint.x + 1.75, passedSpacePoint.y + 3.9 - 0.4, passedSpacePoint.z),
+        new SpacePoint(passedSpacePoint.x + 1.75, passedSpacePoint.y + 3.9, passedSpacePoint.z + 0.4),
+
+        // pravokotni ZL guma (desno)
+        new SpacePoint(passedSpacePoint.x + 2 - 0.25, passedSpacePoint.y + 3.9, passedSpacePoint.z - 0.4),  // 72 - (zadaj levo) ZD guma
+        new SpacePoint(passedSpacePoint.x + 2, passedSpacePoint.y + 3.9, passedSpacePoint.z - 0.4),
+        new SpacePoint(passedSpacePoint.x + 2, passedSpacePoint.y + 3.9, passedSpacePoint.z + 0.4),
+        new SpacePoint(passedSpacePoint.x + 2 - 0.25, passedSpacePoint.y + 3.9, passedSpacePoint.z + 0.4),  // 75
         ];
 
         this.planrCentr = Thingy.calcPlanarCtr(this.spacePoints);
@@ -446,7 +519,7 @@ class Pickup extends Thingy {
             new FillInfo(BASE, true, 'black'), undefined,[ 15, 14, 34, 35]
         ));
 
-        //ploskev pod zadnjim steklom
+        // ploskev pod zadnjim steklom
         this.segments.push(new Segment(this.spacePoints,
             new FillInfo(BASE, true, 'black'), undefined, [15, 14, 33, 32])
         );
@@ -533,6 +606,77 @@ class Pickup extends Thingy {
         this.segments.push(new Segment(this.spacePoints,
             new FillInfo(PROXIMAL, true, this.bodyColor), undefined, [15, 14, 33, 32], new SpacePoint(0, -0.03, 0))
         );
+
+        // sprednja D guma
+        this.segments.push(new Segment(this.spacePoints,
+            new FillInfo(PROXIMAL, true, 'black'),
+            [[0, 1], [0, 2]], // povezave; od središča k točki na obodu po screen dimenziji x,  od središča k točki na vrhu oboda (polmer po screen dimenziji y);
+            [36, 37, 38], // središče, dve točki, ki bosta opredelili x in y polnmer elipse
+            new SpacePoint(0.05, 0, 0),
+            0.4 // če je tu vrednost, je to polmer kroga
+        ))
+
+        // sprednja D guma kot BASE, ker mora bit viden krog pod vozilom, tudi ko gumo gledaš z druge strani vozila pod vozilom;
+        this.segments.push(new Segment(this.spacePoints,
+            new FillInfo(BASE, true, 'black'), [[0, 1], [0, 2]], [36, 37, 38], undefined, 0.4))
+
+        // pravokotnik (naris gume, če jo gledano od spredaj) SD gume (na L strani)
+        this.segments.push(new Segment(this.spacePoints,
+            new FillInfo(BASE, true, 'black'), undefined, [42, 43, 44, 45]));
+
+        // shadow guma (levo, SD guma) - shadow so BASE
+        this.segments.push(new Segment(this.spacePoints,
+            new FillInfo(BASE, true, 'black'), [[0, 1], [0, 2]], [46, 47, 48], undefined, 0.4 ));
+
+        // zadnja D guma (na L strani)
+        this.segments.push(new Segment(this.spacePoints,
+            new FillInfo(PROXIMAL, true, 'black'), [[0, 1], [0, 2]], [39, 40, 41], new SpacePoint(0.05, 0, 0), 0.4 // če je tu vrednost, je to polmer kroga
+        ))
+
+        // zadnja D guma (na L strani) - kot base
+        this.segments.push(new Segment(this.spacePoints,
+            new FillInfo(BASE, true, 'black'), [[0, 1], [0, 2]], [39, 40, 41], undefined, 0.4 ));
+        
+        // shadow guma (levo, ZD guma) - shadow so BASE
+        this.segments.push(new Segment(this.spacePoints,
+            new FillInfo(BASE, true, 'black'), [[0, 1], [0, 2]], [49, 50, 51], undefined, 0.4 ));
+
+        // pravokotnik (naris gume, če jo gledano od spredaj) ZD gume (na L strani)
+        this.segments.push(new Segment(this.spacePoints,
+            new FillInfo(BASE, true, 'black'), undefined, [52, 53, 54, 55]));
+
+        // sprednja L guma (desno)
+        this.segments.push(new Segment(this.spacePoints,
+            new FillInfo(PROXIMAL, true, 'black'), [[0, 1], [0, 2]], [56, 57, 58], new SpacePoint(-0.05, 0, 0), 0.4 ))
+        
+        // sprednja L guma (desno) kot base
+        this.segments.push(new Segment(this.spacePoints,
+            new FillInfo(BASE, true, 'black'), [[0, 1], [0, 2]], [56, 57, 58], undefined, 0.4 ))
+        
+        // sprednja L guma (desno) - shadow
+        this.segments.push(new Segment(this.spacePoints,
+            new FillInfo(BASE, true, 'black'), [[0, 1], [0, 2]], [59, 60, 61], undefined, 0.4 ))
+
+        // pravokotnik (naris gume, gledano od spredaj) SL gume (na D strani)
+        this.segments.push(new Segment(this.spacePoints,
+            new FillInfo(BASE, true, 'black'), undefined, [62, 63, 64, 65]));
+
+        // zadnja L guma (desno)
+        this.segments.push(new Segment(this.spacePoints,
+            new FillInfo(PROXIMAL, true, 'black'), [[0, 1], [0, 2]], [66, 67, 68], new SpacePoint(-0.05, 0, 0), 0.4 ))
+
+        // zadnja L guma (desno) kot BASE
+        this.segments.push(new Segment(this.spacePoints,
+            new FillInfo(BASE, true, 'black'), [[0, 1], [0, 2]], [66, 67, 68], undefined, 0.4 ))
+
+        // zadnja L guma (desno) - shadow
+        this.segments.push(new Segment(this.spacePoints,
+            new FillInfo(BASE, true, 'black'), [[0, 1], [0, 2]], [69, 70, 71], undefined, 0.4 ))
+        
+        // pravokotnik (naris gume, gledano od spredaj) ZL gume (na D strani)
+        this.segments.push(new Segment(this.spacePoints,
+            new FillInfo(BASE, true, 'black'), undefined, [72, 73, 74, 75]));
+
 
         // ustvarimo še povezave napisane na tak način, da se lahko lažje uporabi pri interpolaciji
         Thingy.createConns4CalcScrnPts(this.segments);

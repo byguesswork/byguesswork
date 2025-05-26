@@ -1,6 +1,6 @@
 'use strict';
 
-
+// tako kot y ne sme bit negativen (sicer ne izrisujemo), bi bilo verejtno treba isto tudi za x/y in z/y, vidiš namreč samo določen kot;
 // dodat kšne opise v index.html (recimo za fuel: I like its simplicity, maybe you will too)
 
 const canvas = document.getElementById('canvas');
@@ -66,15 +66,15 @@ infoSettgsOK.addEventListener('click', infoCloseClicked);
 // šele po morebitni spremembi zaradi mobile umestimo zgornji okvir;
 document.getElementById('mode').style.bottom = `${30 + controlsCanvas.getBoundingClientRect().height + 25}px`;   // 30 ker ima sklop pod njim bottom 30; 25 je arbitrarna meja med skopoma 
 if (document.readyState == 'loading') { //.. in preberemo koordinate controlsRecta;
-    document.addEventListener("DOMContentLoaded", readcontrlsCnvsRect);  // domcontent loaded je lahko "complete" ali pa "interactive";
+    document.addEventListener("DOMContentLoaded", readCntrlsCnvsRect);  // domcontent loaded je lahko "complete" ali pa "interactive";
 } else {
-    readcontrlsCnvsRect();
+    readCntrlsCnvsRect();
 }
 
 
 //  - - - -   FUNKCIJE   - - - -
 
-function readcontrlsCnvsRect() {
+function readCntrlsCnvsRect() {
     contrlsCnvsRect.left = controlsCanvas.getBoundingClientRect().left;
     contrlsCnvsRect.top = controlsCanvas.getBoundingClientRect().top;
     contrlsCnvsRect.right = controlsCanvas.getBoundingClientRect().right;
@@ -82,7 +82,7 @@ function readcontrlsCnvsRect() {
     console.log('rect:', contrlsCnvsRect.left, contrlsCnvsRect.top)
 }
 
-function chkOnOrientationChgd(){
+function chkOnOrientationChgd(){    // trenutno se ne uproablja, ker ne deluje dobro;
     // console.log('widthWas:', clientWidthWas, 'width is:', document.documentElement.clientWidth, 'interval:', orientationChkIsInMotion);
     if (document.documentElement.clientWidth != clientWidthWas) {
         clearInterval(orientationChkIsInMotion);
@@ -123,8 +123,6 @@ function calcVertRadsFrmCentr(){    // kliče se vsakokrat, ko zamenjaš narrowA
     factorX = scrnMidPoint.x / Math.sin(hrzRadsFrmCentr);
     factorY = drawableYHeightHalved / Math.sin(vertRadsFrmCentr);
 
-    // if (vertRadsFrmCentr > hrzRadsFrmCentr) vertRadsFrmCentr = hrzRadsFrmCentr; // čebi hotel dat to, bi moral omejit tudi višino, do katere sega canvas..
-    // canvas bi v takem primeru moral naredit kvadrat, ker zdaj poskuša isti majhen kot raztegnit do vrha pokončnega telefona in tako sliko raztegne navzgor;
 }  
 
 function clearCanvas() {
@@ -169,7 +167,7 @@ function calcScreenPts(spacePoints, connctnsRange) {   // prejme relativne koord
         }
     }
 
-    function frmSpcPtToScrnPt(x, y, z) {
+    function spcPt2ScrnPt(x, y, z) {
         const scrnPt = new ScreenPoint();
         scrnPt.x = scrnMidPoint.x +  Math.sin(Math.atan2(x, (y**2 + z**2 )**(1/2))) * factorX;
         // /*1*/ scrnPt.y = scrnMidPoint.y +  Math.sin(Math.atan2(z, (y**2  + x**2 )**(1/2))) * factorY;
@@ -179,6 +177,7 @@ function calcScreenPts(spacePoints, connctnsRange) {   // prejme relativne koord
         return scrnPt;
     }
 
+    // začetek dogajanja;
     const scrnPts = new Array();
     let startRoll = 0; // spremenljivka v katero shraniš, kjer si že iskal; predvidoma se poznejše točke najdejo v poznejših povezavah, zato;
     spacePoints.forEach((spcPt, i) => {
@@ -187,7 +186,7 @@ function calcScreenPts(spacePoints, connctnsRange) {   // prejme relativne koord
         // tudi če ozkokotni pogled prikažeš cel (s faktorjem 0,2) ni čisto nič drugačen od fish eye; spreminjanje kota torej ne reši ukrivljenosti, bo treba druga metoda;
         
         if (spcPt.y > 0) {   // neproblematična varianta, tj. če imaš stvar pred sabo;
-            scrnPts.push(frmSpcPtToScrnPt(spcPt.x, spcPt.y, spcPt.z));
+            scrnPts.push(spcPt2ScrnPt(spcPt.x, spcPt.y, spcPt.z));
         } else {    // če prideš v else, je bil podan tudi connctnsRange;
             // najst, kje v connctnsRange je taka točka (y < 0 in ima povezavo, na osnovi katere ga je mogoče interpolirati);
             let found = false;
@@ -195,7 +194,7 @@ function calcScreenPts(spacePoints, connctnsRange) {   // prejme relativne koord
                 const retrndValue = chk4Intrpolate(i, j); // če je mogoče interpolirati negativni y, vrne novi x in y koordinati spacePointa (space, ne screen) v arrayu;
                 if (typeof retrndValue == 'object') {
                     found = true;
-                    scrnPts.push(frmSpcPtToScrnPt(retrndValue[0], retrndValue[1], spcPt.z));    // frmSpcPtT... vrne array, ki ima na prvam mestu x, nato y;
+                    scrnPts.push(spcPt2ScrnPt(retrndValue[0], retrndValue[1], spcPt.z));    // frmSpcPtT... vrne array, ki ima na prvam mestu x, nato y;
                     break;
                 }
             }
@@ -203,7 +202,7 @@ function calcScreenPts(spacePoints, connctnsRange) {   // prejme relativne koord
                 const retrndValue = chk4Intrpolate(i, j);
                 if (typeof retrndValue == 'object') {
                     found = true;
-                    scrnPts.push(frmSpcPtToScrnPt(retrndValue[0], retrndValue[1], spcPt.z));
+                    scrnPts.push(spcPt2ScrnPt(retrndValue[0], retrndValue[1], spcPt.z));
                     break;
                 }
             }
@@ -244,7 +243,7 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
         /*3*/ item2Draw.push(new SpacePoint(x, y, spcPt.z - viewPoint.z)); // z-ju ni treba preračunavat kota
         // /*4*/ item2Draw.push(new SpacePoint(x, y, -spcPt.z - viewPoint.z));
 
-        // rezultati testov preračunov zaslonskih koordinat - Prva cifra pomeni kalkulacijo y v frmSpcPtToScrnPt oz. v calcScreenPts;:
+        // rezultati testov preračunov zaslonskih koordinat - Prva cifra pomeni kalkulacijo y v spcPt2ScrnPt oz. v calcScreenPts;:
         // 1-1 prenizko; 1-2 OK   !!; 1-3 ni ok; 1-4 previsoko;
         // 2-1 previsoko; 2-2 na spodnji strani; 2-3 OK!!; 2-4 prenizko;
         // 3-1 previsoko; 3-2 spodaj; 3-3 OK !!; 3-4 prenizko;
@@ -295,11 +294,7 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
             
             if (spunItem.segments[k].fillInfo.typ == undefined || spunItem.segments[k].fillInfo.typ != PROXIMAL) {
                 oneLoop(k);
-            } else {    // zabeležimo segmente za naslednje pasaže ;
-                if (spunItem.segments[k].fillInfo.typ == PROXIMAL) {
-                    proximals.push(k);
-                }
-            }
+            } else { proximals.push(k); }   // zabeležimo segmente za naslednjo pasažo ;
         } 
         
         if (proximals.length > 0) {
@@ -316,7 +311,7 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
 
 //  - - - - - - - - - - - - - - - - -  PRIPRAVA  - - - - - - - - - - - - - - - - - - - - -
 
-// - - - - - -  USTVARJANJE STVARI, KI BODO NA EKRANU - - - - - -
+// - - - - - -  USTVARJANJE LANDSCAPE STVARI, KI BODO NA EKRANU - - - - - -
 const cubes = [];
 // navpične kocke;
 for (let i = 0; i <= 16; i += 4) {
@@ -328,9 +323,8 @@ for (let i = 10; i <= 46; i += 4) {
 };
 
 // kesonar;
-const pickupTruckLndscp = new Pickup(new SpacePoint(5, 5, 0.2), 'grey');
-const othrPickupTruckLndscp = new Pickup(new SpacePoint(-9, 24, 0.2), '#0f3477', 4.71);
-const pickupTruckRotate = new Pickup(new SpacePoint(1, 5, 0));
+const pickupTruckLndscp = new Pickup(new SpacePoint(5, 5, 0.4), '#a0a0a0');  // silver: #c0c0c0 ; grey: #808080
+const othrPickupTruckLndscp = new Pickup(new SpacePoint(-9, 24, 0.4), Math.random() < 0.5 ? '#850e1e' : '#0f3477', 4.71); // modra: #0f3477 bordo : #850e1e
 
 // rob ceste;
 const lines = [];
@@ -379,9 +373,11 @@ const landObjects = [...cubes, pickupTruckLndscp, othrPickupTruckLndscp];
 // const landscape = [];
 // const landscape = [...lines, ...dividingLines];
 // const landObjects = [];
-// const landObjects = [othrPickupTruckLndscp];
+// const landObjects = [new Pickup(new SpacePoint(-9, 24, 0.2), '#0f3477', 4.71)];
 // const landObjects = [new Cube(new SpacePoint(-4, 10, 1.7), 4)]
 
+// USTVARJANJE IN PRIPRAVA ŠE ZA MODUL OBJECT_ROTATE
+const pickupTruckRotate = new Pickup(new SpacePoint(1, 5, 0), 'red');
 const objRotateItems = [pickupTruckRotate];
 
 
@@ -407,8 +403,6 @@ let mouseOrTchPosOnCtrls = {
     y : 0,
     btn : 'none'
 }
-
-
 
 // - - - -  CONTROLS  - - - - - -
 
