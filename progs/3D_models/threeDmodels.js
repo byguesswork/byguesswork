@@ -279,21 +279,42 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
             }  // else do nuthn, ker so vse koordinate negativne in ne rišemo nič
         }
         
+        function isCloser(sgmtFillInfo){    // ime: is Proximal SpcPt Closer Than Distal SpcPt;
+            // izračunamo dolžino daljic do središča ploskve in do referenčne distalne točke (oboje prostorsko) in če je distalna daljša od središčne, segment gledamo od zunaj;
+            const rSrfcSptlCtr = Thingy.calcSpatialRFromSpcPt(sgmtFillInfo.spatialCtr, viewPoint);
+            const rSrfcDistlSptlCtr = Thingy.calcSpatialRFromSpcPt(sgmtFillInfo.distlSptlCtr, viewPoint);
+            if (rSrfcSptlCtr < rSrfcDistlSptlCtr) { return true; }
+                else return false;
+        }
+
         // začetek dogajanja;
-        const proximals = []; // sem shranimo indexe ploskev tipa PROXIMAL, ki bodo izrisane pozneje;
-        // v prvi pasaži narišemo tiste segmente, ki se narišejo vedno;
-        for (let k = 0; k < item.segments.length; k++) {
-            
-            if (item.segments[k].fillInfo.typ == undefined || item.segments[k].fillInfo.typ != PROXIMAL) {
-                oneLoop(k);
-            } else { proximals.push(k); }   // zabeležimo segmente za naslednjo pasažo ;
-        } 
+        const remaining = [], closerProxmls = []; // sem shranimo indexe ploskev tipa PROXIMAL, ki bodo izrisane, toda pozneje;
         
-        if (proximals.length > 0) {
-            for (let k = 0; k < proximals.length; k++) {
-                const rSrfcSptlCtr = Thingy.calcSpatialRFromSpcPt(item.segments[proximals[k]].fillInfo.spatialCtr, viewPoint) // poda dolžino daljice od gledalca do srewdišča celega predmeta;
-                const rSrfcDistlSptlCtr = Thingy.calcSpatialRFromSpcPt(item.segments[proximals[k]].fillInfo.distlSptlCtr, viewPoint);
-                if (rSrfcSptlCtr < rSrfcDistlSptlCtr) { oneLoop(proximals[k]); } // oneLoop prejme index segmenta, zato proximals[k];
+        // v prvi pasaži narišemo tiste segmente, ki se narišejo vedno (BASE/undefined, lahko barvne ploskev ali samo orisi);
+        for (let k = 0; k < item.segments.length; k++) {
+            if (item.segments[k].fillInfo.typ != PROXIMAL) {
+                if (item.segments[k].fillInfo.typ != BASPROX) {
+                    oneLoop(k); // če ni ne PROXIMAL ne BASPROX, gre v izris (je torej ali (base/undefined) ploskev ali pa element orisa);
+                } else {    // če je BASPROX, se je treba odločit, al ga narisat zdaj (se obnaša kot BASE), al ga zadržat za poznejše risanje (kot PROXIMAL);
+                    if (isCloser(item.segments[k].fillInfo)) {
+                        closerProxmls.push(k);   // ta BASPROX se obnaša kot potrjen PROXIMAL, zabeležimo; PAZI, gre direkt v closerProxmls, ne v remaining;
+                    } else oneLoop(k); // ta BASPROX se obnaša kot BASE plosekv in gre zdaj v izris;
+                }
+            } else { remaining.push(k); }   // če je segment PROXIMAL, ga zabeležimo za naslednjo pasažo;
+        } 
+
+        if (remaining.length > 0) { // v remaining so samo PROXIMAL, ki pa še niso bili preverjeni;
+            for (let k = 0; k < remaining.length; k++) {
+                if (isCloser(item.segments[remaining[k]].fillInfo)) {
+                    closerProxmls.push(remaining[k]);   // če na PROXIMAL gledamo z zunanje strani predmeta (če je njegovo središče bližje od distalne točke), ga shranimo za izris;
+                    // shranit pa moramo remaining[k] in ne k, ker oneLoop prejme index segmenta (ne index izvedenega arraya remaining);
+                } //  else do nuth, ker ta PROXIMAL ne sme biti narisan, ker nanj ne gledamo od zunaj
+            }
+        }
+        
+        if (closerProxmls.length > 0) {
+            for (let k = 0; k < closerProxmls.length; k++) {
+                oneLoop(closerProxmls[k]);
             }
         }
     })
@@ -349,9 +370,9 @@ for (let i = -200; i <= 302; i += 10) {
 function getLandscItems() {
     // sortiranje landObjectsov;
     landObjects.forEach(el => { // najprej vsakemu določima razdaljo do viewerja;
-        el.planrCentr.r = Thingy.calcPlanarRFromSpcPt(el.planrCentr, activeViewer.posIn3D)
+        el.spatlCentr.r = Thingy.calcSpatialRFromSpcPt(el.spatlCentr, activeViewer.posIn3D)
     })
-    landObjects.sort((a, b) => b.planrCentr.r - a.planrCentr.r)   // to je vsa fora da objekte posortiraš od najbolj oddaljenega proti najbližjemu
+    landObjects.sort((a, b) => b.spatlCentr.r - a.spatlCentr.r)   // to je vsa fora da objekte posortiraš od najbolj oddaljenega proti najbližjemu
 
     // združit
     activeItems = landscape.concat(landObjects);
@@ -373,7 +394,7 @@ const landObjects = [...cubes, pickupTruckLndscp, othrPickupTruckLndscp];
 // const landscape = [new OrtgnlCircle({x:-2, y:5, z:0}, 1, [true, false, false], new FillInfo(true, 'yellow'))];
 // const landObjects = [];
 // const landObjects = [othrPickupTruckLndscp];
-// const landObjects = [...cubes]
+// const landObjects = [new Cube(new SpacePoint(6, 20, 0), 4, [GLASS, GLASS, 'grey'])]
 
 // USTVARJANJE IN PRIPRAVA ŠE ZA MODUL OBJECT_ROTATE
 const pickupTruckRotate = new Pickup(new SpacePoint(1, 5, 0), 'red');

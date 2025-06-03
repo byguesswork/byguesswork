@@ -18,13 +18,13 @@ class FillInfo{
         doFill, // false/true
         type, // glej konstante, BASE ali PROXIMAL
         fillColor,
-        spatlDiffFrmCtr) {  // SpacePoint, ki pove, koliko je od prostorsekga centra oddaljena točka, s katero bomo preverjali, al prej vidiš prostorski center ploskve al tisto točko; za PROXIMAL-e;
-        
+        spatlDiffFrmCtr) // SpacePoint, ki pove, koliko je od prostorskega centra oddaljena točka, s katero bomo preverjali, al prej vidiš prostorski center ploskve al tisto točko; za PROXIMAL-e;
+        {
             if (doFill == undefined || doFill == false) {
             this.doFill = false;    // doFill je najpomembnejši; zadostuje, da je doFill false, pa so ostali nerelevantni;
         } else {
             this.doFill = true;   // true, če si prišel do sem; če false, ostali itak ostanejo undefined, glej zgoraj;
-            if (type != BASE && type != PROXIMAL && fillColor == undefined) {  // predpostavljamo, da podaš kar barvo na drugem mestu;
+            if (type != undefined && fillColor == undefined) {  // predpostavljamo, da podaš kar barvo na drugem mestu;
                 this.fillCol = type;
             } else {
                 this.typ = type // glej konstante;
@@ -71,7 +71,8 @@ class Segment{
             if (fillInfo.segments[0].rArc != undefined) this.rArc = fillInfo.segments[0].rArc;
         }
 
-        if (this.fillInfo.typ == PROXIMAL && this.fillInfo.spatialCtr == undefined) {   // pogoj z spatialCtr == undefined je zato, da ne greš dvakrat skozi, če namesto fillInfo podaš objekt;
+        // izračunamo spatialcenter in proximalcenter za potrebne segmente (PROXIMAL, BASPROX)
+        if ((this.fillInfo.typ == PROXIMAL || this.fillInfo.typ == BASPROX) && this.fillInfo.spatialCtr == undefined) {   // pogoj z spatialCtr == undefined je zato, da ne greš dvakrat skozi, če namesto fillInfo podaš objekt;
             this.fillInfo.spatialCtr = Thingy.calcSpatialCtr(this.spcPts);
             if (this.fillInfo.distlSptlCtr == undefined) { this.fillInfo.distlSptlCtr = new SpacePoint(0, 0, 0); }  // tu je začasno shranjena samo relativno razlika distalne točke;
             this.fillInfo.distlSptlCtr.x += this.fillInfo.spatialCtr.x;
@@ -83,10 +84,14 @@ class Segment{
     }
 }
 
-//konstante
+// KONSTANTE;
 // tipi za FillInfo.typ
-const BASE = 'b';   // te ploskve se izrišejo prve in vedno; NAJPREJ DAJ ČRNE BASE, potem oris!!
-const PROXIMAL = 'p'; // se izrišejo, če so pred določeno prostorsko točko;
+const BASE = 'b';   // te ploskve se izrišejo prve in vedno; NAJPREJ DAJ ČRNE BASE/undefined, potem oris(e)!! Rabijo se za risanje neke osnove in notranje površine neke ploskve;
+const PROXIMAL = 'p'; // se izrišejo, če so pred določeno prostorsko točko; rabijo se za barvanje zunanjih površin, če so drugačne barve kot notranja stran iste površine;
+const BASPROX = 'bp';    // BASE-PROXIMAL, če ni izpolnjen pogoj bližine, se izrišejo kot base, sicer se izrišejo kot proximal;
+// BASPROX (BASE-PROXIMAL) se rabi za barvanje površin, ki so enake barve gledano od zunaj in od znoter, je pa pomembno, kdaj v zaporedju barvanja so izrisane (ali grejo čez oris ali ne);
+// splošna logika: (BASE/undefined > oris)(tako zaporedje po potrebi večkrat) > PROXIMALs; BASPROX se v pravem trenutku uvrstijo ali v BASE ali v PROXIMAL;
+
 // barva;
 const GLASS = '#caebf555'; // barva stekla;
 
@@ -99,14 +104,13 @@ class Thingy {
     //                                        .. jih pa ne filaš, tam bi potem ne povezalo; ne želim pa po defaultu rabit closePath, ker ta v nekaterih primerih še enkrat potegne še eno črto;
 
     constructor() {
-        this.planrCentr = undefined // središče telesa na vodoravni ravnini, gledano s ptičje perspektive
 
         // KO INSTANCIIRAŠ OBJEKT, KI EXTENDA THINGY, OBVEZNO ustvari/zaženi:
             // - spacePoints - // OPOMBA: podana točka običajno pomeni spodnjo levo točko spredaj, ostale izhajajo iz nje;
             // - segments
             // - createConnsAlt
-            // - planarcenter je obvezen, če gre za telo, ker telesa je treba izrisovat odvisno od razdalje od gledalca;
-            // drugo je optional (center, barva, rotate, ...)
+            // POGOJNO OBVEZNo: spatialCenter - če gre za telesa v prostoru (ne landscape), ker jih je treba izrisovat odvisno od razdalje od gledalca (upoštevajoč višino predmetov, zato prostorsko);
+            // drugo je optional (barva, rotate, ...)
     }
 
     draw(screenPoints, whichSegmnt) { //    ! !  PAZI ! !  riše s screenPts, ne spacePts ! !
@@ -168,7 +172,9 @@ class Thingy {
         }
         
         // začetek dogajanja;
-        if (this.planrCentr == undefined) { this.planrCentr = Thingy.calcPlanarCtr(this.objSpcPts); }
+        if (this.planrCentr == undefined) { 
+            this.planrCentr = Thingy.calcPlanarCtr(this.objSpcPts); // središče telesa na vodoravni ravnini, gledano s ptičje perspektive, ki se rabi za izračun rotacije;
+        }
 
         let diffAngle;
         if (typeof passedAngle == 'boolean') {
@@ -212,7 +218,7 @@ class Thingy {
         Thingy.ctx = passedCtx;
     }
 
-    static calcPlanarCtr(passdArr) {    // prejme array (verjetno) spacePointov, morda lahko tudi kaj drugea, kar ima not x in y;
+    static calcPlanarCtr(passdArr) { // prejme array (verjetno) spacePointov, karkoli, kar ima not x in y; rabi se le za rotate;
         let xMin = passdArr[0].x;
         let xMax = passdArr[0].x;
         let yMin = passdArr[0].y;
@@ -368,7 +374,7 @@ class Cube extends Thingy {
             new SpacePoint(passedSpacePoint.x, passedSpacePoint.y + this.side, passedSpacePoint.z + this.side),
         ]
 
-        this.planrCentr = Thingy.calcPlanarCtr(this.objSpcPts);
+        this.spatlCentr = Thingy.calcSpatialCtr(this.objSpcPts);
 
         this.segments = [];
 
@@ -377,24 +383,24 @@ class Cube extends Thingy {
             if (colors.length == 1 || colors.length == 3 || colors.length == 6) {
                 let color = colors[0];
                 // sprednja ploskev;
-                if (color != undefined) this.segments.push(new Segment(this.objSpcPts, new FillInfo(true, BASE, color), undefined, [0, 1, 2, 3]));
+                if (color != undefined) this.segments.push(new Segment(this.objSpcPts, new FillInfo(true, BASPROX, color, {x:0, y:0.03, z:0}), undefined, [0, 1, 2, 3]));
                 // zadnja;
                 if (colors.length == 6) color = colors[1];  // barvo spremenimo samo, če je 6 barv, sicer ni potrebe;
-                if (color != undefined) this.segments.push(new Segment(this.objSpcPts, new FillInfo(true, BASE, color), undefined, [4, 5, 6, 7]));
+                if (color != undefined) this.segments.push(new Segment(this.objSpcPts, new FillInfo(true, BASPROX, color, {x:0, y:-0.03, z:0}), undefined, [4, 5, 6, 7]));
                 // leva ploskev;
                 if (colors.length == 6) color = colors[2];
                 else if (colors.length == 3) color = colors[1]; // če pa je podana samo ena barva je itak že od začetka enako colors[0];
-                if (color != undefined) this.segments.push(new Segment(this.objSpcPts, new FillInfo(true, BASE, color), undefined, [4, 0, 3, 7]));
+                if (color != undefined) this.segments.push(new Segment(this.objSpcPts, new FillInfo(true, BASPROX, color, {x:0.03, y:0, z:0}), undefined, [4, 0, 3, 7]));
                 // desna ploskev;
                 if (colors.length == 6) color = colors[3];  // barvo spreminjamo samo, če je podanih 6 barv, sicer ni treba (L-D sta par istih barv);
-                if (color != undefined) this.segments.push(new Segment(this.objSpcPts, new FillInfo(true, BASE, color), undefined, [5, 1, 2, 6]));
+                if (color != undefined) this.segments.push(new Segment(this.objSpcPts, new FillInfo(true, BASPROX, color, {x:-0.03, y:0, z:0}), undefined, [5, 1, 2, 6]));
                 // zgornja ploskev;
                 if (colors.length == 6) color = colors[4];
                 else if (colors.length == 3) color = colors[2]; // če pa je podana samo ena barva je itak že od začetka enako colors[0];
-                if (color != undefined) this.segments.push(new Segment(this.objSpcPts, new FillInfo(true, BASE, color), undefined, [3, 2, 6, 7]));
+                if (color != undefined) this.segments.push(new Segment(this.objSpcPts, new FillInfo(true, BASPROX, color, {x:0, y:0, z:-0.03}), undefined, [3, 2, 6, 7]));
                 // spodnja ploskev;
                 if (colors.length == 6) color = colors[5];  // barvo spreminjamo samo, če je podanih 6 barv, sicer ni treba (zg.-sp. sta par istih barv);
-                if (color != undefined) this.segments.push(new Segment(this.objSpcPts, new FillInfo(true, BASE, color), undefined, [0, 1, 5, 4]));
+                if (color != undefined) this.segments.push(new Segment(this.objSpcPts, new FillInfo(true, BASPROX, color, {x:0, y:0, z:0.03}), undefined, [0, 1, 5, 4]));
             } else {
                 console.log('v arrayu colors je bilo podano napačno število barv za Cube. število mora biti 1, 3 ali 6. Predmet:');
                 console.log(this);
@@ -486,7 +492,7 @@ class Pickup extends Thingy {
         new SpacePoint(passedSpacePoint.x + 2 - 0.25, passedSpacePoint.y + 3.9, passedSpacePoint.z - 0.4),  // 41 - (desno) ZD guma - pravokotnik
         ];
 
-        this.planrCentr = Thingy.calcPlanarCtr(this.objSpcPts);
+        this.spatlCentr = Thingy.calcSpatialCtr(this.objSpcPts);
         this.bodyColor = bodyColr;
 
         this.segments = [];
