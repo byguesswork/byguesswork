@@ -135,8 +135,8 @@ class Thingy {
         if (this.segments[whichSegmnt].fillInfo.doFill) {
             ctx.fillStyle = this.segments[whichSegmnt].fillInfo.fillCol;
             ctx.fill();
-            if (this.segments[whichSegmnt].fillInfo.typ == PROXIMAL) {
-                ctx.strokeStyle = this.segments[whichSegmnt].fillInfo.fillCol;
+            if (this.segments[whichSegmnt].fillInfo.typ == PROXIMAL || this.segments[whichSegmnt].fillInfo.typ == BASPROX) {
+                ctx.strokeStyle = `${this.segments[whichSegmnt].fillInfo.fillCol}77`;   // da potegnemo skoraj prosojno črto v barvi ploskve;
                 ctx.lineWidth = 0.5;
                 ctx.stroke();
                 ctx.lineWidth = 1;  // povrnemo začetne nastavitve strokstyle;
@@ -187,7 +187,7 @@ class Thingy {
         this.objSpcPts.forEach(spcPt => { helper(spcPt, this); })
         this.segments.forEach(segment => {
             // 2.(opcijsko) rotirat treba referenčne točke za distalse;
-            if (segment.fillInfo.typ == PROXIMAL) {
+            if (segment.fillInfo.typ == PROXIMAL || segment.fillInfo.typ == BASPROX) {
                 helper(segment.fillInfo.spatialCtr, this);
                 helper(segment.fillInfo.distlSptlCtr, this);
             }
@@ -576,22 +576,22 @@ class Pickup extends Thingy {
 
         // prednje steklo;
         this.segments.push(new Segment( this.objSpcPts,
-            new FillInfo(true, BASE, GLASS), undefined, [ 8, 9, 10, 11]
+            new FillInfo(true, BASPROX, GLASS, {x:0, y:0.02, z:0.02}), undefined, [ 8, 9, 10, 11]
         ));
 
         // desno steklo;
         this.segments.push(new Segment( this.objSpcPts,
-            new FillInfo(true, BASE, GLASS), undefined, [ 26, 8, 11, 13]
+            new FillInfo(true, BASPROX, GLASS, {x:0.1, y:0, z:-0.01}), undefined, [ 26, 8, 11, 13]
         ));
 
         // levo steklo;
         this.segments.push(new Segment( this.objSpcPts,
-            new FillInfo(true, BASE, GLASS), undefined, [ 9, 10, 12, 27]
+            new FillInfo(true, BASPROX, GLASS, {x:-0.1, y:0, z:-0.01}), undefined, [ 9, 10, 12, 27]
         ));
 
         // zadnje steklo;
         this.segments.push(new Segment( this.objSpcPts,
-            new FillInfo(true, BASE, GLASS), undefined, [ 12, 13, 26, 27]
+            new FillInfo(true, BASPROX, GLASS, {x:0, y:-0.03, z:0}), undefined, [ 12, 13, 26, 27]
         ));
 
         // luči spredaj;
@@ -615,11 +615,7 @@ class Pickup extends Thingy {
         //  - - - -   GUME   - - - 
         // sprednja D guma - proximal
         this.segments.push(new Segment(this.objSpcPts,
-            new OrtgnlCircle(this.objSpcPts[30], 0.4, [false], new FillInfo(true, PROXIMAL, 'black', new SpacePoint(0.05, 0, 0)))  ));
-
-        // sprednja D guma kot BASE, ker mora bit viden krog pod vozilom, tudi ko gumo gledaš z druge strani vozila pod vozilom;
-        this.segments.push(new Segment(this.objSpcPts,
-            new OrtgnlCircle(this.objSpcPts[30], 0.4, [false], new FillInfo(true, BASE, 'black'))  ));
+            new OrtgnlCircle(this.objSpcPts[30], 0.4, [false], new FillInfo(true, BASPROX, 'black', new SpacePoint(0.05, 0, 0)))  ));
 
         // pravokotnik (naris gume, če jo gledano od spredaj) SD gume (na L strani)
         this.segments.push(new Segment(this.objSpcPts,
@@ -631,11 +627,7 @@ class Pickup extends Thingy {
 
         // zadnja D guma (na L strani)
         this.segments.push(new Segment(this.objSpcPts,
-            new OrtgnlCircle(this.objSpcPts[33], 0.4, [false], new FillInfo(true, PROXIMAL, 'black', new SpacePoint(0.05, 0, 0)))  ));
-
-        // zadnja D guma (na L strani) - kot base
-        this.segments.push(new Segment(this.objSpcPts,
-            new OrtgnlCircle(this.objSpcPts[33], 0.4, [false], new FillInfo(true, BASE, 'black'))  ));
+            new OrtgnlCircle(this.objSpcPts[33], 0.4, [false], new FillInfo(true, BASPROX, 'black', new SpacePoint(0.05, 0, 0)))  ));
 
         // shadow guma (levo, ZD guma) - shadow so BASE
         this.segments.push(new Segment(this.objSpcPts,
@@ -647,11 +639,7 @@ class Pickup extends Thingy {
 
         // sprednja L guma (desno) - proximal
         this.segments.push(new Segment(this.objSpcPts,
-            new OrtgnlCircle(this.objSpcPts[36], 0.4, [false], new FillInfo(true, PROXIMAL, 'black', new SpacePoint(-0.05, 0, 0)))  ));
-
-        // sprednja L guma (desno) kot base
-        this.segments.push(new Segment(this.objSpcPts,
-            new OrtgnlCircle(this.objSpcPts[36], 0.4, [false], new FillInfo(true, BASE, 'black'))  ));
+            new OrtgnlCircle(this.objSpcPts[36], 0.4, [false], new FillInfo(true, BASPROX, 'black', new SpacePoint(-0.05, 0, 0)))  ));
 
         // sprednja L guma (desno) - shadow
         this.segments.push(new Segment(this.objSpcPts,
@@ -663,11 +651,7 @@ class Pickup extends Thingy {
 
         // zadnja L guma (desno)
         this.segments.push(new Segment(this.objSpcPts,
-            new OrtgnlCircle(this.objSpcPts[39], 0.4, [false], new FillInfo(true, PROXIMAL, 'black', new SpacePoint(-0.05, 0, 0)))  ));
-
-        // zadnja L guma (desno) kot BASE
-        this.segments.push(new Segment(this.objSpcPts,
-            new OrtgnlCircle(this.objSpcPts[39], 0.4, [false], new FillInfo(true, BASE, 'black'))  ));
+            new OrtgnlCircle(this.objSpcPts[39], 0.4, [false], new FillInfo(true, BASPROX, 'black', new SpacePoint(-0.05, 0, 0)))  ));
 
         // zadnja L guma (desno) - shadow
         this.segments.push(new Segment(this.objSpcPts,

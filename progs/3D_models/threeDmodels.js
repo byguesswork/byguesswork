@@ -1,6 +1,9 @@
 'use strict';
 
+// prehod med normal in fish
+// na pokončen mobile ožji vidni kot
 // tako kot y ne sme bit negativen (sicer ne izrisujemo), bi bilo verejtno treba isto tudi za x/y in z/y, vidiš namreč samo določen kot;
+// zeleno stikalo na steklu stavbe, ki bi bilo vidno ob približanju
 // dodat kšne opise v index.html (recimo za fuel: I like its simplicity, maybe you will too)
 
 const canvas = document.getElementById('canvas');
@@ -36,7 +39,7 @@ drawControlsIcons();
 const FISHEYE = Math.PI / 2;
 const TELEANGLE = 0.3;
 let hrzRadsFrmCentr = TELEANGLE;
-let vertRadsFrmCentr, factorX, factorY;
+let vertRadsFrmCentr, factorX, factorY, linearFctrY;
 calcVertRadsFrmCentr();
 console.log(wdth, hght, scrnMidPoint, vertRadsFrmCentr);
 
@@ -122,6 +125,9 @@ function calcVertRadsFrmCentr(){    // kliče se vsakokrat, ko zamenjaš narrowA
     factorX = scrnMidPoint.x / Math.sin(hrzRadsFrmCentr);
     factorY = drawableYHeightHalved / Math.sin(vertRadsFrmCentr);
 
+    // za linearno metodo (ne-tangensno, ne-fish eye);
+    linearFctrY = scrnMidPoint.x/scrnMidPoint.y;
+
 }  
 
 function clearCanvas() {
@@ -167,11 +173,21 @@ function calcScreenPts(spacePoints, connctnsRange) {   // prejme relativne koord
 
     function spcPt2ScrnPt(x, y, z) {
         const scrnPt = new ScreenPoint();
-        scrnPt.x = scrnMidPoint.x +  Math.sin(Math.atan2(x, (y**2 + z**2 )**(1/2))) * factorX;
-        // /*1*/ scrnPt.y = scrnMidPoint.y +  Math.sin(Math.atan2(z, (y**2  + x**2 )**(1/2))) * factorY;
-        /*2*/ scrnPt.y = scrnMidPoint.y +  Math.sin(Math.atan2(-z, (y**2  + x**2 )**(1/2))) * factorY;
-        // /*3*/ scrnPt.y = scrnMidPoint.y -  Math.sin(Math.atan2(z, (y**2  + x**2 )**(1/2))) * factorY;
-        // /*4*/ scrnPt.y = scrnMidPoint.y -  Math.sin(Math.atan2(-z, (y**2  + x**2 )**(1/2))) * factorY;
+
+        if (hrzRadsFrmCentr == TELEANGLE) { // za linearno metodo (ne-tangensno, ne-fish eye);
+            scrnPt.x = scrnMidPoint.x +  ((3.24 * x) / y) * scrnMidPoint.x;    // 3,24*x, ker pri tangensni metodi je tako (točka, ki je 3,24 dlje, kot je vstran, je na robu vidnega polja
+            scrnPt.y = scrnMidPoint.y +  ((3.24 * -z * linearFctrY) / y) * scrnMidPoint.y;
+
+        } else {    // če fish eye;
+            // x (na zaslonu);
+            scrnPt.x = scrnMidPoint.x +  Math.sin(Math.atan2(x, (y**2 + z**2 )**(1/2))) * factorX;   // ta je bila izvirna ta delovna;
+            // y (na zaslonu);
+            // /*1*/ scrnPt.y = scrnMidPoint.y +  Math.sin(Math.atan2(z, (y**2  + x**2 )**(1/2))) * factorY;
+            /*2*/ scrnPt.y = scrnMidPoint.y +  Math.sin(Math.atan2(-z, (y**2  + x**2 )**(1/2))) * factorY;  // ta je ta prava
+            // /*3*/ scrnPt.y = scrnMidPoint.y -  Math.sin(Math.atan2(z, (y**2  + x**2 )**(1/2))) * factorY;
+            // /*4*/ scrnPt.y = scrnMidPoint.y -  Math.sin(Math.atan2(-z, (y**2  + x**2 )**(1/2))) * factorY;
+        }
+
         return scrnPt;
     }
 
@@ -298,11 +314,13 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
                 } else {    // če je BASPROX, se je treba odločit, al ga narisat zdaj (se obnaša kot BASE), al ga zadržat za poznejše risanje (kot PROXIMAL);
                     if (isCloser(item.segments[k].fillInfo)) {
                         closerProxmls.push(k);   // ta BASPROX se obnaša kot potrjen PROXIMAL, zabeležimo; PAZI, gre direkt v closerProxmls, ne v remaining;
-                    } else oneLoop(k); // ta BASPROX se obnaša kot BASE plosekv in gre zdaj v izris;
+                    } else {
+                        oneLoop(k); // ta BASPROX se obnaša kot BASE plosekv in gre zdaj v izris;
+                    }
                 }
             } else { remaining.push(k); }   // če je segment PROXIMAL, ga zabeležimo za naslednjo pasažo;
         } 
-
+        
         if (remaining.length > 0) { // v remaining so samo PROXIMAL, ki pa še niso bili preverjeni;
             for (let k = 0; k < remaining.length; k++) {
                 if (isCloser(item.segments[remaining[k]].fillInfo)) {
@@ -313,6 +331,7 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
         }
         
         if (closerProxmls.length > 0) {
+            closerProxmls.sort((a, b) => a-b);  // sortiramo po vrsti! da so enak vrstni red, kot so navedeni v objektu;
             for (let k = 0; k < closerProxmls.length; k++) {
                 oneLoop(closerProxmls[k]);
             }
@@ -393,7 +412,7 @@ const landObjects = [...cubes, pickupTruckLndscp, othrPickupTruckLndscp];
 // const landscape = [...dividingLinesTest];
 // const landscape = [new OrtgnlCircle({x:-2, y:5, z:0}, 1, [true, false, false], new FillInfo(true, 'yellow'))];
 // const landObjects = [];
-// const landObjects = [othrPickupTruckLndscp];
+// const landObjects = [pickupTruckLndscp];
 // const landObjects = [new Cube(new SpacePoint(6, 20, 0), 4, [GLASS, GLASS, 'grey'])]
 
 // USTVARJANJE IN PRIPRAVA ŠE ZA MODUL OBJECT_ROTATE
