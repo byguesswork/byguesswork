@@ -1,8 +1,6 @@
 'use strict';
 
-// prehod med normal in fish
-// na pokončen mobile ožji vidni kot
-// tako kot y ne sme bit negativen (sicer ne izrisujemo), bi bilo verejtno treba isto tudi za x/y in z/y, vidiš namreč samo določen kot;
+// tako kot y ne sme bit negativen (sicer ne izrisujemo), bi bilo verjetno - SAMO PRI TELE - treba isto tudi za x/y in z/y, vidiš namreč samo določen kot;
 // zeleno stikalo na steklu stavbe, ki bi bilo vidno ob približanju
 // dodat kšne opise v index.html (recimo za fuel: I like its simplicity, maybe you will too)
 
@@ -35,14 +33,6 @@ const scrnMidPoint = {
 initScrn();
 drawControlsIcons();
 
-// koti; ekran od leve do desne je 3.0 radiana (malo manj kot 180', kao oponaša vidno polje človeka), pomeni da je scrnMidPoint.x = 1.5 (ali tam nekje); zdaj izračunamo še, kolikšen kot je lahko po vertikali 
-const FISHEYE = Math.PI / 2;
-const TELEANGLE = 0.3;
-let hrzRadsFrmCentr = TELEANGLE;
-let vertRadsFrmCentr, factorX, factorY, linearFctrY;
-calcVertRadsFrmCentr();
-console.log(wdth, hght, scrnMidPoint, vertRadsFrmCentr);
-
 // najprej preverimo za mobilca, ker to lahko spremeni postavitev;
 let mobile = false;
 if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null) {
@@ -60,6 +50,22 @@ if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null) {
 
     // če je mobile, ni info linka, ker ni kaj razlagat o tipkah;
     infoSettgs.classList.add('hidden');
+}
+
+// koti; ekran od leve do desne je 3.0 radiana (malo manj kot 180', kao oponaša vidno polje človeka), pomeni da je scrnMidPoint.x = 1.5 (ali tam nekje); zdaj izračunamo še, kolikšen kot je lahko po vertikali 
+const FISHEYEANGLE = Math.PI / 2;    // to podaja kot, ker pri FISHEYE se točke računajo s koti;
+const TELEANGLEFACTOR = mobile ? 5 : 3.24;  // to sta empirično pridobljeni vrednosti, pri katerih za točko na robu zaslona..
+//                                             ..velja naslednje: x * faktor = y, če je vidni kot od sredine do roba 0,2 radiana (tele, mob pokončno) ali 0,3 rad (tele, desktop/mob-ležeče);
+const hrzRadsFrmCentr = FISHEYEANGLE;  // ta se itak ne spreminja, ker se hrzRads... rabi samo pri FISHEYE in itak trenutno se stran ponovno naloži ob spremembi postavitve zaslona na mobile;
+let vertRadsFrmCentr, fishFctrX, fishFctrY, teleFctrX, teleFctrY;
+let isViewModeTele = true;  // to je prava spremenljivka, ki hrani, kateri pogled imamo, ko pa je tranzicija, pa tudi to, kateri je ciljni pogled tranzicije;
+calcVertRadsFrmCentr();
+console.log(wdth, hght, scrnMidPoint);
+const viewModeTranstn = {
+    active : false,
+    cycleTime : 50,
+    numCycles : 20,
+    cycleNum : 0
 }
 
 infoSettgsContent.addEventListener('click', infoClicked);
@@ -110,9 +116,12 @@ function initScrn(){
     ctx.strokeStyle = lineColor;
 }
 
-function calcVertRadsFrmCentr(){    // kliče se vsakokrat, ko zamenjaš narrowAngle/fish eye;
+function calcVertRadsFrmCentr(){    // kliče se samo ob nalaganju strani (se je tudi ob sprmeewmbi orientacije, ampak tisto se začasno ne uporablja);
+    
+    // za FISHEYE;
     let drawableYHeightHalved;
 
+    // hrzRadsFrmCentr in vertRadsFrmCentr sta samo začasna proxija, potrebna za izračun fishFctrX in fishFctrY, kar se uporablja samo pri FISHEYE
     vertRadsFrmCentr = toDecPlace((scrnMidPoint.y / scrnMidPoint.x) * hrzRadsFrmCentr, 4);
     drawableYHeightHalved = scrnMidPoint.y;
     
@@ -121,13 +130,15 @@ function calcVertRadsFrmCentr(){    // kliče se vsakokrat, ko zamenjaš narrowA
         drawableYHeightHalved = scrnMidPoint.x; // da je slika enaka v širino in višino, ker že po širini zajame 180', višina pa je še višja;
     }
 
-    console.log('vertRads:', vertRadsFrmCentr)
-    factorX = scrnMidPoint.x / Math.sin(hrzRadsFrmCentr);
-    factorY = drawableYHeightHalved / Math.sin(vertRadsFrmCentr);
+    console.log('vertRads @fisheye:', vertRadsFrmCentr)
+    fishFctrX = scrnMidPoint.x / Math.sin(hrzRadsFrmCentr);   // fishFctrX in Y sta edina delovno uporabna podatka za FISHE, ostali do tle so bili le pomožni;
+    fishFctrY = drawableYHeightHalved / Math.sin(vertRadsFrmCentr);
 
-    // za linearno metodo (ne-tangensno, ne-fish eye);
-    linearFctrY = scrnMidPoint.x/scrnMidPoint.y;
+    // za TELEANGLE (linearna, ne-tangensna, ne-fish eye metoda);
+    teleFctrX = TELEANGLEFACTOR;
+    teleFctrY = TELEANGLEFACTOR * scrnMidPoint.x/scrnMidPoint.y;    // tu ni omejitve navzgor, oz. ni težava pri mob pokončno, pač vidiš več neba;
 
+    // skratka, izračun točk zs FISHEYE temelji na kotih, izračun točk za TELEANGLE pa na koeficientu x/y;
 }  
 
 function clearCanvas() {
@@ -141,7 +152,7 @@ function clearCanvas() {
     ctx.strokeStyle = lineColor;
 }
 
-function calcScreenPts(spacePoints, connctnsRange) {   // prejme relativne koordinate!, položaj viewerja mora torej biti že odštet;
+function calcScreenPts(spacePoints, connctnsRange) {   // prejme relativne koordinate! (na ravni segmenta), položaj viewerja mora torej biti že odštet;
 
     // i - index v arrayu spacePoints
     // j - index v arrayu s povezavami
@@ -171,23 +182,36 @@ function calcScreenPts(spacePoints, connctnsRange) {   // prejme relativne koord
         }
     }
 
-    function spcPt2ScrnPt(x, y, z) {
+    function spcPt2ScrnPt(x, y, z) {    // dela na ravni točke, ne segmenta ali predmeta;
         const scrnPt = new ScreenPoint();
 
-        if (hrzRadsFrmCentr == TELEANGLE) { // za linearno metodo (ne-tangensno, ne-fish eye);
-            scrnPt.x = scrnMidPoint.x +  ((3.24 * x) / y) * scrnMidPoint.x;    // 3,24*x, ker pri tangensni metodi je tako (točka, ki je 3,24 dlje, kot je vstran, je na robu vidnega polja
-            scrnPt.y = scrnMidPoint.y +  ((3.24 * -z * linearFctrY) / y) * scrnMidPoint.y;
-
-        } else {    // če fish eye;
-            // x (na zaslonu);
-            scrnPt.x = scrnMidPoint.x +  Math.sin(Math.atan2(x, (y**2 + z**2 )**(1/2))) * factorX;   // ta je bila izvirna ta delovna;
-            // y (na zaslonu);
-            // /*1*/ scrnPt.y = scrnMidPoint.y +  Math.sin(Math.atan2(z, (y**2  + x**2 )**(1/2))) * factorY;
-            /*2*/ scrnPt.y = scrnMidPoint.y +  Math.sin(Math.atan2(-z, (y**2  + x**2 )**(1/2))) * factorY;  // ta je ta prava
-            // /*3*/ scrnPt.y = scrnMidPoint.y -  Math.sin(Math.atan2(z, (y**2  + x**2 )**(1/2))) * factorY;
-            // /*4*/ scrnPt.y = scrnMidPoint.y -  Math.sin(Math.atan2(-z, (y**2  + x**2 )**(1/2))) * factorY;
+        if (!viewModeTranstn.active) {
+            if (isViewModeTele) { // za linearno metodo (ne-tangensno, ne-fish eye);
+                scrnPt.x = scrnMidPoint.x +  (teleFctrX * x / y) * scrnMidPoint.x;    // 3,24*x, ker pri tangensni metodi je tako (točka, ki je 3,24 dlje, kot je vstran, je na robu vidnega polja, če vidiš 0,3 radiana vstran); 
+                scrnPt.y = scrnMidPoint.y +  (teleFctrY * -z / y) * scrnMidPoint.y;
+            } else {    // če fish eye;
+                // x (na zaslonu);
+                scrnPt.x = scrnMidPoint.x +  Math.sin(Math.atan2(x, (y**2 + z**2 )**(1/2))) * fishFctrX;   // ta je bila izvirna ta delovna, tudi za teleangle;
+                // y (na zaslonu);
+                // /*1*/ scrnPt.y = scrnMidPoint.y +  Math.sin(Math.atan2(z, (y**2  + x**2 )**(1/2))) * fishFctrY;
+                /*2*/ scrnPt.y = scrnMidPoint.y +  Math.sin(Math.atan2(-z, (y**2  + x**2 )**(1/2))) * fishFctrY;  // ta je ta prava
+                // /*3*/ scrnPt.y = scrnMidPoint.y -  Math.sin(Math.atan2(z, (y**2  + x**2 )**(1/2))) * fishFctrY;
+                // /*4*/ scrnPt.y = scrnMidPoint.y -  Math.sin(Math.atan2(-z, (y**2  + x**2 )**(1/2))) * fishFctrY;
+            } 
+        } else {    // če je TRANSITION;
+            const ratio = viewModeTranstn.cycleNum / viewModeTranstn.numCycles;
+            const scrnPtTeleX = scrnMidPoint.x +  (teleFctrX * x / y) * scrnMidPoint.x;
+            const scrnPtTeleY = scrnMidPoint.y +  (teleFctrY * -z / y) * scrnMidPoint.y;
+            const scrnPtFishX = scrnMidPoint.x +  Math.sin(Math.atan2(x, (y**2 + z**2 )**(1/2))) * fishFctrX;
+            const scrnPtFishY = scrnMidPoint.y +  Math.sin(Math.atan2(-z, (y**2  + x**2 )**(1/2))) * fishFctrY;
+            if (!isViewModeTele) {   // če je cilj tranzicije FISHEYE
+                scrnPt.x = scrnPtTeleX + ratio * (scrnPtFishX - scrnPtTeleX);
+                scrnPt.y = scrnPtTeleY + ratio * (scrnPtFishY - scrnPtTeleY);
+            } else {    // če je cilj tranzicije TELEANGLE
+                scrnPt.x = scrnPtFishX + ratio * (scrnPtTeleX - scrnPtFishX);
+                scrnPt.y = scrnPtFishY + ratio * (scrnPtTeleY - scrnPtFishY);
+            }
         }
-
         return scrnPt;
     }
 
@@ -228,7 +252,7 @@ function calcScreenPts(spacePoints, connctnsRange) {   // prejme relativne koord
 }
 
 
-function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od viewerja do predmetov;
+function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od viewerja do predmetov; dela na ravni celega kataloga predmetov;
     
     // helper funkcije;
 
@@ -279,7 +303,7 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
         // kot pogleda je zelo pomemben; risanja ne moreš izvajat brez preračunavanja kota, tudi če je kot == 0,..
         // .. ker če imaš zadevo za hrbtom, tudi če gledaš direkt proti S (kot == 0), zadeve ne smeš izrisat, ker je ne moreš videt;
         
-        function oneLoop(segIdx) {   // prejme index segmenta;
+        function oneLoop(segIdx) {   // prejme index segmenta; dela na ravni segmenta
             const item2Draw = new Array();   // item2Draw je nov objekt, da ne spreminjamo dejanskih koordinat teles v prostoru (telesa ostajajo na istih točkah),..
                                     // ..ampak da dobimo relativne koordinate glede na gledišče, ki jih podamo v item.draw;
             const constraints = {   // mora bit objekt, ker se pošlje kot argument in če bi bilo primitive, bi tamkajšnja sprememba ne veljala tu zunaj;
@@ -421,10 +445,11 @@ const objRotateItems = [pickupTruckRotate];
 
 
 //  - - - - - -  USTVARJANJE GLEDALCEV (2: za pomikanje po pokrajini in za gledanje rotacije predmeta);
-const landscapeViewer = new Viewer(0, -9, 1.7);   // na začetku ima gledalec privzeto spacePoint 0,-9,1.7 (kao visok 1.7m), gleda naravnost vzdolž osi y, torej v {0,neskončno,1.7}, tj. kot 0;
+const landscapeViewer = new Viewer(0, -9, 1.75);   // na začetku ima gledalec privzeto spacePoint 0,-9,1.7 (kao visok 1,75 m), gleda naravnost vzdolž osi y, torej v {0,neskončno,1.7}, tj. kot 0;
+if (mobile) landscapeViewer.posIn3D.x = 2.6;
 // y == 9, da je pri normal view videt del avta
 
-const obj2RotateViewer = new Viewer (0, 0, 1.7);
+const obj2RotateViewer = new Viewer (0, 0, 1.75);
 
 // štartamo v landscape mode;
 let isLandscapeMode = true;
@@ -494,9 +519,12 @@ function atKeyPress(e){
         if (isLandscapeMode) rotateViewer(CLOCKW);
         else rotateObj(CLOCKW);
     } else if (e.code == 'KeyN') {
-        if (lensBtns[0].classList.contains('unselected')) { changeLens(false); }
+        if (lensBtns[0].classList.contains('unselected') 
+            && !viewModeTranstn.active) {  // tako vrednost ima samo takrat, ko se izvaja prehod FISH <> TELEANGLE; da se ne sproži hkrati še en prehod;
+            changeLens(false); 
+        }
     } if (e.code == 'KeyF') {
-        if (lensBtns[1].classList.contains('unselected')) { changeLens(true); }
+        if (lensBtns[1].classList.contains('unselected') && !viewModeTranstn.active) { changeLens(true); }
     }
 }
 
@@ -524,15 +552,25 @@ function changeLens(doFish){    // to lahko kličeš tudi s tipkami;
     lensBtns[1].classList.toggle('selected');
     lensBtns[0].classList.toggle('unselected');
     lensBtns[1].classList.toggle('unselected');
-    if (doFish) hrzRadsFrmCentr = FISHEYE;
-    else hrzRadsFrmCentr = TELEANGLE;
-    calcVertRadsFrmCentr();
-    calcReltvSpcPtsAndDraw();
+    if (doFish) { isViewModeTele = false; }
+        else { isViewModeTele = true; }
+    viewModeTranstn.active = true;   // to je sprožilec za izvajanje prehoda v spcPt2ScrnPt oz. calcScrnPts, po koncu prehoda se spet naštima prava vrednost;
+    for (let i = 1; i <= viewModeTranstn.numCycles; i++) {  // akcija
+        setTimeout(() => {
+            viewModeTranstn.cycleNum = i;
+            calcReltvSpcPtsAndDraw()
+            if (i == viewModeTranstn.numCycles) {
+                console.log('konc prehoda');
+                viewModeTranstn.active = false;
+            }
+        }, i * viewModeTranstn.cycleTime)
+    }
 }
 
 function lensBtnOprtn(evt){
     //  evt.target.parentElement čekiramo, ker lahko klikneš span comment znotraj gumba in v tem primeru je ta span target, zato moramo skočit na parent;
-    if (evt.target.classList.contains('unselected') || evt.target.parentElement.classList.contains('unselected')) {
+    if ((evt.target.classList.contains('unselected') || evt.target.parentElement.classList.contains('unselected')) 
+        && !viewModeTranstn.active) { // tako vrednost ima samo takrat, ko se izvaja prehod FISH <> TELEANGLE; da se ne sproži hkrati še en prehod;
         if (lensBtns[0].classList.contains('selected')) {
             changeLens(true);
         } else changeLens(false);
