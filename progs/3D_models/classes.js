@@ -524,13 +524,11 @@ class Pickup extends Thingy {
 
         // prednja stena kesona; ta sledi orisu, ker če ne je oris notranjosti kabine videt skozi pregrado;
         this.segments.push(new Segment( this.objSpcPts,
-            new FillInfo(true, BASE, 'black'), undefined,[ 15, 14, 28, 29]
-        ));
+            new FillInfo(true, BASE, 'black'), undefined,[ 15, 14, 28, 29] ));
 
         // ploskev pod zadnjim steklom
         this.segments.push(new Segment(this.objSpcPts,
-            new FillInfo(true, BASE, 'black'), undefined, [15, 14, 27, 26])
-        );
+            new FillInfo(true, BASE, 'black'), undefined, [15, 14, 27, 26] ));
 
         // dodatni oris, ker sta 2 dela predelne stene kesona prebarvala del orisa;
         this.segments.push(new Segment(this.objSpcPts,
@@ -541,58 +539,52 @@ class Pickup extends Thingy {
 
         // prednja ploskev;
         this.segments.push(new Segment( this.objSpcPts,
-            new FillInfo(true, PROXIMAL, this.bodyColor, new SpacePoint(0, 0.03, 0)), undefined, [ 0, 1, 2, 3 ]
-        ));
+            new FillInfo(true, PROXIMAL, this.bodyColor, new SpacePoint(0, 0.03, 0)), undefined, [ 0, 1, 2, 3 ]  ));
 
         // desna ploskev (vozila, sicer na levi strani koordinatnega sistema);
         this.segments.push(new Segment( this.objSpcPts,
-            new FillInfo(true, PROXIMAL, this.bodyColor, new SpacePoint(0.03, 0, 0)), undefined, [ 4, 0, 3, 7 ]
-        ));
+            new FillInfo(true, PROXIMAL, this.bodyColor, new SpacePoint(0.03, 0, 0)), undefined, [ 4, 0, 3, 7 ]  ));
 
         // leva ploskev;
         this.segments.push(new Segment( this.objSpcPts,
-            new FillInfo(true, PROXIMAL, this.bodyColor, new SpacePoint(-0.03, 0, 0)), undefined, [ 5, 1, 2, 6]
-        ));
+            new FillInfo(true, PROXIMAL, this.bodyColor, new SpacePoint(-0.03, 0, 0)), undefined, [ 5, 1, 2, 6]  ));
 
         // zadnja ploskev;
         this.segments.push(new Segment( this.objSpcPts,
-            new FillInfo(true, PROXIMAL, this.bodyColor, new SpacePoint(0, -0.03, 0)), undefined, [ 4, 5, 6, 7]
-        ));
+            new FillInfo(true, PROXIMAL, this.bodyColor, new SpacePoint(0, -0.03, 0)), undefined, [ 4, 5, 6, 7]  ));
 
         // havba;
         this.segments.push(new Segment( this.objSpcPts,
-            new FillInfo(true, PROXIMAL, this.bodyColor, new SpacePoint(0, 0.01, -0.05)), undefined, [ 3, 2, 9, 8]
-        ));
+            new FillInfo(true, PROXIMAL, this.bodyColor, new SpacePoint(0, 0.01, -0.05)), undefined, [ 3, 2, 9, 8]  ));
 
         // desni filer (na desni strani vozila, sicer levo v smislu koordinate x);
         this.segments.push(new Segment( this.objSpcPts,
-            new FillInfo(true, PROXIMAL, this.bodyColor, new SpacePoint(0.03, 0, -0.01)), undefined, [ 15, 3, 8, 26]
-        ));
+            new FillInfo(true, PROXIMAL, this.bodyColor, new SpacePoint(0.03, 0, -0.01)), undefined, [ 15, 3, 8, 26]  ));
 
         // levi filer;
         this.segments.push(new Segment( this.objSpcPts,
-            new FillInfo(true, PROXIMAL, this.bodyColor, new SpacePoint(-0.03, 0, -0.01)), undefined, [ 2, 9, 27, 14]
-        ));
+            new FillInfo(true, PROXIMAL, this.bodyColor, new SpacePoint(-0.03, 0, -0.01)), undefined, [ 2, 9, 27, 14]  ));
 
         // prednje steklo;
         this.segments.push(new Segment( this.objSpcPts,
-            new FillInfo(true, BASPROX, GLASS, {x:0, y:0.02, z:0.02}), undefined, [ 8, 9, 10, 11]
-        ));
+            new FillInfo(true, BASPROX, GLASS, {x:0, y:0.02, z:0.02}), undefined, [ 8, 9, 10, 11]  ));
 
         // desno steklo;
         this.segments.push(new Segment( this.objSpcPts,
-            new FillInfo(true, BASPROX, GLASS, {x:0.1, y:0, z:-0.01}), undefined, [ 26, 8, 11, 13]
-        ));
+            new FillInfo(true, BASPROX, GLASS, {x:0.1, y:0, z:-0.01}), undefined, [ 26, 8, 11, 13]  ));
 
         // levo steklo;
         this.segments.push(new Segment( this.objSpcPts,
-            new FillInfo(true, BASPROX, GLASS, {x:-0.1, y:0, z:-0.01}), undefined, [ 9, 10, 12, 27]
-        ));
+            new FillInfo(true, BASPROX, GLASS, {x:-0.1, y:0, z:-0.01}), undefined, [ 9, 10, 12, 27]  ));
 
         // zadnje steklo;
         this.segments.push(new Segment( this.objSpcPts,
-            new FillInfo(true, BASPROX, GLASS, {x:0, y:-0.03, z:0}), undefined, [ 12, 13, 26, 27]
-        ));
+            new FillInfo(true, BASPROX, GLASS, {x:0, y:-0.03, z:0}), undefined, [ 12, 13, 26, 27]  ));
+
+        // streha
+        this.segments.push(new Segment( this.objSpcPts,
+            new FillInfo(true, PROXIMAL, this.bodyColor, {x:0, y:0, z:-0.03}), undefined, [ 11, 10, 12, 13]  ));
+
 
         // luči spredaj;
         this.segments.push(new Segment( this.objSpcPts,
@@ -609,8 +601,7 @@ class Pickup extends Thingy {
 
         //ozka ploskev pod zadnjim steklom
         this.segments.push(new Segment(this.objSpcPts,
-            new FillInfo(true, PROXIMAL, this.bodyColor, new SpacePoint(0, -0.03, 0)), undefined, [15, 14, 27, 26])
-        );
+            new FillInfo(true, PROXIMAL, this.bodyColor, new SpacePoint(0, -0.03, 0)), undefined, [15, 14, 27, 26]  ));
 
         //  - - - -   GUME   - - - 
         // sprednja D guma - proximal

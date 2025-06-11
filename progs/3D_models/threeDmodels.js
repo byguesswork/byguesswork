@@ -1,6 +1,5 @@
 'use strict';
 
-// tako kot y ne sme bit negativen (sicer ne izrisujemo), bi bilo verjetno - SAMO PRI TELE - treba isto tudi za x/y in z/y, vidiš namreč samo določen kot;
 // zeleno stikalo na steklu stavbe, ki bi bilo vidno ob približanju
 // dodat kšne opise v index.html (recimo za fuel: I like its simplicity, maybe you will too)
 
@@ -54,8 +53,12 @@ if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null) {
 
 // koti; ekran od leve do desne je 3.0 radiana (malo manj kot 180', kao oponaša vidno polje človeka), pomeni da je scrnMidPoint.x = 1.5 (ali tam nekje); zdaj izračunamo še, kolikšen kot je lahko po vertikali 
 const FISHEYEANGLE = Math.PI / 2;    // to podaja kot, ker pri FISHEYE se točke računajo s koti;
-const TELEANGLEFACTOR = mobile ? 5 : 3.24;  // to sta empirično pridobljeni vrednosti, pri katerih za točko na robu zaslona..
+let TELEANGLEFACTOR = 3.24;  // to sta empirično pridobljeni vrednosti, pri katerih za točko na robu zaslona..
 //                                             ..velja naslednje: x * faktor = y, če je vidni kot od sredine do roba 0,2 radiana (tele, mob pokončno) ali 0,3 rad (tele, desktop/mob-ležeče);
+if (mobile) {
+    TELEANGLEFACTOR = 5;
+    if (screen.orientation.type.includes('landscape')) TELEANGLEFACTOR = 4.1;
+}
 const hrzRadsFrmCentr = FISHEYEANGLE;  // ta se itak ne spreminja, ker se hrzRads... rabi samo pri FISHEYE in itak trenutno se stran ponovno naloži ob spremembi postavitve zaslona na mobile;
 let vertRadsFrmCentr, fishFctrX, fishFctrY, teleFctrX, teleFctrY;
 let isViewModeTele = true;  // to je prava spremenljivka, ki hrani, kateri pogled imamo, ko pa je tranzicija, pa tudi to, kateri je ciljni pogled tranzicije;
@@ -130,7 +133,7 @@ function calcVertRadsFrmCentr(){    // kliče se samo ob nalaganju strani (se je
         drawableYHeightHalved = scrnMidPoint.x; // da je slika enaka v širino in višino, ker že po širini zajame 180', višina pa je še višja;
     }
 
-    console.log('vertRads @fisheye:', vertRadsFrmCentr)
+    console.log('vertRads@fisheye:', vertRadsFrmCentr)
     fishFctrX = scrnMidPoint.x / Math.sin(hrzRadsFrmCentr);   // fishFctrX in Y sta edina delovno uporabna podatka za FISHE, ostali do tle so bili le pomožni;
     fishFctrY = drawableYHeightHalved / Math.sin(vertRadsFrmCentr);
 
@@ -256,31 +259,43 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
     
     // helper funkcije;
 
-    function helper(spcPt, item2Draw, constraints) {
+    function helper(spcPt, item2Draw, constraints) {    // dela na ravni točke segmenta;
         x = spcPt.x - viewPoint.x;  // x in y relativiziramo;
         y = spcPt.y - viewPoint.y;
         r = (x**2 + y**2)**(0.5);
         
-        angle;
-        if (y > 0) {
-            angle = Math.asin(x/r) - viewngAngle;   // pri izračunu kota, pod katerim gledamo neko točko, je treba upoštevati, kam je usmerjen pogled gledalva (viewAngle)..;
-        } else if (y < 0) {                             // ..pri rotaciji (objRotate) je sicer viewAngle kot, za koliko je zarotiran predmet ! ! !;
-            angle = Math.PI - Math.asin(x/r) - viewngAngle;
-        } else if (y == 0) {
-            if (x < 0) angle = 1.5 * Math.PI - viewngAngle;
-            else angle = 0.5 * Math.PI - viewngAngle;
+        // izračun relativnega ploskovnega x in y, če gledalec ne gleda pod kotom 0 (sicer ta del ni potreben);
+        if (viewngAngle != 0) {
+            if (y > 0) {
+                angle = Math.asin(x/r) - viewngAngle;   // pri izračunu kota, pod katerim gledamo neko točko, je treba upoštevati, kam je usmerjen pogled gledalva (viewAngle);
+            } else if (y < 0) {
+                angle = Math.PI - Math.asin(x/r) - viewngAngle;
+            } else if (y == 0) {
+                if (x < 0) angle = 1.5 * Math.PI - viewngAngle;
+                else angle = 0.5 * Math.PI - viewngAngle;
+            }
+            
+            //zdaj, ko smo dobili relativni kot, lahko izračunamo pripadajoči x in y (prostorske) relativne točke, ki bo izrisana;
+            x = r * Math.sin(angle);
+            y = r * Math.cos(angle);
         }
+
+        // preverjanje, ali naj gre točka (in posledično segment) v izris; false > gre v izris, privzeto je true;
+        if (!isViewModeTele) {
+            if (y > 0) constraints.allYNegAngular = false;
+        } else {    // torej če imamo teleangle; za zdaj gledamo samo y/x, z-ja ne gledamo, ker ni veliko visokih predmetov
+            if ((y / x) >= TELEANGLEFACTOR || (y / x) <= -TELEANGLEFACTOR) constraints.allYNegAngular = false;  // izvedba z Math.abs bi bila krajša v kodi a morda počasnejša v izvedbi;
+        }
+
+        // zabeleženje točke (v vsakem primeru, ne glede na true/false pri allYNegAngular, ker recimo ti zadnja točka lahko da false in sproži izris)
+        item2Draw.push(new SpacePoint(x, y, spcPt.z - viewPoint.z));    // to je številka 3 spodaj;
         
-        //zdaj, ko smo dobili nov kot, že kar lahko izračunamo nov x in nov y (prostorske) relativne točke, ki bo izrisana;
-        x = r * Math.sin(angle);
-        y = r * Math.cos(angle);
-        if (y > 0) constraints.allYNegAngular = false;
+        // rezultati testov preračunov zaslonskih koordinat - Prva cifra pomeni kalkulacijo y v spcPt2ScrnPt oz. v calcScreenPts;:
         // /*1*/ item2Draw.push(new SpacePoint(x, y, spcPt.z + viewPoint.z));
         // /*2*/ item2Draw.push(new SpacePoint(x, y, -spcPt.z + viewPoint.z));
-        /*3*/ item2Draw.push(new SpacePoint(x, y, spcPt.z - viewPoint.z));
+        // /*3*/ item2Draw.push(new SpacePoint(x, y, spcPt.z - viewPoint.z));
         // /*4*/ item2Draw.push(new SpacePoint(x, y, -spcPt.z - viewPoint.z));
 
-        // rezultati testov preračunov zaslonskih koordinat - Prva cifra pomeni kalkulacijo y v spcPt2ScrnPt oz. v calcScreenPts;:
         // 1-1 prenizko; 1-2 OK   !!; 1-3 ni ok; 1-4 previsoko;
         // 2-1 previsoko; 2-2 na spodnji strani; 2-3 OK!!; 2-4 prenizko;
         // 3-1 previsoko; 3-2 spodaj; 3-3 OK !!; 3-4 prenizko;
@@ -295,7 +310,7 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
 
     // določimo izhodišče pogleda in kot; slednje je odvisno od tega al landscape ali objRotate;
     const viewPoint = activeViewer.posIn3D;   // točka, iz katere gledamo;
-    const viewngAngle = isLandscapeMode == true ? activeViewer.angle : 0; // kot pod katerim gledamo; sever (y proti neskončćo) == 0;
+    const viewngAngle = isLandscapeMode == true ? activeViewer.angle : 0; // kot pod katerim gledamo; sever (y proti neskončno) == 0;
 
     activeItems.forEach(item => {
         // preslikava prostorskih točk na dvodimenzionalno ravnino, ..
@@ -312,11 +327,12 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
 
             item.segments[segIdx].spcPts.forEach((spcPt) => { helper(spcPt, item2Draw, constraints) })
 
-            if (!constraints.allYNegAngular) {  // če so vse prostorske y-koordinate predmeta negativne, je predmet v celoti za hrbtom gledalca in ga ne rišemo;
+            if (!constraints.allYNegAngular) {  // če so vse prostorske y-koordinate segmenta (ali predmeta, če je iz samo enega seg.) negativne, je segm v celoti za hrbtom gledalca in ga ne rišemo;
                 item.draw(calcScreenPts(item2Draw, item.segments[segIdx].connsAlt), segIdx);
+                // izrisanih++;
                 // če je kakšna y-koordinata prostorske točke negativna, je treba komplicirat, interpolirat y, da ni negativen, ampak to se zgodi v calcScrnPts;
                 // (kajti zaradi kotnih preračunov se lahko stvari, ki jih imaš za hrbtom, narišejo pred tamo, zato je treba negativne y skenalsat pred kotnimi prer.); 
-            }  // else do nuthn, ker so vse koordinate negativne in ne rišemo nič
+            } // else console.log('segment za hrbtom')  // else do nuthn, ker so vse koordinate segmenta negativne in ga ne rišemo;
         }
         
         function isCloser(sgmtFillInfo){    // ime: is Proximal SpcPt Closer Than Distal SpcPt;
@@ -329,6 +345,7 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
 
         // začetek dogajanja;
         const remaining = [], closerProxmls = []; // sem shranimo indexe ploskev tipa PROXIMAL, ki bodo izrisane, toda pozneje;
+        // let izrisanih = 0; bila samo za testne namene, kao števec, koliko segmetnov je bilo izrisanih pri predmetu;
         
         // v prvi pasaži narišemo tiste segmente, ki se narišejo vedno (BASE/undefined, lahko barvne ploskev ali samo orisi);
         for (let k = 0; k < item.segments.length; k++) {
@@ -350,7 +367,7 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
                 if (isCloser(item.segments[remaining[k]].fillInfo)) {
                     closerProxmls.push(remaining[k]);   // če na PROXIMAL gledamo z zunanje strani predmeta (če je njegovo središče bližje od distalne točke), ga shranimo za izris;
                     // shranit pa moramo remaining[k] in ne k, ker oneLoop prejme index segmenta (ne index izvedenega arraya remaining);
-                } //  else do nuth, ker ta PROXIMAL ne sme biti narisan, ker nanj ne gledamo od zunaj
+                } // else console.log('neizpolnjen proximal segment') //  else do nuth, ker ta PROXIMAL ne sme biti narisan, ker nanj ne gledamo od zunaj
             }
         }
         
@@ -360,6 +377,7 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
                 oneLoop(closerProxmls[k]);
             }
         }
+        // console.log('konc predmeta, izrisanih:', izrisanih)
     })
 }
 
