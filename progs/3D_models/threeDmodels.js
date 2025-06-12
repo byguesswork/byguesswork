@@ -284,7 +284,21 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
         if (!isViewModeTele) {
             if (y > 0) constraints.allYNegAngular = false;
         } else {    // torej če imamo teleangle; za zdaj gledamo samo y/x, z-ja ne gledamo, ker ni veliko visokih predmetov
-            if ((y / x) >= TELEANGLEFACTOR || (y / x) <= -TELEANGLEFACTOR) constraints.allYNegAngular = false;  // izvedba z Math.abs bi bila krajša v kodi a morda počasnejša v izvedbi;
+            if ((y / x) >= TELEANGLEFACTOR || (y / x) <= -TELEANGLEFACTOR) {    // izvedba z Math.abs bi bila krajša v kodi a morda počasnejša v izvedbi;
+                constraints.allYNegAngular = false;
+            } else {    // moramo zabeležit, na kateri strani vidnega polja se točke segmenta pojavljajo zunaj vidnega polja, ker če se na obeh, je to poseben primer;
+                if ((y / x) >= 0) { // zdaj že vemo, da nismo ne levo od negativne meje ne desno od pozitivne in je pomembna samo še meja 0;
+                    // constraints.right = true; // tu bi lahko samo to zabeležli, lahko pa gremo korak dlje in že delamo na allYNeg;
+                    if (constraints.left) {
+                        constraints.allYNegAngular = false; // če že imamo od prej left in zdaj bi itak dodali še right, lahko kar zabeležimo allYNeg;
+                    } else constraints.right = true;
+                } else {
+                    // constraints.left = true; // tu bi lahko samo to zabeležli, lahko pa gremo korak dlje in že delamo na allYNeg;
+                    if (constraints.right) {
+                        constraints.allYNegAngular = false; // če že imamo od prej right in zdaj bi itak dodali še left, lahko kar zabeležimo allYNeg;
+                    } else constraints.left = true;
+                }
+            }
         }
 
         // zabeleženje točke (v vsakem primeru, ne glede na true/false pri allYNegAngular, ker recimo ti zadnja točka lahko da false in sproži izris)
@@ -323,6 +337,8 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
                                     // ..ampak da dobimo relativne koordinate glede na gledišče, ki jih podamo v item.draw;
             const constraints = {   // mora bit objekt, ker se pošlje kot argument in če bi bilo primitive, bi tamkajšnja sprememba ne veljala tu zunaj;
                 allYNegAngular : true,  // beleži, ali so vse y koordinate nekega predmeta negativne, tj. gledalcu za hrbtom; če tako, ničesar ne izrišemo, ker gre le za zrcalno sliko, ki je za hrbtom;
+                right : false,  // pri teleangle beleži, al je vsaj ena točka zunaj vidnega polja desno od vidnega polja;
+                left : false    // isto za levo; če so vse negativne in imamo negativne (zunaj) tako levo kot desno, moramo stvar vseeno narisat, ker je treba narisat to, kar je vmes!!;
             }
 
             item.segments[segIdx].spcPts.forEach((spcPt) => { helper(spcPt, item2Draw, constraints) })
@@ -333,6 +349,7 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
                 // če je kakšna y-koordinata prostorske točke negativna, je treba komplicirat, interpolirat y, da ni negativen, ampak to se zgodi v calcScrnPts;
                 // (kajti zaradi kotnih preračunov se lahko stvari, ki jih imaš za hrbtom, narišejo pred tamo, zato je treba negativne y skenalsat pred kotnimi prer.); 
             } // else console.log('segment za hrbtom')  // else do nuthn, ker so vse koordinate segmenta negativne in ga ne rišemo;
+            // console.log('- - -  konec segmenta - - -')
         }
         
         function isCloser(sgmtFillInfo){    // ime: is Proximal SpcPt Closer Than Distal SpcPt;
