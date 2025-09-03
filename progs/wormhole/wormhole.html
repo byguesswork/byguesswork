@@ -3,33 +3,46 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="description" content="A beginner's study of wormhole animation">
+    <meta name="description" content="learning 3D models">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=1, maximum-scale=5">
-    <title>Wormhole, lateral mvmt ver2</title>
+    <title>3D models · byGuesswork</title>
     <link rel="icon" href="/images/favicon.ico">
-    <link href="wormhole.css" rel="stylesheet">
+    <link href="wormhole_frm_3Dmodls.css" rel="stylesheet">
 </head>
 
 <body>
-    <canvas id="canvas">kamela, posodobi browser</canvas>
-    <div id="info">
-        <p>Arrow L/R - Steer</p>
-        <p>C - Center</p>
-        <p>S - Straighten</p>
-        <p>Esc - End</p>
-        <p>B - Back</p>
-        <p>(not mobile friendly)</p>
+    <canvas id="canvas"></canvas>
+    <!-- <div id="mode"> -->
+        <!-- <div id="lens">
+            <p class="lens selected">Narrow angle<span class="not_if_mobile"> (N)</span></p>
+            <p class="interstit">&nbsp;</p>
+            <p class="lens unselected">Fish eye<span class="not_if_mobile"> (F)</span></p>
+        </div> -->
+        <!-- <div>
+            <p class="mode selected">Landscape</p>
+            <p class="interstit">&nbsp;</p>
+            <p class="mode unselected">Rotate object</p>
+        </div> -->
+    <!-- </div> -->
+    <canvas id="controls_canvas"></canvas>
+    <div id="home">
+        <a href="/index.html" title="back to byGuesswork"><img src="/images/home.PNG" alt="home"></a>
     </div>
-    <div id="data">
-        <p>Angle (rad): <span id="kot"></span></p>
-        <p>DX (1 unit): <span id="dx"></span></p>
-    </div>                              <!-- spodaj navodila, ko kopiraš za različice  -->
-    <script src="data.js"></script>     <!-- spremeni tudi pot za CSS zgoraj !!!, dodaj ../  -->
-    <script src="ring.js"></script>     <!-- spremeni tudi title zgoraj (na: Wormhole, ime različice) !!!  -->
-    <script src="you.js"></script>      <!-- spremeni tudi relativno pot za Back v .js, dodaj ../ !!!  -->
-    <script src="utils.js"></script>
-    <script type="module" src="wormhole.js"></script>
-</body>
+    <div id="info_settings" class="info_settings_closed">
+        <div id="info_settings_content" class="info_settings_content_closed">i</div>
+        <div id="info_settings_OK" class="hidden align-right"></div>
+    </div>
+    <div id="joker" class="hidden"></div>
 
+    <script src="utils.js"></script>
+    <script src="classes.js"></script>
+    <script src="graphic_icons.js"></script>
+    <script src="wormhole_frm_3Dmodls.js"></script>
+</body>
 </html>
+
+
+<!-- 
+
+-->

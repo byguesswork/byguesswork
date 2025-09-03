@@ -1,8 +1,7 @@
 'use strict';
 
-// v classes preveri to: // spodnji dve bi morda morali bit na if (this.segments[whichSegmnt].fillInfo.doFill) ker morda ni samoumevno, da ima krog barvo 
-// zeleno stikalo na steklu stavbe, ki bi bilo vidno ob približanju
-// dodat kšne opise v index.html (recimo za fuel: I like its simplicity, maybe you will too)
+// tam kjer je y / x) >= TELEANGLEFACTOR bi moralo merit na dočino hipotenuze ()
+// ortgnl circle 4 točke nardit
 
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
@@ -62,21 +61,12 @@ if (mobile) {
 }
 const hrzRadsFrmCentr = FISHEYEANGLE;  // ta se itak ne spreminja, ker se hrzRads... rabi samo pri FISHEYE in itak trenutno se stran ponovno naloži ob spremembi postavitve zaslona na mobile;
 let vertRadsFrmCentr, fishFctrX, fishFctrY, teleFctrX, teleFctrY;
-let isViewModeTele = true;  // to je prava spremenljivka, ki hrani, kateri pogled imamo, ko pa je tranzicija, pa tudi to, kateri je ciljni pogled tranzicije;
 calcVertRadsFrmCentr();
 console.log(wdth, hght, scrnMidPoint);
-const viewModeTranstn = {
-    active : false,
-    cycleTime : 50,
-    numCycles : 20,
-    cycleNum : 0
-}
 
 infoSettgsContent.addEventListener('click', infoClicked);
 infoSettgsOK.addEventListener('click', infoCloseClicked);
 
-// šele po morebitni spremembi zaradi mobile umestimo zgornji okvir;
-document.getElementById('mode').style.bottom = `${30 + controlsCanvas.getBoundingClientRect().height + 25}px`;   // 30 ker ima sklop pod njim bottom 30; 25 je arbitrarna meja med skopoma 
 if (document.readyState == 'loading') { //.. in preberemo koordinate controlsRecta;
     document.addEventListener("DOMContentLoaded", readCntrlsCnvsRect);  // domcontent loaded je lahko "complete" ali pa "interactive";
 } else {
@@ -189,33 +179,8 @@ function calcScreenPts(spacePoints, connctnsRange) {   // prejme relativne koord
     function spcPt2ScrnPt(x, y, z) {    // dela na ravni točke, ne segmenta ali predmeta;
         const scrnPt = new ScreenPoint();
 
-        if (!viewModeTranstn.active) {
-            if (isViewModeTele) { // za linearno metodo (ne-tangensno, ne-fish eye);
-                scrnPt.x = scrnMidPoint.x +  (teleFctrX * x / y) * scrnMidPoint.x;    // 3,24*x, ker pri tangensni metodi je tako (točka, ki je 3,24 dlje, kot je vstran, je na robu vidnega polja, če vidiš 0,3 radiana vstran); 
-                scrnPt.y = scrnMidPoint.y +  (teleFctrY * -z / y) * scrnMidPoint.y;
-            } else {    // če fish eye;
-                // x (na zaslonu);
-                scrnPt.x = scrnMidPoint.x +  Math.sin(Math.atan2(x, (y**2 + z**2 )**(1/2))) * fishFctrX;   // ta je bila izvirna ta delovna, tudi za teleangle;
-                // y (na zaslonu);
-                // /*1*/ scrnPt.y = scrnMidPoint.y +  Math.sin(Math.atan2(z, (y**2  + x**2 )**(1/2))) * fishFctrY;
-                /*2*/ scrnPt.y = scrnMidPoint.y +  Math.sin(Math.atan2(-z, (y**2  + x**2 )**(1/2))) * fishFctrY;  // ta je ta prava
-                // /*3*/ scrnPt.y = scrnMidPoint.y -  Math.sin(Math.atan2(z, (y**2  + x**2 )**(1/2))) * fishFctrY;
-                // /*4*/ scrnPt.y = scrnMidPoint.y -  Math.sin(Math.atan2(-z, (y**2  + x**2 )**(1/2))) * fishFctrY;
-            } 
-        } else {    // če je TRANSITION;
-            const ratio = viewModeTranstn.cycleNum / viewModeTranstn.numCycles;
-            const scrnPtTeleX = scrnMidPoint.x +  (teleFctrX * x / y) * scrnMidPoint.x;
-            const scrnPtTeleY = scrnMidPoint.y +  (teleFctrY * -z / y) * scrnMidPoint.y;
-            const scrnPtFishX = scrnMidPoint.x +  Math.sin(Math.atan2(x, (y**2 + z**2 )**(1/2))) * fishFctrX;
-            const scrnPtFishY = scrnMidPoint.y +  Math.sin(Math.atan2(-z, (y**2  + x**2 )**(1/2))) * fishFctrY;
-            if (!isViewModeTele) {   // če je cilj tranzicije FISHEYE
-                scrnPt.x = scrnPtTeleX + ratio * (scrnPtFishX - scrnPtTeleX);
-                scrnPt.y = scrnPtTeleY + ratio * (scrnPtFishY - scrnPtTeleY);
-            } else {    // če je cilj tranzicije TELEANGLE
-                scrnPt.x = scrnPtFishX + ratio * (scrnPtTeleX - scrnPtFishX);
-                scrnPt.y = scrnPtFishY + ratio * (scrnPtTeleY - scrnPtFishY);
-            }
-        }
+        scrnPt.x = scrnMidPoint.x +  (teleFctrX * x / y) * scrnMidPoint.x;    // 3,24*x, ker pri tangensni metodi je tako (točka, ki je 3,24 dlje, kot je vstran, je na robu vidnega polja, če vidiš 0,3 radiana vstran); 
+        scrnPt.y = scrnMidPoint.y +  (teleFctrY * -z / y) * scrnMidPoint.y;
         return scrnPt;
     }
 
@@ -282,23 +247,19 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
         }
 
         // preverjanje, ali naj gre točka (in posledično segment) v izris; false > gre v izris, privzeto je true;
-        if (!isViewModeTele) {
-            if (y > 0) constraints.allYNegAngular = false;
-        } else {    // torej če imamo teleangle; za zdaj gledamo samo y/x, z-ja ne gledamo, ker ni veliko visokih predmetov
-            if ((y / x) >= TELEANGLEFACTOR || (y / x) <= -TELEANGLEFACTOR) {    // izvedba z Math.abs bi bila krajša v kodi a morda počasnejša v izvedbi;
-                constraints.allYNegAngular = false;
-            } else {    // moramo zabeležit, na kateri strani vidnega polja se točke segmenta pojavljajo zunaj vidnega polja, ker če se na obeh, je to poseben primer;
-                if ((y / x) >= 0) { // zdaj že vemo, da nismo ne levo od negativne meje ne desno od pozitivne in je pomembna samo še meja 0;
-                    // constraints.right = true; // tu bi lahko samo to zabeležli, lahko pa gremo korak dlje in že delamo na allYNeg;
-                    if (constraints.left) {
-                        constraints.allYNegAngular = false; // če že imamo od prej left in zdaj bi itak dodali še right, lahko kar zabeležimo allYNeg;
-                    } else constraints.right = true;
-                } else {
-                    // constraints.left = true; // tu bi lahko samo to zabeležli, lahko pa gremo korak dlje in že delamo na allYNeg;
-                    if (constraints.right) {
-                        constraints.allYNegAngular = false; // če že imamo od prej right in zdaj bi itak dodali še left, lahko kar zabeležimo allYNeg;
-                    } else constraints.left = true;
-                }
+        if ((y / x) >= TELEANGLEFACTOR || (y / x) <= -TELEANGLEFACTOR) {    // izvedba z Math.abs bi bila krajša v kodi a morda počasnejša v izvedbi;
+            constraints.allYNegAngular = false;
+        } else {    // moramo zabeležit, na kateri strani vidnega polja se točke segmenta pojavljajo zunaj vidnega polja, ker če se na obeh, je to poseben primer;
+            if ((y / x) >= 0) { // zdaj že vemo, da nismo ne levo od negativne meje ne desno od pozitivne in je pomembna samo še meja 0;
+                // constraints.right = true; // tu bi lahko samo to zabeležli, lahko pa gremo korak dlje in že delamo na allYNeg;
+                if (constraints.left) {
+                    constraints.allYNegAngular = false; // če že imamo od prej left in zdaj bi itak dodali še right, lahko kar zabeležimo allYNeg;
+                } else constraints.right = true;
+            } else {
+                // constraints.left = true; // tu bi lahko samo to zabeležli, lahko pa gremo korak dlje in že delamo na allYNeg;
+                if (constraints.right) {
+                    constraints.allYNegAngular = false; // če že imamo od prej right in zdaj bi itak dodali še left, lahko kar zabeležimo allYNeg;
+                } else constraints.left = true;
             }
         }
 
@@ -325,7 +286,7 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
 
     // določimo izhodišče pogleda in kot; slednje je odvisno od tega al landscape ali objRotate;
     const viewPoint = activeViewer.posIn3D;   // točka, iz katere gledamo;
-    const viewngAngle = isLandscapeMode == true ? activeViewer.angle : 0; // kot pod katerim gledamo; sever (y proti neskončno) == 0;
+    const viewngAngle = activeViewer.angle; // kot pod katerim gledamo; sever (y proti neskončno) == 0;
 
     activeItems.forEach(item => {
         // preslikava prostorskih točk na dvodimenzionalno ravnino, ..
@@ -402,96 +363,14 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
 
 //  - - - - - - - - - - - - - - - - -  PRIPRAVA  - - - - - - - - - - - - - - - - - - - - -
 
-// - - - - - -  USTVARJANJE LANDSCAPE STVARI, KI BODO NA EKRANU - - - - - -
-const cubes = [];
-// navpične kocke;
-cubes.push(new Cube(new SpacePoint(6, 20, 0), 4, [GLASS, GLASS, GLASS, undefined, 'grey', 'grey']))
-for (let i = 4; i <= 16; i += 4) {
-    cubes.push(new Cube(new SpacePoint(6, 20, i), 4, [GLASS, GLASS, 'grey']));
-};
-// vodoravne kocke;
-for (let i = 10; i <= 42; i += 4) {
-    cubes.push(new Cube(new SpacePoint(i, 20, 0), 4, [GLASS, undefined, 'grey']));
-};
-cubes.push(new Cube(new SpacePoint(46, 20, 0), 4, [GLASS, GLASS, undefined, GLASS, 'grey', 'grey']));
+//  - - - - - -  USTVARJANJE GLEDALCA;
+const activeViewer = new Viewer(0, -9, 0);
 
-// kesonar;
-const pickupTruckLndscp = new Pickup(new SpacePoint(5, 5, 0.4), '#a0a0a0');  // silver: #c0c0c0 ; grey: #808080
-const othrPickupTruckLndscp = new Pickup(new SpacePoint(-9, 24, 0.4), Math.random() < 0.5 ? '#850e1e' : '#0f3477', 4.71); // modra: #0f3477 bordo : #850e1e
-
-// rob ceste;
-const lines = [];
-// new Connection(new SpacePoint(-4, 0, 0), new SpacePoint(-4, 2000, 0));      // opazi, kako je line1 ravna in se ne ujema s segmentirano črto;
-for(let i = 1; i <= 16; i++) {
-    lines.push(new Connection(new SpacePoint(-4, (i - 1) * 4, 0), new SpacePoint(-4, i * 4, 0)));
-    lines.push(new Connection(new SpacePoint(4, (i - 1) * 4, 0), new SpacePoint(4, i * 4, 0)));
-    lines.push(new Connection(new SpacePoint(-4, -(i - 1) * 4, 0), new SpacePoint(-4, -i * 4, 0)));
-    lines.push(new Connection(new SpacePoint(4, -(i - 1) * 4, 0), new SpacePoint(4, -i * 4, 0)));
+// ustvarjanje obročev
+let activeItems = [];
+for (let index = 1; index < 40; index++) {
+    activeItems.push(new OrtgnlCircle(new SpacePoint(0, 20 * index, 0), 5, [true, false], new FillInfo(false)))
 }
-for(let i = 1; i <= 4; i++) {
-    lines.push(new Connection(new SpacePoint(-4, 64 + (i - 1) * 16, 0), new SpacePoint(-4, 64 + i * 16, 0)));
-    lines.push(new Connection(new SpacePoint(4, 64 + (i - 1) * 16, 0), new SpacePoint(4, 64 + i * 16, 0)));
-    lines.push(new Connection(new SpacePoint(-4, -64 - (i - 1) * 16, 0), new SpacePoint(-4, -64 - i * 16, 0)));
-    lines.push(new Connection(new SpacePoint(4, -64 - (i - 1) * 16, 0), new SpacePoint(4, -64 - i * 16, 0)));
-}
-lines.push(new Connection(new SpacePoint(-4, 128, 0), new SpacePoint(-4, 2000, 0)));
-lines.push(new Connection(new SpacePoint(4, 128, 0), new SpacePoint(4, 2000, 0)));
-lines.push(new Connection(new SpacePoint(-4, -128, 0), new SpacePoint(-4, -2000, 0)));
-lines.push(new Connection(new SpacePoint(4, -128, 0), new SpacePoint(4, -2000, 0)));
-
-// črte na sredini ceste;
-const dividingLines = [];
-for (let i = -200; i <= 302; i += 10) {
-    dividingLines.push(new OrtgnlRect(new SpacePoint(-0.1, i, 0), new SpacePoint(0.2, 3, 0), new FillInfo(true, 'white')));
-};
-
-
-function getLandscItems() {
-    // sortiranje landObjectsov;
-    landObjects.forEach(el => { // najprej vsakemu določima razdaljo do viewerja;
-        el.spatlCentr.r = Thingy.calcSpatialRFromSpcPt(el.spatlCentr, activeViewer.posIn3D)
-    })
-    landObjects.sort((a, b) => b.spatlCentr.r - a.spatlCentr.r)   // to je vsa fora da objekte posortiraš od najbolj oddaljenega proti najbližjemu
-
-    // združit
-    activeItems = landscape.concat(landObjects);
-}
-
-// - - - - - -  DODAJANJE STVARI V KATALOGE  - - - - - -
-// če gledaš pokrajino - definirana morata biti dva arraya, ki morta biti vsaj prazna; vsebinolandObjects pri premikanju gledalca sortiramo po oddaljenosti;
-// DELOVNA VARIANTA 
-const landscape = [...lines, ...dividingLines];
-const landObjects = [...cubes, pickupTruckLndscp, othrPickupTruckLndscp];
-
-// TESTNE VARIANTE;
-// const landscape = [];
-// const dividingLinesTest = [];
-// for (let i = 10; i <= 100; i += 20) {
-//     dividingLinesTest.push(new OrtgnlRect(new SpacePoint(-0.1, i, 0), new SpacePoint(0.2, 10, 0), new FillInfo(true, 'white')));
-// };
-// const landscape = [...dividingLinesTest];
-// const landscape = [new OrtgnlCircle({x:-2, y:5, z:0}, 1, [true, false, false], new FillInfo(true, 'yellow'))];
-// const landObjects = [];
-// const landObjects = [pickupTruckLndscp];
-// const landObjects = [new Cube(new SpacePoint(6, 20, 0), 4, [GLASS, GLASS, 'grey'])]
-
-// USTVARJANJE IN PRIPRAVA ŠE ZA MODUL OBJECT_ROTATE
-const pickupTruckRotate = new Pickup(new SpacePoint(1, 5, 0), 'red');
-const objRotateItems = [pickupTruckRotate];
-
-
-//  - - - - - -  USTVARJANJE GLEDALCEV (2: za pomikanje po pokrajini in za gledanje rotacije predmeta);
-const landscapeViewer = new Viewer(0, -9, 1.75);   // na začetku ima gledalec privzeto spacePoint 0,-9,1.7 (kao visok 1,75 m), gleda naravnost vzdolž osi y, torej v {0,neskončno,1.7}, tj. kot 0;
-if (mobile) landscapeViewer.posIn3D.x = 2.6;
-// y == 9, da je pri normal view videt del avta
-
-const obj2RotateViewer = new Viewer (0, 0, 1.75);
-
-// štartamo v landscape mode;
-let isLandscapeMode = true;
-let activeViewer = landscapeViewer;
-let activeItems;
-getLandscItems();   // to napolni vsebino activeItems;
 
 //  - - - - - - - - - - - - - - - - -  AKCIJA  - - - - - - - - - - - - - - - - - - - - -
 calcReltvSpcPtsAndDraw();   // začetni izris izbranega kataloga;
@@ -516,17 +395,10 @@ const CLOCKW = 'cw';
 const ANTICLOCKW = 'acw';
 const INVALID = 'inv';  // neveljaven klik
 
-const lensBtns = document.getElementsByClassName('lens');
-const modeBtns = document.getElementsByClassName('mode');
 
 //   - - - - - -    listenerji
 // tipke;
 document.addEventListener('keydown', atKeyPress);
-// besedilni gumbi;
-lensBtns[0].addEventListener('click', lensBtnOprtn);
-lensBtns[1].addEventListener('click', lensBtnOprtn);
-modeBtns[0].addEventListener('click', modeBtnOprtn);
-modeBtns[1].addEventListener('click', modeBtnOprtn);
 // grafični gumbi;
 if (!mobile) {  // poslušalci za ikone krmiljenja če miška;
     controlsCanvas.addEventListener('mousedown', (e) => {mouseDownOprtn(e)});
@@ -537,107 +409,26 @@ if (!mobile) {  // poslušalci za ikone krmiljenja če miška;
     controlsCanvas.addEventListener('touchstart', (e) => {touchStartOprtn(e)}, {passive : false});
     controlsCanvas.addEventListener('touchmove', (e) => {touchMoveOprtn(e)}, {passive : false});
     controlsCanvas.addEventListener('touchend', (e) => {touchEndOprtn(e)}, {passive : false});
-
 }
 
 //  - - - - - -    funkcije
 function atKeyPress(e){
-    if (e.key == 'ArrowLeft') { moveViewer(LEFT) }
-    else if (e.key == 'ArrowRight') { moveViewer(RIGHT);}
+    if (e.key == 'ArrowLeft') { rotateViewer(ANTICLOCKW) }
+    else if (e.key == 'ArrowRight') { rotateViewer(CLOCKW);}
     else if (e.key == 'ArrowUp') { moveViewer(FORWARD) }  //e.code == 'KeyC'
     else if (e.key == 'ArrowDown') { moveViewer(BACK)  }
-    else if (e.code == 'KeyU') { moveViewer(UP);}
-    else if (e.code == 'KeyJ') { moveViewer(DOWN);}
-    else if (e.code == 'KeyI') {
-        if (isLandscapeMode) rotateViewer(ANTICLOCKW);
-        else rotateObj(ANTICLOCKW);
-    } else if (e.code == 'KeyO') {
-        if (isLandscapeMode) rotateViewer(CLOCKW);
-        else rotateObj(CLOCKW);
-    } else if (e.code == 'KeyN') {
-        if (lensBtns[0].classList.contains('unselected') 
-            && !viewModeTranstn.active) {  // tako vrednost ima samo takrat, ko se izvaja prehod FISH <> TELEANGLE; da se ne sproži hkrati še en prehod;
-            changeLens(false); 
-        }
-    } if (e.code == 'KeyF') {
-        if (lensBtns[1].classList.contains('unselected') && !viewModeTranstn.active) { changeLens(true); }
-    }
 }
 
 function moveViewer(toWhere){
     activeViewer.move(toWhere, activeViewer);
-    // console.log(toDecPlace(activeViewer.posIn3D.x), toDecPlace(activeViewer.posIn3D.y), toDecPlace(activeViewer.posIn3D.z), 'kot:', toDecPlace(activeViewer.angle));
-    if (isLandscapeMode) getLandscItems();  // da se določi, kateri predmeti so bližje in kateri dlje
     calcReltvSpcPtsAndDraw();
 }
 
 function rotateViewer(dir){
-    activeViewer.rotate(dir);   // samo landscapeViewer pride sem;
+    activeViewer.rotate(dir);
     calcReltvSpcPtsAndDraw();
 }
 
-function rotateObj(dir){
-    if (dir == CLOCKW) activeItems[0].rotate(true); // true za clockwise, sicer false;
-        else activeItems[0].rotate(false);
-    calcReltvSpcPtsAndDraw();
-}
-
-// - - - -  gumba FISH EYE/NARROW;
-function changeLens(doFish){    // to lahko kličeš tudi s tipkami;
-    lensBtns[0].classList.toggle('selected');
-    lensBtns[1].classList.toggle('selected');
-    lensBtns[0].classList.toggle('unselected');
-    lensBtns[1].classList.toggle('unselected');
-    if (doFish) { isViewModeTele = false; }
-        else { isViewModeTele = true; }
-    viewModeTranstn.active = true;   // to je sprožilec za izvajanje prehoda v spcPt2ScrnPt oz. calcScrnPts, po koncu prehoda se spet naštima prava vrednost;
-    for (let i = 1; i <= viewModeTranstn.numCycles; i++) {  // akcija
-        setTimeout(() => {
-            viewModeTranstn.cycleNum = i;
-            calcReltvSpcPtsAndDraw()
-            if (i == viewModeTranstn.numCycles) {
-                console.log('konc prehoda');
-                viewModeTranstn.active = false;
-            }
-        }, i * viewModeTranstn.cycleTime)
-    }
-}
-
-function lensBtnOprtn(evt){
-    //  evt.target.parentElement čekiramo, ker lahko klikneš span comment znotraj gumba in v tem primeru je ta span target, zato moramo skočit na parent;
-    if ((evt.target.classList.contains('unselected') || evt.target.parentElement.classList.contains('unselected')) 
-        && !viewModeTranstn.active) { // tako vrednost ima samo takrat, ko se izvaja prehod FISH <> TELEANGLE; da se ne sproži hkrati še en prehod;
-        if (lensBtns[0].classList.contains('selected')) {
-            changeLens(true);
-        } else changeLens(false);
-    }
-}
-
-//  - - - - -  gumba LANDSCAPE/ROTATE;
-function modeBtnOprtn(evt){
-    if (evt.target.classList.contains('unselected')) {
-        if (modeBtns[0].classList.contains('selected')) {
-            changeMode(true);
-        } else changeMode(false);
-        modeBtns[0].classList.toggle('selected');
-        modeBtns[1].classList.toggle('selected');
-        modeBtns[0].classList.toggle('unselected');
-        modeBtns[1].classList.toggle('unselected');
-    }
-
-    function changeMode(doRotate){
-        if (doRotate) {
-            activeItems = objRotateItems;
-            activeViewer = obj2RotateViewer;
-            isLandscapeMode = false;
-        } else {
-            activeItems = landscape.concat(landObjects);   // to nastavi activeItems na pravo stvar; ni treba getLandscItems, ker bi po nepotrebnem sortiralo;
-            activeViewer = landscapeViewer;
-            isLandscapeMode = true;
-        }
-        calcReltvSpcPtsAndDraw();
-    }
-}
 
 //  - -  grafične ikone za premikanje;      - - - - - - -
 // če mobile
@@ -718,31 +509,18 @@ function determineMousPosOnCtrlsCnvs(e) {
         mouseOrTchPosOnCtrls.y = e.changedTouches[0].clientY - contrlsCnvsRect.top;
     }
     
-    if (mouseOrTchPosOnCtrls.y < 50) {  // zgornja vrstica
-        return whichBtnInRow(true);
-    } else if (mouseOrTchPosOnCtrls.y > 55) {   // spodnja vrstica
-        return whichBtnInRow(false);
-    } else return INVALID;
-
-    function whichBtnInRow(isUpper) {   // če true, zgornja vrstica, sicer spodnja;
-        if (mouseOrTchPosOnCtrls.x < 105) { // leva polovica
-            if (mouseOrTchPosOnCtrls.x < 49) {  // 1. četrtina;
-                if (isUpper) return ANTICLOCKW;
-                else return LEFT;
-            } else if (mouseOrTchPosOnCtrls.x > 55) {   // 2. četrtina
-                if (isUpper) return FORWARD;
-                else return BACK;
-            } else return INVALID;
-        } else if (mouseOrTchPosOnCtrls.x > 111) { // desna polovica;
-            if (mouseOrTchPosOnCtrls.x < 161) { // 3. četrtina;
-                if (isUpper) return CLOCKW;
-                else return RIGHT;
-            } else if (mouseOrTchPosOnCtrls.x > 179) {  // 4. četrtina;
-                if (isUpper) return UP;
-                else return DOWN;
-            } else return INVALID;
-        } else return INVALID;
+    if (mouseOrTchPosOnCtrls.x < 49) { // prva tretjina, gumb za levo
+        if (mouseOrTchPosOnCtrls.y > 49 && mouseOrTchPosOnCtrls.y < 98) return ANTICLOCKW;
+        else return INVALID;
+    } else if (mouseOrTchPosOnCtrls.x < 98) { // srednja tretjina; gumba za gor in dol
+        if (mouseOrTchPosOnCtrls.y < 50 ) return FORWARD;
+        else if (mouseOrTchPosOnCtrls.y > 97 ) return BACK;
+        else return INVALID;
+    } else {    // zdej že vemo da smo na zadnji, desni tretjini;
+        if (mouseOrTchPosOnCtrls.y > 49 && mouseOrTchPosOnCtrls.y < 98) return CLOCKW; 
+        else return INVALID;
     }
+
 }
 
 function invldteCtrlsClick() {
@@ -755,10 +533,8 @@ function invldteCtrlsClick() {
 
 function desktopMovingHelper() {
     moveViewer(mouseOrTchPosOnCtrls.btn);
-    if (isLandscapeMode) getLandscItems();
 }
 
 function desktopRotationHelper() {
-    if (isLandscapeMode) rotateViewer(mouseOrTchPosOnCtrls.btn);
-        else rotateObj(mouseOrTchPosOnCtrls.btn);
+    rotateViewer(mouseOrTchPosOnCtrls.btn);
 }

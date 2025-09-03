@@ -44,7 +44,7 @@ class Segment{
         fillInfo,       // če undefined/false, se nastavi fillInfo.doFill = false;
         connections,    // če undefined, se nastavi na obrazec povezave, ki opiše štirikotnik;
         spcPtsIdxs,     // spcPtsIdxs je array indeksov, na osnovi katerega bo nastal podnabor točk za to ploskev; če UNDEFINED, se nastavi na allSpcPtsRef;
-        rArc) {     // polmer kroga, če krog
+        rArc) {     // polmer kroga, če krog; mal brezvezno polje, ker v resnici ne določa r-ja, ampak samo sporoči, da gra za krog, mroda bi bilo bolje, če bi se klicalo isArc;
         
         this.spcPts;
         this.connsAlt = new Array();   // tega se zapolni v konstruktorju od predmeta s klicem createConnsAlt();
@@ -129,6 +129,7 @@ class Thingy {
             const rX = Math.abs(screenPoints[1].x - screenPoints[0].x);
             const rY = Math.abs(screenPoints[2].y - screenPoints[0].y);
             ctx.ellipse(screenPoints[0].x, screenPoints[0].y, rX, rY, 0, 0, 6.3);
+            // spodnji dve bi morda morali bit na if (this.segments[whichSegmnt].fillInfo.doFill) ker morda ni samoumevno, da ima krog barvo 
             ctx.fillStyle = this.segments[whichSegmnt].fillInfo.fillCol;
             ctx.fill();
         }

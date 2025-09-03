@@ -1,0 +1,28 @@
+
+.mid {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    justify-self: center;
+    background:green;
+    
+}
+
+.one {
+    background: blue;
+}
+
+.right {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin-right: 100px;;
+}
+
+.left {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin-left: 100px;
+}

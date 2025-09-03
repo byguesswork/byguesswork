@@ -3,10 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="description" content="A neginner's study of animating wormholes">
+    <meta name="description" content="A beginner's study of wormhole animation">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=1, maximum-scale=5">
-    <title>Wormhole, psycho version · byGuesswork</title>
+    <title>Wormhole, lateral mvmt ver2</title>
     <link rel="icon" href="/images/favicon.ico">
     <link href="wormhole.css" rel="stylesheet">
 </head>
@@ -14,20 +14,22 @@
 <body>
     <canvas id="canvas">kamela, posodobi browser</canvas>
     <div id="info">
+        <p>Arrow L/R - Steer</p>
         <p>C - Center</p>
         <p>S - Straighten</p>
         <p>Esc - End</p>
         <p>B - Back</p>
+        <p>(not mobile friendly)</p>
     </div>
     <div id="data">
         <p>Angle (rad): <span id="kot"></span></p>
         <p>DX (1 unit): <span id="dx"></span></p>
-    </div>
-    <script src="data_psycho.js"></script>
-    <script src="ring_psycho.js"></script>
-    <script src="you_psycho.js"></script>
+    </div>                              <!-- spodaj navodila, ko kopiraš za različice  -->
+    <script src="data.js"></script>     <!-- spremeni tudi pot za CSS zgoraj !!!, dodaj ../  -->
+    <script src="ring.js"></script>     <!-- spremeni tudi title zgoraj (na: Wormhole, ime različice) !!!  -->
+    <script src="you.js"></script>      <!-- spremeni tudi relativno pot za Back v .js, dodaj ../ !!!  -->
     <script src="../utils.js"></script>
-    <script type="module" src="wormhole_psycho.js"></script>
+    <script type="module" src="wormhole.js"></script>
 </body>
 
 </html>

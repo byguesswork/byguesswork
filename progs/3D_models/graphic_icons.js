@@ -21,7 +21,7 @@ function drawControlsIcons() {
     controlsCtx.beginPath();
     
     // spodnji levi gumb (ZA LEVO);
-    controlsCtx.moveTo(37, 78);
+    controlsCtx.moveTo(37, 78); // sredina: 25, 79
     controlsCtx.lineTo(13, 78);
     controlsCtx.lineTo(21, 70);
     controlsCtx.moveTo(37, 79);
@@ -29,7 +29,7 @@ function drawControlsIcons() {
     controlsCtx.lineTo(21, 87);
     
     // spodnji desni gumb (ZA DESNO);
-    controlsCtx.moveTo(123, 78);
+    controlsCtx.moveTo(123, 78); // serdina: 135
     controlsCtx.lineTo(147, 78);
     controlsCtx.lineTo(139, 70);
     controlsCtx.moveTo(123, 79);
@@ -37,15 +37,15 @@ function drawControlsIcons() {
     controlsCtx.lineTo(139, 87);
     
     // zgornji srednji (ZA NAPREJ)
-    controlsCtx.moveTo(79, 36);
+    controlsCtx.moveTo(79, 36); // sredina 56 + 24, 25
     controlsCtx.lineTo(79, 12);
     controlsCtx.lineTo(72, 20);
     controlsCtx.moveTo(80, 36);
     controlsCtx.lineTo(80, 12);
     controlsCtx.lineTo(88, 20);
     
-    // zgornji srednji (ZA NAZAJ)
-    controlsCtx.moveTo(79, 67);
+    // spodnji srednji (ZA NAZAJ)
+    controlsCtx.moveTo(79, 67); // sredina 56+24, 79
     controlsCtx.lineTo(79, 91);
     controlsCtx.lineTo(72, 83);
     controlsCtx.moveTo(80, 67);

@@ -1,0 +1,153 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 16px;
+}
+
+body {
+    background-color: #4e4e4c;
+}
+
+#canvas {
+    background-color: #4e4e4c; 
+}
+
+#mode{
+    position: absolute;
+    left: 12px;
+    display: flex;
+}
+
+/* #controls {
+    position: absolute;
+    bottom: 30px;
+    left: 12px;
+    display: flex;
+} */
+
+/* #test{
+    background-color: #c0ffa7;
+} */
+
+#controls_canvas{
+    position: absolute;
+    bottom: 30px;
+    left: 26px;
+    background-color: #4e4e4c44;
+}
+
+#home {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+
+#info_settings {
+    position: absolute;
+}
+
+#joker {
+    position:absolute;
+    top: 20px;
+    left: 200px;
+    color: aliceblue;
+}
+
+#mode p, #rotate p, #lens p, #proceed p, #pan p, #rise p {
+    margin-left: 12px;
+    padding-left: 6px;
+    padding-right:5px;
+}
+
+.selected {
+    background-color:beige;
+    color: black;
+}
+
+.unselected {
+    background-color: #4e4e4c;
+    color: beige;
+}
+
+.interstit {
+    line-height: 8px;
+} 
+
+.mode,
+.rotate,
+.lens,
+.proceed,
+.pan,
+.rise,
+.interstit {
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+    cursor:default;
+}
+
+.rotate,
+.proceed,
+.pan,
+.rise {
+    color: beige;
+}
+
+.smaller {
+    font-size: 12px;
+}
+
+.hidden {
+    display: none;
+}
+
+
+
+/* izposojeno od mobile tetris */
+.info_settings_closed {
+    position: absolute;
+    top: 60px;
+    left: 20px;
+    height: 1.1em;
+    width: 1.1em;
+    line-height: 1.1em;
+    text-align: center;
+    color:whitesmoke
+}
+
+.info_settings_content_closed {
+    border-radius: 50%;
+    border-color: #bdc4bd;
+    border-width: 1px;
+    border-style: solid;
+    color:whitesmoke
+}
+.info_settings_content_open {
+    border: none;
+    color: #f0fff0;
+}
+
+.info_settings_open {
+    position: absolute;
+    top: 120px;
+    left: 120px;
+    /* right: 120px; */
+    padding: 20px;
+    text-align: left;
+    background-color: #4e4e4c;
+    border-color: #bdc4bd;
+    border-width: 1px;
+    border-style: solid;
+}
+
+#info_settings_OK {
+    color: #f0fff0;
+}
+
+.align-right {
+    text-align: right;
+}
