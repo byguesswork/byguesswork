@@ -23,7 +23,7 @@ function drawControlsIcons() {
 
     // narisat krivulje v krogih;
     controlsCtx.lineWidth = 2;
-    controlsCtx.strokeStyle = /*'#313131'*/ 'red';
+    controlsCtx.strokeStyle = '#313131';
     controlsCtx.beginPath();
     
     // levi gumb (ZA LEVO);
@@ -62,32 +62,32 @@ function drawControlsIcons() {
 
 
     // - - - - - - -   samo za test - - - - - - -
-    controlsCtx.strokeStyle = 'white';
-    controlsCtx.lineWidth = 1;
+    // controlsCtx.strokeStyle = 'white';
+    // controlsCtx.lineWidth = 1;
     
-    controlsCtx.beginPath();
+    // controlsCtx.beginPath();
 
-    // vodoravne;
-    controlsCtx.moveTo(0, 1);
-    controlsCtx.lineTo(250, 1);
-    controlsCtx.moveTo(0, 50);
-    controlsCtx.lineTo(250, 50);
-    controlsCtx.moveTo(0, 98);
-    controlsCtx.lineTo(250, 98);
-    controlsCtx.moveTo(0, 145);
-    controlsCtx.lineTo(250, 145);
+    // // vodoravne;
+    // controlsCtx.moveTo(0, 1);
+    // controlsCtx.lineTo(250, 1);
+    // controlsCtx.moveTo(0, 50);
+    // controlsCtx.lineTo(250, 50);
+    // controlsCtx.moveTo(0, 98);
+    // controlsCtx.lineTo(250, 98);
+    // controlsCtx.moveTo(0, 145);
+    // controlsCtx.lineTo(250, 145);
     
-    // navpične
-    controlsCtx.moveTo(1, 0);
-    controlsCtx.lineTo(1, 148);
-    controlsCtx.moveTo(49, 0);
-    controlsCtx.lineTo(49, 148);
-    controlsCtx.moveTo(98, 0);
-    controlsCtx.lineTo(98, 148);
-    controlsCtx.moveTo(145, 0);
-    controlsCtx.lineTo(145, 148);
+    // // navpične
+    // controlsCtx.moveTo(1, 0);
+    // controlsCtx.lineTo(1, 148);
+    // controlsCtx.moveTo(49, 0);
+    // controlsCtx.lineTo(49, 148);
+    // controlsCtx.moveTo(98, 0);
+    // controlsCtx.lineTo(98, 148);
+    // controlsCtx.moveTo(145, 0);
+    // controlsCtx.lineTo(145, 148);
 
-    controlsCtx.stroke();
+    // controlsCtx.stroke();
     // !test
 
 

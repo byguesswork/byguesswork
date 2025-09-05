@@ -1,5 +1,6 @@
 'use strict';
 
+// odstranit event listenerje, ko ESC
 // tam kjer je y / x) >= TELEANGLEFACTOR bi moralo merit na dočino hipotenuze ()
 // ortgnl circle 4 točke nardit
 
@@ -375,30 +376,40 @@ for (let index = 1; index < 40; index++) {
 //  - - - - - - - - - - - - - - - - -  AKCIJA  - - - - - - - - - - - - - - - - - - - - -
 calcReltvSpcPtsAndDraw();   // začetni izris izbranega kataloga;
 
+let intervalChecker = null; // glavna zadeva, ki dela tik tak, da eče igra;
 let mousePressIsValid = false;  // če true, pove, da je dotik v teku in da je na veljavnem mestu;
-let intervalChecker = null;
+let steeringKeyIsPressd = false;
+let steeringKeys = {
+    left : false,
+    right : false,
+    keyDown : false,
+    keyUp : false
+};
 let mouseOrTchPosOnCtrls = {
     x : 0,
     y : 0,
-    btn : 'none'
-}
+    btn : ''    // ta bi prazna lahko služila namesto mousePressIsValid, zdaj je to v bistvu podvojeno;
+};
+
+intervalChecker = setInterval(updtViewer, 30);
 
 // - - - -  CONTROLS  - - - - - -
 
+const FORWARD = "f";
+const KEYUP = 'u';
+const KEYDOWN = 'd';
+const RIGHT = 'r';
 const LEFT = 'l';
-const RIGHT = "r";
-const FORWARD = "c";    // izvirno je bilo closer
-const BACK = 'f';       // izvirno je bilo far
-const UP = 'u';
-const DOWN = 'd';
-const CLOCKW = 'cw';
-const ANTICLOCKW = 'acw';
+const RISE = 'ris';
+const DIVE = 'dve';
 const INVALID = 'inv';  // neveljaven klik
 
 
 //   - - - - - -    listenerji
 // tipke;
-document.addEventListener('keydown', atKeyPress);
+document.addEventListener('keydown', atKeyDown);
+document.addEventListener('keyup', atKeyUp);
+
 // grafični gumbi;
 if (!mobile) {  // poslušalci za ikone krmiljenja če miška;
     controlsCanvas.addEventListener('mousedown', (e) => {mouseDownOprtn(e)});
@@ -412,21 +423,86 @@ if (!mobile) {  // poslušalci za ikone krmiljenja če miška;
 }
 
 //  - - - - - -    funkcije
-function atKeyPress(e){
-    if (e.key == 'ArrowLeft') { rotateViewer(ANTICLOCKW) }
-    else if (e.key == 'ArrowRight') { rotateViewer(CLOCKW);}
-    else if (e.key == 'ArrowUp') { moveViewer(FORWARD) }  //e.code == 'KeyC'
-    else if (e.key == 'ArrowDown') { moveViewer(BACK)  }
+function atKeyDown(e){
+    if (e.key == 'ArrowLeft') { 
+        steeringKeys.left = true;
+        steeringKeyIsPressd = true; 
+    } else if (e.key == 'ArrowRight') { 
+        steeringKeys.right = true;
+        steeringKeyIsPressd = true;
+    } else if (e.key == 'ArrowUp') {
+        steeringKeys.keyUp = true;
+        steeringKeyIsPressd = true;
+    } else if (e.key == 'ArrowDown') {
+        steeringKeys.keyDown = true;
+        steeringKeyIsPressd = true;
+    } else if (e.key === 'Escape') {
+        if (intervalChecker != null) {
+            clearInterval(intervalChecker);
+            intervalChecker = null;
+        }
+    }
 }
 
-function moveViewer(toWhere){
-    activeViewer.move(toWhere, activeViewer);
-    calcReltvSpcPtsAndDraw();
+function atKeyUp(e) {
+    if (intervalChecker != null) {
+        if (e.key == 'ArrowLeft') { 
+            steeringKeys.left = false;
+            // če so tudi ostali false, mora it na false tudi steerinKeyIsPressd kontrolnik;
+            if (!steeringKeys.right && !steeringKeys.keyUp && !steeringKeys.keyDown) steeringKeyIsPressd = false; 
+        } else if (e.key == 'ArrowRight') { 
+            steeringKeys.right = false;
+            if (!steeringKeys.left && !steeringKeys.keyUp && !steeringKeys.keyDown) steeringKeyIsPressd = false; 
+        } else if (e.key == 'ArrowUp') {
+            steeringKeys.keyUp = false;
+            if (!steeringKeys.left && !steeringKeys.right && !steeringKeys.keyDown) steeringKeyIsPressd = false; 
+        } else if (e.key == 'ArrowDown') {
+            steeringKeys.keyDown = false;
+            if (!steeringKeys.left && !steeringKeys.right && !steeringKeys.keyUp) steeringKeyIsPressd = false; 
+        }
+    }
 }
 
-function rotateViewer(dir){
-    activeViewer.rotate(dir);
-    calcReltvSpcPtsAndDraw();
+function updtViewer() { // glavna reč, da se reč dogaja, vezano na interval;
+    rotateViewer(); // spremenimo kote/položaj, če pritisnjena kšna smerna tipka;
+    activeViewer.move(FORWARD); // gas naprej v izračunani smeri - samo izračun;
+    calcReltvSpcPtsAndDraw();   // izris
+}
+
+
+function rotateViewer(){
+    if (mousePressIsValid || steeringKeyIsPressd) {
+        let left = false, right = false, sideways = false;
+        if (mouseOrTchPosOnCtrls.btn == LEFT || steeringKeys.left) {
+            left = true;
+            sideways = true;
+        }
+        if (mouseOrTchPosOnCtrls.btn == RIGHT || steeringKeys.right) {
+            right = true;
+            sideways = true;
+        }
+        if (sideways) {
+            if (left && right) { /* do nuthn, če oba hkrati; */ }
+            else if (left) { activeViewer.rotate(LEFT) }
+            else { activeViewer.rotate(RIGHT) }
+        }
+
+        let keyUp = false, keyDown = false, climbDive = false;
+        if (mouseOrTchPosOnCtrls.btn == KEYUP || steeringKeys.keyUp) {
+            keyUp = true;
+            climbDive = true;
+        }
+        if (mouseOrTchPosOnCtrls.btn == KEYDOWN || steeringKeys.keyDown) {
+            keyDown = true;
+            climbDive = true;
+        }
+        if (climbDive) {
+            if (keyDown && keyUp) { /* do nuthn, če oba hkrati; */ }
+            else if (keyDown) { activeViewer.rotate(RISE) }
+            else { activeViewer.rotate(DIVE) }
+        }
+
+    }
 }
 
 
@@ -455,7 +531,6 @@ function touchMoveOprtn(e) {
     e.preventDefault();
     if (e.changedTouches[0].clientX < contrlsCnvsRect.left || e.changedTouches[0].clientX > contrlsCnvsRect.right
         || e.changedTouches[0].clientY < contrlsCnvsRect.top || e.changedTouches[0].clientY > contrlsCnvsRect.bottom) {
-        // if (mousePressIsValid) console.log('invalidated, ker zdrsnil s controls');
         invldteCtrlsClick();
     } else {
         mouseMoveOprtn(e);   // lahko uporabimo kar od miši;
@@ -470,15 +545,6 @@ function mouseDownOprtn(e){
     } else {
         mousePressIsValid = true;
         mouseOrTchPosOnCtrls.btn = reslt;
-        if (reslt != CLOCKW && reslt != ANTICLOCKW) {
-            desktopMovingHelper();
-            if (reslt == FORWARD || reslt == BACK) intervalChecker = setInterval(desktopMovingHelper, 30);
-            else if (reslt == LEFT || reslt == RIGHT) intervalChecker = setInterval(desktopMovingHelper, 45);
-            else intervalChecker = setInterval(desktopMovingHelper, 55);
-        } else {
-            desktopRotationHelper();
-            intervalChecker = setInterval(desktopRotationHelper, 50);
-        }
     }
 }
 
@@ -487,7 +553,6 @@ function mouseMoveOprtn(e) {
         const reslt = determineMousPosOnCtrlsCnvs(e);
         if (reslt != mouseOrTchPosOnCtrls.btn) {
             invldteCtrlsClick();
-            // console.log('invalidated pri premiku z gumba')
         }
     }
 }
@@ -510,14 +575,14 @@ function determineMousPosOnCtrlsCnvs(e) {
     }
     
     if (mouseOrTchPosOnCtrls.x < 49) { // prva tretjina, gumb za levo
-        if (mouseOrTchPosOnCtrls.y > 49 && mouseOrTchPosOnCtrls.y < 98) return ANTICLOCKW;
+        if (mouseOrTchPosOnCtrls.y > 49 && mouseOrTchPosOnCtrls.y < 98) return LEFT;
         else return INVALID;
     } else if (mouseOrTchPosOnCtrls.x < 98) { // srednja tretjina; gumba za gor in dol
-        if (mouseOrTchPosOnCtrls.y < 50 ) return FORWARD;
-        else if (mouseOrTchPosOnCtrls.y > 97 ) return BACK;
+        if (mouseOrTchPosOnCtrls.y < 50 ) return KEYUP;
+        else if (mouseOrTchPosOnCtrls.y > 97 ) return KEYDOWN;
         else return INVALID;
     } else {    // zdej že vemo da smo na zadnji, desni tretjini;
-        if (mouseOrTchPosOnCtrls.y > 49 && mouseOrTchPosOnCtrls.y < 98) return CLOCKW; 
+        if (mouseOrTchPosOnCtrls.y > 49 && mouseOrTchPosOnCtrls.y < 98) return RIGHT; 
         else return INVALID;
     }
 
@@ -525,16 +590,6 @@ function determineMousPosOnCtrlsCnvs(e) {
 
 function invldteCtrlsClick() {
     mousePressIsValid = false;
-    if (intervalChecker != null) {
-        clearInterval(intervalChecker);
-        intervalChecker = null;
-    }
+    mouseOrTchPosOnCtrls.btn = '';
 }
 
-function desktopMovingHelper() {
-    moveViewer(mouseOrTchPosOnCtrls.btn);
-}
-
-function desktopRotationHelper() {
-    rotateViewer(mouseOrTchPosOnCtrls.btn);
-}
