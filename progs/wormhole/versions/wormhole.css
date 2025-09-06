@@ -22,3 +22,16 @@
     padding-right: 20px;
     padding-bottom: 20px;
 }
+
+#links {
+    position: absolute;
+    left: 0;
+    top: 0;
+    padding-left: 20px;
+    padding-top: 10px;
+}
+
+#links p, #links p a {
+    font-size: 13px;
+
+}

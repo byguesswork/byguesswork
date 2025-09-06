@@ -1,6 +1,12 @@
 'use strict';
 
 // v classes preveri to: // spodnji dve bi morda morali bit na if (this.segments[whichSegmnt].fillInfo.doFill) ker morda ni samoumevno, da ima krog barvo 
+//tole:  if (!isViewModeTele) {
+            //if (y > 0) constraints.allYNegAngular = false;
+            // pred tole bi verjetno lahko šlo if(constrints.allYNegAngular) ker če je že false,m ni več treba čekirat 
+            // helper res dela na ravni točke, ampak allYNegAngular pa je na ravni segmenta!;
+// trenutno se preverja, pri preverjaju ali naj gre v izris, le glede na levo/desno (if ((y / x) >= TELEANGLEFACTOR || (y / x) <= -TELEANGLEFACTOR))
+    // bi bilo treba tudi glede na y / z (teleFctrY);
 // zeleno stikalo na steklu stavbe, ki bi bilo vidno ob približanju
 // dodat kšne opise v index.html (recimo za fuel: I like its simplicity, maybe you will too)
 
@@ -223,6 +229,7 @@ function calcScreenPts(spacePoints, connctnsRange) {   // prejme relativne koord
     const scrnPts = new Array();
     let startRoll = 0; // spremenljivka v katero shraniš, kjer si že iskal; predvidoma se poznejše točke najdejo v poznejših povezavah, zato;
     spacePoints.forEach((spcPt, i) => {
+        // to spodaj je nek star opis, ki ne več velja, odkar se uporablja TELEANGLEFACTOR;
         // glavna logika je Math.atan2(offset(od navpičnice, vodoravnice), razdalja do tja);
         // računanje hipotenuze služi upoštevanju tega, da če je neka stvar visoko, je v bistvu tudi oddaljena;
         // tudi če ozkokotni pogled prikažeš cel (s faktorjem 0,2) ni čisto nič drugačen od fish eye; spreminjanje kota torej ne reši ukrivljenosti, bo treba druga metoda;

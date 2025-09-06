@@ -277,28 +277,17 @@ class Viewer {
 
     constructor(x, y, z){
         this.posIn3D = new SpacePoint(x, y, z)
-        this.angle = 0; // kot 0 gleda vzdolž osi y, v smeri naraščanja y;
+        this.angle = 0; // horizontal angle; kot 0 gleda vzdolž osi y, v smeri naraščanja y; narašča po osi x desno;
+        this.diveAngle = 0 // vertival angle;kot 0 gleda vzdolž osi y, v smeri naraščanja y; narašča po osi z navzgot;
         this.rotationAngleIncrmnt = Math.PI/180;
     }
 
     move(dir){
-        /* if (dir == LEFT) {
-            // this.posIn3D.x -= 0.2 * Math.cos(viewer.angle); // prvenstveni premik;
-            // this.posIn3D.y += 0.2 * Math.sin(viewer.angle); // dodaten premik ob morebitnem kotu;
-        } else if (dir == RIGHT) {
-            this.posIn3D.x += 0.2 * Math.cos(viewer.angle);
-            this.posIn3D.y -= 0.2 * Math.sin(viewer.angle);
-        } else */ if (dir == FORWARD) {
-            this.posIn3D.y += 0.6 * Math.cos(this.angle); // prvenstveni premik;
-            this.posIn3D.x += 0.6 * Math.sin(this.angle);
-        } /* else if (dir == BACK) {
-            this.posIn3D.y -= 0.2 * Math.cos(viewer.angle);
-            this.posIn3D.x -= 0.2 * Math.sin(viewer.angle);
-        } else if (dir == UP) {
-            this.posIn3D.z += 0.2;
-        } else if (dir == DOWN) {
-            this.posIn3D.z -= 0.2;
-        } */
+        if (dir == FORWARD) {
+            this.posIn3D.y += 0.5 * Math.cos(this.angle); // prvenstveni premik;
+            this.posIn3D.x += 0.5 * Math.sin(this.angle);
+            this.posIn3D.z += 0.5 * Math.sin(this.diveAngle);
+        }
     }
 
     rotate(dir){
@@ -307,9 +296,9 @@ class Viewer {
         } else if (dir == RIGHT) {
             this.angle += this.rotationAngleIncrmnt;
         } else if (dir == RISE) {   // lahko gremo vse na else, ker itak se rotate kliče po eden naenkrat;
-            this.posIn3D.z += 0.2;
+            this.diveAngle += this.rotationAngleIncrmnt;
         } else if (dir == DIVE) {
-            this.posIn3D.z -= 0.2;
+            this.diveAngle -= this.rotationAngleIncrmnt;
         }
         this.angle = rangeAngle(this.angle);
 
