@@ -1,12 +1,11 @@
 'use strict';
 
+// ortgnl circle 4 točke nardit ali 8 točk al pa čekirat če je središče kroga oddaljeno od središča ekrana največ za polovico diagonale ekrana + r kroga;
 // a se y in yForZ razlikujeta v calcReltvSpcPtsAndDraw > helper ???
 // morda zdaj vozi nekoliko hitreje ker se premakne za delta x, y in z vendar vsi trije emd sabo niso uskaljeni, ampak samo x in y in ločeno z in y;
-// da bi bili oddaljenejši obroči temnejši
 // zdaj bi bilo treba čekirat tudi za to, ali je nekaj nad z (tako kot se preverja, al je nekaj za y == 0) ker če ne ko delaš looping, ti pred tabo izrisuje stvari, ki jih imaš za hrbtom;
 // odstranit event listenerje, ko ESC
 // tam kjer je y / x) >= TELEANGLEFACTOR bi moralo merit na dočino hipotenuze ()
-// ortgnl circle 4 točke nardit ali 8 točk al pa čekirat če je središče kroga oddaljeno od središča ekrana največ za polovico diagonale ekrana + r kroga;
 
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
@@ -47,7 +46,7 @@ if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null) {
 
     screen.orientation.addEventListener("change", () => {
         
-        // ne dela dobro, bi rablo mal več testiranja, damo kar reload
+        // ne dela dobro, bi rablo mal več testiranja, zato damo namesto tega kar reload;
         // orientationChkIsInMotion = setInterval(chkOnOrientationChgd, 50);
         location.reload();
     });
@@ -69,9 +68,6 @@ let vertRadsFrmCentr, fishFctrX, fishFctrY, teleFctrX, teleFctrY;
 calcVertRadsFrmCentr();
 console.log(wdth, hght, scrnMidPoint);
 
-infoSettgsContent.addEventListener('click', infoClicked);
-infoSettgsOK.addEventListener('click', infoCloseClicked);
-
 if (document.readyState == 'loading') { //.. in preberemo koordinate controlsRecta;
     document.addEventListener("DOMContentLoaded", readCntrlsCnvsRect);  // domcontent loaded je lahko "complete" ali pa "interactive";
 } else {
@@ -89,16 +85,16 @@ function readCntrlsCnvsRect() {
     console.log('rect:', contrlsCnvsRect.left, contrlsCnvsRect.top)
 }
 
-function chkOnOrientationChgd(){    // trenutno se ne uproablja, ker ne deluje dobro;
-    // console.log('widthWas:', clientWidthWas, 'width is:', document.documentElement.clientWidth, 'interval:', orientationChkIsInMotion);
-    if (document.documentElement.clientWidth != clientWidthWas) {
-        clearInterval(orientationChkIsInMotion);
-        orientationChkIsInMotion = null;
-        initScrn();
-        calcVertRadsFrmCentr();
-        calcReltvSpcPtsAndDraw();
-    }
-}
+// function chkOnOrientationChgd(){    // trenutno se ne uproablja, ker ne deluje dobro;
+//     // console.log('widthWas:', clientWidthWas, 'width is:', document.documentElement.clientWidth, 'interval:', orientationChkIsInMotion);
+//     if (document.documentElement.clientWidth != clientWidthWas) {
+//         clearInterval(orientationChkIsInMotion);
+//         orientationChkIsInMotion = null;
+//         initScrn();
+//         calcVertRadsFrmCentr();
+//         calcReltvSpcPtsAndDraw();
+//     }
+// }
 
 function initScrn(){
     clientWidthWas = document.documentElement.clientWidth; // da bomo pozneje lahko preverjali orietn change na mobilcu;
@@ -257,18 +253,18 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
         r = (z**2 + yForZ**2)**(0.5);
 
         // izračun relativnega ploskovnega z in y, če gledalec ne gleda pod kotom 0 (sicer ta del ni potreben);
-        if (viewngDiveAngle != 0) {
+        if (viewngClimbAngle != 0) {
             if (yForZ > 0) {
-                diveAngle = Math.asin(z/r) - viewngDiveAngle;   // pri izračunu kota, pod katerim gledamo neko točko, je treba upoštevati, kam je usmerjen pogled gledalva (viewAngle);
+                climbAngle = Math.asin(z/r) - viewngClimbAngle;   // pri izračunu kota, pod katerim gledamo neko točko, je treba upoštevati, kam je usmerjen pogled gledalva (viewAngle);
             } else if (yForZ < 0) {
-                diveAngle = Math.PI - Math.asin(z/r) - viewngDiveAngle;
+                climbAngle = Math.PI - Math.asin(z/r) - viewngClimbAngle;
             } else if (yForZ == 0) {
-                if (z < 0) diveAngle = 1.5 * Math.PI - viewngDiveAngle;
-                else diveAngle = 0.5 * Math.PI - viewngDiveAngle;
+                if (z < 0) climbAngle = 1.5 * Math.PI - viewngClimbAngle;
+                else climbAngle = 0.5 * Math.PI - viewngClimbAngle;
             }
             
             //zdaj, ko smo dobili relativni kot, lahko izračunamo pripadajoči x in y (prostorske) relativne točke, ki bo izrisana;
-            z = r * Math.sin(diveAngle);
+            z = r * Math.sin(climbAngle);
             /* y = r * Math.cos(angle); */
 
         }
@@ -276,21 +272,23 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
         // !test
 
         // preverjanje, ali naj gre točka (in posledično segment) v izris; false > gre v izris, privzeto je true;
-        if ((y / x) >= TELEANGLEFACTOR || (y / x) <= -TELEANGLEFACTOR) {    // izvedba z Math.abs bi bila krajša v kodi a morda počasnejša v izvedbi;
-            constraints.allYNegAngular = false;
-        } else {    // moramo zabeležit, na kateri strani vidnega polja se točke segmenta pojavljajo zunaj vidnega polja, ker če se na obeh, je to poseben primer;
-            if ((y / x) >= 0) { // zdaj že vemo, da nismo ne levo od negativne meje ne desno od pozitivne in je pomembna samo še meja 0;
-                // constraints.right = true; // tu bi lahko samo to zabeležli, lahko pa gremo korak dlje in že delamo na allYNeg;
-                if (constraints.left) {
-                    constraints.allYNegAngular = false; // če že imamo od prej left in zdaj bi itak dodali še right, lahko kar zabeležimo allYNeg;
-                } else constraints.right = true;
-            } else {
-                // constraints.left = true; // tu bi lahko samo to zabeležli, lahko pa gremo korak dlje in že delamo na allYNeg;
-                if (constraints.right) {
-                    constraints.allYNegAngular = false; // če že imamo od prej right in zdaj bi itak dodali še left, lahko kar zabeležimo allYNeg;
-                } else constraints.left = true;
+        if (constraints.allYNegAngular) {   // če je še true, probamo, al lahko postane false;
+            if ((y / x) >= TELEANGLEFACTOR || (y / x) <= -TELEANGLEFACTOR) {    // izvedba z Math.abs bi bila krajša v kodi a morda počasnejša v izvedbi;
+                constraints.allYNegAngular = false;
+            } else {    // moramo zabeležit, na kateri strani vidnega polja se točke segmenta pojavljajo zunaj vidnega polja, ker če se na obeh, je to poseben primer;
+                if ((y / x) >= 0) { // zdaj že vemo, da nismo ne levo od negativne meje ne desno od pozitivne in je pomembna samo še meja 0;
+                    // constraints.right = true; // tu bi lahko samo to zabeležli, lahko pa gremo korak dlje in že delamo na allYNeg;
+                    if (constraints.left) {
+                        constraints.allYNegAngular = false; // če že imamo od prej left in zdaj bi itak dodali še right, lahko kar zabeležimo allYNeg;
+                    } else constraints.right = true;
+                } else {
+                    // constraints.left = true; // tu bi lahko samo to zabeležli, lahko pa gremo korak dlje in že delamo na allYNeg;
+                    if (constraints.right) {
+                        constraints.allYNegAngular = false; // če že imamo od prej right in zdaj bi itak dodali še left, lahko kar zabeležimo allYNeg;
+                    } else constraints.left = true;
+                }
             }
-        }
+        } // else allYNeg je že false, ni več treba čekirat;
 
         // zabeleženje točke (v vsakem primeru, ne glede na true/false pri allYNegAngular, ker recimo ti zadnja točka lahko da false in sproži izris)
         item2Draw.push(new SpacePoint(x, y, z));    // to je številka 3 spodaj (item2Draw.push(new SpacePoint(x, y, spcPt.z - viewPoint.z)););
@@ -318,7 +316,7 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
     }
 
     // začetek dogajanja;
-    let x, y, z, r, angle, diveAngle;   // prvi kot je horizontalni (narašča desno od naravnost), drugi vertikalni (narašča navpično gor od naravnost);
+    let x, y, z, r, angle, climbAngle;   // prvi kot je horizontalni (narašča desno od naravnost), drugi vertikalni (narašča navpično gor od naravnost);
 
     // ker bomo na koncu risali, moramo na začetku vse izbrisat;
     clearCanvas();
@@ -326,7 +324,7 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
     // določimo izhodišče pogleda in kot; slednje je odvisno od tega al landscape ali objRotate;
     const viewPoint = activeViewer.posIn3D;   // točka, iz katere gledamo;
     const viewngAngle = activeViewer.angle; // horizontalni kot pod katerim gledamo; sever (y proti neskončno) == 0; narašča na desno;
-    const viewngDiveAngle = activeViewer.diveAngle; // vertikalni kot; sever (y proti neskončno) == 0; narašča navzgor;
+    const viewngClimbAngle = activeViewer.climbAngle; // vertikalni kot; sever (y proti neskončno) == 0; narašča navzgor;
 
     // - -  NA RAVNI POSAMIČNIH PREDMETOV KATALOGA PREDMETOV  - - ;
     activeItems.forEach(item => {
@@ -375,17 +373,19 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
         // - -  NA RAVNI SEGMENTA  - - ;
         // v prvi pasaži narišemo tiste segmente, ki se narišejo vedno (BASE/undefined, lahko barvne ploskev ali samo orisi);
         for (let k = 0; k < item.segments.length; k++) {
-            if (item.segments[k].fillInfo.typ != PROXIMAL) {
-                if (item.segments[k].fillInfo.typ != BASPROX) {
-                    oneLoop(k); // če ni ne PROXIMAL ne BASPROX, gre v izris (je torej ali (base/undefined) ploskev ali pa element orisa);
-                } else {    // če je BASPROX, se je treba odločit, al ga narisat zdaj (se obnaša kot BASE), al ga zadržat za poznejše risanje (kot PROXIMAL);
-                    if (isCloser(item.segments[k].fillInfo)) {
-                        closerProxmls.push(k);   // ta BASPROX se obnaša kot potrjen PROXIMAL, zabeležimo; PAZI, gre direkt v closerProxmls, ne v remaining;
-                    } else {
-                        oneLoop(k); // ta BASPROX se obnaša kot BASE ploskEv in gre zdaj v izris;
+            if (item.strokeOpacity != '00'){
+                if (item.segments[k].fillInfo.typ != PROXIMAL) {
+                    if (item.segments[k].fillInfo.typ != BASPROX) {
+                        oneLoop(k); // če ni ne PROXIMAL ne BASPROX, gre v izris (je torej ali (base/undefined) ploskev ali pa element orisa);
+                    } else {    // če je BASPROX, se je treba odločit, al ga narisat zdaj (se obnaša kot BASE), al ga zadržat za poznejše risanje (kot PROXIMAL);
+                        if (isCloser(item.segments[k].fillInfo)) {
+                            closerProxmls.push(k);   // ta BASPROX se obnaša kot potrjen PROXIMAL, zabeležimo; PAZI, gre direkt v closerProxmls, ne v remaining;
+                        } else {
+                            oneLoop(k); // ta BASPROX se obnaša kot BASE ploskEv in gre zdaj v izris;
+                        }
                     }
-                }
-            } else { remaining.push(k); }   // če je segment PROXIMAL, ga zabeležimo za naslednjo pasažo;
+                } else { remaining.push(k); }   // če je segment PROXIMAL, ga zabeležimo za naslednjo pasažo;
+            } // else console.log('prosojno, ne delamo izračuna niti izrišemo'); // če je poteza prosojna, je brezveze sploh računat ...;
         } 
         
         if (remaining.length > 0) { // v remaining so samo PROXIMAL, ki pa še niso bili preverjeni;
@@ -411,18 +411,26 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
 //  - - - - - - - - - - - - - - - - -  PRIPRAVA  - - - - - - - - - - - - - - - - - - - - -
 
 //  - - - - - -  USTVARJANJE GLEDALCA;
-const activeViewer = new Viewer(0, -9, 0);
+const activeViewer = new Viewer(0, -10, 0);
 
 // ustvarjanje obročev
-let activeItems = [];
+let loops = []
 for (let index = 1; index < 40; index++) {
-    activeItems.push(new OrtgnlCircle(new SpacePoint(0, 20 * index, 0), 5, [true, false], new FillInfo(false)))
-}
+    loops.push(new OrtgnlCircle(new SpacePoint(0, 60 + 20 * index, 0), 5, [true, false], new FillInfo(false)))
+};
+let activeItems = [...loops];
+const xOffst = mobile ? -5 : 0;
+const zOffst = mobile ? 6 : 0;
+activeItems.push(new LetterS(new SpacePoint(6 + xOffst, 60, 0 + zOffst), new FillInfo(true, BASE, 'white')));
+activeItems.push(new LetterT(new SpacePoint(8.2 + xOffst, 60, 0 + zOffst), new FillInfo(true, BASE, 'white')));
+activeItems.push(new LetterA(new SpacePoint(10.4 + xOffst, 60, 0 + zOffst), new FillInfo(true, BASE, 'white')));
+activeItems.push(new LetterR(new SpacePoint(12.6 + xOffst, 60, 0 + zOffst), new FillInfo(true, BASE, 'white')));
+activeItems.push(new LetterT(new SpacePoint(14.8 + xOffst, 60, 0 + zOffst), new FillInfo(true, BASE, 'white')));
 
 //  - - - - - - - - - - - - - - - - -  AKCIJA  - - - - - - - - - - - - - - - - - - - - -
-calcReltvSpcPtsAndDraw();   // začetni izris izbranega kataloga;
 
-let intervalChecker = null; // glavna zadeva, ki dela tik tak, da eče igra;
+let intervalChecker = null; // glavna zadeva, ki dela tik tak, da teče igra;
+let isRunning = true;   // ali se igra izvaja; z ESC gre na false in ni mogoče več zagnati
 let mousePressIsValid = false;  // če true, pove, da je dotik v teku in da je na veljavnem mestu;
 let steeringKeyIsPressd = false;
 let steeringKeys = {
@@ -437,18 +445,27 @@ let mouseOrTchPosOnCtrls = {
     btn : ''    // ta bi prazna lahko služila namesto mousePressIsValid, zdaj je to v bistvu podvojeno;
 };
 
+const distToBlck = 255; // pri kateri oddaljenosti od možička je krog že prosojen/neviden;
+
+// začetni izris izbranega kataloga;
+updLoopsShapes()
+calcReltvSpcPtsAndDraw(); 
+
+// gremo!
 intervalChecker = setInterval(updtViewer, 30);
 
 // - - - -  CONTROLS  - - - - - -
 
 const FORWARD = "f";
-const KEYUP = 'u';
-const KEYDOWN = 'd';
+const KEYUP = 'ku';
+const KEYDOWN = 'kd';
 const RIGHT = 'r';
 const LEFT = 'l';
-const RISE = 'ris';
-const DIVE = 'dve';
+const CLIMB = 'c';
+const DIVE = 'd';
 const INVALID = 'inv';  // neveljaven klik
+const ESC = 'esc'; // signal, da si pritisnil tipko esc;
+const TILL_END = 'tillEnd'; // signal, da si prišel do konca igre;
 
 
 //   - - - - - -    listenerji
@@ -457,12 +474,17 @@ document.addEventListener('keydown', atKeyDown);
 document.addEventListener('keyup', atKeyUp);
 
 // grafični gumbi;
-if (!mobile) {  // poslušalci za ikone krmiljenja če miška;
+if (!mobile) {  // če miška;
+    // poslušalci za ikone krmiljenja;
     controlsCanvas.addEventListener('mousedown', (e) => {mouseDownOprtn(e)});
     controlsCanvas.addEventListener('mouseleave', (e) => {mouseLeaveOprtn(e)});
     controlsCanvas.addEventListener('mouseup', (e) => {mouseUpOprtn(e)});
     controlsCanvas.addEventListener('mousemove', (e) => {mouseMoveOprtn(e)});
-} else {
+
+    // poslušalci za drugo (info panel);
+    infoSettgsContent.addEventListener('click', infoClicked);
+    infoSettgsOK.addEventListener('click', infoCloseClicked);
+} else { // če mobile (touch);
     controlsCanvas.addEventListener('touchstart', (e) => {touchStartOprtn(e)}, {passive : false});
     controlsCanvas.addEventListener('touchmove', (e) => {touchMoveOprtn(e)}, {passive : false});
     controlsCanvas.addEventListener('touchend', (e) => {touchEndOprtn(e)}, {passive : false});
@@ -484,8 +506,7 @@ function atKeyDown(e){
         steeringKeyIsPressd = true;
     } else if (e.key === 'Escape') {
         if (intervalChecker != null) {
-            clearInterval(intervalChecker);
-            intervalChecker = null;
+            gameOver(ESC);
         }
     }
 }
@@ -512,6 +533,13 @@ function atKeyUp(e) {
 function updtViewer() { // glavna reč, da se reč dogaja, vezano na interval;
     rotateViewer(); // spremenimo kote/položaj, če pritisnjena kšna smerna tipka;
     activeViewer.move(FORWARD); // gas naprej v izračunani smeri - samo izračun;
+    if (activeViewer.posIn3D.y > 900) { // če si prišel do konca; 900 je hardcoded, to bi veljalo parametrizirat;
+        console.log(' - -  KONEC - -');
+        gameOver(TILL_END);
+    }
+    if(activeViewer.someCounter % 10 == 0) {
+        updLoopsShapes();
+    }
     calcReltvSpcPtsAndDraw();   // izris
 }
 
@@ -544,11 +572,37 @@ function rotateViewer(){
         }
         if (climbDive) {
             if (keyDown && keyUp) { /* do nuthn, če oba hkrati; */ }
-            else if (keyDown) { activeViewer.rotate(RISE) }
+            else if (keyDown) { activeViewer.rotate(CLIMB) }
             else { activeViewer.rotate(DIVE) }
         }
-
     }
+}
+
+function updLoopsShapes() {
+    loops.forEach(loop => {
+        let diff = Thingy.calcSpatialRFromSpcPt(loop.objSpcPts[0], activeViewer.posIn3D);
+        // širina črte;
+        // če fiksna
+            // do nuthn, ker je že nastavljena;
+        
+        // će variabilno;
+        // varianta 1;
+        if (diff <= 80) loop.lineWidth = 2.5;
+        else if (diff <= 60) loop.lineWidth = 3;
+        else if (diff <= 40) loop.lineWidth = 4;
+
+        // neprosojnost;
+        diff = diff - 30;   // -30 je zato, da je pri razdalji 30 barva že ff (polna);
+        if (diff < 0) diff = 0;
+        if (diff > distToBlck) diff = distToBlck;
+        diff = Math.floor(255 - diff / (distToBlck / 255));
+        loop.strokeOpacity = '' + decToHex(diff);
+    })
+}
+
+function stopTicker() {
+    clearInterval(intervalChecker);
+    intervalChecker = null;
 }
 
 

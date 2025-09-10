@@ -42,7 +42,10 @@ class Segment{
     constructor(
         allSpcPtsRef,   // ref na spacePoints od predmeta;  
         fillInfo,       // če undefined/false, se nastavi fillInfo.doFill = false;
-        connections,    // če undefined, se nastavi na obrazec povezave, ki opiše štirikotnik;
+        connections,    // podaš array arrayev; 
+                        // prvo podaš [0,1] (povezava od 0. do 1. indeks točke), potem pa podaš samo naslednji cilj, ne več povezavo od-do, tj. recimo [2];
+                        // če rišeš lik, ga moraš zapret, zadnji array v arrayju je torej [0] (da potegneš potezo do izhodiščne točke); 
+                        // če undefined, se nastavi na obrazec povezave, ki opiše štirikotnik;
         spcPtsIdxs,     // spcPtsIdxs je array indeksov, na osnovi katerega bo nastal podnabor točk za to ploskev; če UNDEFINED, se nastavi na allSpcPtsRef;
         rArc) {     // polmer kroga, če krog; mal brezvezno polje, ker v resnici ne določa r-ja, ampak samo sporoči, da gra za krog, mroda bi bilo bolje, če bi se klicalo isArc;
         
@@ -92,9 +95,6 @@ const BASPROX = 'bp';    // BASE-PROXIMAL, če ni izpolnjen pogoj bližine, se i
 // BASPROX (BASE-PROXIMAL) se rabi za barvanje površin, ki so enake barve gledano od zunaj in od znoter, je pa pomembno, kdaj v zaporedju barvanja so izrisane (ali grejo čez oris ali ne);
 // splošna logika: (BASE/undefined > oris)(tako zaporedje po potrebi večkrat) > PROXIMALs; BASPROX se v pravem trenutku uvrstijo ali v BASE ali v PROXIMAL;
 
-// barva;
-const GLASS = '#caebf555'; // barva stekla;
-
 
 class Thingy {
 
@@ -102,8 +102,10 @@ class Thingy {
     static rotationAngleIncrmnt = Math.PI/30;
     static defaultConnections = [ [0, 1], [2], [3], [0]];   // čeprav fill() samodejno potegne do izhodiščne točke (in bi ne rabil napisat ta četrtega [0]), imaš recimo primere, ko imaš like,..
     //                                        .. jih pa ne filaš, tam bi potem ne povezalo; ne želim pa po defaultu rabit closePath, ker ta v nekaterih primerih še enkrat potegne še eno črto;
-
+    
     constructor() {
+        
+        this.strokeOpacity = 'ff';  // to podedujejo/imajo potem v this. instance vseh klasov, ki extendajo Thingy;
 
         // KO INSTANCIIRAŠ OBJEKT, KI EXTENDA THINGY, OBVEZNO ustvari/zaženi:
             // - spacePoints - // OPOMBA: podana točka običajno pomeni spodnjo levo točko spredaj, ostale izhajajo iz nje;
@@ -128,9 +130,9 @@ class Thingy {
         } else {
             const rX = Math.abs(screenPoints[1].x - screenPoints[0].x);
             const rY = Math.abs(screenPoints[2].y - screenPoints[0].y);
+            ctx.lineWidth = this.lineWidth;
+            ctx.strokeStyle = `#f0fff0${this.strokeOpacity}`;
             ctx.ellipse(screenPoints[0].x, screenPoints[0].y, rX, rY, 0, 0, 6.3);
-            // ctx.fillStyle = this.segments[whichSegmnt].fillInfo.fillCol; // ta in spodnja vrstica se rabita le pri risaju koles pickupa v 3D objects;
-            // ctx.fill();
         }
         if (this.segments[whichSegmnt].fillInfo.doFill) {
             ctx.fillStyle = this.segments[whichSegmnt].fillInfo.fillCol;
@@ -278,15 +280,17 @@ class Viewer {
     constructor(x, y, z){
         this.posIn3D = new SpacePoint(x, y, z)
         this.angle = 0; // horizontal angle; kot 0 gleda vzdolž osi y, v smeri naraščanja y; narašča po osi x desno;
-        this.diveAngle = 0 // vertival angle;kot 0 gleda vzdolž osi y, v smeri naraščanja y; narašča po osi z navzgot;
-        this.rotationAngleIncrmnt = Math.PI/180;
+        this.climbAngle = 0 // vertival angle;kot 0 gleda vzdolž osi y, v smeri naraščanja y; narašča po osi z navzgot;
+        this.rotationAngleIncrmnt = Math.PI/360;
+        this.someCounter = 0;
     }
 
     move(dir){
         if (dir == FORWARD) {
             this.posIn3D.y += 0.5 * Math.cos(this.angle); // prvenstveni premik;
             this.posIn3D.x += 0.5 * Math.sin(this.angle);
-            this.posIn3D.z += 0.5 * Math.sin(this.diveAngle);
+            this.posIn3D.z += 0.5 * Math.sin(this.climbAngle);
+            this.someCounter++;
         }
     }
 
@@ -295,14 +299,12 @@ class Viewer {
             this.angle -= this.rotationAngleIncrmnt;
         } else if (dir == RIGHT) {
             this.angle += this.rotationAngleIncrmnt;
-        } else if (dir == RISE) {   // lahko gremo vse na else, ker itak se rotate kliče po eden naenkrat;
-            this.diveAngle += this.rotationAngleIncrmnt;
+        } else if (dir == CLIMB) {   // lahko gremo vse na else, ker itak se rotate kliče po eden naenkrat;
+            this.climbAngle += this.rotationAngleIncrmnt;
         } else if (dir == DIVE) {
-            this.diveAngle -= this.rotationAngleIncrmnt;
+            this.climbAngle -= this.rotationAngleIncrmnt;
         }
         this.angle = rangeAngle(this.angle);
-
-        // tle bo treba dodat vertAngle ali riseAngle;
     }
 }
 
@@ -333,5 +335,185 @@ class OrtgnlCircle extends Thingy {
         this.segments[0].rArc = r;
 
         Thingy.createConnsAlt(this.segments);
+
+        // spremenljivke lastne samo temu klasu;
+        this.lineWidth = 2;
     }
 }
+
+class LetterS extends Thingy {  // črke naj bojo široke 2m, visoke 2,6, debelina poteze 0,6m; podano izhodišče naj bo vedno spodaj levo;
+
+    constructor(
+        btmL, // spacepoint spodaj levo
+        fillInfo) {
+
+        super();
+
+        this.objSpcPts = [];
+        this.objSpcPts.push(new SpacePoint(btmL.x, btmL.y, btmL.z + 2.6));
+        this.objSpcPts.push(new SpacePoint(btmL.x, btmL.y, btmL.z + 1));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 1.4, btmL.y, btmL.z + 1));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 1.4, btmL.y, btmL.z + 0.6));
+        this.objSpcPts.push(new SpacePoint(btmL.x, btmL.y, btmL.z + 0.6)); // 4
+        this.objSpcPts.push(new SpacePoint(btmL.x, btmL.y, btmL.z));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 2, btmL.y, btmL.z));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 2, btmL.y, btmL.z + 1.6));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 0.6, btmL.y, btmL.z + 1.6));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 0.6, btmL.y, btmL.z + 2));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 2, btmL.y, btmL.z + 2));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 2, btmL.y, btmL.z + 2.6)); // 11
+        
+        this.segments = [ new Segment(this.objSpcPts, fillInfo, [[0,1], [2], [3], [4], [5], [6], [7], [8], [9], [10], [11], [0]])];
+
+        Thingy.createConnsAlt(this.segments);
+
+    }
+}
+
+class LetterT extends Thingy {
+
+    constructor(
+        btmL,
+        fillInfo) {
+
+        super();
+
+        this.objSpcPts = [];
+        this.objSpcPts.push(new SpacePoint(btmL.x, btmL.y, btmL.z + 2.6));
+        this.objSpcPts.push(new SpacePoint(btmL.x, btmL.y, btmL.z + 2));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 0.7, btmL.y, btmL.z + 2));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 0.7, btmL.y, btmL.z));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 1.3, btmL.y, btmL.z));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 1.3, btmL.y, btmL.z + 2));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 2, btmL.y, btmL.z + 2));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 2, btmL.y, btmL.z + 2.6)); // 7
+
+        this.segments = [ new Segment(this.objSpcPts, fillInfo, [[0,1], [2], [3], [4], [5], [6], [7], [0]])];
+
+        Thingy.createConnsAlt(this.segments);
+
+    }
+}
+
+// alternativna varianta črke A
+// class LetterA extends Thingy {  // naj bojo široke 2m, visoke 2,6, debelina poteze 0,6m; podano izhodišče naj bo vedno spodaj levo;
+
+//     constructor(
+//         btmL, // spacepoint spodaj levo
+//         fillInfo) {
+
+//         super();
+
+//         this.objSpcPts = [];
+//         this.objSpcPts.push(new SpacePoint(btmL.x, btmL.y, btmL.z + 2.6));
+//         this.objSpcPts.push(new SpacePoint(btmL.x, btmL.y, btmL.z));
+//         this.objSpcPts.push(new SpacePoint(btmL.x + 0.6, btmL.y, btmL.z));
+//         this.objSpcPts.push(new SpacePoint(btmL.x + 0.6, btmL.y, btmL.z + 2));
+//         this.objSpcPts.push(new SpacePoint(btmL.x + 1.1, btmL.y, btmL.z + 2));
+//         this.objSpcPts.push(new SpacePoint(btmL.x + 1.1, btmL.y, btmL.z + 1.6));
+//         this.objSpcPts.push(new SpacePoint(btmL.x + 0.65, btmL.y, btmL.z + 1.6));
+//         this.objSpcPts.push(new SpacePoint(btmL.x + 0.65, btmL.y, btmL.z + 1));
+//         this.objSpcPts.push(new SpacePoint(btmL.x + 1.4, btmL.y, btmL.z + 1));
+//         this.objSpcPts.push(new SpacePoint(btmL.x + 1.4, btmL.y, btmL.z));
+//         this.objSpcPts.push(new SpacePoint(btmL.x + 2, btmL.y, btmL.z));
+//         this.objSpcPts.push(new SpacePoint(btmL.x + 2, btmL.y, btmL.z + 1.6));
+//         this.objSpcPts.push(new SpacePoint(btmL.x + 1.7, btmL.y, btmL.z + 1.6));
+//         this.objSpcPts.push(new SpacePoint(btmL.x + 1.7, btmL.y, btmL.z + 2.6)); // 13
+        
+
+//         this.segments = [ new Segment(this.objSpcPts, fillInfo, [[0,1], [2], [3], [4], [5], [6], [7], [8], [9], [10], [11], [12], [13], /*[14], [15], [16], [17],*/ [0]])];
+
+//         Thingy.createConnsAlt(this.segments);
+
+//     }
+// }
+
+class LetterA extends Thingy {
+
+    constructor(
+        btmL,
+        fillInfo) {
+
+        super();
+
+        this.objSpcPts = [];
+        this.objSpcPts.push(new SpacePoint(btmL.x, btmL.y, btmL.z + 2.3));
+        this.objSpcPts.push(new SpacePoint(btmL.x, btmL.y, btmL.z));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 0.6, btmL.y, btmL.z));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 0.6, btmL.y, btmL.z + 2));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 1.4, btmL.y, btmL.z + 2));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 1.4, btmL.y, btmL.z + 1.6));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 0.65, btmL.y, btmL.z + 1.6));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 0.65, btmL.y, btmL.z + 1));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 1.4, btmL.y, btmL.z + 1));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 1.4, btmL.y, btmL.z));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 2, btmL.y, btmL.z));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 2, btmL.y, btmL.z + 1.6));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 2, btmL.y, btmL.z + 2.3));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 1.7, btmL.y, btmL.z + 2.6));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 0.3, btmL.y, btmL.z + 2.6)); // 14
+        
+
+        this.segments = [ new Segment(this.objSpcPts, fillInfo, [[0,1], [2], [3], [4], [5], [6], [7], [8], [9], [10], [11], [12], [13], [14], /*[15], [16], [17],*/ [0]])];
+
+        Thingy.createConnsAlt(this.segments);
+
+    }
+}
+
+class LetterR extends Thingy {
+
+    constructor(
+        btmL,
+        fillInfo) {
+
+        super();
+
+        this.objSpcPts = [];
+        this.objSpcPts.push(new SpacePoint(btmL.x, btmL.y, btmL.z + 2.6));
+        this.objSpcPts.push(new SpacePoint(btmL.x, btmL.y, btmL.z));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 0.6, btmL.y, btmL.z));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 0.6, btmL.y, btmL.z + 1));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 1.4, btmL.y, btmL.z + 1));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 1.4, btmL.y, btmL.z));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 2, btmL.y, btmL.z));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 2, btmL.y, btmL.z + 1.0));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 1.7, btmL.y, btmL.z + 1.3));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 2, btmL.y, btmL.z + 1.6)); // 
+        this.objSpcPts.push(new SpacePoint(btmL.x + 0.6, btmL.y, btmL.z + 1.6));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 0.6, btmL.y, btmL.z + 2));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 1.4, btmL.y, btmL.z + 2));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 1.4, btmL.y, btmL.z + 1.65));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 2, btmL.y, btmL.z + 1.65));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 2, btmL.y, btmL.z + 2.3)); // 15
+        this.objSpcPts.push(new SpacePoint(btmL.x + 1.7, btmL.y, btmL.z + 2.6)); // 16
+        
+
+        this.segments = [ new Segment(this.objSpcPts, fillInfo, [[0,1], [2], [3], [4], [5], [6], [7], [8], [9], [10], [11], [12], [13], [14], [15], [16], [0]])];
+
+        Thingy.createConnsAlt(this.segments);
+
+    }
+}
+
+// class Template extends Thingy {  // predloga, ki opisuje, kaj je obvezno, ko ustvariš class na osnovi Thingy
+
+//     constructor(
+//         izhodišče_recimo, // spacepoint, recimo spodaj levo
+//         fillInfo) {
+
+           // obvezno
+//         super();
+
+           // obvezno
+//         this.objSpcPts = [];
+//         this.objSpcPts.push(new SpacePoint(opišeš točko in tako vse naslednje);
+//         this.objSpcPts.push(...); // kolikor treba
+
+           // obvezno
+//         this.segments = [ new Segment(this.objSpcPts, fillInfo, [[0,1], [2], [0]])]; // sicer pa glej class Segment, da vidiš kaj in kako
+
+           // obvezno
+//         Thingy.createConnsAlt(this.segments);
+//     }
+// }

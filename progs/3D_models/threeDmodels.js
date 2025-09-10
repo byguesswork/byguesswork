@@ -1,10 +1,6 @@
 'use strict';
 
 // v classes preveri to: // spodnji dve bi morda morali bit na if (this.segments[whichSegmnt].fillInfo.doFill) ker morda ni samoumevno, da ima krog barvo 
-//tole:  if (!isViewModeTele) {
-            //if (y > 0) constraints.allYNegAngular = false;
-            // pred tole bi verjetno lahko šlo if(constrints.allYNegAngular) ker če je že false,m ni več treba čekirat 
-            // helper res dela na ravni točke, ampak allYNegAngular pa je na ravni segmenta!;
 // trenutno se preverja, pri preverjaju ali naj gre v izris, le glede na levo/desno (if ((y / x) >= TELEANGLEFACTOR || (y / x) <= -TELEANGLEFACTOR))
     // bi bilo treba tudi glede na y / z (teleFctrY);
 // zeleno stikalo na steklu stavbe, ki bi bilo vidno ob približanju
@@ -289,25 +285,27 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
         }
 
         // preverjanje, ali naj gre točka (in posledično segment) v izris; false > gre v izris, privzeto je true;
-        if (!isViewModeTele) {
-            if (y > 0) constraints.allYNegAngular = false;
-        } else {    // torej če imamo teleangle; za zdaj gledamo samo y/x, z-ja ne gledamo, ker ni veliko visokih predmetov
-            if ((y / x) >= TELEANGLEFACTOR || (y / x) <= -TELEANGLEFACTOR) {    // izvedba z Math.abs bi bila krajša v kodi a morda počasnejša v izvedbi;
-                constraints.allYNegAngular = false;
-            } else {    // moramo zabeležit, na kateri strani vidnega polja se točke segmenta pojavljajo zunaj vidnega polja, ker če se na obeh, je to poseben primer;
-                if ((y / x) >= 0) { // zdaj že vemo, da nismo ne levo od negativne meje ne desno od pozitivne in je pomembna samo še meja 0;
-                    // constraints.right = true; // tu bi lahko samo to zabeležli, lahko pa gremo korak dlje in že delamo na allYNeg;
-                    if (constraints.left) {
-                        constraints.allYNegAngular = false; // če že imamo od prej left in zdaj bi itak dodali še right, lahko kar zabeležimo allYNeg;
-                    } else constraints.right = true;
-                } else {
-                    // constraints.left = true; // tu bi lahko samo to zabeležli, lahko pa gremo korak dlje in že delamo na allYNeg;
-                    if (constraints.right) {
-                        constraints.allYNegAngular = false; // če že imamo od prej right in zdaj bi itak dodali še left, lahko kar zabeležimo allYNeg;
-                    } else constraints.left = true;
+        if (constraints.allYNegAngular) {  // če je še true, probamo, al lahko postane false;
+            if (!isViewModeTele) {
+                if (y > 0) constraints.allYNegAngular = false;
+            } else {    // torej če imamo teleangle; za zdaj gledamo samo y/x, z-ja ne gledamo, ker ni veliko visokih predmetov
+                if ((y / x) >= TELEANGLEFACTOR || (y / x) <= -TELEANGLEFACTOR) {    // izvedba z Math.abs bi bila krajša v kodi a morda počasnejša v izvedbi;
+                    constraints.allYNegAngular = false;
+                } else {    // moramo zabeležit, na kateri strani vidnega polja se točke segmenta pojavljajo zunaj vidnega polja, ker če se na obeh, je to poseben primer;
+                    if ((y / x) >= 0) { // zdaj že vemo, da nismo ne levo od negativne meje ne desno od pozitivne in je pomembna samo še meja 0;
+                        // constraints.right = true; // tu bi lahko samo to zabeležli, lahko pa gremo korak dlje in že delamo na allYNeg;
+                        if (constraints.left) {
+                            constraints.allYNegAngular = false; // če že imamo od prej left in zdaj bi itak dodali še right, lahko kar zabeležimo allYNeg;
+                        } else constraints.right = true;
+                    } else {
+                        // constraints.left = true; // tu bi lahko samo to zabeležli, lahko pa gremo korak dlje in že delamo na allYNeg;
+                        if (constraints.right) {
+                            constraints.allYNegAngular = false; // če že imamo od prej right in zdaj bi itak dodali še left, lahko kar zabeležimo allYNeg;
+                        } else constraints.left = true;
+                    }
                 }
             }
-        }
+        } // else allYneg že false, ni več treba čekirat;
 
         // zabeleženje točke (v vsakem primeru, ne glede na true/false pri allYNegAngular, ker recimo ti zadnja točka lahko da false in sproži izris)
         item2Draw.push(new SpacePoint(x, y, spcPt.z - viewPoint.z));    // to je številka 3 spodaj;

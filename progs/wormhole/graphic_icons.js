@@ -99,17 +99,17 @@ function infoClicked() {
         infoSettgs.className = 'info_settings_open';
         infoSettgsContent.className = 'info_settings_content_open';
         if (lang === 'en') {
-            infoSettgsContent.innerHTML = `Instructions<br><br><div style="font-size:0.9em;"><strong>Move left/right/forward/back:</strong> Use arrow keys (or icons below)<br><p class="interstit">&nbsp;</p>
-            <strong>Rotate left/right:</strong> I / O (or use icons below)<br><p class="interstit">&nbsp;</p>
-            <strong>Up/down:</strong> U / J (you get the drill)<br><br>`;
+            infoSettgsContent.innerHTML = `Instructions<br><br><div style="font-size:0.9em;"><strong>Yaw left/right/climb/dive:</strong> Use arrow keys (or icons below)<br><p class="interstit">&nbsp;</p>
+            <strong>Stop movement:</strong> ESC<br><br>`;
             infoSettgsOK.innerHTML = 'OK';
         } else {
-            infoSettgsContent.innerHTML = `Navodila<br><br><div style="font-size:0.9em;"><strong>Premik levo/desno/naprej/nazaj:</strong> smerne tipke (ali kliknite ustrezno ikono spodaj)<br><p class="interstit">&nbsp;</p>
-            <strong>Obračanje levo/desno:</strong> I / O (ali kliknite ustrezno ikono spodaj)<br><p class="interstit">&nbsp;</p>
-            <strong>Gor/dol:</strong> U / J (bla bla bla ...)<br><br>`;
+            infoSettgsContent.innerHTML = `Navodila<br><br><div style="font-size:0.9em;"><strong>Odklon levo/desno/dviganje/spuščanje:</strong> smerne tipke (ali kliknite ustrezno ikono spodaj)<br><p class="interstit">&nbsp;</p>
+            <strong>Konec:</strong> ESC<br><br>`;
             infoSettgsOK.innerHTML = 'V redu';
         }
         infoSettgsOK.className = 'align-right';
+
+        if (isRunning) stopTicker();
 
         // listener za nasprotno dejanje je spodaj;
     }
@@ -121,5 +121,40 @@ function infoCloseClicked() {
     infoSettgsContent.className = 'info_settings_content_closed';
     infoSettgsContent.innerHTML = 'i';
     infoSettgsOK.className = 'hidden';  // skrijemo gumb;
+
+    // zaženemo
+    if (isRunning) intervalChecker = setInterval(updtViewer, 30);
 }
 
+function gameOver(why) {
+
+    infoSettgs.className = 'info_settings_open';
+    infoSettgsContent.className = 'info_settings_content_open';
+    
+    stopTicker();
+    isRunning = false;
+    
+    if (why == ESC) {
+        if (lang === 'en') {
+            infoSettgsContent.innerHTML = `KEY ESC PRESSED<br><br><div style="font-size:0.9em;"><strong>Game interrupted:</strong> Reload page (F5) to restart<br><p class="interstit">&nbsp;</p>`;
+            infoSettgsOK.innerHTML = ''; // prazno, nič ne napišemo;
+        } else {
+            infoSettgsContent.innerHTML = `PRITISNJENA JE BILA TIPKA ESC<br><br><div style="font-size:0.9em;"><strong>Igra prekinjena:</strong> če želite še enkrat začeti, znova naložite stran (F5).<br><p class="interstit">&nbsp;</p>`;
+            infoSettgsOK.innerHTML = ''; // prazno, nič ne napišemo;
+        }
+    } else if (why == TILL_END) {
+        let addOn = ' F5';
+        if (mobile) {
+            infoSettgs.style.left = '20px';
+            infoSettgs.style.right = '10px';
+            addOn = '';
+        }
+        if (lang === 'en') {
+            infoSettgsContent.innerHTML = `CONGRATS!<br><br><div style="font-size:0.9em;"><strong>End of wormhole reached:</strong> Reload page${addOn} to restart<br><p class="interstit">&nbsp;</p>`;
+            infoSettgsOK.innerHTML = ''; // prazno, nič ne napišemo;
+        } else {
+            infoSettgsContent.innerHTML = `UH, KONEC ČRVINE!<br><br><div style="font-size:0.9em;"><strong>Prišli ste do konca:</strong> če želite še enkrat začeti, znova naložite stran${addOn}.<br><p class="interstit">&nbsp;</p>`;
+            infoSettgsOK.innerHTML = ''; // prazno, nič ne napišemo;
+        }
+    }
+}
