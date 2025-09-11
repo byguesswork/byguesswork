@@ -325,14 +325,21 @@ class OrtgnlCircle extends Thingy {
             this.objSpcPts.push(new SpacePoint(center.x, center.y + r, center.z));
             this.objSpcPts.push(new SpacePoint(center.x, center.y, center.z + r));
         } else if (dirs[1] == false) {
+            // wormhole za zdaj uporablja samo te ortogonml kroge, zato samo njim določim po 8 pik;
             this.objSpcPts.push(new SpacePoint(center.x + r, center.y, center.z));
-            this.objSpcPts.push(new SpacePoint(center.x, center.y, center.z + r));
+            this.objSpcPts.push(new SpacePoint(center.x, center.y, center.z + r));  // samo ta prva dva sta potrebna za izris;
+            this.objSpcPts.push(new SpacePoint(center.x + r, center.y, center.z + r)); // od tu dalje so potrebni samo za potrditev ali je izris potreben;
+            this.objSpcPts.push(new SpacePoint(center.x + r, center.y, center.z - r));
+            this.objSpcPts.push(new SpacePoint(center.x, center.y, center.z - r));
+            this.objSpcPts.push(new SpacePoint(center.x - r, center.y, center.z - r));
+            this.objSpcPts.push(new SpacePoint(center.x - r, center.y, center.z));
+            this.objSpcPts.push(new SpacePoint(center.x - r, center.y, center.z + r)); // idx 7
         } else {
             this.objSpcPts.push(new SpacePoint(center.x + r, center.y, center.z));
             this.objSpcPts.push(new SpacePoint(center.x, center.y + r, center.z));
         }
         
-        this.segments = [ new Segment(this.objSpcPts, fillInfo, [[0,1], [0,2]]) ];
+        this.segments = [ new Segment(this.objSpcPts, fillInfo, [[0,1], [0,2]]) ];  // povezavi sta, kolikor vem, podani samo zato, da sta, se ne uporabljata;
         this.segments[0].rArc = r;
 
         Thingy.createConnsAlt(this.segments);

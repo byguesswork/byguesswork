@@ -227,6 +227,7 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
 
     //  - - NA RAVNI TOČKE  - - ;
     function helper(spcPt, item2Draw, constraints) {    // dela na ravni točke segmenta;
+        // najprej x in y (kar tako, ni posebne logike ali namena za to);
         x = spcPt.x - viewPoint.x;  // x in y relativiziramo;
         y = spcPt.y - viewPoint.y;
         r = (x**2 + y**2)**(0.5);
@@ -247,7 +248,7 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
             y = r * Math.cos(angle);
         }
 
-        // test
+        // še za z;
         z = spcPt.z - viewPoint.z;  // z in y relativiziramo;
         let yForZ = spcPt.y - viewPoint.y;
         r = (z**2 + yForZ**2)**(0.5);
@@ -265,13 +266,10 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
             
             //zdaj, ko smo dobili relativni kot, lahko izračunamo pripadajoči x in y (prostorske) relativne točke, ki bo izrisana;
             z = r * Math.sin(climbAngle);
-            /* y = r * Math.cos(angle); */
-
         }
 
-        // !test
-
-        // preverjanje, ali naj gre točka (in posledično segment) v izris; false > gre v izris, privzeto je true;
+        // preverjanje SAMO PO DIMENZIJI Y ! !, ali naj gre točka (in posledično segment) v izris; false > gre v izris, privzeto je true;
+        // (tako preverjanje bi moralo bit tudi za dimenzijo z);
         if (constraints.allYNegAngular) {   // če je še true, probamo, al lahko postane false;
             if ((y / x) >= TELEANGLEFACTOR || (y / x) <= -TELEANGLEFACTOR) {    // izvedba z Math.abs bi bila krajša v kodi a morda počasnejša v izvedbi;
                 constraints.allYNegAngular = false;
@@ -416,9 +414,9 @@ const activeViewer = new Viewer(0, -10, 0);
 // ustvarjanje obročev
 let activeItems;
 let loops = [];
-for (let index = 1; index < 4; index++) {
-    loops.push(new OrtgnlCircle(new SpacePoint(0, 60 + 20 * index, 0), 5, [true, false], new FillInfo(false)))
-};
+loops.push(new OrtgnlCircle(new SpacePoint(0, 80, 0), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(0, 100, 0), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(2, 120, 0), 5, [true, false], new FillInfo(false)));
 loops.push(new OrtgnlCircle(new SpacePoint(5, 140, 0), 5, [true, false], new FillInfo(false)));
 loops.push(new OrtgnlCircle(new SpacePoint(10, 160, 0), 5, [true, false], new FillInfo(false)));
 loops.push(new OrtgnlCircle(new SpacePoint(15, 180, 3), 5, [true, false], new FillInfo(false)));
@@ -472,12 +470,15 @@ activeItems.push(new LetterR(new SpacePoint(12.6 + xOffst, 60, 0 + zOffst), new 
 activeItems.push(new LetterT(new SpacePoint(14.8 + xOffst, 60, 0 + zOffst), new FillInfo(true, BASE, '#ffffff')));
 
 let yay = [];
-const distOfLast = loops[loops.length - 1].objSpcPts[0].y;
+let distOfLast = loops[loops.length - 1].objSpcPts[0].y;
 yay.push(new LetterY(new SpacePoint(0.55, distOfLast + 7, 1.2), new FillInfo(true, BASE, '#ffffff')));
 yay.push(new LetterA(new SpacePoint(2.75, distOfLast + 7, 1.2), new FillInfo(true, BASE, '#ffffff')));
 yay.push(new LetterY(new SpacePoint(4.95, distOfLast + 7, 1.2), new FillInfo(true, BASE, '#ffffff')));
 yay.push(new LetterExclamationPt(new SpacePoint(7.15, distOfLast + 7, 1.2), new FillInfo(true, BASE, '#ffffff')));
 activeItems = [...activeItems, ...yay]
+
+// določimo novo vrednost distOfLast, tokrat za vse elemente;
+distOfLast = 15 + activeItems[activeItems.length - 1].objSpcPts[0].y;   // 15, da se malo izteče po zadnjem el.;
 
 //  - - - - - - - - - - - - - - - - -  AKCIJA  - - - - - - - - - - - - - - - - - - - - -
 
@@ -586,7 +587,7 @@ function atKeyUp(e) {
 function updtViewer() { // glavna reč, da se reč dogaja, vezano na interval;
     rotateViewer(); // spremenimo kote/položaj, če pritisnjena kšna smerna tipka;
     activeViewer.move(FORWARD); // gas naprej v izračunani smeri - samo izračun;
-    if (activeViewer.posIn3D.y > 975) { // če si prišel do konca; 900 je hardcoded, to bi veljalo parametrizirat;
+    if (activeViewer.posIn3D.y > distOfLast) {
         console.log(' - -  KONEC - -');
         gameOver(TILL_END);
     }
