@@ -135,7 +135,7 @@ class Thingy {
             ctx.ellipse(screenPoints[0].x, screenPoints[0].y, rX, rY, 0, 0, 6.3);
         }
         if (this.segments[whichSegmnt].fillInfo.doFill) {
-            ctx.fillStyle = this.segments[whichSegmnt].fillInfo.fillCol;
+            ctx.fillStyle = `${this.segments[whichSegmnt].fillInfo.fillCol}${this.strokeOpacity}`;  // trenutno rabi strokeOpacity za fill, to bi veljalo izboljšat;
             ctx.fill();
             if (this.segments[whichSegmnt].fillInfo.typ == PROXIMAL || this.segments[whichSegmnt].fillInfo.typ == BASPROX) {
                 ctx.strokeStyle = `${this.segments[whichSegmnt].fillInfo.fillCol}77`;   // da potegnemo skoraj prosojno črto v barvi ploskve;
@@ -283,13 +283,14 @@ class Viewer {
         this.climbAngle = 0 // vertival angle;kot 0 gleda vzdolž osi y, v smeri naraščanja y; narašča po osi z navzgot;
         this.rotationAngleIncrmnt = Math.PI/360;
         this.someCounter = 0;
+        this.fwdSpeed = 0.6;
     }
 
     move(dir){
         if (dir == FORWARD) {
-            this.posIn3D.y += 0.5 * Math.cos(this.angle); // prvenstveni premik;
-            this.posIn3D.x += 0.5 * Math.sin(this.angle);
-            this.posIn3D.z += 0.5 * Math.sin(this.climbAngle);
+            this.posIn3D.y += this.fwdSpeed * Math.cos(this.angle); // prvenstveni premik;
+            this.posIn3D.x += this.fwdSpeed * Math.sin(this.angle);
+            this.posIn3D.z += this.fwdSpeed * Math.sin(this.climbAngle);
             this.someCounter++;
         }
     }
@@ -495,6 +496,69 @@ class LetterR extends Thingy {
 
     }
 }
+
+class LetterY extends Thingy {
+
+    constructor(
+        btmL,
+        fillInfo) {
+
+        super();
+
+        this.objSpcPts = [];
+        this.objSpcPts.push(new SpacePoint(btmL.x, btmL.y, btmL.z + 2.6));
+        this.objSpcPts.push(new SpacePoint(btmL.x, btmL.y, btmL.z + 1.3));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 0.3, btmL.y, btmL.z + 1.0));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 0.7, btmL.y, btmL.z + 1.0));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 0.7, btmL.y, btmL.z));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 1.3, btmL.y, btmL.z));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 1.3, btmL.y, btmL.z + 1.0));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 2, btmL.y, btmL.z + 1.0));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 2, btmL.y, btmL.z + 2.6));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 1.3, btmL.y, btmL.z + 2.6));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 1.3, btmL.y, btmL.z + 1.6));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 0.7, btmL.y, btmL.z + 1.6));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 0.7, btmL.y, btmL.z + 2.6)); //12
+        
+
+        this.segments = [ new Segment(this.objSpcPts, fillInfo, [[0,1], [2], [3], [4], [5], [6], [7], [8], [9], [10], [11] , [12] /*, [13], [14] */, [0]])];
+
+        Thingy.createConnsAlt(this.segments);
+
+    }
+}
+
+class LetterExclamationPt extends Thingy {
+
+    constructor(
+        btmL,
+        fillInfo) {
+
+        super();
+
+        this.objSpcPts = [];
+        this.objSpcPts.push(new SpacePoint(btmL.x + 0.7, btmL.y, btmL.z + 2.6));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 0.7, btmL.y, btmL.z + 1));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 1.28, btmL.y, btmL.z + 1));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 1.28, btmL.y, btmL.z + 0.6));
+        // this.objSpcPts.push(new SpacePoint(btmL.x + 1, btmL.y, btmL.z + 0.6));   // odrezana pika zgoraj levo;
+        // this.objSpcPts.push(new SpacePoint(btmL.x + 0.7, btmL.y, btmL.z + 0.3));
+        // this.objSpcPts.push(new SpacePoint(btmL.x + 0.7, btmL.y, btmL.z));
+        // this.objSpcPts.push(new SpacePoint(btmL.x + 1.3, btmL.y, btmL.z));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 0.7, btmL.y, btmL.z + 0.6));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 0.7, btmL.y, btmL.z));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 1, btmL.y, btmL.z));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 1.3, btmL.y, btmL.z + 0.3));
+        this.objSpcPts.push(new SpacePoint(btmL.x + 1.3, btmL.y, btmL.z + 2.6)); // 8
+        
+
+        this.segments = [ new Segment(this.objSpcPts, fillInfo, [[0,1], [2], [3], [4], [5], [6], [7], [8], /* [9], [10], [11] , [12] /*, [13], [14], [15], [16] */ [0]])];
+
+        Thingy.createConnsAlt(this.segments);
+
+    }
+}
+
 
 // class Template extends Thingy {  // predloga, ki opisuje, kaj je obvezno, ko ustvariš class na osnovi Thingy
 

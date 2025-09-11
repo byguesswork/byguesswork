@@ -136,24 +136,24 @@ function gameOver(why) {
     
     if (why == ESC) {
         if (lang === 'en') {
-            infoSettgsContent.innerHTML = `KEY ESC PRESSED<br><br><div style="font-size:0.9em;"><strong>Game interrupted:</strong> Reload page (F5) to restart<br><p class="interstit">&nbsp;</p>`;
+            infoSettgsContent.innerHTML = `KEY ESC PRESSED<br><br><div style="font-size:0.9em;"><strong>Game interrupted:</strong> Refresh page (F5) to restart<br><p class="interstit">&nbsp;</p>`;
             infoSettgsOK.innerHTML = ''; // prazno, nič ne napišemo;
         } else {
-            infoSettgsContent.innerHTML = `PRITISNJENA JE BILA TIPKA ESC<br><br><div style="font-size:0.9em;"><strong>Igra prekinjena:</strong> če želite še enkrat začeti, znova naložite stran (F5).<br><p class="interstit">&nbsp;</p>`;
+            infoSettgsContent.innerHTML = `PRITISNJENA JE BILA TIPKA ESC<br><br><div style="font-size:0.9em;"><strong>Igra prekinjena:</strong> če želite še enkrat začeti, osvežite stran (F5).<br><p class="interstit">&nbsp;</p>`;
             infoSettgsOK.innerHTML = ''; // prazno, nič ne napišemo;
         }
     } else if (why == TILL_END) {
-        let addOn = ' F5';
+        let addOn = ' (F5)';
         if (mobile) {
             infoSettgs.style.left = '20px';
             infoSettgs.style.right = '10px';
             addOn = '';
         }
         if (lang === 'en') {
-            infoSettgsContent.innerHTML = `CONGRATS!<br><br><div style="font-size:0.9em;"><strong>End of wormhole reached:</strong> Reload page${addOn} to restart<br><p class="interstit">&nbsp;</p>`;
+            infoSettgsContent.innerHTML = `CONGRATS!<br><br><div style="font-size:0.9em;"><strong>End of wormhole reached:</strong> Refresh page${addOn} to restart<br><p class="interstit">&nbsp;</p>`;
             infoSettgsOK.innerHTML = ''; // prazno, nič ne napišemo;
         } else {
-            infoSettgsContent.innerHTML = `UH, KONEC ČRVINE!<br><br><div style="font-size:0.9em;"><strong>Prišli ste do konca:</strong> če želite še enkrat začeti, znova naložite stran${addOn}.<br><p class="interstit">&nbsp;</p>`;
+            infoSettgsContent.innerHTML = `UH, KONEC ČRVINE!<br><br><div style="font-size:0.9em;"><strong>Prišli ste do konca:</strong> če želite še enkrat začeti, osvežite stran${addOn}.<br><p class="interstit">&nbsp;</p>`;
             infoSettgsOK.innerHTML = ''; // prazno, nič ne napišemo;
         }
     }

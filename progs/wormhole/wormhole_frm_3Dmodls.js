@@ -414,23 +414,75 @@ function calcReltvSpcPtsAndDraw(){ // calculate relative spacePoints, tj. od vie
 const activeViewer = new Viewer(0, -10, 0);
 
 // ustvarjanje obročev
-let loops = []
-for (let index = 1; index < 40; index++) {
+let activeItems;
+let loops = [];
+for (let index = 1; index < 4; index++) {
     loops.push(new OrtgnlCircle(new SpacePoint(0, 60 + 20 * index, 0), 5, [true, false], new FillInfo(false)))
 };
-let activeItems = [...loops];
+loops.push(new OrtgnlCircle(new SpacePoint(5, 140, 0), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(10, 160, 0), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(15, 180, 3), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(18, 200, 7), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(20, 220, 10), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(18, 240, 13), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(15, 260, 15), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(13, 280, 15), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(11, 300, 15), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(10, 320, 15), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(10, 340, 15), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(10, 360, 15), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(8, 380, 14), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(5, 400, 10), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(0, 420, 5), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(-4, 440, 0), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(-2, 460, -5), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(2, 480, -10), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(5, 500, -15), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(5, 520, -13), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(5, 540, -9), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(7, 560, -5), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(10, 580, -3), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(14, 600, -2), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(18, 620, -1), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(23, 640, 0), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(24, 660, 1), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(25, 680, 4), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(25, 700, 9), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(25, 720, 14), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(24, 740, 16), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(23, 760, 17), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(21, 780, 16), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(17, 800, 14), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(13, 820, 12), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(9, 840, 9), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(6, 860, 6), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(3, 880, 4), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(1, 900, 2), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(0, 920, 0), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(0, 940, 0), 5, [true, false], new FillInfo(false)));
+loops.push(new OrtgnlCircle(new SpacePoint(0, 960, 0), 5, [true, false], new FillInfo(false)));
+activeItems = [...loops];
+
 const xOffst = mobile ? -5 : 0;
 const zOffst = mobile ? 6 : 0;
-activeItems.push(new LetterS(new SpacePoint(6 + xOffst, 60, 0 + zOffst), new FillInfo(true, BASE, 'white')));
-activeItems.push(new LetterT(new SpacePoint(8.2 + xOffst, 60, 0 + zOffst), new FillInfo(true, BASE, 'white')));
-activeItems.push(new LetterA(new SpacePoint(10.4 + xOffst, 60, 0 + zOffst), new FillInfo(true, BASE, 'white')));
-activeItems.push(new LetterR(new SpacePoint(12.6 + xOffst, 60, 0 + zOffst), new FillInfo(true, BASE, 'white')));
-activeItems.push(new LetterT(new SpacePoint(14.8 + xOffst, 60, 0 + zOffst), new FillInfo(true, BASE, 'white')));
+activeItems.push(new LetterS(new SpacePoint(6 + xOffst, 60, 0 + zOffst), new FillInfo(true, BASE, '#ffffff')));
+activeItems.push(new LetterT(new SpacePoint(8.2 + xOffst, 60, 0 + zOffst), new FillInfo(true, BASE, '#ffffff')));
+activeItems.push(new LetterA(new SpacePoint(10.4 + xOffst, 60, 0 + zOffst), new FillInfo(true, BASE, '#ffffff')));
+activeItems.push(new LetterR(new SpacePoint(12.6 + xOffst, 60, 0 + zOffst), new FillInfo(true, BASE, '#ffffff')));
+activeItems.push(new LetterT(new SpacePoint(14.8 + xOffst, 60, 0 + zOffst), new FillInfo(true, BASE, '#ffffff')));
+
+let yay = [];
+const distOfLast = loops[loops.length - 1].objSpcPts[0].y;
+yay.push(new LetterY(new SpacePoint(0.55, distOfLast + 7, 1.2), new FillInfo(true, BASE, '#ffffff')));
+yay.push(new LetterA(new SpacePoint(2.75, distOfLast + 7, 1.2), new FillInfo(true, BASE, '#ffffff')));
+yay.push(new LetterY(new SpacePoint(4.95, distOfLast + 7, 1.2), new FillInfo(true, BASE, '#ffffff')));
+yay.push(new LetterExclamationPt(new SpacePoint(7.15, distOfLast + 7, 1.2), new FillInfo(true, BASE, '#ffffff')));
+activeItems = [...activeItems, ...yay]
 
 //  - - - - - - - - - - - - - - - - -  AKCIJA  - - - - - - - - - - - - - - - - - - - - -
 
 let intervalChecker = null; // glavna zadeva, ki dela tik tak, da teče igra;
-let isRunning = true;   // ali se igra izvaja; z ESC gre na false in ni mogoče več zagnati
+let isRunning = true;   // ali se igra izvaja oz. ali je ekran aktiven/odziven; z ESC gre na false in ni mogoče več zagnati, teba osvežit stran;
 let mousePressIsValid = false;  // če true, pove, da je dotik v teku in da je na veljavnem mestu;
 let steeringKeyIsPressd = false;
 let steeringKeys = {
@@ -446,6 +498,7 @@ let mouseOrTchPosOnCtrls = {
 };
 
 const distToBlck = 255; // pri kateri oddaljenosti od možička je krog že prosojen/neviden;
+const fadeForYay = 128;
 
 // začetni izris izbranega kataloga;
 updLoopsShapes()
@@ -533,7 +586,7 @@ function atKeyUp(e) {
 function updtViewer() { // glavna reč, da se reč dogaja, vezano na interval;
     rotateViewer(); // spremenimo kote/položaj, če pritisnjena kšna smerna tipka;
     activeViewer.move(FORWARD); // gas naprej v izračunani smeri - samo izračun;
-    if (activeViewer.posIn3D.y > 900) { // če si prišel do konca; 900 je hardcoded, to bi veljalo parametrizirat;
+    if (activeViewer.posIn3D.y > 975) { // če si prišel do konca; 900 je hardcoded, to bi veljalo parametrizirat;
         console.log(' - -  KONEC - -');
         gameOver(TILL_END);
     }
@@ -586,7 +639,7 @@ function updLoopsShapes() {
             // do nuthn, ker je že nastavljena;
         
         // će variabilno;
-        // varianta 1;
+        // začnemo pri 2 (tako je verjetno nastavljeno v clasu), ker će začneš z 1 ali 1,5, je ful videt prehode na večje;
         if (diff <= 80) loop.lineWidth = 2.5;
         else if (diff <= 60) loop.lineWidth = 3;
         else if (diff <= 40) loop.lineWidth = 4;
@@ -597,6 +650,16 @@ function updLoopsShapes() {
         if (diff > distToBlck) diff = distToBlck;
         diff = Math.floor(255 - diff / (distToBlck / 255));
         loop.strokeOpacity = '' + decToHex(diff);
+    })
+    yay.forEach(ltr => {
+        let diff = Thingy.calcSpatialRFromSpcPt(ltr.objSpcPts[0], activeViewer.posIn3D);
+
+        // neprosojnost;
+        diff = diff - 30;   // -30 je zato, da je pri razdalji 30 barva že ff (polna);
+        if (diff < 0) diff = 0;
+        if (diff > fadeForYay) diff = fadeForYay;
+        diff = Math.floor(255 - diff / (fadeForYay / 255));
+        ltr.strokeOpacity = '' + decToHex(diff);
     })
 }
 
