@@ -1,6 +1,13 @@
 'use strict';
 
-// ortgnl circle 4 točke nardit ali 8 točk al pa čekirat če je središče kroga oddaljeno od središča ekrana največ za polovico diagonale ekrana + r kroga;
+// tabela vrednosti sinusa in kosinusa (90' v 6 korakih; osnovna lateralna sprememba: 5)
+// 1	    5	    0
+// 0,95	    4,75	0,25
+// 0,85	    4,25	0,75
+// 0,7	    3,5	    1,5
+// 0,5	    2,5	    2,5
+// 0,25	    1	    4
+
 // a se y in yForZ razlikujeta v calcReltvSpcPtsAndDraw > helper ???
 // morda zdaj vozi nekoliko hitreje ker se premakne za delta x, y in z vendar vsi trije emd sabo niso uskaljeni, ampak samo x in y in ločeno z in y;
 // zdaj bi bilo treba čekirat tudi za to, ali je nekaj nad z (tako kot se preverja, al je nekaj za y == 0) ker če ne ko delaš looping, ti pred tabo izrisuje stvari, ki jih imaš za hrbtom;
@@ -414,51 +421,98 @@ const activeViewer = new Viewer(0, -10, 0);
 // ustvarjanje obročev
 let activeItems;
 let loops = [];
-loops.push(new OrtgnlCircle(new SpacePoint(0, 80, 0), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(0, 100, 0), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(2, 120, 0), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(5, 140, 0), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(10, 160, 0), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(15, 180, 3), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(18, 200, 7), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(20, 220, 10), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(18, 240, 13), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(15, 260, 15), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(13, 280, 15), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(11, 300, 15), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(10, 320, 15), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(10, 340, 15), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(10, 360, 15), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(8, 380, 14), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(5, 400, 10), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(0, 420, 5), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(-4, 440, 0), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(-2, 460, -5), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(2, 480, -10), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(5, 500, -15), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(5, 520, -13), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(5, 540, -9), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(7, 560, -5), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(10, 580, -3), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(14, 600, -2), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(18, 620, -1), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(23, 640, 0), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(24, 660, 1), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(25, 680, 4), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(25, 700, 9), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(25, 720, 14), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(24, 740, 16), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(23, 760, 17), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(21, 780, 16), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(17, 800, 14), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(13, 820, 12), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(9, 840, 9), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(6, 860, 6), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(3, 880, 4), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(1, 900, 2), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(0, 920, 0), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(0, 940, 0), 5, [true, false], new FillInfo(false)));
-loops.push(new OrtgnlCircle(new SpacePoint(0, 960, 0), 5, [true, false], new FillInfo(false)));
+
+if (Math.random() < 0.5) {
+    loops.push(new OrtgnlCircle(new SpacePoint(0, 80, 0), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(0, 100, 0), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(2, 120, 0), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(5, 140, 0), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(10, 160, 0), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(15, 180, 3), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(18, 200, 7), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(20, 220, 10), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(18, 240, 13), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(15, 260, 15), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(13, 280, 15), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(11, 300, 15), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(10, 320, 15), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(10, 340, 15), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(10, 360, 15), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(8, 380, 14), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(5, 400, 10), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(0, 420, 5), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(-4, 440, 0), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(-2, 460, -5), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(2, 480, -10), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(5, 500, -15), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(5, 520, -13), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(5, 540, -9), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(7, 560, -5), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(10, 580, -3), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(14, 600, -2), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(18, 620, -1), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(23, 640, 0), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(24, 660, 1), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(25, 680, 4), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(25, 700, 9), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(25, 720, 14), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(24, 740, 16), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(23, 760, 17), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(21, 780, 16), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(17, 800, 14), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(13, 820, 12), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(9, 840, 9), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(6, 860, 6), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(3, 880, 4), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(1, 900, 2), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(0, 920, 0), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(0, 940, 0), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(0, 960, 0), 5, [true, false], new FillInfo(false)));
+} else {
+    loops.push(new OrtgnlCircle(new SpacePoint(0, 80, 0), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(0, 100, 0), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(0, 120, 0), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(-2, 140, 0), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(-5, 160, 0), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(-9, 180, 0), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(-14, 200, 0), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(-17, 220, 0), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(-19, 240, 0), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(-17, 260, 0), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(-14, 280, 0), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(-9, 300, 0), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(-5, 320, 0), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(-2, 340, 0), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(0, 360, 0), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(0, 380, -1), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(0, 400, -5), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(0, 420, -7), 5, [true, false], new FillInfo(false)));    // 1
+    loops.push(new OrtgnlCircle(new SpacePoint(-0.25, 440, -9,75), 5, [true, false], new FillInfo(false))); // ,95
+    loops.push(new OrtgnlCircle(new SpacePoint(-1, 460, -14), 5, [true, false], new FillInfo(false)));  // ,85
+    loops.push(new OrtgnlCircle(new SpacePoint(-2.5, 480, -17.5), 5, [true, false], new FillInfo(false)));  //,7
+    loops.push(new OrtgnlCircle(new SpacePoint(-5, 500, -20), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(-9, 520, -21), 5, [true, false], new FillInfo(false))); // ,25 konec gibanja dol levo
+    loops.push(new OrtgnlCircle(new SpacePoint(-14, 540, -21), 5, [true, false], new FillInfo(false))); // 1
+    loops.push(new OrtgnlCircle(new SpacePoint(-18,75, 560, -20.75), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(-23, 580, -20), 5, [true, false], new FillInfo(false))); // ,85
+    loops.push(new OrtgnlCircle(new SpacePoint(-26,5, 600, -18.5), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(-29, 620, -16), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(-30, 640, -12), 5, [true, false], new FillInfo(false))); // ,25 konec gibanja gor levo
+    loops.push(new OrtgnlCircle(new SpacePoint(-30, 660, -7), 5, [true, false], new FillInfo(false))); // 1
+    loops.push(new OrtgnlCircle(new SpacePoint(-29.75, 680, -2.25), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(-29, 700, 2), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(-27.5, 720, 5.5), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(-25, 740, 8), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(-21, 760, 9), 5, [true, false], new FillInfo(false))); // ,25 konec gibanja gor desno
+    loops.push(new OrtgnlCircle(new SpacePoint(-16, 780, 9), 5, [true, false], new FillInfo(false))); // 1
+    loops.push(new OrtgnlCircle(new SpacePoint(-11,25, 800, 8.75), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(-7, 820, 8), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(-3,5, 840, 6.5), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(-1, 860, 4), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(0, 880, 0), 5, [true, false], new FillInfo(false))); // 0,25 konec gibanja dol desno
+    loops.push(new OrtgnlCircle(new SpacePoint(0, 900, 0), 5, [true, false], new FillInfo(false)));
+    loops.push(new OrtgnlCircle(new SpacePoint(0, 920, 0), 5, [true, false], new FillInfo(false)));
+}
 activeItems = [...loops];
 
 const xOffst = mobile ? -5 : 0;
@@ -470,15 +524,15 @@ activeItems.push(new LetterR(new SpacePoint(12.6 + xOffst, 60, 0 + zOffst), new 
 activeItems.push(new LetterT(new SpacePoint(14.8 + xOffst, 60, 0 + zOffst), new FillInfo(true, BASE, '#ffffff')));
 
 let yay = [];
-let distOfLast = loops[loops.length - 1].objSpcPts[0].y;
-yay.push(new LetterY(new SpacePoint(0.55, distOfLast + 7, 1.2), new FillInfo(true, BASE, '#ffffff')));
-yay.push(new LetterA(new SpacePoint(2.75, distOfLast + 7, 1.2), new FillInfo(true, BASE, '#ffffff')));
-yay.push(new LetterY(new SpacePoint(4.95, distOfLast + 7, 1.2), new FillInfo(true, BASE, '#ffffff')));
-yay.push(new LetterExclamationPt(new SpacePoint(7.15, distOfLast + 7, 1.2), new FillInfo(true, BASE, '#ffffff')));
+let spcPtOfLast = loops[loops.length - 1].objSpcPts[0];
+yay.push(new LetterY(new SpacePoint(spcPtOfLast.x + 0.55, spcPtOfLast.y + 7, spcPtOfLast.z + 1.2), new FillInfo(true, BASE, '#ffffff')));
+yay.push(new LetterA(new SpacePoint(spcPtOfLast.x + 2.75, spcPtOfLast.y + 7, spcPtOfLast.z + 1.2), new FillInfo(true, BASE, '#ffffff')));
+yay.push(new LetterY(new SpacePoint(spcPtOfLast.x + 4.95, spcPtOfLast.y + 7, spcPtOfLast.z + 1.2), new FillInfo(true, BASE, '#ffffff')));
+yay.push(new LetterExclamationPt(new SpacePoint(spcPtOfLast.x + 7.15, spcPtOfLast.y + 7, spcPtOfLast.z + 1.2), new FillInfo(true, BASE, '#ffffff')));
 activeItems = [...activeItems, ...yay]
 
-// določimo novo vrednost distOfLast, tokrat za vse elemente;
-distOfLast = 15 + activeItems[activeItems.length - 1].objSpcPts[0].y;   // 15, da se malo izteče po zadnjem el.;
+// določimo novo vrednost spcPtOfLast, tokrat za vse elemente;
+spcPtOfLast = activeItems[activeItems.length - 1].objSpcPts[0];
 
 //  - - - - - - - - - - - - - - - - -  AKCIJA  - - - - - - - - - - - - - - - - - - - - -
 
@@ -587,7 +641,7 @@ function atKeyUp(e) {
 function updtViewer() { // glavna reč, da se reč dogaja, vezano na interval;
     rotateViewer(); // spremenimo kote/položaj, če pritisnjena kšna smerna tipka;
     activeViewer.move(FORWARD); // gas naprej v izračunani smeri - samo izračun;
-    if (activeViewer.posIn3D.y > distOfLast) {
+    if (activeViewer.posIn3D.y > spcPtOfLast.y + 20) { // 20 m po YAY! je konc
         console.log(' - -  KONEC - -');
         gameOver(TILL_END);
     }
