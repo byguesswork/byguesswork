@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="polyrhythm beat generator">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=1, maximum-scale=5">
+    <title>Polyrhythm Beat Dial · byGuesswork</title>
+    <link rel="icon" href="/images/favicon.ico">
+    <link href="poly.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <div id="home">
+       <a href="/index.html" title="back to byGuesswork"><img src="/images/home.PNG" alt="home"></a>
+    </div>
+    <p class="center-text">Polyrhythm Beat Maker</p>
+    <div id="canvas_div">
+       <canvas id="canvas"></div>
+    </div>
+    <div id="foreground_canvas_div">
+       <canvas id="foreground_canvas"></div>
+    </div>
+    <div id="controls">
+        <p id="left_beat_digit" class="no-margin no-click"></p>
+        <div>
+            <canvas id="left_beat"></canvas>
+            <p class="center-text">Marks inside circle<br>(beats per bar)</p>
+        </div>
+        <div>
+            <canvas id="center_control" title="Press to play/stop metronome or press Enter to play, Esc to stop"></canvas>
+            <!-- <p class="center-text"></p> -->
+        </div>
+        <div>
+            <canvas id="right_beat"></canvas>
+            <p class="center-text">Marks outside of circle<br>(beats per bar)</p>
+        </div>
+    </div>
+    <p id="right_beat_digit" class="no-margin no-click"></p>
+    <!-- <p id="test">AAAA</p> -->
+
+    <embe></embe>
+
+    <script src="controls.js"></script>
+    <script src="poly.js"></script>
+</body>
+</html>
