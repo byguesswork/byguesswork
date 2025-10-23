@@ -30,6 +30,8 @@ const resltBckgndFault = '#c96a6aff';
 
 let lastInteracted = null;
 let mobile = false;
+let divSigture, lesserHeight; // sigture in lesserHeight se bo rabilo, samo če bo mobile;
+let mobileIntervalChecker = null;
 let jokerOpen = false;
 let width;
 
@@ -42,28 +44,14 @@ function check4mobile() {
     if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null) {
         console.log('mobile');
         mobile = true;
+        divSigture = document.getElementById('sigture');
     
-        // screen.orientation.addEventListener("change", () => {
-        //    to bo še treba 
-        // });
+        screen.orientation.addEventListener("change", mobileHorizontalAdjstmts );
     }
 }
 
 function defineDimensions() {
-    if(mobile) {
-        divJokerForegnd.style.top = '120px';
-        divAvgHexInfo.style.position = 'relative';
-        divAvgHexInfo.style.justifySelf = 'end';
-        divAvgHexInfo.style.marginRight = '8px';
-        divAvgHexInfo.style.marginBottom = '12px';
-        document.getElementById('div_avg_hex').style.marginLeft = '24px';
-
-        btnAvgHexCalc.style.marginLeft = '8px';
-        btnAvgHexCalc.style.fontSize = '13px';
-
-        document.getElementsByTagName('form')[0].style.fontSize = '15px';
-    }
-
+   
     width = document.documentElement.clientWidth < window.innerWidth ? document.documentElement.clientWidth : window.innerWidth;
     if(screen.width < width) width = screen.width;
     if(width > 400) {
@@ -79,6 +67,45 @@ function defineDimensions() {
         divAvgHexInfo.style.color = 'whitesmoke';
         divAvgHexInfo.style.background = '#808080';
     }
+
+     if(mobile) {
+        divJokerForegnd.style.top = '120px';
+        divAvgHexInfo.style.position = 'relative';
+        divAvgHexInfo.style.justifySelf = 'end';
+        divAvgHexInfo.style.marginRight = '8px';
+        divAvgHexInfo.style.marginBottom = '12px';
+        document.getElementById('div_avg_hex').style.marginLeft = '24px';
+
+        btnAvgHexCalc.style.marginLeft = '8px';
+        btnAvgHexCalc.style.fontSize = '13px';
+
+        document.getElementsByTagName('form')[0].style.fontSize = '15px';
+
+        mobileHorizontalAdjstmts();
+    }
+}
+
+function mobileHorizontalAdjstmts() {
+    if(mobileIntervalChecker == null) {
+        mobileIntervalChecker = setInterval(mobileHozAdjstmsDo, 100);
+    }
+}
+
+function mobileHozAdjstmsDo() {
+
+    lesserHeight = document.documentElement.clientHeight < screen.height ? document.documentElement.clientHeight : screen.height;
+    console.log('element', document.documentElement.clientHeight, ', skrin hajt: ', screen.height, ', lesserH:', lesserHeight);
+    console.log('bodyHght:', document.documentElement.getBoundingClientRect().height, 'signatureHght: ', divSigture.getBoundingClientRect().height);
+
+    if((document.documentElement.getBoundingClientRect().height + divSigture.getBoundingClientRect().height) > lesserHeight) {
+        divSigture.style.position = 'static';   // druzga ni treba urejat, ker mikro položaj je urejen s padingom in ta je tudi vštet v višino ..
+        // .. (bottom, ki je del positiona, ni vštat v višino, tisto bi moral ločeno prištet, če bi uporabljal!!);
+    } else {
+        divSigture.style.position = 'absolute';
+    }
+
+    clearInterval(mobileIntervalChecker);
+    mobileIntervalChecker = null;
 }
 
 function atKeyDown(e) {

@@ -93,8 +93,10 @@ input[type="reset"] {
 
 #sigture {
     position: absolute;
-    bottom: 16px;
-    left: 24px;
+    bottom: 0px;
+    padding-left: 24px;
+    padding-bottom: 16px;
+    padding-top: 24px;
     color: #f0fff0;
 }
 
