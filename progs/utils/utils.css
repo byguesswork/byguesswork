@@ -1,0 +1,164 @@
+* {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-family: Helvetica, Arial, sans-serif;
+    background: #808080; /* najprej: #808080 (grey) */
+}
+
+#home {
+    padding-top: 15px;
+    padding-left: 15px;
+}
+
+#Utilities_title_section {
+    position: relative; /* samo da omogočimo morebitne poznejše absolute */
+    margin-top: 24px;
+    margin-left: 32px;
+    margin-right: 8px;
+}
+
+#div_avg_hex {
+    position: relative;
+    margin-top: 32px;
+    margin-left: 32px;
+}
+
+#avg_hex_info_icon {
+    position: absolute; 
+    right: 40px;
+    top: 0;
+
+    /* za mobile, da gre eno vrstico više kot vsebina, implementirano v js */
+    /*
+    position: relative;
+    justify-self: end;
+    margin-right: 20px;
+    */
+
+    border-radius: 50%;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #4f4f4f;
+    color:black; /* whitesmoke */
+    background: #a2f083;
+
+    height: 1.1em;
+    width: 1.1em;
+    /* line-height: 1.1em; */
+    text-align: center;
+
+    /* da ni mogoče izbrati besedila, view pa je še vedno clickable */
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+    cursor:default;
+}
+
+input[type="text"] {
+    background: #dad9d9;
+    padding: 2px 4px;
+    width: 6em;
+}
+
+#btn_avg_hex_calc, input[type="reset"] {
+    margin-left: 20px;
+    background: #a2f083;
+    padding: 2px 10px;
+    font-size: 15px;
+    border-radius: 5px;
+}
+
+input[type="reset"] {
+    font-size: 13px;
+    margin-left: 8px;
+}
+
+#avg_hex_reslt_output {
+        background: #bbbbbb;
+        padding: 2px 12px;
+        margin-left: 8px;
+}
+
+.colr-display {
+    margin-left: 8px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #404040;
+    padding: 2px 12px;
+}
+
+#sigture {
+    position: absolute;
+    bottom: 16px;
+    left: 24px;
+    color: #f0fff0;
+}
+
+#joker_bckgnd {
+    position: absolute;
+    background: #bbbbbb66;
+}
+
+#joker_foregnd {
+    position: absolute;
+    background: #686868;
+    padding: 24px 20px 32px;
+    top: 200px;
+    
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 10px;
+}
+
+#joker_close_icon {
+    position: relative;
+    justify-self: end;
+    margin-right: 10px;
+    
+    border-radius: 50%;
+    border-color: whitesmoke;
+    border-width: 1px;
+    border-style: solid;
+    color:whitesmoke;
+    
+    height: 1.1em;
+    width: 1.1em;
+    line-height: 1.1em;
+    text-align: center;
+    
+    /* da ni mogoče izbrati besedila, view pa je še vedno clickable */
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+    cursor:default;
+}
+
+#joker_content {
+    margin-top: 0.5em;
+    margin-right: 32px;
+    background: #686868;
+    color: #eeece4;
+}
+
+.marginTop6 {
+    margin-top: 6px;
+}
+
+.margin-bottom-2 {
+    margin-bottom: 2px;
+}
+
+.margin-right-50 {
+    margin-right: 50px;
+}
+
+.hidden {
+    display: none;
+}

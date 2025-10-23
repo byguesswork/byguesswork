@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="some utils">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=1, maximum-scale=5">
+    <title>Some utils · byGuesswork</title>
+    <link rel="icon" href="/images/favicon.ico">
+    <link href="utils.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="home">
+       <a href="/index.html" title="back to byGuesswork"><img src="/images/home.PNG" alt="home"></a>
+    </div>
+
+    <div id="Utilities_title_section">
+        <h1>Some utilities</h1>
+        <p>Well, OK, currently there's only 1 utility below, but perhaps others will follow later.</p>
+
+    </div>
+
+    <div id="div_avg_hex">  <!-- oktober 2025 -->
+        <div id="avg_hex_info_icon">i</div>
+        <form id="form_avg_hex">
+            <fieldset>
+                <legend class="margin-bottom-2 margin-right-50">Calculate the middle-of-way color value between two hexadecimal numbers for RGB colors</legend>
+                1st hex number:&nbsp;<input id="inpt_avg_hex_1" type="text" class="margin-bottom-2">
+                <span id="avg_hx_inpt1_colr" class="colr-display hidden">&nbsp;&nbsp;</span><br>
+            </fieldset>
+            2nd hex number:&nbsp;<input id="inpt_avg_hex_2" type="text" class="margin-bottom-2">
+            <span id="avg_hx_inpt2_colr" class="colr-display hidden">&nbsp;&nbsp;</span>
+            <button id="btn_avg_hex_calc">Calculate</button><br>
+            <p class="marginTop6">Result: <span id="avg_hex_reslt_output">&nbsp;&nbsp;</span>
+                <span id="avg_hx_reslt_colr" class="colr-display hidden">&nbsp;&nbsp;</span>
+            </p><br>
+            <input id="btn_reset" type="reset" value="Reset">
+        </form>
+    </div>
+
+    <div id="sigture">
+        <br>
+        <span style="background-color: inherit; font-size: 14px;">Ivo Makuc, 2025</span><br>
+        <span style="background-color: inherit; font-size: 13px;">byguesswork@gmail.com</span>
+        <br>
+    </div>
+
+    <div id="joker_bckgnd">
+        <div id="joker_foregnd" class="hidden">
+            <div id="joker_close_icon" class="hidden">✖</div>
+            <p id="joker_content"> <!-- tle se vstavlja z innerHTML --> </p>
+        </div>
+    </div>
+<!-- a -->
+    <script src="utils.js"></script>
+</body>
+</html>
