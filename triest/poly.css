@@ -53,14 +53,18 @@ p {
     background: none;
 }
 
-#controls{
+#controls, #tempo_div{
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
 }
 
+#controls {
+    margin-bottom: 20px;
+}
+
 #left_beat, #center_control, #right_beat {
-    margin: 30px 30px 12px;
+    margin: 30px 30px 2px;
 }
 
 #right_beat_digit {
@@ -73,4 +77,20 @@ p {
     position: absolute;
     font-size: 50px;
     padding-right: 0.25em;
+}
+
+#display_tempo {
+    color: #85ac75;
+    font-size: 36px;
+    margin-right: 12px;
+    align-self: center;
+
+}
+
+.beat-selector {
+    color: #85ac75;
+    font-size: 18px;
+    margin-right: 12px;
+    align-self: center;
+
 }

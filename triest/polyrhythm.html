@@ -16,32 +16,39 @@
     <div id="home">
        <a href="/index.html" title="back to byGuesswork"><img src="/images/home.PNG" alt="home"></a>
     </div>
+    
     <p class="center-text">Polyrhythm Beat Maker</p>
+    
     <div id="canvas_div">
        <canvas id="canvas"></div>
     </div>
     <div id="foreground_canvas_div">
        <canvas id="foreground_canvas"></div>
     </div>
+    
+    <p id="left_beat_digit" class="no-margin no-click"></p>
     <div id="controls">
-        <p id="left_beat_digit" class="no-margin no-click"></p>
         <div>
             <canvas id="left_beat"></canvas>
-            <p class="center-text">Marks inside circle<br>(beats per bar)</p>
+            <p class="center-text label">Marks inside circle<br>(beats per bar)</p>
         </div>
         <div>
             <canvas id="center_control" title="Press to play/stop metronome or press Enter to play, Esc to stop"></canvas>
-            <!-- <p class="center-text"></p> -->
         </div>
         <div>
             <canvas id="right_beat"></canvas>
-            <p class="center-text">Marks outside of circle<br>(beats per bar)</p>
+            <p class="center-text label">Marks outside circle<br>(beats per bar)</p>
         </div>
     </div>
     <p id="right_beat_digit" class="no-margin no-click"></p>
-    <!-- <p id="test">AAAA</p> -->
 
-    <embe></embe>
+    <div id="tempo_div">
+        <p class="beat-selector">Beats per minute</p>
+        <p id="display_tempo">100</p>
+        <canvas id="canv_tempo"></div>
+
+    </div>
+
 
     <script src="controls.js"></script>
     <script src="poly.js"></script>
