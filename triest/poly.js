@@ -39,7 +39,7 @@ const TEMPO_UP = 'u';
 const TEMPO_DOWN = 'd';
 
 const bckgndColor = '#686868';  // preveri, da je isto v css!;
-const btnColor = '#a2f083ff';
+const btnColor = '#a2f083'; // kulska: #81D95E
 const btnColorShaded = '#85ac75';   // #85ac75
 const digitColrShaded = '#85ac75';    // #84c46bff ; včasih je bil gumb malo svetlejšo od cifer;
 
@@ -49,7 +49,7 @@ let mainBeat = 4; // na desni oz. zunaj kroga;
 let leftBeat = 3; // znotraj kroga;
 let bpm = 60;   // beatsPerMinute; potem bo treba ločit še bars per minute;
 const startRad = -Math.PI / 2; // to je kot točke, ki je na vrhu kroga;
-let revltnDurtn = (60 / (bpm / mainBeat)) * 1000;  //  čas, potreben za en krog, v milisekundah; 60, ker 60 sekund v minuti;
+let revltnDurtn;
 let notchCoords = {
     main: [],
     left: []
@@ -99,6 +99,7 @@ class Notch {
 }
 
 function initialize() {
+    defineRevltnDurtn();
     check4mobile();
     defineDimensions();
 }
@@ -187,10 +188,7 @@ function positionElems() {
 function atKeyPress(keyKey) {
     if(keyKey == 'Escape') {
         if (isRotating != null) stopRotation();
-            else if(!azzerato) {
-                azzerato = true;
-                drawBckgnd(); // treba prav ozadje nova izrisat, da razbarvaš oznake, prestaviš kazalec in odstraniš ostanke obarvanj z robov oznak;
-            }
+            else if(!azzerato) { azzerareAfterStop()};
     } else if(keyKey == 'Enter') {
         if (isRotating == null) { startRotating(); }
     }
@@ -201,7 +199,7 @@ function atClickEvent() {
     else stopRotation();
 }
 
-function beatClick(e) {
+function click4BeatChg(e) {
     let actionedBeat, otherBeat;
     if(e.target == canvRBeat) {
         actionedBeat = mainBeat;
@@ -235,6 +233,10 @@ function beatClick(e) {
             setNotchCoords(LEFT);
         }
     }
+}
+
+function defineRevltnDurtn() {
+    revltnDurtn = (60 / (bpm / mainBeat)) * 1000;  //  čas, potreben za en krog, v milisekundah; 60, ker 60 sekund v minuti;
 }
 
 function rotate() {
@@ -315,8 +317,9 @@ function startRotating() {
     drawBckgnd(); // ker blinkanje (vsaj zdaj ko je fiksno) pusti sled na krogu, zato je pred novim vrtenjem treba narisat krog; vrstica gre pozneje ven, verjetno;
     rotate();   // ta je da obarvaš prvo dobo + narišeš ta prvo, navpično črto (ki ni narisana, če ne zaganjaš prvič) (črta se sicer trenutno riše že v drawBckgnd, ampak ta bo morda umaknjena);
     isRotating = setInterval(rotate, 20);
-    drawPauseBtn();
+    drawStopBtn();
     azzerato = false;
+    if(mobile) foreCanv.removeEventListener('touchstart', (e) => {touchAzzerareDial(e)}, {passive : false}); 
 }
 
 function stopRotation() {
@@ -330,14 +333,7 @@ function stopRotation() {
     notchBlinks.left.nextAngle = 0;
     notchBlinks.left.nextIdx = 0;
     drawPlayBtn();
-    console.log('isRotating je false');
-}
-
-function resetBckgndCanv() {
-    canv.height = 0;
-    canv.height = baseDimension;
-    ctx.strokeStyle = 'honeydew';
-    ctx.lineWidth = 3;
+    if(mobile) foreCanv.addEventListener('touchstart', (e) => {touchAzzerareDial(e)}, {passive : false});  // da s pritiskom številčnice ponastaviš kazalec (ki po zaustavitvi ostane, kjer je bil);
 }
 
 function resetForeCanv() {
@@ -348,24 +344,42 @@ function resetForeCanv() {
 }
 
 function drawBckgnd() {
+    // reset bckgCanvas
+    canv.height = 0;
+    canv.height = baseDimension;
+    ctx.strokeStyle = 'honeydew';
+    ctx.lineWidth = 3;
     // krog;
-    resetBckgndCanv();
     ctx.beginPath();
     ctx.arc(crclX, crclY, r, 0, 2 * Math.PI);
     ctx.stroke();
 
-    drawNotches();
+    // narisat oznake;
+    function helper(which) {
+        for (let i = 0; i < which.length; i++) {
+            ctx.beginPath();
+            ctx.moveTo(which[i].start.x, which[i].start.y);
+            ctx.lineTo(which[i].end.x, which[i].end.y);
+            ctx.stroke();
+        }
+    }
+
+    ctx.strokeStyle = 'honeydew';
+    ctx.lineWidth = notchWidth;
+    helper(notchCoords.main);
+    helper(notchCoords.left);
 
     // navpičen kazalec; ko odpreš program, mora bit navpičen kazalec že narisan in čaka;
-    resetNeedle();
-}
-
-function resetNeedle() {
     resetForeCanv();
     foreCtx.beginPath();
     foreCtx.moveTo(crclX, crclY  - r);
     foreCtx.lineTo(crclX, crclY);
     foreCtx.stroke();
+}
+
+function azzerareAfterStop() {
+    azzerato = true;
+    drawBckgnd(); // treba prav ozadje nova izrisat, da razbarvaš oznake, prestaviš kazalec in odstraniš ostanke obarvanj z robov oznak;
 }
 
 function setNotchCoords(WHICH) {
@@ -397,23 +411,6 @@ function setNotchCoords(WHICH) {
     drawBckgnd();
 }
 
-function drawNotches() {
-
-    function helper(which) {
-        for (let i = 0; i < which.length; i++) {
-            ctx.beginPath();
-            ctx.moveTo(which[i].start.x, which[i].start.y);
-            ctx.lineTo(which[i].end.x, which[i].end.y);
-            ctx.stroke();
-        }
-    }
-
-    ctx.strokeStyle = 'honeydew';
-    ctx.lineWidth = notchWidth;
-    helper(notchCoords.main);
-    helper(notchCoords.left);
-}
-
 function zvok(which) {
     if (which == RIGHT) { audioMain.play(); } 
         else audioLeft.play();
@@ -433,8 +430,8 @@ if (document.readyState == 'loading') {
 
 //   -  -  -   POSLUŠALCI  -  -  vsaj en mora bit šele zdaj, ker je odvisen od stanja spremenljivke mobile;
 document.addEventListener('keydown', e => { atKeyPress(e.key) });
-canvRBeat.addEventListener('click', e => { beatClick(e) });
-canvLBeat.addEventListener('click', e => { beatClick(e) });
+canvRBeat.addEventListener('click', e => { click4BeatChg(e) });
+canvLBeat.addEventListener('click', e => { click4BeatChg(e) });
 canvPlayStop.addEventListener('click', atClickEvent);
 if (!mobile) {  // poslušalci za ikone krmiljenja če miška;
     canvTempo.addEventListener('mousedown', (e) => {mouseDownOprtn(e)});

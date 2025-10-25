@@ -89,7 +89,7 @@ function drawPlayBtn () {
     ctxPlayStop.fill();
 }
 
-function drawPauseBtn() {
+function drawStopBtn() {
     resetPlayStopCanv();
 
     ctxPlayStop.beginPath();
@@ -111,30 +111,44 @@ function drawPauseBtn() {
     ctxPlayStop.beginPath();
     if(!mobile) {
         ctxPlayStop.moveTo(15, 43);
-        ctxPlayStop.lineTo(35, 43);
-        ctxPlayStop.lineTo(35, 93);
+        ctxPlayStop.lineTo(65, 43);
+        ctxPlayStop.lineTo(65, 93);
         ctxPlayStop.lineTo(15, 93);
     } else {
         ctxPlayStop.moveTo(12, 33);
-        ctxPlayStop.lineTo(27, 33);
-        ctxPlayStop.lineTo(27, 70);
+        ctxPlayStop.lineTo(48, 33);
+        ctxPlayStop.lineTo(48, 70);
         ctxPlayStop.lineTo(12, 70);
     }
     ctxPlayStop.fill();
+    // legacy, ko je bila še ikona za pavzo;
+    // ctxPlayStop.beginPath();
+    // if(!mobile) {
+    //     ctxPlayStop.moveTo(15, 43);
+    //     ctxPlayStop.lineTo(35, 43);
+    //     ctxPlayStop.lineTo(35, 93);
+    //     ctxPlayStop.lineTo(15, 93);
+    // } else {
+    //     ctxPlayStop.moveTo(12, 33);
+    //     ctxPlayStop.lineTo(27, 33);
+    //     ctxPlayStop.lineTo(27, 70);
+    //     ctxPlayStop.lineTo(12, 70);
+    // }
+    // ctxPlayStop.fill();
 
-    ctxPlayStop.beginPath();
-    if(!mobile) {
-        ctxPlayStop.moveTo(45, 43);
-        ctxPlayStop.lineTo(65, 43);
-        ctxPlayStop.lineTo(65, 93);
-        ctxPlayStop.lineTo(45, 93);
-    } else {
-        ctxPlayStop.moveTo(33, 33);
-        ctxPlayStop.lineTo(49, 33);
-        ctxPlayStop.lineTo(49, 70);
-        ctxPlayStop.lineTo(33, 70);
-    }
-    ctxPlayStop.fill();
+    // ctxPlayStop.beginPath();
+    // if(!mobile) {
+    //     ctxPlayStop.moveTo(45, 43);
+    //     ctxPlayStop.lineTo(65, 43);
+    //     ctxPlayStop.lineTo(65, 93);
+    //     ctxPlayStop.lineTo(45, 93);
+    // } else {
+    //     ctxPlayStop.moveTo(33, 33);
+    //     ctxPlayStop.lineTo(49, 33);
+    //     ctxPlayStop.lineTo(49, 70);
+    //     ctxPlayStop.lineTo(33, 70);
+    // }
+    // ctxPlayStop.fill();
 }
 
 function drawTempo() {
@@ -191,6 +205,9 @@ function touchMoveOprtn(e) {
     }
 }
 
+function touchAzzerareDial() {
+    if(isRotating == null && azzerato == false) azzerareAfterStop();
+}
 
 // - -  če miška     - - - - - - - - - - - - 
 function mouseDownOprtn(e){
@@ -201,9 +218,9 @@ function mouseDownOprtn(e){
         mousePressIsValid = true;
         mouseOrTchPosOnTempo.btn = reslt;
         if (reslt == TEMPO_UP) {
-            tempoIntrvlChckr = setInterval(tempoUp, 50);
+            if(tempoIntrvlChckr == null) { tempoIntrvlChckr = setInterval(tempo, 100, true); }
         } else if(reslt == TEMPO_DOWN){
-            tempoIntrvlChckr = setInterval(tempoDown, 50);
+            if(tempoIntrvlChckr == null) tempoIntrvlChckr = setInterval(tempo, 100, false);
         }
     }
 }
@@ -227,7 +244,6 @@ function mouseLeaveOprtn() {
 }
 
 function detrmnMousPosOnTempoCnvs(e) {
-    console.log(e);
     if (!mobile) {
         mouseOrTchPosOnTempo.x = e.clientX - tempoCnvsRect.left;
         mouseOrTchPosOnTempo.y = e.clientY - tempoCnvsRect.top;
@@ -249,14 +265,9 @@ function invldteTempoClick() {
     tempoIntrvlChckr = null;
 }
 
-function tempoUp(){
-    bpm++;
+function tempo(up){
+    if(up) bpm++;
+        else bpm--;
     displayTempo.innerHTML = bpm;
-    console.log(bpm)
-}
-
-function tempoDown() {
-    bpm--;
-    displayTempo.innerHTML = bpm;
-     console.log(bpm)
+    defineRevltnDurtn();
 }

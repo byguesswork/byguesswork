@@ -88,9 +88,11 @@ p {
 }
 
 .beat-selector {
-    color: #85ac75;
+    color: #2e2d2d;
+    background-color: #999;
     font-size: 18px;
+    padding: 2px 8px;
     margin-right: 12px;
     align-self: center;
-
+    border-radius: 0.4em;
 }
