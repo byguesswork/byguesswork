@@ -218,9 +218,15 @@ function mouseDownOprtn(e){
         mousePressIsValid = true;
         mouseOrTchPosOnTempo.btn = reslt;
         if (reslt == TEMPO_UP) {
-            if(tempoIntrvlChckr == null) { tempoIntrvlChckr = setInterval(tempo, 100, true); }
+            if(tempoIntrvlChckr == null) { 
+                tempo(true);
+                tempoIntrvlChckr = setInterval(tempo, 100, true); 
+            }
         } else if(reslt == TEMPO_DOWN){
-            if(tempoIntrvlChckr == null) tempoIntrvlChckr = setInterval(tempo, 100, false);
+            if(tempoIntrvlChckr == null) {
+                tempo(false);
+                tempoIntrvlChckr = setInterval(tempo, 100, false);
+            }
         }
     }
 }
@@ -266,8 +272,12 @@ function invldteTempoClick() {
 }
 
 function tempo(up){
-    if(up) bpm++;
-        else bpm--;
-    displayTempo.innerHTML = bpm;
+    if(up) {bpm++;}
+        else {bpm--;}
     defineRevltnDurtn();
+    updBpmDisp();
+}
+
+async function updBpmDisp(){
+    displayTempo.innerHTML = bpm;
 }

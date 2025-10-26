@@ -2,7 +2,8 @@
 
 // če zmanjša levega na manj kot 2, ga izklopiš;
 // izklop zvoka
-// dat kaj na async
+// beats per bar
+// i - noter licenca
 // dodat uvajalno odštevanje (opcija);
 
 // skala in kazalec;
@@ -49,7 +50,10 @@ let mainBeat = 4; // na desni oz. zunaj kroga;
 let leftBeat = 3; // znotraj kroga;
 let bpm = 60;   // beatsPerMinute; potem bo treba ločit še bars per minute;
 const startRad = -Math.PI / 2; // to je kot točke, ki je na vrhu kroga;
-let revltnDurtn;
+const twoPI = 2 * Math.PI;
+let revltnDurtn, revltnConst;
+const frameDurtn = 20;  // na koliko ms se sproži interval, ki izrisuje kroženje;
+let angle, prevT;   // angle služi hkrati tudi kot prevAngle;
 let notchCoords = {
     main: [],
     left: []
@@ -194,7 +198,7 @@ function atKeyPress(keyKey) {
     }
 }
 
-function atClickEvent() {
+function playStopBtnOprtn() {
     if(isRotating == null) startRotating();
     else stopRotation();
 }
@@ -237,13 +241,17 @@ function click4BeatChg(e) {
 
 function defineRevltnDurtn() {
     revltnDurtn = (60 / (bpm / mainBeat)) * 1000;  //  čas, potreben za en krog, v milisekundah; 60, ker 60 sekund v minuti;
+    revltnConst = twoPI / revltnDurtn;
 }
 
-function rotate() {
+async function rotate() {
     // izračunamo kot, kamor trenutno kaže kazalec;
-    const tDiff = (Date.now() - tStart) % revltnDurtn;
-    const tRatio = tDiff / revltnDurtn;
-    const angle = tRatio * (2 * Math.PI) // delež kota 360';
+    const nowT = Date.now();
+    const dT = nowT - prevT;
+    const dAngle = dT * revltnConst // delež kota 360'; če ne bi prej izračunal konstante, bi bilo tako: dAngle = (dT / revltnDurtn) * twoPI;
+    angle += dAngle;    // iz prevAngle arta aktualni angle;
+    if(angle > twoPI) angle -= twoPI;
+    prevT = nowT;   // lahko bi šlo v async;
 
     function helper(passBlinkCoords, passdNotchCoords) {
 
@@ -313,12 +321,23 @@ function rotate() {
 }
 
 function startRotating() {
-    tStart = Date.now();
-    drawBckgnd(); // ker blinkanje (vsaj zdaj ko je fiksno) pusti sled na krogu, zato je pred novim vrtenjem treba narisat krog; vrstica gre pozneje ven, verjetno;
+    // ponastavimo procesne vrednosti;
+    prevT = Date.now();
+    angle = 0;
+
+    // ponastavimo videz ali kontrolno spremenljivko;
+    if (!azzerato) {    // to prav pri prvem zagonu odveč riše še enkrat, ampak naj bo
+        drawBckgnd(); // ker blinkanje (vsaj zdaj ko je fiksno) pusti sled na krogu, zato je pred novim vrtenjem treba narisat krog; vrstica gre pozneje ven, verjetno;
+    } else azzerato = false;    // smo že ponastavili kazale, ni treba še enkrat izrisovat, je pa treba ponastavit ta checker;
+    
+    // zagon;
     rotate();   // ta je da obarvaš prvo dobo + narišeš ta prvo, navpično črto (ki ni narisana, če ne zaganjaš prvič) (črta se sicer trenutno riše že v drawBckgnd, ampak ta bo morda umaknjena);
-    isRotating = setInterval(rotate, 20);
+    isRotating = setInterval(rotate, frameDurtn);
+    restOfStartRottng();    // v async da ne dela zamud;
+}
+
+async function restOfStartRottng() {
     drawStopBtn();
-    azzerato = false;
     if(mobile) foreCanv.removeEventListener('touchstart', (e) => {touchAzzerareDial(e)}, {passive : false}); 
 }
 
@@ -351,7 +370,7 @@ function drawBckgnd() {
     ctx.lineWidth = 3;
     // krog;
     ctx.beginPath();
-    ctx.arc(crclX, crclY, r, 0, 2 * Math.PI);
+    ctx.arc(crclX, crclY, r, 0, twoPI);
     ctx.stroke();
 
     // narisat oznake;
@@ -382,7 +401,7 @@ function azzerareAfterStop() {
     drawBckgnd(); // treba prav ozadje nova izrisat, da razbarvaš oznake, prestaviš kazalec in odstraniš ostanke obarvanj z robov oznak;
 }
 
-function setNotchCoords(WHICH) {
+function setNotchCoords(WHICH) {    // ne samo izračuna oznake, ampak jih tudi izriše;
 
     function helper(passdBeat, passdNotchCoords) {
         const angleSlice = (Math.PI * 2) / passdBeat; // kot celega kroga deljeno s številom dob;
@@ -408,6 +427,7 @@ function setNotchCoords(WHICH) {
         helper(leftBeat, notchCoords.left)
     }
 
+    // izris ozadja in torej tudi oznak;
     drawBckgnd();
 }
 
@@ -432,8 +452,8 @@ if (document.readyState == 'loading') {
 document.addEventListener('keydown', e => { atKeyPress(e.key) });
 canvRBeat.addEventListener('click', e => { click4BeatChg(e) });
 canvLBeat.addEventListener('click', e => { click4BeatChg(e) });
-canvPlayStop.addEventListener('click', atClickEvent);
-if (!mobile) {  // poslušalci za ikone krmiljenja če miška;
+canvPlayStop.addEventListener('click', playStopBtnOprtn);
+if (!mobile) {  // poslušalci za spremembo tempa; najprej, če miška;
     canvTempo.addEventListener('mousedown', (e) => {mouseDownOprtn(e)});
     canvTempo.addEventListener('mouseleave', (e) => {mouseLeaveOprtn(e)});
     canvTempo.addEventListener('mouseup', (e) => {mouseUpOprtn(e)});
