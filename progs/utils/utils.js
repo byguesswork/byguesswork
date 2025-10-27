@@ -5,6 +5,7 @@
 const btnAvgHexCalc = document.getElementById('btn_avg_hex_calc');
 const inptAvgHex1 = document.getElementById('inpt_avg_hex_1');
 const inptAvgHex2 = document.getElementById('inpt_avg_hex_2');
+const inptAvgHexRatio = document.getElementById('inpt_avg_hex_ratio');
 const avgHexInpt1ColrThumb = document.getElementById('avg_hx_inpt1_colr');
 const avgHexInpt2ColrThumb = document.getElementById('avg_hx_inpt2_colr');
 const avgHexResltOutput = document.getElementById('avg_hex_reslt_output');
@@ -109,8 +110,8 @@ function mobileHozAdjstmsDo() {
 }
 
 function atKeyDown(e) {
-    lastInteracted = document.activeElement;
-    // console.log(e)
+    if(document.activeElement == inptAvgHex1) lastInteracted = document.activeElement;
+        else if(document.activeElement == inptAvgHex2) lastInteracted = document.activeElement; 
     if(e.code == 'Enter') {
         if(e.target == inptAvgHex1 || e.target == inptAvgHex2) {
             e.preventDefault(); // dam sem in ne prej, ker na gumbu Calculate mora vseeno delat; samo na teh dveh ne sme;
@@ -159,7 +160,9 @@ function avgHexChkInptFields(clicked, other) {
             const otherVal = helper(other);
             if(otherVal !== false) {    // treba dat tako preverjanje, ker != najde tudi falsi rezultate, kot je 000000, ki pa je legitimen rezulat;
                 if(clickedVal.length == otherVal.length) {
-                    avgHexCalc(clickedVal, otherVal, isClickedInput1);
+                    // da pošljemo vedno tako , da 1. argument pošilja podatek za 1. (gornji) input;
+                    if(isClickedInput1) avgHexCalc(clickedVal, otherVal);
+                        else avgHexCalc(otherVal, clickedVal);
                 } else avgHexResltError('The 2 entered values shall be of same length. Length of 3 counts as length of 6');
             } else {other.focus(); } // če je v drugi celici napaka (izpisana v helperju), se prestavimo tja;
         } else {
@@ -222,27 +225,39 @@ function avgHexValdteCalcBtn(e) {
     if(focused.value.length == 0 || other.value.length == 0) avgHexResltError('Input field is empty, enter some data.');
 }
 
-function avgHexCalc(firstHex, secondHex, isClickedInput1) {
-    let reslt = '';
-    for (let i = 0; 2 * i < firstHex.length; i++) {
+function avgHexCalc(firstHex, secondHex) {
+    // ratio
+    let ratio;
+    if(inptAvgHexRatio.value == '') ratio = 0.5;
+        else {
+            ratio = Number(inptAvgHexRatio.value);
+            if(ratio < 0 || ratio > 1) {
+                ratio = 0.5;
+                inptAvgHexRatio.value = '';
+            }
+        }
+    console.log(ratio);
+    
+    // izračuni;
+    let reslt = ''; // ker je to string, se bojo spodaj številke samodejno spremenile v besedilo;
+    for (let i = 0; 2 * i < firstHex.length; i++) { // ker imata oba isto dolžino (predhodno preverjanje), prverjamo tu samo enega;
         const firstDec = hex2dec2digits(firstHex.slice(2 * i, 2 * i + 2));
         const secondDec = hex2dec2digits(secondHex.slice(2 * i, 2 * i + 2));
-        const midOfWayHex = decToHex((firstDec + secondDec) / 2);
-        reslt += midOfWayHex;
+        let midOfWayHex;
+        midOfWayHex = decToHex(firstDec + (secondDec - firstDec) * ratio);
+        // midOfWayHex = decToHex((firstDec + secondDec) / 2);
+        reslt += midOfWayHex;   // ker je to string se rezultati dodajajo v string;
         console.log(firstHex.slice(2 * i, 2 * i + 2), secondHex.slice(2 * i, 2 * i + 2), 'vmesna vrednost:', midOfWayHex);
     }
     avgHexResltOutput.innerHTML = reslt;
+
+    // morebiten izris barv;
     if(reslt.length == 6) {
+        avgHexInpt1ColrThumb.style.background = `#${firstHex}`;
+        avgHexInpt2ColrThumb.style.background = `#${secondHex}`;
         avgHexResltColrThumb.style.background = `#${reslt}`;
-        if(isClickedInput1) {
-            avgHexInpt1ColrThumb.style.background = `#${firstHex}`;
-            avgHexInpt2ColrThumb.style.background = `#${secondHex}`;
-        } else {
-            avgHexInpt2ColrThumb.style.background = `#${firstHex}`;
-            avgHexInpt1ColrThumb.style.background = `#${secondHex}`;
-        }
         avgHexShowColorThumbs();
-    } else avgHexResltOutput.style.background = resltBckgnd;
+    } else avgHexResltOutput.style.background = resltBckgnd;    // za vsak slučaj če je prej bil error, verjetno (pri dolžini 2, ki ne kaže barve zadaj;)
     console.log('rezultat:', reslt);
     console.log('- - - - - -');
 }
@@ -307,11 +322,12 @@ function hex2dec2digits(niz) {  // prejme 2-mestni hex niz in vrne razpon 0-255;
 }
 
 function avgHexInfoClick() {
-    const msg = `A utility that is handy when you want to know the hex value of the color just middle-of-way between 2 hex code RGB colors on the color wheel.
-    <br><br>Acceptable characters are hex digits (0-9, a-f, A-F).<br>
+    const msg = `A utility with which to calculate the hex value of a color some way between 2 hex code RGB colors on the color wheel.
+    <br><br>For hex color inputs, acceptable characters are hex digits (0-9, a-f, A-F).<br>
     Values must be 2, 3 or 6 digits long. 3-digit &quot;f80&quot; is stretched to &quot;ff8800&quot;.
-    <br><br>For pairs of colors that are on opposite sides of the color wheel, the result will be some shade of grey as the result is the 
-    mathematical average of each component (R, G and B) and is found on midpoint of the straight line connecting the two colors.`;
+    <br><br>By default the color just middle-of-way between 2 colors is output (ratio = 0.5).
+    A ratio between 0 and 1 can be selected (values outside this range default to 0.5),
+    meaning the point where the result sits on the way from input 1 to input 2.`;
     raiseJoker(msg);
 }
 

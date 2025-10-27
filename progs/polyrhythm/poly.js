@@ -4,6 +4,7 @@
 // izklop zvoka
 // beats per bar
 // i - noter licenca
+// vodoravna postavitev
 // dodat uvajalno odštevanje (opcija);
 
 // skala in kazalec;
@@ -28,6 +29,12 @@ const canvTempo = document.getElementById('canv_tempo');
 const ctxTempo = canvTempo.getContext('2d');
 const displayTempo = document.getElementById('display_tempo');
 
+const infoIcon = document.getElementById('avg_hex_info_icon');
+const divJokerBckgnd = document.getElementById('joker_bckgnd');
+const divJokerForegnd = document.getElementById('joker_foregnd');
+const divJokerCloseIcon = document.getElementById('joker_close_icon');
+const jokerContent = document.getElementById('joker_content');
+
 const audioMain = new Audio('Perc_Can_hi.mp3');
 const audioLeft = new Audio('Perc_Clap_hi.mp3');
 
@@ -41,7 +48,9 @@ const TEMPO_DOWN = 'd';
 
 const bckgndColor = '#686868';  // preveri, da je isto v css!;
 const btnColor = '#a2f083'; // kulska: #81D95E
-const btnColorShaded = '#85ac75';   // #85ac75
+const btnColorShaded = '#85ac75';
+const btnColorShadedDarkrCentr = '#7f9e72';
+const btnColorShadedDarkr = '#717d6b';   // ko dosežeš mejo nastavitev in gumb postane neaktiven;
 const digitColrShaded = '#85ac75';    // #84c46bff ; včasih je bil gumb malo svetlejšo od cifer;
 
 let baseDimension, notchLength, notchWidth, r, crclX /* polovica od width oz. hght canvasa; */, crclY;
@@ -82,6 +91,8 @@ let tempoIntrvlChckr = null; // interval checker za tempo gumb;
 let azzerato = false;   // to je za vodenje evidence (samo pri upravljanju s tipkami) al si esc pritisnil enkrat (samo ustaviš) ali večkrat (ponastaviš kazalec);
 let mobile = false;
 let mousePressIsValid = false;
+let jokerOpen = false;
+let wasRunngB4Joker = false;
 const tempoCnvsRect = {
     left: 0,
     top: 0,
@@ -126,6 +137,9 @@ function defineDimensions() {
         notchLength = 20;
         r = 200;    // baseDim - 2*20(notch) - 2*2 (zaradi debeline 3, da ni prirezano)
         canvPlayStop.width = 80;
+        
+        divJokerForegnd.style.left = `${window.innerWidth * 0.2}px`;
+        divJokerForegnd.style.right = `${window.innerWidth * 0.2}px`;
     } else {
         let width = document.documentElement.clientWidth < window.innerWidth ? document.documentElement.clientWidth : window.innerWidth;
         if(screen.width < width) width = screen.width;
@@ -136,6 +150,11 @@ function defineDimensions() {
 
         document.getElementById('home').style.position = 'absolute';
         document.getElementById('home').style.paddingTop = '0px';
+        infoIcon.style.right = '12px';
+
+        divJokerForegnd.style.top = '80px';
+        divJokerForegnd.style.left = '32px';
+        divJokerForegnd.style.right = '32px';
 
         canvLBeat.style.marginTop = '16px';
         canvLBeat.style.marginRight = '8px';
@@ -203,26 +222,45 @@ function playStopBtnOprtn() {
     else stopRotation();
 }
 
-function click4BeatChg(e) {
-    let actionedBeat, otherBeat;
+function clickBeatCount(e) {
+    let actionedBeat, isActionedRBeat;
     if(e.target == canvRBeat) {
         actionedBeat = mainBeat;
-        otherBeat = leftBeat;
+        isActionedRBeat = true;
     } else {
         actionedBeat = leftBeat;
-        otherBeat = mainBeat;
+        isActionedRBeat = false;
     }
-    let doChange = false;
+    let doChange = false; 
+    let wasMaxed = false; // shrani potrditev, da je gumb, preden si ga pritisnil, bil razbarvan/neaktiven (imel največjo vrednost navzgor ali navzdol);
     posOnCtrl.y = e.clientY - posOnCtrl.top;
+
     if (posOnCtrl.y < 60) {
+        // pritisk na zgornjo puščico, za povečanje števila dob;
         if(actionedBeat < 12) {
+            if(actionedBeat == 2) wasMaxed = true;  // je bil neaktiven na spodnji meji;
             actionedBeat++;
             doChange = true;
+            if(actionedBeat == 12) {    // če si dosegel zgornji max, deaktivirat zgornjo puščico;
+                if(isActionedRBeat) drawBeatCount(RIGHT, false, true);
+                else drawBeatCount(LEFT, false, true);
+            } else if(wasMaxed) { // če si zapustil spodnjo mejo, aktivirat spodnjo puščico;
+                if(isActionedRBeat) drawBeatCount(RIGHT, true, true);
+                else drawBeatCount(LEFT, true, true);
+            }
         }
-    } else if(posOnCtrl.y > 76) {
+    } else if(posOnCtrl.y > 76) {   // pritisk na spodnjo puščico, za zmanjšanje števila dob;
         if(actionedBeat > 2) {
+            if(actionedBeat == 12) wasMaxed = true;  // je bil neaktiven na zgornji meji;
             actionedBeat--;
             doChange = true;
+            if(actionedBeat == 2) { // če si dosegel spodnji max, deaktivirat spodnjo puščico;
+                if(isActionedRBeat) drawBeatCount(RIGHT, true, false);
+                else drawBeatCount(LEFT, true, false)
+            } else if(wasMaxed) {   // če si zapustil zgornje nedovoljeno območje, aktivirat zgornjo puščico;
+                if(isActionedRBeat) drawBeatCount(RIGHT, true, true);
+                else drawBeatCount(LEFT, true, true);
+            }
         }
     }
     if(doChange) {
@@ -231,6 +269,7 @@ function click4BeatChg(e) {
             mainBeat = actionedBeat;
             rBeatDigit.innerHTML = mainBeat;
             setNotchCoords(RIGHT);
+            defineRevltnDurtn(); // samo če si spremenil desni beat, ker je on merilo 
         } else {
             leftBeat = actionedBeat;
             lBeatDigit.innerHTML = leftBeat;
@@ -339,6 +378,7 @@ function startRotating() {
 async function restOfStartRottng() {
     drawStopBtn();
     if(mobile) foreCanv.removeEventListener('touchstart', (e) => {touchAzzerareDial(e)}, {passive : false}); 
+        else foreCanv.removeEventListener('touchstart', (e) => {touchAzzerareDial(e)}); 
 }
 
 function stopRotation() {
@@ -353,6 +393,7 @@ function stopRotation() {
     notchBlinks.left.nextIdx = 0;
     drawPlayBtn();
     if(mobile) foreCanv.addEventListener('touchstart', (e) => {touchAzzerareDial(e)}, {passive : false});  // da s pritiskom številčnice ponastaviš kazalec (ki po zaustavitvi ostane, kjer je bil);
+        else foreCanv.addEventListener('click', (e) => {touchAzzerareDial(e)});
 }
 
 function resetForeCanv() {
@@ -450,18 +491,23 @@ if (document.readyState == 'loading') {
 
 //   -  -  -   POSLUŠALCI  -  -  vsaj en mora bit šele zdaj, ker je odvisen od stanja spremenljivke mobile;
 document.addEventListener('keydown', e => { atKeyPress(e.key) });
-canvRBeat.addEventListener('click', e => { click4BeatChg(e) });
-canvLBeat.addEventListener('click', e => { click4BeatChg(e) });
+canvRBeat.addEventListener('click', e => { clickBeatCount(e) });
+canvLBeat.addEventListener('click', e => { clickBeatCount(e) });
 canvPlayStop.addEventListener('click', playStopBtnOprtn);
 if (!mobile) {  // poslušalci za spremembo tempa; najprej, če miška;
     canvTempo.addEventListener('mousedown', (e) => {mouseDownOprtn(e)});
     canvTempo.addEventListener('mouseleave', (e) => {mouseLeaveOprtn(e)});
     canvTempo.addEventListener('mouseup', (e) => {mouseUpOprtn(e)});
     canvTempo.addEventListener('mousemove', (e) => {mouseMoveOprtn(e)});
+    //infoIcon
+    infoIcon.addEventListener('click', infoClick);
+    divJokerCloseIcon.addEventListener('click', retireJoker);
 } else {
     canvTempo.addEventListener('touchstart', (e) => {touchStartOprtn(e)}, {passive : false});
     canvTempo.addEventListener('touchmove', (e) => {touchMoveOprtn(e)}, {passive : false});
     canvTempo.addEventListener('touchend', (e) => {touchEndOprtn(e)}, {passive : false});
+    // infoIcon;
+    infoIcon.addEventListener('touchstart', () => {infoClick()}, {passive : false});
+    divJokerCloseIcon.addEventListener('touchstart', () => {retireJoker()}, {passive : false});
 }
-
 

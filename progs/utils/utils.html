@@ -25,17 +25,20 @@
     <div id="div_avg_hex">  <!-- oktober 2025 -->
         <div id="avg_hex_info_icon">i</div>
         <form id="form_avg_hex">
+            <legend class="margin-bottom-2 margin-right-50">Find point between two hexadecimal numbers for RGB colors</legend>
             <fieldset>
-                <legend class="margin-bottom-2 margin-right-50">Midpoint between two hexadecimal numbers for RGB colors</legend>
                 1st hex number:&nbsp;<input id="inpt_avg_hex_1" type="text" class="margin-bottom-2">
-                <span id="avg_hx_inpt1_colr" class="colr-display hidden">&nbsp;&nbsp;</span><br>
+                <span id="avg_hx_inpt1_colr" class="colr-display hidden">&nbsp;&nbsp;</span>
+                <input id="inpt_avg_hex_ratio" type="number" placeholder="0.5"><br>
+                2nd hex number:&nbsp;<input id="inpt_avg_hex_2" type="text" class="margin-bottom-2">
+                <span id="avg_hx_inpt2_colr" class="colr-display hidden">&nbsp;&nbsp;</span>
+                <button id="btn_avg_hex_calc">Calculate</button><br>
             </fieldset>
-            2nd hex number:&nbsp;<input id="inpt_avg_hex_2" type="text" class="margin-bottom-2">
-            <span id="avg_hx_inpt2_colr" class="colr-display hidden">&nbsp;&nbsp;</span>
-            <button id="btn_avg_hex_calc">Calculate</button><br>
-            <p class="marginTop6">Result: <span id="avg_hex_reslt_output">&nbsp;&nbsp;</span>
-                <span id="avg_hx_reslt_colr" class="colr-display hidden">&nbsp;&nbsp;</span>
-            </p><br>
+            <div id="div_reslt">
+                <p>Result: <span id="avg_hex_reslt_output">&nbsp;&nbsp;</span>
+                    <!-- <span id="avg_hx_reslt_colr" class="colr-display hidden">&nbsp;&nbsp;</span> -->
+                </p><span id="avg_hx_reslt_colr" class="colr-display hidden">&nbsp;&nbsp;</span><br>
+            </div>
             <input id="btn_reset" type="reset" value="Reset">
         </form>
     </div>

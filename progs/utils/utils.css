@@ -58,10 +58,15 @@
     cursor:default;
 }
 
-input[type="text"] {
+input[type="text"], input[type="number"] {
     background: #dad9d9;
     padding: 2px 4px;
     width: 6em;
+}
+
+input[type="number"] {
+    margin-left: 8px;
+    width: 4em;
 }
 
 #btn_avg_hex_calc, input[type="reset"] {
@@ -75,6 +80,7 @@ input[type="text"] {
 input[type="reset"] {
     font-size: 13px;
     margin-left: 8px;
+    margin-top: 12px;
 }
 
 #avg_hex_reslt_output {
@@ -83,12 +89,10 @@ input[type="reset"] {
         margin-left: 8px;
 }
 
-.colr-display {
-    margin-left: 8px;
-    border-width: 1px;
-    border-style: solid;
-    border-color: #404040;
-    padding: 2px 12px;
+#div_reslt {
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
 }
 
 #sigture {
@@ -147,6 +151,15 @@ input[type="reset"] {
     margin-right: 32px;
     background: #686868;
     color: #eeece4;
+}
+
+
+.colr-display {
+    margin-left: 8px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #404040;
+    padding: 2px 12px;
 }
 
 .marginTop6 {

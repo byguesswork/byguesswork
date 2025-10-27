@@ -1,50 +1,93 @@
 'use strict';
 
 function drawControls() {
-    // levo število dob
-    // krog
-    ctxLBeat.fillStyle = btnColorShaded;
-    ctxLBeat.beginPath();
-    ctxLBeat.arc(30, 30, 30, 0, 2 * Math.PI);
-    ctxLBeat.arc(30, 106, 30, 0, 2 * Math.PI);
-    ctxLBeat.fill();
-
-    // puščici;
-    ctxLBeat.fillStyle = btnColor;
-    ctxLBeat.beginPath();
-    ctxLBeat.moveTo(30, 10);
-    ctxLBeat.lineTo(47.3, 40);
-    ctxLBeat.lineTo(12.7, 40);
-    ctxLBeat.fill();
-
-    ctxLBeat.beginPath();
-    ctxLBeat.moveTo(30, 126);
-    ctxLBeat.lineTo(47.3, 96);
-    ctxLBeat.lineTo(12.7, 96);
-    ctxLBeat.fill();
-
-    // desno število dob;
-    ctxRBeat.fillStyle = digitColrShaded;
-    ctxRBeat.beginPath();
-    ctxRBeat.arc(30, 30, 30, 0, 2 * Math.PI);
-    ctxRBeat.arc(30, 106, 30, 0, 2 * Math.PI);
-    ctxRBeat.fill();
-
-    ctxRBeat.fillStyle = btnColor;
-    ctxRBeat.beginPath();
-    ctxRBeat.moveTo(30, 10);
-    ctxRBeat.lineTo(47.3, 40);
-    ctxRBeat.lineTo(12.7, 40);
-    ctxRBeat.fill();
-
-    ctxRBeat.beginPath();
-    ctxRBeat.moveTo(30, 126);
-    ctxRBeat.lineTo(47.3, 96);
-    ctxRBeat.lineTo(12.7, 96);
-    ctxRBeat.fill();
-
+    drawBeatCount(BOTH);
     drawPlayBtn(); // gumb za štart/ustavi;
     drawTempo();    // območje za tempo;
+}
+
+function drawBeatCount(which, upper, lower) {
+
+    // podat tri atribute:
+    // which: LEFT, RIGHT, BOTH - katera stan
+    // upper: (neobvezen) al je puščica za gor na tej strani aktivna; (samo pri Left/RIGHT)
+    // lower: (neobvezen) al je puščica za dol na tej strani aktivna;   (samo pri Left/RIGHT)
+
+console.log(which, upper, lower)
+
+    // levo število dob
+    if(which == BOTH || which == LEFT) {
+        // kroga
+        // zgornji krog;
+        if(which == BOTH || upper) ctxLBeat.fillStyle = btnColorShaded;
+            else ctxLBeat.fillStyle = btnColorShadedDarkr;
+        ctxLBeat.beginPath();
+        ctxLBeat.arc(30, 30, 30, 0, 2 * Math.PI);
+        ctxLBeat.fill();
+        // spodnji krog;
+        if(which == BOTH || lower) ctxLBeat.fillStyle = btnColorShaded;
+            else ctxLBeat.fillStyle = btnColorShadedDarkr;
+        ctxLBeat.beginPath();
+        ctxLBeat.arc(30, 106, 30, 0, 2 * Math.PI);
+        ctxLBeat.fill();
+    
+        // puščici;
+        //zgornja;
+        if(which == BOTH || upper) ctxLBeat.fillStyle = btnColor;
+            else ctxLBeat.fillStyle = btnColorShadedDarkrCentr;
+        ctxLBeat.beginPath();
+        ctxLBeat.moveTo(30, 10);
+        ctxLBeat.lineTo(47.3, 40);
+        ctxLBeat.lineTo(12.7, 40);
+        ctxLBeat.fill();
+    
+        // spodnja
+        if(which == BOTH || lower) ctxLBeat.fillStyle = btnColor;
+            else ctxLBeat.fillStyle = btnColorShadedDarkrCentr;
+        ctxLBeat.beginPath();
+        ctxLBeat.moveTo(30, 126);
+        ctxLBeat.lineTo(47.3, 96);
+        ctxLBeat.lineTo(12.7, 96);
+        ctxLBeat.fill();
+    }
+
+
+ // levo število dob
+    if(which == BOTH || which == RIGHT) {
+        // kroga
+        // zgornji krog;
+        if(which == BOTH || upper) ctxRBeat.fillStyle = btnColorShaded;
+            else ctxRBeat.fillStyle = btnColorShadedDarkr;
+        ctxRBeat.beginPath();
+        ctxRBeat.arc(30, 30, 30, 0, 2 * Math.PI);
+        ctxRBeat.fill();
+        // spodnji krog;
+        if(which == BOTH || lower) ctxRBeat.fillStyle = btnColorShaded;
+            else ctxRBeat.fillStyle = btnColorShadedDarkr;
+        ctxRBeat.beginPath();
+        ctxRBeat.arc(30, 106, 30, 0, 2 * Math.PI);
+        ctxRBeat.fill();
+    
+        // puščici;
+        //zgornja;
+        if(which == BOTH || upper) ctxRBeat.fillStyle = btnColor;
+            else ctxRBeat.fillStyle = btnColorShadedDarkrCentr;
+        ctxRBeat.beginPath();
+        ctxRBeat.moveTo(30, 10);
+        ctxRBeat.lineTo(47.3, 40);
+        ctxRBeat.lineTo(12.7, 40);
+        ctxRBeat.fill();
+    
+        // spodnja
+        if(which == BOTH || lower) ctxRBeat.fillStyle = btnColor;
+            else ctxRBeat.fillStyle = btnColorShadedDarkrCentr;
+        ctxRBeat.beginPath();
+        ctxRBeat.moveTo(30, 126);
+        ctxRBeat.lineTo(47.3, 96);
+        ctxRBeat.lineTo(12.7, 96);
+        ctxRBeat.fill();
+    }
+
 }
 
 function resetPlayStopCanv() {
@@ -280,4 +323,48 @@ function tempo(up){
 
 async function updBpmDisp(){
     displayTempo.innerHTML = bpm;
+}
+
+// info btn&co
+function infoClick() {
+    const msg = `A polyrhythm metronome.<br><br>
+    Right value determines beat marks on the outside of the dial, left value determines the beat shown by the marks on
+    the inside of the circle. Possible values: 2-12.
+    <br><br>The &quot;Beats per minute&quot; value affects the speed of beats of the beat count on the right,
+    ie. the speed with which the indicator visits the marks on the outside of the circle.
+    <br><br><br><span style="font-size:12px;">Metronome sounds by Ludwig Peter Müller (December 2020).
+    Used under the license &quot;Creative Commons CC0 1.0 Universal&quot; extended by the author.</span>`;
+    raiseJoker(msg);
+}
+
+function raiseJoker(msg) {
+    jokerOpen = true;
+    if(isRotating) {
+        clearInterval(isRotating);
+        isRotating = null;
+        wasRunngB4Joker = true;
+    } 
+    divJokerBckgnd.style.top = '0px';
+    divJokerBckgnd.style.bottom = '0px';
+    divJokerBckgnd.style.left = '0px';
+    divJokerBckgnd.style.right = '0px';
+    divJokerForegnd.classList.remove('hidden');
+    divJokerCloseIcon.classList.remove('hidden');
+    jokerContent.innerHTML = msg;
+}
+
+function retireJoker() {
+    jokerOpen = false;
+    divJokerBckgnd.style.top = 'auto';
+    divJokerBckgnd.style.bottom = 'auto';
+    divJokerBckgnd.style.left = 'auto';
+    divJokerBckgnd.style.right = 'auto';
+    divJokerForegnd.classList.add('hidden');
+    divJokerCloseIcon.classList.add('hidden');
+    jokerContent.innerHTML = '';
+    if(wasRunngB4Joker) {
+        wasRunngB4Joker = false;
+        prevT = Date.now(); // da gre kazalec od tam naperj, kjer si ga ustail;
+        isRotating = setInterval(rotate, frameDurtn);
+    }
 }

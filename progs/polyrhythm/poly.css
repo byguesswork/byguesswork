@@ -37,6 +37,31 @@ p {
     padding-left: 15px;
 }
 
+#avg_hex_info_icon {
+    position: absolute; 
+    right: 16px;
+    top: 10px;
+
+    border-radius: 50%;
+    border-width: 1px;
+    border-style: solid;
+    color : whitesmoke;
+
+    height: 1.1em;
+    width: 1.1em;
+    /* line-height: 1.1em; */
+    text-align: center;
+
+    /* da ni mogoče izbrati besedila, view pa je še vedno clickable */
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+    cursor:default;
+}
+
 #canvas_div {
     /* position: absolute;   ne sme imet absolute, ker ima takrat left:0 in ni več na sredini*/
     display: flex;
@@ -87,6 +112,55 @@ p {
 
 }
 
+#joker_bckgnd {
+    position: absolute;
+    background: #bbbbbb66;
+}
+
+#joker_foregnd {
+    position: absolute;
+    background: #686868;
+    padding: 24px 20px 32px;
+    top: 120px;
+    
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 10px;
+}
+
+#joker_close_icon {
+    position: relative;
+    justify-self: end;
+    margin-right: 10px;
+    
+    border-radius: 50%;
+    border-color: whitesmoke;
+    border-width: 1px;
+    border-style: solid;
+    color:whitesmoke;
+    
+    height: 1.1em;
+    width: 1.1em;
+    line-height: 1.1em;
+    text-align: center;
+    
+    /* da ni mogoče izbrati besedila, view pa je še vedno clickable */
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+    cursor:default;
+}
+
+#joker_content {
+    margin-top: 0.5em;
+    margin-right: 32px;
+    background: #686868;
+    color: #eeece4;
+}
+
 .beat-selector {
     color: #2e2d2d;
     background-color: #999;
@@ -95,4 +169,8 @@ p {
     margin-right: 12px;
     align-self: center;
     border-radius: 0.4em;
+}
+
+.hidden {
+    display: none;
 }
