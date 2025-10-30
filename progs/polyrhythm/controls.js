@@ -13,8 +13,6 @@ function drawBeatCount(which, upper, lower) {
     // upper: (neobvezen) al je puščica za gor na tej strani aktivna; (samo pri Left/RIGHT)
     // lower: (neobvezen) al je puščica za dol na tej strani aktivna;   (samo pri Left/RIGHT)
 
-console.log(which, upper, lower)
-
     // levo število dob
     if(which == BOTH || which == LEFT) {
         // kroga
@@ -330,7 +328,7 @@ function infoClick() {
     const msg = `A polyrhythm metronome.<br><br>
     Right value determines beat marks on the outside of the dial, left value determines the beat shown by the marks on
     the inside of the circle. Possible values: 2-12.
-    <br><br>The &quot;Beats per minute&quot; value affects the speed of beats of the beat count on the right,
+    <br><br>The &quot;Beats per minute&quot; setting affects the speed of the beat count on the right,
     ie. the speed with which the indicator visits the marks on the outside of the circle.
     <br><br><br><span style="font-size:12px;">Metronome sounds by Ludwig Peter Müller (December 2020).
     Used under the license &quot;Creative Commons CC0 1.0 Universal&quot; extended by the author.</span>`;

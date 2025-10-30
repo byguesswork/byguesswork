@@ -1,9 +1,13 @@
 'use strict';
 
+// dat risanj v async, zbrat najprej vse poteze za eno rundo
 // če zmanjša levega na manj kot 2, ga izklopiš;
-// izklop zvoka
+// dodat podpis
+// krajšanje trajanja lbinks s hitrejšimi udarci (L in D enaka hitrost)
+// prilagdoljiva/različna hitrost L in D udarca (blinkanja) glede na njuno hitrost
+// izklop zvoka; morda na po dva klikerja na vsaki strani: izklop zvoka in izklop blinkanja (še vedno se vedno vrti kazalec);
 // beats per bar
-// i - noter licenca
+// zagon in ustavitev s klikom na številčnico
 // vodoravna postavitev
 // dodat uvajalno odštevanje (opcija);
 
@@ -35,8 +39,6 @@ const divJokerForegnd = document.getElementById('joker_foregnd');
 const divJokerCloseIcon = document.getElementById('joker_close_icon');
 const jokerContent = document.getElementById('joker_content');
 
-const audioMain = new Audio('Perc_Can_hi.mp3');
-const audioLeft = new Audio('Perc_Clap_hi.mp3');
 
 // konstante
 const RIGHT = 'r';
@@ -46,6 +48,7 @@ const INVALID = 'inv';  // neveljaven klik;
 const TEMPO_UP = 'u';
 const TEMPO_DOWN = 'd';
 
+const dialColr = 'honeydew';
 const bckgndColor = '#686868';  // preveri, da je isto v css!;
 const btnColor = '#a2f083'; // kulska: #81D95E
 const btnColorShaded = '#85ac75';
@@ -53,32 +56,29 @@ const btnColorShadedDarkrCentr = '#7f9e72';
 const btnColorShadedDarkr = '#717d6b';   // ko dosežeš mejo nastavitev in gumb postane neaktiven;
 const digitColrShaded = '#85ac75';    // #84c46bff ; včasih je bil gumb malo svetlejšo od cifer;
 
-let baseDimension, notchLength, notchWidth, r, crclX /* polovica od width oz. hght canvasa; */, crclY;
+const notchWidth = 11;
+const startRad = -Math.PI / 2; // to je kot točke, ki je na vrhu kroga;
+const twoPI = 2 * Math.PI;
+const frameDurtn = 10;  // na koliko ms se sproži interval, ki izrisuje kroženje;
 
+let baseDimension, notchLength, r, crclX /* polovica od width oz. hght canvasa; */, crclY;
 let mainBeat = 4; // na desni oz. zunaj kroga;
 let leftBeat = 3; // znotraj kroga;
 let bpm = 60;   // beatsPerMinute; potem bo treba ločit še bars per minute;
-const startRad = -Math.PI / 2; // to je kot točke, ki je na vrhu kroga;
-const twoPI = 2 * Math.PI;
 let revltnDurtn, revltnConst;
-const frameDurtn = 20;  // na koliko ms se sproži interval, ki izrisuje kroženje;
 let angle, prevT;   // angle služi hkrati tudi kot prevAngle;
-let notchCoords = {
-    main: [],
-    left: []
-}
-let notchBlinks = {
+const notches = {
     main: {
-        active: [], // tu so shranjeni podatki, kako osvetlimo neko zarezo
-        nextAngle: 0, // tu je shranjen podatek, pri katerem kotu dodamo nov active;
-        nextIdx: 0 // tu je shranjen index, ki ga ima doba, ki bo NASLEDNJA blinkala (da bomo takrat, ko pridemo do nje, vedeli od kod jemat podatke);
+        coords: [], // tu so shranjeni podatki, kako osvetlimo neko zarezo
+        nextBlinkAngle: 0, // tu je shranjen podatek, pri katerem kotu dodamo nov active;
+        nextBlinkIdx: 0 // tu je shranjen index, ki ga ima doba, ki bo NASLEDNJA blinkala (da bomo takrat, ko pridemo do nje, vedeli od kod jemat podatke);
     },
     left: {
-        active: [],
-        nextAngle: 0,
-        nextIdx: 0
+        coords: [],
+        nextBlinkAngle: 0,
+        nextBlinkIdx: 0
     }
-};
+}
 const posOnCtrl = {
     top: 0,
     x: 0,
@@ -104,6 +104,10 @@ let mouseOrTchPosOnTempo = {
     y : 0,
     btn : 'none'
 }
+const audioMain = [];   // arraya za zvoke. Main je desni, left je levi;
+const audioLeft = [];
+const notchesResets = [];   // tabela, v kateri si shraniš podatke, kdaj izbrisat obarvanje katere oznake;
+    // noter grejo (push, bereš od začetka) arrayi s tako sestavo: triggerTime, startX, startY, endX, endY;
 
 class Notch {
     constructor(x1, y1, x2, y2, angle) {
@@ -170,7 +174,6 @@ function defineDimensions() {
 
     crclX = baseDimension / 2;  // polovica od width oz. hght canvasa;
     crclY = baseDimension / 2;
-    notchWidth = 7;
 
     canv.width = baseDimension;   // 404 je minimum, če je polmer 200 in debelina kroga 3 (središče je v 202, 202, torej polovica širine/dolžine);
     canv.height = baseDimension;
@@ -222,7 +225,7 @@ function playStopBtnOprtn() {
     else stopRotation();
 }
 
-function clickBeatCount(e) {
+function beatCountCtrlOprtn(e) {
     let actionedBeat, isActionedRBeat;
     if(e.target == canvRBeat) {
         actionedBeat = mainBeat;
@@ -283,73 +286,80 @@ function defineRevltnDurtn() {
     revltnConst = twoPI / revltnDurtn;
 }
 
-async function rotate() {
+function rotate() {
     // izračunamo kot, kamor trenutno kaže kazalec;
     const nowT = Date.now();
     const dT = nowT - prevT;
     const dAngle = dT * revltnConst // delež kota 360'; če ne bi prej izračunal konstante, bi bilo tako: dAngle = (dT / revltnDurtn) * twoPI;
     angle += dAngle;    // iz prevAngle arta aktualni angle;
     if(angle > twoPI) angle -= twoPI;
-    prevT = nowT;   // lahko bi šlo v async;
+    prevT = nowT;
 
-    function helper(passBlinkCoords, passdNotchCoords) {
+    function helper(passdNotches) {
+
+        const passdNotchCoords = passdNotches.coords;
 
         // najprej pogledamo, al je treba dodat kak element v array za blinkanje;
-        // tako zakomplicirano čekiranje, ker zadnja doba ima next angle 0 in tako bi imela vedno izpolnjen pogoj, da je večja od next angle, takrat je treba potrdit angle < notchCoords[1].angle;
-        if (angle >= passBlinkCoords.nextAngle && (passBlinkCoords.nextAngle > 0 || angle < passdNotchCoords[1].angle)) { 
-            // dodamo podatke za naslednji blink (sem pride tudi blink prve dobe takoj po štartu);
-            const set = [];
-            for (let i = 1; i <=6; i++) {  set.push(JSON.parse(JSON.stringify(passdNotchCoords[passBlinkCoords.nextIdx])));  }
-            // set[0].color = '#00ffffff';
-            // set[0].color = '#81ff50ff';
+        // tako zakomplicirano čekiranje, ker zadnja doba ima next angle 0 in tako bi imela vedno izpolnjen pogoj, da je večja od next angle,..
+        // ..takrat je treba potrdit angle < notchCoords[1].angle;
+        if (angle >= passdNotches.nextBlinkAngle && (passdNotches.nextBlinkAngle > 0 || angle < passdNotchCoords[1].angle)) { 
+           
+            // na tem mestu v zanki vemo, da bo na tem mestu na številčnici zvok/blink;
+
+            const blinkIdx = passdNotches.nextBlinkIdx; // do posodobitve (bolj spodaj) je nextBlinkIdx dejansko currentIdx!!;
             
-            const isMain = passdNotchCoords == notchCoords.main ? true : false;
-            if(isMain) {
-                set[0].color = '#fa0707ff';
-                set[1].color = '#fa0707ff';
-                set[2].color = '#fa0707ff';
-                set[3].color = '#fa4646ff';
-                set[4].color = '#fc8383ff';
-            } else {
-                set[0].color = '#0707faff';
-                set[1].color = '#0707faff';
-                set[2].color = '#0707faff';
-                set[3].color = '#0707faff';
-                set[4].color = '#0707faff';
-            }
-            
-            // zadnja (enaka za vse možnosti);
-            set[5].color = '#f0fff0';
-    
-            passBlinkCoords.active.push(set); // na začetku vrtenja je nextIdx == 0;
+            // zvok;
+            const isMain = passdNotches == notches.main ? true : false;
+            if(isMain) zvok(RIGHT, blinkIdx); // nextBlinkIdx tukaj dejansko pomeni currentIdx;
+                else zvok(LEFT, blinkIdx);
+
+            // blink
+            const startX = passdNotchCoords[blinkIdx].start.x;
+            const startY = passdNotchCoords[blinkIdx].start.y;
+            const endX = passdNotchCoords[blinkIdx].end.x;
+            const endY = passdNotchCoords[blinkIdx].end.y;
+            ctx.lineWidth = notchWidth;
+            if(isMain) ctx.strokeStyle = '#fa0707';
+                else ctx.strokeStyle = '#0707fa';
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(endX, endY);
+            ctx.stroke();
+
+            // si zabeležimo, da izbrišemo čez čas, okoli 100ms;
+            // zvoka trajata okoli 169 ms, morda je OK, če sveti približno toliko
+            notchesResets.push([nowT + 140, startX, startY, endX, endY]);
+
             // dodamo trigger za naslednji blink;
             // najprej njegov index;
-            if (passBlinkCoords.nextIdx == passdNotchCoords.length - 1) passBlinkCoords.nextIdx = 0;
-            else passBlinkCoords.nextIdx++;
-            passBlinkCoords.nextAngle = passdNotchCoords[passBlinkCoords.nextIdx].angle // nato še njegov kot;
-
-            // zvok;
-            if(isMain) zvok(RIGHT)
-                else zvok(LEFT);
-
-        }
-        // morebitno izvajanje blinkanja dob (zarez/notch); dogaja se v backCanv;
-        if (passBlinkCoords.active.length > 0) {
-            ctx.lineWidth = notchWidth;
-            ctx.strokeStyle = passBlinkCoords.active[0][0].color;
-            ctx.beginPath();
-            ctx.moveTo(passBlinkCoords.active[0][0].start.x, passBlinkCoords.active[0][0].start.y);
-            ctx.lineTo(passBlinkCoords.active[0][0].end.x, passBlinkCoords.active[0][0].end.y);
-            ctx.stroke();
-            passBlinkCoords.active[0].shift(); // po izvajanju odstranimo (prvi) element;
-            if(passBlinkCoords.active[0].length == 0) {
-                passBlinkCoords.active.length = 0;  // ne sme bit = [], ker to ustvari novo referenco na nov prazen array, tle pa delamo s podano referenco in bi jo tako uničili.
-            }
+            if (passdNotches.nextBlinkIdx == passdNotchCoords.length - 1) passdNotches.nextBlinkIdx = 0;
+            else passdNotches.nextBlinkIdx++;
+            passdNotches.nextBlinkAngle = passdNotchCoords[passdNotches.nextBlinkIdx].angle // nato še njegov kot;
         }
     }
 
-    helper(notchBlinks.main, notchCoords.main);
-    helper(notchBlinks.left, notchCoords.left);
+    // najprej zvok in risanje blinkanja;
+    helper(notches.main);
+    helper(notches.left);
+
+    // brisanje predhodno osvetljenih oznak;
+    if(notchesResets.length > 0) {
+        let toSpl = 0;  // kolko jih bo treba splice-at;
+        for(let i = 0; i < notchesResets.length; i++) {
+            if(nowT > notchesResets[i][0]) {
+                toSpl++;
+                ctx.lineWidth = notchWidth;
+                ctx.strokeStyle = dialColr;
+                ctx.beginPath();
+                ctx.moveTo(notchesResets[i][1], notchesResets[i][2]);   // idx 1 in 2 start startX in startY:
+                ctx.lineTo(notchesResets[i][3], notchesResets[i][4]);   // idx 3 in 4 sta za end;
+                ctx.stroke();
+            }
+        }
+        if(toSpl > 0) {
+            notchesResets.splice(0, toSpl)
+        }
+    }
 
     // kazalec (dogaja se v forecanv;)
     resetForeCanv();
@@ -357,6 +367,8 @@ async function rotate() {
     foreCtx.arc(crclX, crclY, r, startRad + angle, startRad + angle); // finta, da se postaviš v določeno točko na krogu: končni kot daš isti kot začetni
     foreCtx.lineTo(crclX, crclY);
     foreCtx.stroke();
+
+    // opomba: brez blinkanja (samo zvok, vzet iz arraya) naredi celo funkcijo v isti ms, v 20% primerih rabi 1 ms
 }
 
 function startRotating() {
@@ -385,12 +397,11 @@ function stopRotation() {
     clearInterval(isRotating);
     isRotating = null;
     // azzeriramo podatke za blinkanje;
-    notchBlinks.main.active = [];
-    notchBlinks.main.nextAngle = 0;
-    notchBlinks.main.nextIdx = 0;
-    notchBlinks.left.active = [];
-    notchBlinks.left.nextAngle = 0;
-    notchBlinks.left.nextIdx = 0;
+    notches.main.nextBlinkAngle = 0;
+    notches.main.nextBlinkIdx = 0;
+    notches.left.nextBlinkAngle = 0;
+    notches.left.nextBlinkIdx = 0;
+    notchesResets.length = 0;
     drawPlayBtn();
     if(mobile) foreCanv.addEventListener('touchstart', (e) => {touchAzzerareDial(e)}, {passive : false});  // da s pritiskom številčnice ponastaviš kazalec (ki po zaustavitvi ostane, kjer je bil);
         else foreCanv.addEventListener('click', (e) => {touchAzzerareDial(e)});
@@ -399,7 +410,7 @@ function stopRotation() {
 function resetForeCanv() {
     foreCanv.height = 0;
     foreCanv.height = baseDimension;
-    foreCtx.strokeStyle = 'honeydew';
+    foreCtx.strokeStyle = dialColr;
     foreCtx.lineWidth = 2;
 }
 
@@ -407,7 +418,7 @@ function drawBckgnd() {
     // reset bckgCanvas
     canv.height = 0;
     canv.height = baseDimension;
-    ctx.strokeStyle = 'honeydew';
+    ctx.strokeStyle = dialColr;
     ctx.lineWidth = 3;
     // krog;
     ctx.beginPath();
@@ -424,10 +435,10 @@ function drawBckgnd() {
         }
     }
 
-    ctx.strokeStyle = 'honeydew';
+    ctx.strokeStyle = dialColr;
     ctx.lineWidth = notchWidth;
-    helper(notchCoords.main);
-    helper(notchCoords.left);
+    helper(notches.main.coords);
+    helper(notches.left.coords);
 
     // navpičen kazalec; ko odpreš program, mora bit navpičen kazalec že narisan in čaka;
     resetForeCanv();
@@ -444,9 +455,9 @@ function azzerareAfterStop() {
 
 function setNotchCoords(WHICH) {    // ne samo izračuna oznake, ampak jih tudi izriše;
 
-    function helper(passdBeat, passdNotchCoords) {
-        const angleSlice = (Math.PI * 2) / passdBeat; // kot celega kroga deljeno s številom dob;
-        const diff = passdNotchCoords == notchCoords.main ? 20 : -20;
+    function helper(passdBeat, passdNotchCoords, passdAudioArr) {
+        const angleSlice = twoPI / passdBeat; // kot celega kroga deljeno s številom dob;
+        const diff = passdNotchCoords == notches.main.coords ? 20 : -20;
         passdNotchCoords.length = 0; // spraznimo array; ne sme bit = [], ker to ustvari nov array in se zgubi referenca !!!!!;
         for (let i = 0; i < passdBeat; i++) {
             passdNotchCoords.push(
@@ -459,22 +470,33 @@ function setNotchCoords(WHICH) {    // ne samo izračuna oznake, ampak jih tudi 
                 )
             );
         }
+        // po potrebi dofilamo toliko zvokov, da ustreza številu dob;
+        if(passdAudioArr.length < passdBeat) {
+            const diff = passdBeat - passdAudioArr.length;
+            for(let i = 0; i < diff; i++ ) {
+                if(passdAudioArr == audioMain) {
+                    passdAudioArr.push(new Audio('Perc_Can_hi.mp3'));
+                } else {
+                    passdAudioArr.push(new Audio('Perc_Clap_hi.mp3'));
+                }
+            }
+        }
     }
 
     if (WHICH == RIGHT || WHICH == BOTH) {
-        helper(mainBeat, notchCoords.main)
+        helper(mainBeat, notches.main.coords, audioMain)
     }
     if (WHICH == LEFT || WHICH == BOTH) {
-        helper(leftBeat, notchCoords.left)
+        helper(leftBeat, notches.left.coords, audioLeft)
     }
 
     // izris ozadja in torej tudi oznak;
     drawBckgnd();
 }
 
-function zvok(which) {
-    if (which == RIGHT) { audioMain.play(); } 
-        else audioLeft.play();
+function zvok(which, idx) {
+    if (which == RIGHT) { audioMain[idx].play(); } 
+        else audioLeft[idx].play();
 }
 
 
@@ -491,8 +513,8 @@ if (document.readyState == 'loading') {
 
 //   -  -  -   POSLUŠALCI  -  -  vsaj en mora bit šele zdaj, ker je odvisen od stanja spremenljivke mobile;
 document.addEventListener('keydown', e => { atKeyPress(e.key) });
-canvRBeat.addEventListener('click', e => { clickBeatCount(e) });
-canvLBeat.addEventListener('click', e => { clickBeatCount(e) });
+canvRBeat.addEventListener('click', e => { beatCountCtrlOprtn(e) });
+canvLBeat.addEventListener('click', e => { beatCountCtrlOprtn(e) });
 canvPlayStop.addEventListener('click', playStopBtnOprtn);
 if (!mobile) {  // poslušalci za spremembo tempa; najprej, če miška;
     canvTempo.addEventListener('mousedown', (e) => {mouseDownOprtn(e)});
