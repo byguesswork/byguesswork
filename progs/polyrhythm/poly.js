@@ -1,6 +1,5 @@
 'use strict';
 
-// dodaj da je Beta
 // optimizirat podajanje zvoka; naredit dummy izvedbo za 1. beat? da je manj ifov in podajanja argumentov;
 // začasno da vodoravno ni na voljo
 // če zmanjša levega na manj kot 2, ga izklopiš;
@@ -8,7 +7,7 @@
 // prilagdoljiva/različna hitrost L in D udarca (blinkanja) glede na njuno hitrost
 // izklop zvoka; morda na po dva klikerja na vsaki strani: izklop zvoka in izklop blinkanja (še vedno se vedno vrti kazalec);
 // beats per bar
-// zagon in ustavitev s klikom na številčnico
+// zagon s klikom na številčnico (če je že zaustavitev tako)
 // vodoravna postavitev
 // dodat uvajalno odštevanje (opcija);
 
@@ -81,21 +80,15 @@ const notches = {
         nextBlinkIdx: 0
     }
 }
-const posOnCtrl = {
-    top: 0,
-    x: 0,
-    y: 0
-}
 
 let angle, prevT;   // angle služi hkrati tudi kot prevAngle;
 let isRotating = null;  // interval checker za vrtenje kazalca;
 let tempoIntrvlChckr = null; // interval checker za tempo gumb;
-let azzerato = false;   // to je za vodenje evidence (samo pri upravljanju s tipkami) al si esc pritisnil enkrat (samo ustaviš) ali večkrat (ponastaviš kazalec);
+let azzerato = true;   // to je za vodenje evidence al si esc pritisnil enkrat (samo ustaviš) ali dvakrat (ponastaviš kazalec); na začetku je true, ker je kazalec ponastavljen;
 let mobile = false;
 let mousePressIsValid = false;
 let jokerOpen = false;
 let wasRunngB4Joker = false;
-let samplesInitlsd = false; // samples initialized; ali smo jih uvozili v Web Audio;
 let audioCtx = new AudioContext();
 let audioSmpls, arrayBfrs;
 const tempoCnvsRect = {
@@ -103,6 +96,11 @@ const tempoCnvsRect = {
     top: 0,
     right: 0,
     bottom: 0
+}
+const posOnCtrl = { // top je mera, kje je vrh gumbov za beat; ENAKO SE UPORABLJA ZA PLAY!! ;
+    top: 0,
+    x: 0,
+    y: 0
 }
 let mouseOrTchPosOnTempo = {
     x : 0,
@@ -153,6 +151,9 @@ function defineDimensions() {
         
         divJokerForegnd.style.left = `${window.innerWidth * 0.2}px`;
         divJokerForegnd.style.right = `${window.innerWidth * 0.2}px`;
+
+        // da s klikom številčnice ponastaviš kazalec (ki po zaustavitvi ostane, kjer je bil) ali pa zaženeš štetje;
+        foreCanv.addEventListener('click', touchDialB4SmplInit);
     } else {
         let width = document.documentElement.clientWidth < window.innerWidth ? document.documentElement.clientWidth : window.innerWidth;
         if(screen.width < width) width = screen.width;
@@ -179,6 +180,9 @@ function defineDimensions() {
         const toRemove = document.getElementsByClassName('label')
         toRemove[0].innerHTML = '';
         toRemove[1].innerHTML = '';
+
+        // da s pritiskom številčnice ponastaviš kazalec (ki po zaustavitvi ostane, kjer je bil) ali pa zaženeš štetje;
+        foreCanv.addEventListener('touchstart', touchDialB4SmplInit, {passive : false});
     }
 
     crclX = baseDimension / 2;  // polovica od width oz. hght canvasa;
@@ -222,28 +226,49 @@ function positionElems() {
 
 function atKeyPress(keyKey) {
     if(keyKey == 'Escape') {
-        if (isRotating != null) stopRotation();
-            else if(!azzerato) { azzerareAfterStop()};
+        if (isRotating != null) {
+            stopRotation();
+        } else {    // če je vrtenje null;
+            if(jokerOpen) {
+                retireJoker();
+            } else if(!azzerato) azzerareAfterStop();
+        }
     } else if(keyKey == 'Enter') {
-        if (isRotating == null) { startRotating(); }
+        if (isRotating == null && !jokerOpen) {
+            startRotating(); 
+        }
     }
 }
 
-function playStopBtnOprtn() {
-    if(isRotating == null) startRotating();
-    else stopRotation();
+function playStopBtnOprtn(e) {
+    if((e.clientY > (posOnCtrl.top + 25)) && (e.clientY < (posOnCtrl.top + 110))) {
+        if(isRotating == null) startRotating();
+        else stopRotation();
+    }
 }
 
-function playStopBtnOprtnB4SmplInit() {
-    playStopBtnOprtn();
+function playStopBtnOprtnB4SmplInit(e) {
+    if((e.clientY > (posOnCtrl.top + 25)) && (e.clientY < (posOnCtrl.top + 110))) {
+        setupSamplesPt2(arrayBfrs).then((response) => {
+            audioSmpls = response;
+            console.log(audioSmpls);
+            playStopBtnOprtn(e); // zagnat;
+            setListnrsAftrInit();   // poštimat listenerje;
+        });
+    }
 
-    setupSamplesPt2(arrayBfrs).then((response) => {
-        canvPlayStop.removeEventListener('click', playStopBtnOprtnB4SmplInit);
-        canvPlayStop.addEventListener('click', playStopBtnOprtn);
-        samplesInitlsd = true;
-        audioSmpls = response;
-        console.log(audioSmpls)
-    });
+}
+
+function setListnrsAftrInit() {
+    canvPlayStop.removeEventListener('click', playStopBtnOprtnB4SmplInit);
+    canvPlayStop.addEventListener('click', playStopBtnOprtn);
+    if(mobile) {
+        foreCanv.removeEventListener('touchstart', touchDialB4SmplInit, {passive : false});
+        foreCanv.addEventListener('touchstart', touchDial, {passive : false});
+    } else {
+        foreCanv.removeEventListener('click', touchDialB4SmplInit);
+        foreCanv.addEventListener('click', touchDial);
+    }
 }
 
 function beatCountCtrlOprtn(e) {
@@ -418,8 +443,8 @@ function startRotating() {
 
 async function restOfStartRottng() {
     drawStopBtn();
-    if(mobile) foreCanv.removeEventListener('touchstart', (e) => {touchAzzerareDial(e)}, {passive : false}); 
-        else foreCanv.removeEventListener('touchstart', (e) => {touchAzzerareDial(e)}); 
+    if(mobile) foreCanv.removeEventListener('touchstart', touchDial, {passive : false}); 
+        else foreCanv.removeEventListener('click', touchDial); 
 }
 
 function stopRotation() {
@@ -432,8 +457,8 @@ function stopRotation() {
     notches.left.nextBlinkIdx = 0;
     notchesResets.length = 0;
     drawPlayBtn();
-    if(mobile) foreCanv.addEventListener('touchstart', (e) => {touchAzzerareDial(e)}, {passive : false});  // da s pritiskom številčnice ponastaviš kazalec (ki po zaustavitvi ostane, kjer je bil);
-        else foreCanv.addEventListener('click', (e) => {touchAzzerareDial(e)});
+    if(mobile) foreCanv.addEventListener('touchstart', touchDial, {passive : false});  // da s pritiskom številčnice ponastaviš kazalec (ki po zaustavitvi ostane, kjer je bil);
+        else foreCanv.addEventListener('click', touchDial);
 }
 
 function resetForeCanv() {
@@ -513,16 +538,9 @@ function setNotchCoords(WHICH) {    // ne samo izračuna oznake, ampak jih tudi 
 }
 
 function zvok(which) {
-    if(samplesInitlsd) {
-        if(which == RIGHT) {
-            playSample(audioSmpls[0], 0);
-        } else playSample(audioSmpls[1], 0);
-    } else {
-        console.log('oldschool');   // predvidoma samo prvi, začetni beat;
-        if (which == RIGHT) { 
-            audioMain.play(); 
-        } else audioLeft.play();
-    }
+    if(which == RIGHT) {
+        playSample(audioSmpls[0], 0);
+    } else playSample(audioSmpls[1], 0);
 }
 
 // AudioContext

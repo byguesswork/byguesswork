@@ -246,8 +246,29 @@ function touchMoveOprtn(e) {
     }
 }
 
-function touchAzzerareDial() {
-    if(isRotating == null && azzerato == false) azzerareAfterStop();
+function touchDial(e) {
+    if(isRotating == null) {
+        if(azzerato) {
+            e.stopImmediatePropagation();
+            startRotating();    // če je zaustavljeno in tudi ponastavljen kazalec (kar je tudi stanje ob odprtju appa), zaženeš; 
+        } else {
+            e.stopImmediatePropagation();
+            azzerareAfterStop();  // če je zaustavljeno, prvi klik ponastavi številčnico;
+        }
+    }
+}
+
+function touchDialB4SmplInit(e) {
+    setupSamplesPt2(arrayBfrs).then((response) => {
+        // uredit zvoke;
+        audioSmpls = response;
+        console.log(audioSmpls);
+        // zagnat;
+        touchDial(e);
+        // uredit listenerje;
+        setListnrsAftrInit();
+    });
+
 }
 
 // - -  če miška     - - - - - - - - - - - - 
