@@ -42,11 +42,7 @@ const divJokerForegnd = document.getElementById('joker_foregnd');
 const divJokerCloseIcon = document.getElementById('joker_close_icon');
 const jokerContent = document.getElementById('joker_content');
 
-let tstMsg = '';
-let audioCtx = new AudioContext();
-let audioSmpls;
-tstMsg += `state takoj na začetki: ${audioCtx.state}<br>`;
-const samplePaths = ['Perc_Squeak_hi.wav','Perc_Can_hi.mp3'];
+const samplePaths = ['Perc_Squeak_hi.wav','Synth_Square_A_hi.wav'];
 
 // konstante
 const RIGHT = 'r';
@@ -101,6 +97,12 @@ let mobile = false;
 let mousePressIsValid = false;
 let jokerOpen = false;
 let wasRunngB4Joker = false;
+let samplesInitlsd = false; // samples initiated; ali smo jih uvozili v Web Audio
+let tstMsg = '';
+let audioCtx = new AudioContext();
+let audioSmpls, arrayBfrs;
+// let arrayBfrs;
+tstMsg += `state takoj na začetki: ${audioCtx.state}<br>`;
 const tempoCnvsRect = {
     left: 0,
     top: 0,
@@ -129,6 +131,10 @@ function initialize() {
     defineRevltnDurtn();
     check4mobile();
     defineDimensions();
+    setupSamplesPt1StpBfrz(samplePaths).then((response) => {
+        arrayBfrs = response;
+        console.log('arrays done');
+    });
 }
 
 function check4mobile() {
@@ -231,6 +237,31 @@ function atKeyPress(keyKey) {
 function playStopBtnOprtn() {
     if(isRotating == null) startRotating();
     else stopRotation();
+}
+
+function playStopBtnOprtnB4SmplInit() {
+    if(isRotating == null) startRotating();
+    else stopRotation();
+
+    // setupSamples(samplePaths).then((response) => {
+    //     audioSmpls = response;
+    //     console.log(audioSmpls);
+
+    // });
+
+    setupSamplesPt2(arrayBfrs).then((response) => {
+        canvPlayStop.removeEventListener('click', playStopBtnOprtnB4SmplInit);
+        canvPlayStop.addEventListener('click', playStopBtnOprtn);
+        samplesInitlsd = true;
+        audioSmpls = response;
+        console.log(audioSmpls)
+    });
+
+    // for(let i = 1; i<10; i++) {
+    //     setTimeout(() => {
+    //         playSample(audioSmpls[0], 0);
+    //     }, i * 80)
+    // }
 }
 
 function beatCountCtrlOprtn(e) {
@@ -534,12 +565,17 @@ function setNotchCoords(WHICH) {    // ne samo izračuna oznake, ampak jih tudi 
 }
 
 function zvok(which, idx) {
-    if (which == RIGHT) { 
-        audioMain[idx].play(); 
-        // console.log('main play', idx, Date.now())
-        // console.log('- -- - -')
-    } 
-        else audioLeft[idx].play();
+    if(samplesInitlsd) {
+        if(which == RIGHT) {
+            playSample(audioSmpls[0], 0);
+        } else playSample(audioSmpls[1], 0);
+    } else {
+        if (which == RIGHT) { 
+            audioMain[idx].play(); 
+            // console.log('main play', idx, Date.now())
+            // console.log('- -- - -')
+        } else audioLeft[idx].play();
+    }
 }
 
 // AudioContext
@@ -548,6 +584,18 @@ async function getFile(path) {
     const arrayBuffer = await response.arrayBuffer();
     tstMsg += `v getFile1: ${audioCtx.state}<br>`;
     const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+    tstMsg += `v getFile2: ${audioCtx.state}<br>`;
+    return audioBuffer;
+}
+
+async function getFilePt1(path) {
+    const response = await fetch(path);
+    const arrayBuffer = await response.arrayBuffer();
+    return arrayBuffer;
+}
+
+async function getFilePt2(bfr) {
+    const audioBuffer = await audioCtx.decodeAudioData(bfr);
     tstMsg += `v getFile2: ${audioCtx.state}<br>`;
     return audioBuffer;
 }
@@ -563,6 +611,34 @@ async function setupSamples(paths) {
     }
 
     console.log('naštimano')
+    return audioBuffers;
+}
+
+async function setupSamplesPt1StpBfrz(paths) {
+    // console.log('začeli štimat')
+    // tstMsg += `v setupSamples: ${audioCtx.state}<br>`;
+    
+    const arrayBuffers = [];
+
+    for (const path of paths) {
+        const bfr = await getFilePt1(path);
+        arrayBuffers.push(bfr);
+    }
+
+    console.log('naštimano')
+    return arrayBuffers;
+}
+
+async function setupSamplesPt2(bfrs) {
+
+    const audioBuffers = [];
+
+    for (const bfr of bfrs) {
+        const sample = await getFilePt2(bfr);
+        audioBuffers.push(sample);
+    }
+
+    console.log('audio buffers done')
     return audioBuffers;
 }
 
@@ -589,10 +665,16 @@ if (document.readyState == 'loading') {
 document.addEventListener('keydown', e => { atKeyPress(e.key) });
 canvRBeat.addEventListener('click', e => { beatCountCtrlOprtn(e) });
 canvLBeat.addEventListener('click', e => { beatCountCtrlOprtn(e) });
-canvPlayStop.addEventListener('click', playStopBtnOprtn);
+// test
+// canvPlayStop.addEventListener('click', playStopBtnOprtn);
+canvPlayStop.addEventListener('click', playStopBtnOprtnB4SmplInit);
+// !test 
 bPMinuteLbl.addEventListener('click', () => {   // TODO to gre pozneje v funkcijo
     // test
-    if(audioCtx.state == 'suspended') audioCtx.resume();
+    if(audioCtx.state == 'suspended') {
+        audioCtx.resume();
+        tstMsg += `bilo suspended, dali resume: ${audioCtx.state}<br>`;
+    }
     tstMsg += `po kliku: ${audioCtx.state}<br>`;
 
     setupSamples(samplePaths).then((response) => {
