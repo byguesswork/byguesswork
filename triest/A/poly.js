@@ -546,12 +546,15 @@ function zvok(which, idx) {
 async function getFile(path) {
     const response = await fetch(path);
     const arrayBuffer = await response.arrayBuffer();
+    tstMsg += `v getFile1: ${audioCtx.state}<br>`;
     const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+    tstMsg += `v getFile2: ${audioCtx.state}<br>`;
     return audioBuffer;
 }
 
 async function setupSamples(paths) {
     console.log('začeli štimat')
+    tstMsg += `v setupSamples: ${audioCtx.state}<br>`;
     const audioBuffers = [];
 
     for (const path of paths) {
