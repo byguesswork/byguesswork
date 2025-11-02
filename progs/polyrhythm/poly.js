@@ -1,8 +1,9 @@
 'use strict';
 
-// dat risanj v async, zbrat najprej vse poteze za eno rundo
+// dodaj da je Beta
+// optimizirat podajanje zvoka; naredit dummy izvedbo za 1. beat? da je manj ifov in podajanja argumentov;
+// začasno da vodoravno ni na voljo
 // če zmanjša levega na manj kot 2, ga izklopiš;
-// dodat podpis
 // krajšanje trajanja lbinks s hitrejšimi udarci (L in D enaka hitrost)
 // prilagdoljiva/različna hitrost L in D udarca (blinkanja) glede na njuno hitrost
 // izklop zvoka; morda na po dva klikerja na vsaki strani: izklop zvoka in izklop blinkanja (še vedno se vedno vrti kazalec);
@@ -11,12 +12,12 @@
 // vodoravna postavitev
 // dodat uvajalno odštevanje (opcija);
 
+// canvasi in njihovi konteksti;
 // skala in kazalec;
 const canv = document.getElementById('canvas'); // to je kanvas, na katerem je narisan krog in oznake dob;
 const ctx = canv.getContext('2d');
 const foreCanv = document.getElementById('foreground_canvas');  // to je kanvas, na katerem se odvija vrtenje;
 const foreCtx = foreCanv.getContext('2d');
-const foreCanvDiv = document.getElementById('foreground_canvas_div');
 
 // gumbi;
 const canvLBeat = document.getElementById('left_beat');
@@ -25,20 +26,22 @@ const canvRBeat = document.getElementById('right_beat');
 const ctxRBeat = canvRBeat.getContext('2d');
 const canvPlayStop = document.getElementById('center_control');
 const ctxPlayStop = canvPlayStop.getContext('2d');
-
-const rBeatDigit = document.getElementById('right_beat_digit');
-const lBeatDigit = document.getElementById('left_beat_digit');
-
 const canvTempo = document.getElementById('canv_tempo');
 const ctxTempo = canvTempo.getContext('2d');
-const displayTempo = document.getElementById('display_tempo');
 
+// druge ročice;
 const infoIcon = document.getElementById('avg_hex_info_icon');
+const foreCanvDiv = document.getElementById('foreground_canvas_div');
+const rBeatDigit = document.getElementById('right_beat_digit');
+const lBeatDigit = document.getElementById('left_beat_digit');
+const bPMinuteLbl = document.getElementById('b_per_minute');
+const displayTempo = document.getElementById('display_tempo');
 const divJokerBckgnd = document.getElementById('joker_bckgnd');
 const divJokerForegnd = document.getElementById('joker_foregnd');
 const divJokerCloseIcon = document.getElementById('joker_close_icon');
 const jokerContent = document.getElementById('joker_content');
 
+const samplePaths = ['Perc_Can_hi.wav','Perc_Clap_hi.wav'];
 
 // konstante
 const RIGHT = 'r';
@@ -66,7 +69,6 @@ let mainBeat = 4; // na desni oz. zunaj kroga;
 let leftBeat = 3; // znotraj kroga;
 let bpm = 60;   // beatsPerMinute; potem bo treba ločit še bars per minute;
 let revltnDurtn, revltnConst;
-let angle, prevT;   // angle služi hkrati tudi kot prevAngle;
 const notches = {
     main: {
         coords: [], // tu so shranjeni podatki, kako osvetlimo neko zarezo
@@ -85,7 +87,7 @@ const posOnCtrl = {
     y: 0
 }
 
-let tStart; // čas (v ms od 1970), ko se je začelo vrteti;
+let angle, prevT;   // angle služi hkrati tudi kot prevAngle;
 let isRotating = null;  // interval checker za vrtenje kazalca;
 let tempoIntrvlChckr = null; // interval checker za tempo gumb;
 let azzerato = false;   // to je za vodenje evidence (samo pri upravljanju s tipkami) al si esc pritisnil enkrat (samo ustaviš) ali večkrat (ponastaviš kazalec);
@@ -93,6 +95,9 @@ let mobile = false;
 let mousePressIsValid = false;
 let jokerOpen = false;
 let wasRunngB4Joker = false;
+let samplesInitlsd = false; // samples initialized; ali smo jih uvozili v Web Audio;
+let audioCtx = new AudioContext();
+let audioSmpls, arrayBfrs;
 const tempoCnvsRect = {
     left: 0,
     top: 0,
@@ -104,8 +109,8 @@ let mouseOrTchPosOnTempo = {
     y : 0,
     btn : 'none'
 }
-const audioMain = [];   // arraya za zvoke. Main je desni, left je levi;
-const audioLeft = [];
+const audioMain = new Audio('Perc_Can_hi.mp3');   // ta dva samo za prvi beat, potem poprime WebAudio (audioContext);
+const audioLeft = new Audio('Perc_Clap_hi.mp3');
 const notchesResets = [];   // tabela, v kateri si shraniš podatke, kdaj izbrisat obarvanje katere oznake;
     // noter grejo (push, bereš od začetka) arrayi s tako sestavo: triggerTime, startX, startY, endX, endY;
 
@@ -121,6 +126,10 @@ function initialize() {
     defineRevltnDurtn();
     check4mobile();
     defineDimensions();
+    setupSamplesPt1StpBfrz(samplePaths).then((response) => {
+        arrayBfrs = response;
+        console.log('arrays done');
+    });
 }
 
 function check4mobile() {
@@ -225,6 +234,18 @@ function playStopBtnOprtn() {
     else stopRotation();
 }
 
+function playStopBtnOprtnB4SmplInit() {
+    playStopBtnOprtn();
+
+    setupSamplesPt2(arrayBfrs).then((response) => {
+        canvPlayStop.removeEventListener('click', playStopBtnOprtnB4SmplInit);
+        canvPlayStop.addEventListener('click', playStopBtnOprtn);
+        samplesInitlsd = true;
+        audioSmpls = response;
+        console.log(audioSmpls)
+    });
+}
+
 function beatCountCtrlOprtn(e) {
     let actionedBeat, isActionedRBeat;
     if(e.target == canvRBeat) {
@@ -289,58 +310,66 @@ function defineRevltnDurtn() {
 function rotate() {
     // izračunamo kot, kamor trenutno kaže kazalec;
     const nowT = Date.now();
-    const dT = nowT - prevT;
-    const dAngle = dT * revltnConst // delež kota 360'; če ne bi prej izračunal konstante, bi bilo tako: dAngle = (dT / revltnDurtn) * twoPI;
-    angle += dAngle;    // iz prevAngle arta aktualni angle;
+    angle += (nowT - prevT) * revltnConst // delež kota 360'; če ne bi prej izračunal konstante, bi bilo tako: dAngle = (dT / revltnDurtn) * twoPI; dT = nowT - prevT;
     if(angle > twoPI) angle -= twoPI;
     prevT = nowT;
+    let doR = false, doL = false; // gre na true, če se pri preverjanju zvoka ugotovi, da je izpolnjen pogoj za blinkanje (L/R);
 
-    function helper(passdNotches) {
-
-        const passdNotchCoords = passdNotches.coords;
-
+    function doSnd(passdNotches, which) {  // do sound helper;
         // najprej pogledamo, al je treba dodat kak element v array za blinkanje;
         // tako zakomplicirano čekiranje, ker zadnja doba ima next angle 0 in tako bi imela vedno izpolnjen pogoj, da je večja od next angle,..
         // ..takrat je treba potrdit angle < notchCoords[1].angle;
-        if (angle >= passdNotches.nextBlinkAngle && (passdNotches.nextBlinkAngle > 0 || angle < passdNotchCoords[1].angle)) { 
-           
-            // na tem mestu v zanki vemo, da bo na tem mestu na številčnici zvok/blink;
-
-            const blinkIdx = passdNotches.nextBlinkIdx; // do posodobitve (bolj spodaj) je nextBlinkIdx dejansko currentIdx!!;
-            
-            // zvok;
-            const isMain = passdNotches == notches.main ? true : false;
-            if(isMain) zvok(RIGHT, blinkIdx); // nextBlinkIdx tukaj dejansko pomeni currentIdx;
-                else zvok(LEFT, blinkIdx);
-
-            // blink
-            const startX = passdNotchCoords[blinkIdx].start.x;
-            const startY = passdNotchCoords[blinkIdx].start.y;
-            const endX = passdNotchCoords[blinkIdx].end.x;
-            const endY = passdNotchCoords[blinkIdx].end.y;
-            ctx.lineWidth = notchWidth;
-            if(isMain) ctx.strokeStyle = '#fa0707';
-                else ctx.strokeStyle = '#0707fa';
-            ctx.beginPath();
-            ctx.moveTo(startX, startY);
-            ctx.lineTo(endX, endY);
-            ctx.stroke();
-
-            // si zabeležimo, da izbrišemo čez čas, okoli 100ms;
-            // zvoka trajata okoli 169 ms, morda je OK, če sveti približno toliko
-            notchesResets.push([nowT + 140, startX, startY, endX, endY]);
-
-            // dodamo trigger za naslednji blink;
-            // najprej njegov index;
-            if (passdNotches.nextBlinkIdx == passdNotchCoords.length - 1) passdNotches.nextBlinkIdx = 0;
-            else passdNotches.nextBlinkIdx++;
-            passdNotches.nextBlinkAngle = passdNotchCoords[passdNotches.nextBlinkIdx].angle // nato še njegov kot;
+        if (angle >= passdNotches.nextBlinkAngle && (passdNotches.nextBlinkAngle > 0 || angle < passdNotches.coords[1].angle)) {
+            // na tem mestu v zanki vemo da je ima stran (L/R) na tej točki oznako;
+            if(which == RIGHT) {
+                zvok(RIGHT);
+                doR = true;
+            } else {
+                zvok(LEFT);
+                doL = true;
+            }
         }
     }
 
-    // najprej zvok in risanje blinkanja;
-    helper(notches.main);
-    helper(notches.left);
+    function helper(passdNotches, which) {
+
+        // na tem mestu v zanki vemo, da bo na tem mestu na številčnici blink;
+        
+        // pomožne spremenljivke;
+        const passdNotchCoords = passdNotches.coords;
+        const blinkIdx = passdNotches.nextBlinkIdx; // do posodobitve (bolj spodaj) je nextBlinkIdx dejansko currentIdx!!;
+        
+        // blink
+        const startX = passdNotchCoords[blinkIdx].start.x;
+        const startY = passdNotchCoords[blinkIdx].start.y;
+        const endX = passdNotchCoords[blinkIdx].end.x;
+        const endY = passdNotchCoords[blinkIdx].end.y;
+        ctx.lineWidth = notchWidth;
+        if(which == RIGHT) ctx.strokeStyle = '#fa0707';
+        else ctx.strokeStyle = '#0707fa';
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+        
+        // si zabeležimo, da izbrišemo čez čas, okoli 100ms;
+        // zvoka trajata okoli 169 ms, morda je OK, če sveti približno toliko
+        notchesResets.push([nowT + 140, startX, startY, endX, endY]);
+        
+        // dodamo trigger za naslednji blink;
+        // najprej njegov index;
+        if (blinkIdx == passdNotchCoords.length - 1) passdNotches.nextBlinkIdx = 0;
+        else passdNotches.nextBlinkIdx++;
+        passdNotches.nextBlinkAngle = passdNotchCoords[passdNotches.nextBlinkIdx].angle // nato še njegov kot;
+    }
+
+    // najprej zvok;
+    doSnd(notches.main, RIGHT);
+    doSnd(notches.left, LEFT);
+    
+    // risanje utripanja;
+    if(doR) helper(notches.main, RIGHT);
+    if(doL) helper(notches.left, LEFT);
 
     // brisanje predhodno osvetljenih oznak;
     if(notchesResets.length > 0) {
@@ -455,7 +484,7 @@ function azzerareAfterStop() {
 
 function setNotchCoords(WHICH) {    // ne samo izračuna oznake, ampak jih tudi izriše;
 
-    function helper(passdBeat, passdNotchCoords, passdAudioArr) {
+    function helper(passdBeat, passdNotchCoords) {
         const angleSlice = twoPI / passdBeat; // kot celega kroga deljeno s številom dob;
         const diff = passdNotchCoords == notches.main.coords ? 20 : -20;
         passdNotchCoords.length = 0; // spraznimo array; ne sme bit = [], ker to ustvari nov array in se zgubi referenca !!!!!;
@@ -470,33 +499,90 @@ function setNotchCoords(WHICH) {    // ne samo izračuna oznake, ampak jih tudi 
                 )
             );
         }
-        // po potrebi dofilamo toliko zvokov, da ustreza številu dob;
-        if(passdAudioArr.length < passdBeat) {
-            const diff = passdBeat - passdAudioArr.length;
-            for(let i = 0; i < diff; i++ ) {
-                if(passdAudioArr == audioMain) {
-                    passdAudioArr.push(new Audio('Perc_Can_hi.mp3'));
-                } else {
-                    passdAudioArr.push(new Audio('Perc_Clap_hi.mp3'));
-                }
-            }
-        }
     }
 
     if (WHICH == RIGHT || WHICH == BOTH) {
-        helper(mainBeat, notches.main.coords, audioMain)
+        helper(mainBeat, notches.main.coords);
     }
     if (WHICH == LEFT || WHICH == BOTH) {
-        helper(leftBeat, notches.left.coords, audioLeft)
+        helper(leftBeat, notches.left.coords);
     }
 
-    // izris ozadja in torej tudi oznak;
+    // izris ozadja in s tem tudi oznak;
     drawBckgnd();
 }
 
-function zvok(which, idx) {
-    if (which == RIGHT) { audioMain[idx].play(); } 
-        else audioLeft[idx].play();
+function zvok(which) {
+    if(samplesInitlsd) {
+        if(which == RIGHT) {
+            playSample(audioSmpls[0], 0);
+        } else playSample(audioSmpls[1], 0);
+    } else {
+        console.log('oldschool');   // predvidoma samo prvi, začetni beat;
+        if (which == RIGHT) { 
+            audioMain.play(); 
+        } else audioLeft.play();
+    }
+}
+
+// AudioContext
+async function getFile(path) {
+    const response = await fetch(path);
+    const arrayBuffer = await response.arrayBuffer();
+    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+    return audioBuffer;
+}
+
+async function getFilePt1(path) {   // del pred audioContext;
+    const response = await fetch(path);
+    const arrayBuffer = await response.arrayBuffer();
+    return arrayBuffer;
+}
+
+async function getFilePt2(bfr) {    // del po audioCtx, nisem prepričan da je treba dalit na 2 kosa; (kao če določeni browserji ne dovolijo audioCtxa pred uporabnikovo interakcijo);
+    const audioBuffer = await audioCtx.decodeAudioData(bfr);
+    return audioBuffer;
+}
+
+async function setupSamples(paths) {
+    const audioBuffers = [];
+
+    for (const path of paths) {
+        const sample = await getFile(path);
+        audioBuffers.push(sample);
+    }
+
+    return audioBuffers;
+}
+
+async function setupSamplesPt1StpBfrz(paths) { // setup array buffers;
+    const arrayBuffers = [];
+
+    for (const path of paths) {
+        const bfr = await getFilePt1(path);
+        arrayBuffers.push(bfr);
+    }
+
+    return arrayBuffers;
+}
+
+async function setupSamplesPt2(bfrs) {
+    const audioBuffers = [];
+
+    for (const bfr of bfrs) {
+        const sample = await getFilePt2(bfr);
+        audioBuffers.push(sample);
+    }
+
+    console.log('audio buffers done');  // 2 ms rabi za ta postopek, če sta arraybufferja že narejena;
+    return audioBuffers;
+}
+
+function playSample(audioBuffer, time) {    // to je način za predvajanje audia v Web audio (audioContext);
+    const sample = audioCtx.createBufferSource();
+    sample.buffer = audioBuffer;
+    sample.connect(audioCtx.destination);
+    sample.start(time); // ta start je kot play() v HTML 5;
 }
 
 
@@ -515,7 +601,7 @@ if (document.readyState == 'loading') {
 document.addEventListener('keydown', e => { atKeyPress(e.key) });
 canvRBeat.addEventListener('click', e => { beatCountCtrlOprtn(e) });
 canvLBeat.addEventListener('click', e => { beatCountCtrlOprtn(e) });
-canvPlayStop.addEventListener('click', playStopBtnOprtn);
+canvPlayStop.addEventListener('click', playStopBtnOprtnB4SmplInit);
 if (!mobile) {  // poslušalci za spremembo tempa; najprej, če miška;
     canvTempo.addEventListener('mousedown', (e) => {mouseDownOprtn(e)});
     canvTempo.addEventListener('mouseleave', (e) => {mouseLeaveOprtn(e)});
