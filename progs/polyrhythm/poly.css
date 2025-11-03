@@ -13,25 +13,6 @@ p {
     color: #f0fff0; /* honeydew */
 }
 
-.center-text {
-    text-align: center;
-}
-
-.no-margin {
-    margin-top: 0;
-    margin-bottom: 0;
-}
-
-.no-click{
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -o-user-select: none;
-    user-select: none;
-    cursor:default;
-}
-
 #home {
     padding-top: 15px;
     padding-left: 15px;
@@ -171,6 +152,33 @@ p {
     border-radius: 0.4em;
 }
 
+.center-text {
+    text-align: center;
+}
+
+.no-margin {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.top-margin-1em {
+    margin-top: 0.8em;
+}
+
+.no-click{
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+    cursor:default;
+}
+
 .hidden {
     display: none;
+}
+
+.size-15px {
+    font-size: 15px;;
 }

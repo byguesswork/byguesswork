@@ -259,7 +259,7 @@ function touchDial(e) {
 }
 
 function touchDialB4SmplInit(e) {
-    setupSamplesPt2(arrayBfrs).then((response) => {
+    setupSamplesPt2(arrayBfrs).then((response) => { // za videt je podobna playStopBtnOprtnB4SmplInit(), ampak ni ista!!;
         // uredit zvoke;
         audioSmpls = response;
         console.log(audioSmpls);

@@ -1,15 +1,16 @@
 'use strict';
 
-// optimizirat podajanje zvoka; naredit dummy izvedbo za 1. beat? da je manj ifov in podajanja argumentov;
 // začasno da vodoravno ni na voljo
-// če zmanjša levega na manj kot 2, ga izklopiš;
-// krajšanje trajanja lbinks s hitrejšimi udarci (L in D enaka hitrost)
 // prilagdoljiva/različna hitrost L in D udarca (blinkanja) glede na njuno hitrost
+    // v bistvu bi moralo upoštevat tudi kje je naslednji drugi udarec..
+    // ..(na trajanje D udarca vpliva, kdaj se pojavi naslednji L udarec, če je to prej kot naslednji D udarec); 
 // izklop zvoka; morda na po dva klikerja na vsaki strani: izklop zvoka in izklop blinkanja (še vedno se vedno vrti kazalec);
 // beats per bar
 // zagon s klikom na številčnico (če je že zaustavitev tako)
 // vodoravna postavitev
+// če zmanjša levega na manj kot 2, ga izklopiš;
 // dodat uvajalno odštevanje (opcija);
+
 
 // canvasi in njihovi konteksti;
 // skala in kazalec;
@@ -67,7 +68,7 @@ let baseDimension, notchLength, r, crclX /* polovica od width oz. hght canvasa; 
 let mainBeat = 4; // na desni oz. zunaj kroga;
 let leftBeat = 3; // znotraj kroga;
 let bpm = 60;   // beatsPerMinute; potem bo treba ločit še bars per minute;
-let revltnDurtn, revltnConst;
+let revltnDurtn, revltnConst, blinkDurtn;
 const notches = {
     main: {
         coords: [], // tu so shranjeni podatki, kako osvetlimo neko zarezo
@@ -97,11 +98,12 @@ const tempoCnvsRect = {
     right: 0,
     bottom: 0
 }
-const posOnCtrl = { // top je mera, kje je vrh gumbov za beat; ENAKO SE UPORABLJA ZA PLAY!! ;
+const posOnCtrl = { // top je mera, kje je vrh L/D gumba za beat;
     top: 0,
     x: 0,
     y: 0
 }
+let playBtnTop = 0, playBtnHght = 80;
 let mouseOrTchPosOnTempo = {
     x : 0,
     y : 0,
@@ -158,7 +160,7 @@ function defineDimensions() {
         let width = document.documentElement.clientWidth < window.innerWidth ? document.documentElement.clientWidth : window.innerWidth;
         if(screen.width < width) width = screen.width;
         if(width % 2 == 1) width = width - 1;
-        baseDimension = width - 24; // 12 roba na vsaki strani;
+        baseDimension = width - 36; // 18 roba na vsaki strani;
         notchLength = 16;
         r = (baseDimension - 2 * 16 - 2 * 2) / 2;
 
@@ -171,10 +173,14 @@ function defineDimensions() {
         divJokerForegnd.style.right = '32px';
 
         canvLBeat.style.marginTop = '16px';
-        canvLBeat.style.marginRight = '8px';
+        canvLBeat.style.marginRight = '4px';
         canvRBeat.style.marginTop = '16px';
-        canvRBeat.style.marginLeft = '8px';
-        canvPlayStop.style.marginTop = '24px'
+        canvRBeat.style.marginLeft = '4px';
+        lBeatDigit.style.fontSize = '44px';
+        lBeatDigit.style.paddingRight = '0.15em';
+        rBeatDigit.style.fontSize = '44px';
+        rBeatDigit.style.paddingLeft = '0.15em';
+        canvPlayStop.style.marginTop = '30px';
         canvPlayStop.width = 60;
 
         const toRemove = document.getElementsByClassName('label')
@@ -213,6 +219,12 @@ function positionElems() {
 
     posOnCtrl.top = canvRBeat.getBoundingClientRect().top; // levi in desni gumb imata isti top, zato zabeležimo samo enkrat;
 
+    playBtnTop = canvPlayStop.getBoundingClientRect().top;
+    if(mobile) {
+        playBtnTop += 16;   // ker tolko od roba se začne gumb (21) + malo gor, da lažje prime;
+        playBtnHght = 70;   // naredimo malo višje (je 60), da lažje prime;
+    } else playBtnTop += 28; // height pa je že pravilno 80; 
+
     rBeatDigit.style.left = `${canvRBeat.getBoundingClientRect().right}px`;
     rBeatDigit.style.top = `${posOnCtrl.top + 60 - 17}px`;  // -17 (al kolko pač) od oka da je črka bolja na sredini
     rBeatDigit.style.color = digitColrShaded;
@@ -241,22 +253,21 @@ function atKeyPress(keyKey) {
 }
 
 function playStopBtnOprtn(e) {
-    if((e.clientY > (posOnCtrl.top + 25)) && (e.clientY < (posOnCtrl.top + 110))) {
+    if((e.clientY > playBtnTop) && (e.clientY < (playBtnTop + playBtnHght))) {
         if(isRotating == null) startRotating();
         else stopRotation();
     }
 }
 
 function playStopBtnOprtnB4SmplInit(e) {
-    if((e.clientY > (posOnCtrl.top + 25)) && (e.clientY < (posOnCtrl.top + 110))) {
-        setupSamplesPt2(arrayBfrs).then((response) => {
+    if((e.clientY > playBtnTop) && (e.clientY < (playBtnTop + playBtnHght))) {
+        setupSamplesPt2(arrayBfrs).then((response) => { // za videt je podobna touchDialB4SmplInit(), ampak ni ista!!;
             audioSmpls = response;
             console.log(audioSmpls);
             playStopBtnOprtn(e); // zagnat;
             setListnrsAftrInit();   // poštimat listenerje;
         });
     }
-
 }
 
 function setListnrsAftrInit() {
@@ -330,6 +341,14 @@ function beatCountCtrlOprtn(e) {
 function defineRevltnDurtn() {
     revltnDurtn = (60 / (bpm / mainBeat)) * 1000;  //  čas, potreben za en krog, v milisekundah; 60, ker 60 sekund v minuti;
     revltnConst = twoPI / revltnDurtn;
+    
+    const temp = (60 / bpm) * 1000; // trajanje (v ms) enega udarca;
+    if(temp <= 200) {
+        blinkDurtn = 0.9 * temp;
+        if(blinkDurtn > 150) {
+            blinkDurtn = 150;
+        } else if (blinkDurtn < 110) blinkDurtn = 110;
+    } else blinkDurtn = 150;
 }
 
 function rotate() {
@@ -379,7 +398,7 @@ function rotate() {
         
         // si zabeležimo, da izbrišemo čez čas, okoli 100ms;
         // zvoka trajata okoli 169 ms, morda je OK, če sveti približno toliko
-        notchesResets.push([nowT + 140, startX, startY, endX, endY]);
+        notchesResets.push([nowT + blinkDurtn, startX, startY, endX, endY]);
         
         // dodamo trigger za naslednji blink;
         // najprej njegov index;
