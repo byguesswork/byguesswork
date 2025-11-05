@@ -1,5 +1,7 @@
 'use strict';
 
+// Malvec placa pod naslovom
+// Spreminjanje dob in hitrosti je vse skupaj v enem divu?
 // začasno da vodoravno ni na voljo
 // prilagdoljiva/različna hitrost L in D udarca (blinkanja) glede na njuno hitrost
     // v bistvu bi moralo upoštevat tudi kje je naslednji drugi udarec..
@@ -30,7 +32,7 @@ const canvTempo = document.getElementById('canv_tempo');
 const ctxTempo = canvTempo.getContext('2d');
 
 // druge ročice;
-const infoIcon = document.getElementById('avg_hex_info_icon');
+const infoIcon = document.getElementById('info_icon');
 const foreCanvDiv = document.getElementById('foreground_canvas_div');
 const rBeatDigit = document.getElementById('right_beat_digit');
 const lBeatDigit = document.getElementById('left_beat_digit');
@@ -64,7 +66,7 @@ const startRad = -Math.PI / 2; // to je kot točke, ki je na vrhu kroga;
 const twoPI = 2 * Math.PI;
 const frameDurtn = 10;  // na koliko ms se sproži interval, ki izrisuje kroženje;
 
-let baseDimension, notchLength, r, crclX /* polovica od width oz. hght canvasa; */, crclY;
+let baseDimension, notchLength, r, crclX, crclY; // crclX in Y sta koordinati središča kroga, na sredini width oz. hght canvasa;
 let mainBeat = 4; // na desni oz. zunaj kroga;
 let leftBeat = 3; // znotraj kroga;
 let bpm = 60;   // beatsPerMinute; potem bo treba ločit še bars per minute;
@@ -92,6 +94,10 @@ let jokerOpen = false;
 let wasRunngB4Joker = false;
 let audioCtx = new AudioContext();
 let audioSmpls, arrayBfrs;
+const foreCanvRect = {
+    top: 0,
+    left: 0,
+};
 const tempoCnvsRect = {
     left: 0,
     top: 0,
@@ -165,11 +171,12 @@ function defineDimensions() {
         r = (baseDimension - 2 * 16 - 2 * 2) / 2;
 
         document.getElementById('home').style.position = 'absolute';
-        document.getElementById('home').style.paddingTop = '0px';
+        document.getElementById('title').style.paddingTop = '10px';
         infoIcon.style.right = '12px';
 
         divJokerForegnd.style.top = '80px';
         divJokerForegnd.style.left = '32px';
+        divJokerForegnd.style.bottom = '60px';
         divJokerForegnd.style.right = '32px';
 
         canvLBeat.style.marginTop = '16px';
@@ -209,8 +216,11 @@ function defineDimensions() {
 }
 
 function positionElems() {
-    foreCanvDiv.style.top = `${canv.getBoundingClientRect().top}px`;
-    foreCanvDiv.style.left = `${canv.getBoundingClientRect().left}px`;
+    foreCanvRect.top = canv.getBoundingClientRect().top;    // ker itak se bckgCanv in foreCanv prekrivata; 
+    foreCanvRect.left = canv.getBoundingClientRect().left;  // za zdaj smo šele prebrali podatke, spodaj pa jih še nastavimo;
+
+    foreCanvDiv.style.top = `${foreCanvRect.top}px`;
+    foreCanvDiv.style.left = `${foreCanvRect.left}px`;
 
     tempoCnvsRect.left = canvTempo.getBoundingClientRect().left;
     tempoCnvsRect.top = canvTempo.getBoundingClientRect().top;
@@ -263,7 +273,6 @@ function playStopBtnOprtnB4SmplInit(e) {
     if((e.clientY > playBtnTop) && (e.clientY < (playBtnTop + playBtnHght))) {
         setupSamplesPt2(arrayBfrs).then((response) => { // za videt je podobna touchDialB4SmplInit(), ampak ni ista!!;
             audioSmpls = response;
-            console.log(audioSmpls);
             playStopBtnOprtn(e); // zagnat;
             setListnrsAftrInit();   // poštimat listenerje;
         });
@@ -271,14 +280,14 @@ function playStopBtnOprtnB4SmplInit(e) {
 }
 
 function setListnrsAftrInit() {
+    // na play gumbu se ju zaenja;
     canvPlayStop.removeEventListener('click', playStopBtnOprtnB4SmplInit);
     canvPlayStop.addEventListener('click', playStopBtnOprtn);
+    // na številčnici pa se ga samo odstrani, ker trenutno ne dela zaustavljanje s klikom na številčnico; znova je dodan ob zaustavitvi
     if(mobile) {
         foreCanv.removeEventListener('touchstart', touchDialB4SmplInit, {passive : false});
-        foreCanv.addEventListener('touchstart', touchDial, {passive : false});
     } else {
         foreCanv.removeEventListener('click', touchDialB4SmplInit);
-        foreCanv.addEventListener('click', touchDial);
     }
 }
 

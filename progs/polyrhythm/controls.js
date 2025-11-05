@@ -248,26 +248,39 @@ function touchMoveOprtn(e) {
 
 function touchDial(e) {
     if(isRotating == null) {
-        if(azzerato) {
-            e.stopImmediatePropagation();
-            startRotating();    // če je zaustavljeno in tudi ponastavljen kazalec (kar je tudi stanje ob odprtju appa), zaženeš; 
-        } else {
-            e.stopImmediatePropagation();
-            azzerareAfterStop();  // če je zaustavljeno, prvi klik ponastavi številčnico;
+        if(evalClick(e)) {
+            if(azzerato) {
+                e.stopImmediatePropagation();
+                startRotating();    // če je zaustavljeno in tudi ponastavljen kazalec (kar je tudi stanje ob odprtju appa), zaženeš; 
+            } else {
+                e.stopImmediatePropagation();
+                azzerareAfterStop();  // če je zaustavljeno, prvi klik ponastavi številčnico;
+            }
         }
     }
 }
 
+function evalClick(e) {
+    let reslt = false;
+    const tchX = e.targetTouches[0].clientX - foreCanvRect.left;
+    const tchY = e.targetTouches[0].clientY - foreCanvRect.top;
+    const rr = ((tchX - crclX)**2 + (tchY - crclY)**2)**(0.5)
+    if(rr <= r + 5) reslt = true;
+    return reslt;
+}
+
 function touchDialB4SmplInit(e) {
-    setupSamplesPt2(arrayBfrs).then((response) => { // za videt je podobna playStopBtnOprtnB4SmplInit(), ampak ni ista!!;
-        // uredit zvoke;
-        audioSmpls = response;
-        console.log(audioSmpls);
-        // zagnat;
-        touchDial(e);
-        // uredit listenerje;
-        setListnrsAftrInit();
-    });
+    if(evalClick(e)) {
+        setupSamplesPt2(arrayBfrs).then((response) => { // za videt je podobna playStopBtnOprtnB4SmplInit(), ampak ni ista!!;
+            // uredit zvoke;
+            audioSmpls = response;
+            console.log(audioSmpls);
+            // zagnat;
+            touchDial(e);
+            // uredit listenerje;
+            setListnrsAftrInit();
+        });
+    }
 
 }
 

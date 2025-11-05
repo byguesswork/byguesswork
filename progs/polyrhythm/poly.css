@@ -6,22 +6,35 @@
     background: #686868; /* najprej: #808080 (grey) */
 }
 
+body {
+    position: relative;
+    margin-top: -1px;   /* da ni margin collapsing */
+    padding-top: 1px;
+    margin-bottom: 1px;
+}
+
 p {
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
+    margin-bottom: 12px;
     font-size: 14px;
     color: #f0fff0; /* honeydew */
 }
 
 #home {
+    top: 0px;
     padding-top: 15px;
     padding-left: 15px;
 }
 
-#avg_hex_info_icon {
+#title {
+    text-align: center;
+    font-size: 18px;
+
+}
+
+#info_icon {
     position: absolute; 
     right: 16px;
-    top: 10px;
+    top: 15px;
 
     border-radius: 50%;
     border-width: 1px;
@@ -111,8 +124,7 @@ p {
 
 #joker_close_icon {
     position: relative;
-    justify-self: end;
-    margin-right: 10px;
+    justify-self: right;
     
     border-radius: 50%;
     border-color: whitesmoke;
@@ -120,6 +132,7 @@ p {
     border-style: solid;
     color:whitesmoke;
     
+    font-size: 18px;
     height: 1.1em;
     width: 1.1em;
     line-height: 1.1em;
@@ -136,10 +149,14 @@ p {
 }
 
 #joker_content {
-    margin-top: 0.5em;
-    margin-right: 32px;
+    position:absolute;
+    top: 56px;
+    right: 28px;
+    bottom: 32px;
+    left: 24px;
     background: #686868;
     color: #eeece4;
+    overflow-y: scroll;
 }
 
 .beat-selector {
@@ -161,10 +178,6 @@ p {
     margin-bottom: 0;
 }
 
-.top-margin-1em {
-    margin-top: 0.8em;
-}
-
 .no-click{
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -177,8 +190,4 @@ p {
 
 .hidden {
     display: none;
-}
-
-.size-15px {
-    font-size: 15px;;
 }
