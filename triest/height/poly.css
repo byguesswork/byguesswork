@@ -110,24 +110,24 @@ p {
 
 #joker_foregnd {
     position: absolute;
-    background: #686868;
-    padding: 24px 20px 32px;
     top: 120px;
     
     border-width: 1px;
     border-style: solid;
     border-radius: 10px;
+    background: #686868;
 }
 
 #joker_close_icon {
-    position: relative;
-    justify-self: right;
+    position: absolute;
+    top: 24px;
+    right: 20px;
     
     border-radius: 50%;
-    border-color: #fff ; /* whitesmoke */
+    border-color: #fff ; /* prej bilo whitesmoke */
     border-width: 1px;
     border-style: solid;
-    color: #fff ;    /* whitesmoke */
+    color: #fff ;    /* prej bilo whitesmoke */
     
     font-size: 18px;
     height: 1.1em;
@@ -146,7 +146,7 @@ p {
 }
 
 #joker_content {
-    top: 56px;
+    top: 58px;
     right: 28px;
     left: 24px;
     background: #686868;

@@ -368,11 +368,11 @@ function infoClick() {
     <br><span style="font-size:12px;">byguesswork@gmail.com</span>`;
     
     // test
-    raiseJoker(testMsg);
+    // raiseJoker(testMsg);
     // !test
     
     
-    // raiseJoker(msg);
+    raiseJoker(msg);
 }
 
 function raiseJoker(msg) {
