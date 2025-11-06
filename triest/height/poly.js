@@ -1,24 +1,26 @@
 'use strict';
 
-// dodaj da je Beta
-// naredit AB test v triest
-// dat risanj v async, zbrat najprej vse poteze za eno rundo
-// če zmanjša levega na manj kot 2, ga izklopiš;
-// dodat podpis
-// krajšanje trajanja lbinks s hitrejšimi udarci (L in D enaka hitrost)
+// če ni mobile, lahko gumb azempo malo hitrejhe dela
+// Malvec placa pod naslovom
+// Spreminjanje dob in hitrosti je vse skupaj v enem divu?
+// začasno da vodoravno ni na voljo
 // prilagdoljiva/različna hitrost L in D udarca (blinkanja) glede na njuno hitrost
+    // v bistvu bi moralo upoštevat tudi kje je naslednji drugi udarec..
+    // ..(na trajanje D udarca vpliva, kdaj se pojavi naslednji L udarec, če je to prej kot naslednji D udarec); 
 // izklop zvoka; morda na po dva klikerja na vsaki strani: izklop zvoka in izklop blinkanja (še vedno se vedno vrti kazalec);
 // beats per bar
-// zagon in ustavitev s klikom na številčnico
+// zagon s klikom na številčnico (če je že zaustavitev tako)
 // vodoravna postavitev
+// če zmanjša levega na manj kot 2, ga izklopiš;
 // dodat uvajalno odštevanje (opcija);
 
+
+// canvasi in njihovi konteksti;
 // skala in kazalec;
 const canv = document.getElementById('canvas'); // to je kanvas, na katerem je narisan krog in oznake dob;
 const ctx = canv.getContext('2d');
 const foreCanv = document.getElementById('foreground_canvas');  // to je kanvas, na katerem se odvija vrtenje;
 const foreCtx = foreCanv.getContext('2d');
-const foreCanvDiv = document.getElementById('foreground_canvas_div');
 
 // gumbi;
 const canvLBeat = document.getElementById('left_beat');
@@ -27,22 +29,23 @@ const canvRBeat = document.getElementById('right_beat');
 const ctxRBeat = canvRBeat.getContext('2d');
 const canvPlayStop = document.getElementById('center_control');
 const ctxPlayStop = canvPlayStop.getContext('2d');
-
-const rBeatDigit = document.getElementById('right_beat_digit');
-const lBeatDigit = document.getElementById('left_beat_digit');
-
 const canvTempo = document.getElementById('canv_tempo');
 const ctxTempo = canvTempo.getContext('2d');
+
+// druge ročice;
+const infoIcon = document.getElementById('info_icon');
+const canvDiv = document.getElementById('canvas_div');  // se načeloma ne rabi, ma ni odveč imet;
+const foreCanvDiv = document.getElementById('foreground_canvas_div');
+const rBeatDigit = document.getElementById('right_beat_digit');
+const lBeatDigit = document.getElementById('left_beat_digit');
 const bPMinuteLbl = document.getElementById('b_per_minute');
 const displayTempo = document.getElementById('display_tempo');
-
-const infoIcon = document.getElementById('avg_hex_info_icon');
 const divJokerBckgnd = document.getElementById('joker_bckgnd');
 const divJokerForegnd = document.getElementById('joker_foregnd');
 const divJokerCloseIcon = document.getElementById('joker_close_icon');
 const jokerContent = document.getElementById('joker_content');
 
-const samplePaths = ['Perc_Squeak_hi.wav','Synth_Square_A_hi.wav'];
+const samplePaths = ['Perc_Can_hi.wav','Perc_Clap_hi.wav'];
 
 // konstante
 const RIGHT = 'r';
@@ -65,12 +68,11 @@ const startRad = -Math.PI / 2; // to je kot točke, ki je na vrhu kroga;
 const twoPI = 2 * Math.PI;
 const frameDurtn = 10;  // na koliko ms se sproži interval, ki izrisuje kroženje;
 
-let baseDimension, notchLength, r, crclX /* polovica od width oz. hght canvasa; */, crclY;
+let baseDimension, notchLength, r, crclX, crclY; // crclX in Y sta koordinati središča kroga, na sredini width oz. hght canvasa;
 let mainBeat = 4; // na desni oz. zunaj kroga;
 let leftBeat = 3; // znotraj kroga;
 let bpm = 60;   // beatsPerMinute; potem bo treba ločit še bars per minute;
-let revltnDurtn, revltnConst;
-let angle, prevT;   // angle služi hkrati tudi kot prevAngle;
+let revltnDurtn, revltnConst, blinkDurtn;
 const notches = {
     main: {
         coords: [], // tu so shranjeni podatki, kako osvetlimo neko zarezo
@@ -83,41 +85,41 @@ const notches = {
         nextBlinkIdx: 0
     }
 }
-const posOnCtrl = {
-    top: 0,
-    x: 0,
-    y: 0
-}
 
-let tStart; // čas (v ms od 1970), ko se je začelo vrteti;
+let angle, prevT;   // angle služi hkrati tudi kot prevAngle;
 let isRotating = null;  // interval checker za vrtenje kazalca;
 let tempoIntrvlChckr = null; // interval checker za tempo gumb;
-let azzerato = false;   // to je za vodenje evidence (samo pri upravljanju s tipkami) al si esc pritisnil enkrat (samo ustaviš) ali večkrat (ponastaviš kazalec);
+let azzerato = true;   // to je za vodenje evidence al si esc pritisnil enkrat (samo ustaviš) ali dvakrat (ponastaviš kazalec); na začetku je true, ker je kazalec ponastavljen;
 let mobile = false;
 let mousePressIsValid = false;
 let jokerOpen = false;
 let wasRunngB4Joker = false;
-let samplesInitlsd = false; // samples initiated; ali smo jih uvozili v Web Audio
-let tstMsg = '';
 let audioCtx = new AudioContext();
 let audioSmpls, arrayBfrs;
-// let arrayBfrs;
-tstMsg += `state takoj na začetki: ${audioCtx.state}<br>`;
+const foreCanvRect = {
+    top: 0,
+    left: 0,
+};
 const tempoCnvsRect = {
     left: 0,
     top: 0,
     right: 0,
     bottom: 0
 }
+const posOnCtrl = { // top je mera, kje je vrh L/D gumba za beat;
+    top: 0,
+    x: 0,
+    y: 0
+}
+let playBtnTop = 0, playBtnHght = 80;
 let mouseOrTchPosOnTempo = {
     x : 0,
     y : 0,
     btn : 'none'
 }
-const audioMain = [];   // arraya za zvoke. Main je desni, left je levi;
-const audioLeft = [];
 const notchesResets = [];   // tabela, v kateri si shraniš podatke, kdaj izbrisat obarvanje katere oznake;
     // noter grejo (push, bereš od začetka) arrayi s tako sestavo: triggerTime, startX, startY, endX, endY;
+let testMsg = '';
 
 class Notch {
     constructor(x1, y1, x2, y2, angle) {
@@ -160,27 +162,50 @@ function defineDimensions() {
         divJokerForegnd.style.right = `${window.innerWidth * 0.2}px`;
     } else {
         let width = document.documentElement.clientWidth < window.innerWidth ? document.documentElement.clientWidth : window.innerWidth;
+        
+        testMsg += 'document.documentElement.clientWidth: ';
+        testMsg += document.documentElement.clientWidth;
+        testMsg += '<br>window.innerWidth: ';
+        testMsg += window.innerWidth;
+        testMsg += '<br>screen.width: ';
+        testMsg += screen.width;
+        testMsg += '<br><br>document.documentElement.clientHeight: ';
+        testMsg += document.documentElement.clientHeight;
+        testMsg += '<br>window.innerHeight: ';
+        testMsg += window.innerHeight;
+        testMsg += '<br>screen.height: ';
+        testMsg += screen.height;
+
         if(screen.width < width) width = screen.width;
         if(width % 2 == 1) width = width - 1;
-        baseDimension = width - 24; // 12 roba na vsaki strani;
+        baseDimension = width - 36; // 18 roba na vsaki strani;
         notchLength = 16;
         r = (baseDimension - 2 * 16 - 2 * 2) / 2;
-
+        
         document.getElementById('home').style.position = 'absolute';
-        document.getElementById('home').style.paddingTop = '0px';
+        document.getElementById('title').style.paddingTop = '10px';
         infoIcon.style.right = '12px';
-
+        
         divJokerForegnd.style.top = '80px';
         divJokerForegnd.style.left = '32px';
+        divJokerForegnd.style.bottom = '60px';
         divJokerForegnd.style.right = '32px';
 
+        jokerContent.style.position = 'absolute';   // da dobi scroll bar in da ne sega tekst v globino;
+        jokerContent.style.bottom = '32px';
+        jokerContent.style.overflowY = 'scroll';
+        
         canvLBeat.style.marginTop = '16px';
-        canvLBeat.style.marginRight = '8px';
+        canvLBeat.style.marginRight = '4px';
         canvRBeat.style.marginTop = '16px';
-        canvRBeat.style.marginLeft = '8px';
-        canvPlayStop.style.marginTop = '24px'
+        canvRBeat.style.marginLeft = '4px';
+        lBeatDigit.style.fontSize = '44px';
+        lBeatDigit.style.paddingRight = '0.15em';
+        rBeatDigit.style.fontSize = '44px';
+        rBeatDigit.style.paddingLeft = '0.15em';
+        canvPlayStop.style.marginTop = '30px';
         canvPlayStop.width = 60;
-
+        
         const toRemove = document.getElementsByClassName('label')
         toRemove[0].innerHTML = '';
         toRemove[1].innerHTML = '';
@@ -204,15 +229,27 @@ function defineDimensions() {
 }
 
 function positionElems() {
+    
+    // obvezno najprej top, ker preden daš top, canvas sega globoko dol in se pojavi stranki skrolbar..
+    // ..ko določiš top, stranski scrollbar zgine in šele takrat pravilno odčitaš left, ker se širina spremeni in se zadnji kanvas premakne na novo sredino;
     foreCanvDiv.style.top = `${canv.getBoundingClientRect().top}px`;
     foreCanvDiv.style.left = `${canv.getBoundingClientRect().left}px`;
-
+    
+    foreCanvRect.top = foreCanvDiv.getBoundingClientRect().top;
+    foreCanvRect.left = foreCanvDiv.getBoundingClientRect().left;
+    
     tempoCnvsRect.left = canvTempo.getBoundingClientRect().left;
     tempoCnvsRect.top = canvTempo.getBoundingClientRect().top;
     tempoCnvsRect.right = canvTempo.getBoundingClientRect().right;
     tempoCnvsRect.bottom = canvTempo.getBoundingClientRect().bottom;
 
     posOnCtrl.top = canvRBeat.getBoundingClientRect().top; // levi in desni gumb imata isti top, zato zabeležimo samo enkrat;
+
+    playBtnTop = canvPlayStop.getBoundingClientRect().top;
+    if(mobile) {
+        playBtnTop += 16;   // ker tolko od roba se začne gumb (21) + malo gor, da lažje prime;
+        playBtnHght = 70;   // naredimo malo višje (je 60), da lažje prime;
+    } else playBtnTop += 28; // height pa je že pravilno 80; 
 
     rBeatDigit.style.left = `${canvRBeat.getBoundingClientRect().right}px`;
     rBeatDigit.style.top = `${posOnCtrl.top + 60 - 17}px`;  // -17 (al kolko pač) od oka da je črka bolja na sredini
@@ -227,41 +264,43 @@ function positionElems() {
 
 function atKeyPress(keyKey) {
     if(keyKey == 'Escape') {
-        if (isRotating != null) stopRotation();
-            else if(!azzerato) { azzerareAfterStop()};
+        if (isRotating != null) {
+            stopRotation();
+        } else {    // če je vrtenje null;
+            if(jokerOpen) {
+                retireJoker();
+            } else if(!azzerato) azzerareAfterStop();
+        }
     } else if(keyKey == 'Enter') {
-        if (isRotating == null) { startRotating(); }
+        if (isRotating == null && !jokerOpen) {
+            startRotating(); 
+        }
     }
 }
 
-function playStopBtnOprtn() {
-    if(isRotating == null) startRotating();
-    else stopRotation();
+function playStopBtnOprtn(e) {
+    if((e.clientY > playBtnTop) && (e.clientY < (playBtnTop + playBtnHght))) {
+        if(isRotating == null) startRotating();
+        else stopRotation();
+    }
 }
 
-function playStopBtnOprtnB4SmplInit() {
-    if(isRotating == null) startRotating();
-    else stopRotation();
+function playStopBtnOprtnB4SmplInit(e) {
+    if((e.clientY > playBtnTop) && (e.clientY < (playBtnTop + playBtnHght))) {
+        setupSamplesPt2(arrayBfrs).then((response) => { // za videt je podobna touchDialB4SmplInit(), ampak ni ista!!;
+            audioSmpls = response;
+            playStopBtnOprtn(e); // zagnat;
+            setListnrsAftrInit();   // poštimat listenerje;
+        });
+    }
+}
 
-    // setupSamples(samplePaths).then((response) => {
-    //     audioSmpls = response;
-    //     console.log(audioSmpls);
-
-    // });
-
-    setupSamplesPt2(arrayBfrs).then((response) => {
-        canvPlayStop.removeEventListener('click', playStopBtnOprtnB4SmplInit);
-        canvPlayStop.addEventListener('click', playStopBtnOprtn);
-        samplesInitlsd = true;
-        audioSmpls = response;
-        console.log(audioSmpls)
-    });
-
-    // for(let i = 1; i<10; i++) {
-    //     setTimeout(() => {
-    //         playSample(audioSmpls[0], 0);
-    //     }, i * 80)
-    // }
+function setListnrsAftrInit() {
+    // na play gumbu se ju zaenja;
+    canvPlayStop.removeEventListener('click', playStopBtnOprtnB4SmplInit);
+    canvPlayStop.addEventListener('click', playStopBtnOprtn);
+    // na številčnici pa se ga samo odstrani, ker trenutno ne dela zaustavljanje s klikom na številčnico; znova je dodan ob zaustavitvi
+    foreCanv.removeEventListener('click', touchDialB4SmplInit);
 }
 
 function beatCountCtrlOprtn(e) {
@@ -323,24 +362,15 @@ function beatCountCtrlOprtn(e) {
 function defineRevltnDurtn() {
     revltnDurtn = (60 / (bpm / mainBeat)) * 1000;  //  čas, potreben za en krog, v milisekundah; 60, ker 60 sekund v minuti;
     revltnConst = twoPI / revltnDurtn;
+    
+    const temp = (60 / bpm) * 1000; // trajanje (v ms) enega udarca;
+    if(temp <= 200) {
+        blinkDurtn = 0.9 * temp;
+        if(blinkDurtn > 150) {
+            blinkDurtn = 150;
+        } else if (blinkDurtn < 110) blinkDurtn = 110;
+    } else blinkDurtn = 150;
 }
-
-// test
-async function load(what){
-    what.load();
-}
-// !t
-
-// test
-function pause(idx) {
-    audioMain[idx].pause();
-    // console.log('jup pavza,', Date.now())
-    audioMain[idx].currentTime = 0;
-
-}
-// !test
-
-
 
 function rotate() {
     // izračunamo kot, kamor trenutno kaže kazalec;
@@ -357,15 +387,10 @@ function rotate() {
         if (angle >= passdNotches.nextBlinkAngle && (passdNotches.nextBlinkAngle > 0 || angle < passdNotches.coords[1].angle)) {
             // na tem mestu v zanki vemo da je ima stran (L/R) na tej točki oznako;
             if(which == RIGHT) {
-                zvok(RIGHT, passdNotches.nextBlinkIdx); // nextBlinkIdx tukaj dejansko pomeni currentIdx;
-                setTimeout(pause, 150, passdNotches.nextBlinkIdx)
-                // if(passdNotches.nextBlinkIdx == passdNotches.coords.length - 1) /*audioMain[0].load();*/ load(audioMain[0]);
-                //     else /*audioMain[passdNotches.nextBlinkIdx + 1].load() */ load(audioMain[passdNotches.nextBlinkIdx + 1]);
+                zvok(RIGHT);
                 doR = true;
             } else {
-                zvok(LEFT, passdNotches.nextBlinkIdx);
-                // if(passdNotches.nextBlinkIdx == passdNotches.coords.length - 1) audioLeft[0].load();
-                //     else audioLeft[passdNotches.nextBlinkIdx + 1].load();
+                zvok(LEFT);
                 doL = true;
             }
         }
@@ -394,7 +419,7 @@ function rotate() {
         
         // si zabeležimo, da izbrišemo čez čas, okoli 100ms;
         // zvoka trajata okoli 169 ms, morda je OK, če sveti približno toliko
-        notchesResets.push([nowT + 140, startX, startY, endX, endY]);
+        notchesResets.push([nowT + blinkDurtn, startX, startY, endX, endY]);
         
         // dodamo trigger za naslednji blink;
         // najprej njegov index;
@@ -458,8 +483,7 @@ function startRotating() {
 
 async function restOfStartRottng() {
     drawStopBtn();
-    if(mobile) foreCanv.removeEventListener('touchstart', (e) => {touchAzzerareDial(e)}, {passive : false}); 
-        else foreCanv.removeEventListener('touchstart', (e) => {touchAzzerareDial(e)}); 
+    foreCanv.removeEventListener('click', touchDial);   // prvikrat je ta klic prazen, ker poodprtju appa tega listenerja še ni, nastavi se ob prvi ustavitvi;
 }
 
 function stopRotation() {
@@ -472,8 +496,7 @@ function stopRotation() {
     notches.left.nextBlinkIdx = 0;
     notchesResets.length = 0;
     drawPlayBtn();
-    if(mobile) foreCanv.addEventListener('touchstart', (e) => {touchAzzerareDial(e)}, {passive : false});  // da s pritiskom številčnice ponastaviš kazalec (ki po zaustavitvi ostane, kjer je bil);
-        else foreCanv.addEventListener('click', (e) => {touchAzzerareDial(e)});
+    foreCanv.addEventListener('click', touchDial);
 }
 
 function resetForeCanv() {
@@ -524,7 +547,7 @@ function azzerareAfterStop() {
 
 function setNotchCoords(WHICH) {    // ne samo izračuna oznake, ampak jih tudi izriše;
 
-    function helper(passdBeat, passdNotchCoords, passdAudioArr) {
+    function helper(passdBeat, passdNotchCoords) {
         const angleSlice = twoPI / passdBeat; // kot celega kroga deljeno s številom dob;
         const diff = passdNotchCoords == notches.main.coords ? 20 : -20;
         passdNotchCoords.length = 0; // spraznimo array; ne sme bit = [], ker to ustvari nov array in se zgubi referenca !!!!!;
@@ -539,70 +562,45 @@ function setNotchCoords(WHICH) {    // ne samo izračuna oznake, ampak jih tudi 
                 )
             );
         }
-        // po potrebi dofilamo toliko zvokov, da ustreza številu dob;
-        if(passdAudioArr.length < passdBeat) {
-            const diff = passdBeat - passdAudioArr.length;
-            for(let i = 0; i < diff; i++ ) {
-                if(passdAudioArr == audioMain) {
-                    passdAudioArr.push(new Audio('Perc_Can_hi.mp3'));
-                    passdAudioArr[i].addEventListener('canplay', () => {console.log('main canplay',i, Date.now())})
-                } else {
-                    passdAudioArr.push(new Audio('Perc_Clap_hi.mp3'));
-                }
-            }
-        }
     }
 
     if (WHICH == RIGHT || WHICH == BOTH) {
-        helper(mainBeat, notches.main.coords, audioMain)
+        helper(mainBeat, notches.main.coords);
     }
     if (WHICH == LEFT || WHICH == BOTH) {
-        helper(leftBeat, notches.left.coords, audioLeft)
+        helper(leftBeat, notches.left.coords);
     }
 
-    // izris ozadja in torej tudi oznak;
+    // izris ozadja in s tem tudi oznak;
     drawBckgnd();
 }
 
-function zvok(which, idx) {
-    if(samplesInitlsd) {
-        if(which == RIGHT) {
-            playSample(audioSmpls[0], 0);
-        } else playSample(audioSmpls[1], 0);
-    } else {
-        if (which == RIGHT) { 
-            audioMain[idx].play(); 
-            // console.log('main play', idx, Date.now())
-            // console.log('- -- - -')
-        } else audioLeft[idx].play();
-    }
+function zvok(which) {
+    if(which == RIGHT) {
+        playSample(audioSmpls[0], 0);
+    } else playSample(audioSmpls[1], 0);
 }
 
 // AudioContext
 async function getFile(path) {
     const response = await fetch(path);
     const arrayBuffer = await response.arrayBuffer();
-    tstMsg += `v getFile1: ${audioCtx.state}<br>`;
     const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-    tstMsg += `v getFile2: ${audioCtx.state}<br>`;
     return audioBuffer;
 }
 
-async function getFilePt1(path) {
+async function getFilePt1(path) {   // del pred audioContext;
     const response = await fetch(path);
     const arrayBuffer = await response.arrayBuffer();
     return arrayBuffer;
 }
 
-async function getFilePt2(bfr) {
+async function getFilePt2(bfr) {    // del po audioCtx, nisem prepričan da je treba dalit na 2 kosa; (kao če določeni browserji ne dovolijo audioCtxa pred uporabnikovo interakcijo);
     const audioBuffer = await audioCtx.decodeAudioData(bfr);
-    tstMsg += `v getFile2: ${audioCtx.state}<br>`;
     return audioBuffer;
 }
 
 async function setupSamples(paths) {
-    console.log('začeli štimat')
-    tstMsg += `v setupSamples: ${audioCtx.state}<br>`;
     const audioBuffers = [];
 
     for (const path of paths) {
@@ -610,14 +608,10 @@ async function setupSamples(paths) {
         audioBuffers.push(sample);
     }
 
-    console.log('naštimano')
     return audioBuffers;
 }
 
-async function setupSamplesPt1StpBfrz(paths) {
-    // console.log('začeli štimat')
-    // tstMsg += `v setupSamples: ${audioCtx.state}<br>`;
-    
+async function setupSamplesPt1StpBfrz(paths) { // setup array buffers;
     const arrayBuffers = [];
 
     for (const path of paths) {
@@ -625,12 +619,10 @@ async function setupSamplesPt1StpBfrz(paths) {
         arrayBuffers.push(bfr);
     }
 
-    console.log('naštimano')
     return arrayBuffers;
 }
 
 async function setupSamplesPt2(bfrs) {
-
     const audioBuffers = [];
 
     for (const bfr of bfrs) {
@@ -638,15 +630,15 @@ async function setupSamplesPt2(bfrs) {
         audioBuffers.push(sample);
     }
 
-    console.log('audio buffers done')
+    console.log('audio buffers done');  // 2 ms rabi za ta postopek, če sta arraybufferja že narejena;
     return audioBuffers;
 }
 
-function playSample(audioBuffer, time) {
-    const sampleSource = audioCtx.createBufferSource();
-    sampleSource.buffer = audioBuffer;
-    sampleSource.connect(audioCtx.destination);
-    sampleSource.start(time);
+function playSample(audioBuffer, time) {    // to je način za predvajanje audia v Web audio (audioContext);
+    const sample = audioCtx.createBufferSource();
+    sample.buffer = audioBuffer;
+    sample.connect(audioCtx.destination);
+    sample.start(time); // ta start je kot play() v HTML 5;
 }
 
 
@@ -663,41 +655,20 @@ if (document.readyState == 'loading') {
 
 //   -  -  -   POSLUŠALCI  -  -  vsaj en mora bit šele zdaj, ker je odvisen od stanja spremenljivke mobile;
 document.addEventListener('keydown', e => { atKeyPress(e.key) });
+foreCanv.addEventListener('click', touchDialB4SmplInit);
 canvRBeat.addEventListener('click', e => { beatCountCtrlOprtn(e) });
 canvLBeat.addEventListener('click', e => { beatCountCtrlOprtn(e) });
-// test
-// canvPlayStop.addEventListener('click', playStopBtnOprtn);
 canvPlayStop.addEventListener('click', playStopBtnOprtnB4SmplInit);
-// !test 
-bPMinuteLbl.addEventListener('click', () => {   // TODO to gre pozneje v funkcijo
-    // test
-    if(audioCtx.state == 'suspended') {
-        audioCtx.resume();
-        tstMsg += `bilo suspended, dali resume: ${audioCtx.state}<br>`;
-    }
-    tstMsg += `po kliku: ${audioCtx.state}<br>`;
-
-    setupSamples(samplePaths).then((response) => {
-        audioSmpls = response;
-        console.log(audioSmpls);
-        playSample(audioSmpls[0], 0);
-    })
-    // !test
- });
-if (!mobile) {  // poslušalci za spremembo tempa; najprej, če miška;
+//infoIcon
+infoIcon.addEventListener('click', infoClick);
+divJokerCloseIcon.addEventListener('click', retireJoker);
+if (!mobile) {  // poslušalci, ki merijo trajanje ali spremembo položaja klika in so zato ločeni glede na mobile ali ne;
     canvTempo.addEventListener('mousedown', (e) => {mouseDownOprtn(e)});
     canvTempo.addEventListener('mouseleave', (e) => {mouseLeaveOprtn(e)});
     canvTempo.addEventListener('mouseup', (e) => {mouseUpOprtn(e)});
     canvTempo.addEventListener('mousemove', (e) => {mouseMoveOprtn(e)});
-    //infoIcon
-    infoIcon.addEventListener('click', infoClick);
-    divJokerCloseIcon.addEventListener('click', retireJoker);
 } else {
     canvTempo.addEventListener('touchstart', (e) => {touchStartOprtn(e)}, {passive : false});
     canvTempo.addEventListener('touchmove', (e) => {touchMoveOprtn(e)}, {passive : false});
     canvTempo.addEventListener('touchend', (e) => {touchEndOprtn(e)}, {passive : false});
-    // infoIcon;
-    infoIcon.addEventListener('touchstart', () => {infoClick()}, {passive : false});
-    divJokerCloseIcon.addEventListener('touchstart', () => {retireJoker()}, {passive : false});
 }
-

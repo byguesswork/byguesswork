@@ -6,41 +6,35 @@
     background: #686868; /* najprej: #808080 (grey) */
 }
 
+body {
+    position: relative;
+    margin-top: -1px;   /* da ni margin collapsing */
+    padding-top: 1px;
+    margin-bottom: 1px;
+}
+
 p {
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
+    margin-bottom: 12px;
     font-size: 14px;
     color: #f0fff0; /* honeydew */
 }
 
-.center-text {
-    text-align: center;
-}
-
-.no-margin {
-    margin-top: 0;
-    margin-bottom: 0;
-}
-
-.no-click{
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -o-user-select: none;
-    user-select: none;
-    cursor:default;
-}
-
 #home {
+    top: 0px;
     padding-top: 15px;
     padding-left: 15px;
 }
 
-#avg_hex_info_icon {
+#title {
+    text-align: center;
+    font-size: 18px;
+
+}
+
+#info_icon {
     position: absolute; 
     right: 16px;
-    top: 10px;
+    top: 15px;
 
     border-radius: 50%;
     border-width: 1px;
@@ -62,8 +56,7 @@ p {
     cursor:default;
 }
 
-#canvas_div {
-    /* position: absolute;   ne sme imet absolute, ker ima takrat left:0 in ni več na sredini*/
+#canvas_div, #controls, #tempo_div {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -78,14 +71,12 @@ p {
     background: none;
 }
 
-#controls, #tempo_div{
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+#controls  {
+    margin-bottom: 20px;
 }
 
-#controls {
-    margin-bottom: 20px;
+#tempo_div {
+    padding-bottom: 8px;
 }
 
 #left_beat, #center_control, #right_beat {
@@ -130,15 +121,15 @@ p {
 
 #joker_close_icon {
     position: relative;
-    justify-self: end;
-    margin-right: 10px;
+    justify-self: right;
     
     border-radius: 50%;
-    border-color: whitesmoke;
+    border-color: #fff ; /* whitesmoke */
     border-width: 1px;
     border-style: solid;
-    color:whitesmoke;
+    color: #fff ;    /* whitesmoke */
     
+    font-size: 18px;
     height: 1.1em;
     width: 1.1em;
     line-height: 1.1em;
@@ -155,8 +146,9 @@ p {
 }
 
 #joker_content {
-    margin-top: 0.5em;
-    margin-right: 32px;
+    top: 56px;
+    right: 28px;
+    left: 24px;
     background: #686868;
     color: #eeece4;
 }
@@ -169,6 +161,25 @@ p {
     margin-right: 12px;
     align-self: center;
     border-radius: 0.4em;
+}
+
+.center-text {
+    text-align: center;
+}
+
+.no-margin {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.no-click{
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+    cursor:default;
 }
 
 .hidden {

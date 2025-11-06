@@ -246,8 +246,41 @@ function touchMoveOprtn(e) {
     }
 }
 
-function touchAzzerareDial() {
-    if(isRotating == null && azzerato == false) azzerareAfterStop();
+function touchDial(e) {
+    if(isRotating == null) {
+        if(evalClick(e)) {
+             if(azzerato) {
+                e.stopImmediatePropagation();
+                startRotating();    // če je zaustavljeno in tudi ponastavljen kazalec (kar je tudi stanje ob odprtju appa), zaženeš; 
+            } else {
+                e.stopImmediatePropagation();
+                azzerareAfterStop();  // če je zaustavljeno, prvi klik ponastavi številčnico;
+            }
+        }
+    }
+}
+
+function evalClick(e) {
+    // merimo klik, zato je lahko ista procedura za mobile/!mobile; če bi merili premik, bi rabili ločit, tako pa ne;
+    let reslt = false;
+    const tchX = e.clientX - foreCanvRect.left;
+    const tchY = e.clientY - foreCanvRect.top;
+    const rr = ((tchX - crclX)**2 + (tchY - crclY)**2)**(0.5);
+    if(rr <= r + 5) reslt = true;
+    return reslt;
+}
+
+function touchDialB4SmplInit(e) {
+    if(evalClick(e)) {
+        setupSamplesPt2(arrayBfrs).then((response) => { // za videt je podobna playStopBtnOprtnB4SmplInit(), ampak ni ista!!;
+            // uredit zvoke;
+            audioSmpls = response;
+            // zagnat;
+            startRotating();
+            // uredit listenerje;
+            setListnrsAftrInit();
+        });
+    }
 }
 
 // - -  če miška     - - - - - - - - - - - - 
@@ -261,12 +294,12 @@ function mouseDownOprtn(e){
         if (reslt == TEMPO_UP) {
             if(tempoIntrvlChckr == null) { 
                 tempo(true);
-                tempoIntrvlChckr = setInterval(tempo, 100, true); 
+                tempoIntrvlChckr = setInterval(tempo, 70, true); 
             }
         } else if(reslt == TEMPO_DOWN){
             if(tempoIntrvlChckr == null) {
                 tempo(false);
-                tempoIntrvlChckr = setInterval(tempo, 100, false);
+                tempoIntrvlChckr = setInterval(tempo, 70, false);
             }
         }
     }
@@ -277,7 +310,6 @@ function mouseMoveOprtn(e) {
         const reslt = detrmnMousPosOnTempoCnvs(e);
         if (reslt != mouseOrTchPosOnTempo.btn) {
             invldteTempoClick();
-            // console.log('invalidated pri premiku z gumba')
         }
     }
 }
@@ -331,12 +363,16 @@ function infoClick() {
     <br><br>The &quot;Beats per minute&quot; setting affects the speed of the beat count on the right,
     ie. the speed with which the indicator visits the marks on the outside of the circle.
     <br><br><br><span style="font-size:12px;">Metronome sounds by Ludwig Peter Müller (December 2020).
-    Used under the license &quot;Creative Commons CC0 1.0 Universal&quot; extended by the author.</span>`;
+    Used under the license &quot;Creative Commons CC0 1.0 Universal&quot; extended by the author.</span>
+    <br><br><br><span style="font-size:12px;">Ivo Makuc, 2025</span>
+    <br><span style="font-size:12px;">byguesswork@gmail.com</span>`;
+    
+    // test
+    raiseJoker(testMsg);
+    // !test
+    
+    
     // raiseJoker(msg);
-
-    //test
-    raiseJoker(tstMsg);
-    //!test
 }
 
 function raiseJoker(msg) {
