@@ -33,6 +33,7 @@ const ctxTempo = canvTempo.getContext('2d');
 
 // druge ročice;
 const infoIcon = document.getElementById('info_icon');
+const canvDiv = document.getElementById('canvas_div');  // se načeloma ne rabi, ma ni odveč imet;
 const foreCanvDiv = document.getElementById('foreground_canvas_div');
 const rBeatDigit = document.getElementById('right_beat_digit');
 const lBeatDigit = document.getElementById('left_beat_digit');
@@ -115,8 +116,6 @@ let mouseOrTchPosOnTempo = {
     y : 0,
     btn : 'none'
 }
-const audioMain = new Audio('Perc_Can_hi.mp3');   // ta dva samo za prvi beat, potem poprime WebAudio (audioContext);
-const audioLeft = new Audio('Perc_Clap_hi.mp3');
 const notchesResets = [];   // tabela, v kateri si shraniš podatke, kdaj izbrisat obarvanje katere oznake;
     // noter grejo (push, bereš od začetka) arrayi s tako sestavo: triggerTime, startX, startY, endX, endY;
 
@@ -159,9 +158,6 @@ function defineDimensions() {
         
         divJokerForegnd.style.left = `${window.innerWidth * 0.2}px`;
         divJokerForegnd.style.right = `${window.innerWidth * 0.2}px`;
-
-        // da s klikom številčnice ponastaviš kazalec (ki po zaustavitvi ostane, kjer je bil) ali pa zaženeš štetje;
-        foreCanv.addEventListener('click', touchDialB4SmplInit);
     } else {
         let width = document.documentElement.clientWidth < window.innerWidth ? document.documentElement.clientWidth : window.innerWidth;
         if(screen.width < width) width = screen.width;
@@ -169,16 +165,20 @@ function defineDimensions() {
         baseDimension = width - 36; // 18 roba na vsaki strani;
         notchLength = 16;
         r = (baseDimension - 2 * 16 - 2 * 2) / 2;
-
+        
         document.getElementById('home').style.position = 'absolute';
         document.getElementById('title').style.paddingTop = '10px';
         infoIcon.style.right = '12px';
-
+        
         divJokerForegnd.style.top = '80px';
         divJokerForegnd.style.left = '32px';
         divJokerForegnd.style.bottom = '60px';
         divJokerForegnd.style.right = '32px';
 
+        jokerContent.style.position = 'absolute';   // da dobi scroll bar in da ne sega tekst v globino;
+        jokerContent.style.bottom = '32px';
+        jokerContent.style.overflowY = 'scroll';
+        
         canvLBeat.style.marginTop = '16px';
         canvLBeat.style.marginRight = '4px';
         canvRBeat.style.marginTop = '16px';
@@ -189,13 +189,10 @@ function defineDimensions() {
         rBeatDigit.style.paddingLeft = '0.15em';
         canvPlayStop.style.marginTop = '30px';
         canvPlayStop.width = 60;
-
+        
         const toRemove = document.getElementsByClassName('label')
         toRemove[0].innerHTML = '';
         toRemove[1].innerHTML = '';
-
-        // da s pritiskom številčnice ponastaviš kazalec (ki po zaustavitvi ostane, kjer je bil) ali pa zaženeš štetje;
-        foreCanv.addEventListener('touchstart', touchDialB4SmplInit, {passive : false});
     }
 
     crclX = baseDimension / 2;  // polovica od width oz. hght canvasa;
@@ -216,12 +213,15 @@ function defineDimensions() {
 }
 
 function positionElems() {
-    foreCanvRect.top = canv.getBoundingClientRect().top;    // ker itak se bckgCanv in foreCanv prekrivata; 
-    foreCanvRect.left = canv.getBoundingClientRect().left;  // za zdaj smo šele prebrali podatke, spodaj pa jih še nastavimo;
-
-    foreCanvDiv.style.top = `${foreCanvRect.top}px`;
-    foreCanvDiv.style.left = `${foreCanvRect.left}px`;
-
+    
+    // obvezno najprej top, ker preden daš top, canvas sega globoko dol in se pojavi stranki skrolbar..
+    // ..ko določiš top, stranski scrollbar zgine in šele takrat pravilno odčitaš left, ker se širina spremeni in se zadnji kanvas premakne na novo sredino;
+    foreCanvDiv.style.top = `${canv.getBoundingClientRect().top}px`;
+    foreCanvDiv.style.left = `${canv.getBoundingClientRect().left}px`;
+    
+    foreCanvRect.top = foreCanvDiv.getBoundingClientRect().top;
+    foreCanvRect.left = foreCanvDiv.getBoundingClientRect().left;
+    
     tempoCnvsRect.left = canvTempo.getBoundingClientRect().left;
     tempoCnvsRect.top = canvTempo.getBoundingClientRect().top;
     tempoCnvsRect.right = canvTempo.getBoundingClientRect().right;
@@ -645,23 +645,20 @@ if (document.readyState == 'loading') {
 
 //   -  -  -   POSLUŠALCI  -  -  vsaj en mora bit šele zdaj, ker je odvisen od stanja spremenljivke mobile;
 document.addEventListener('keydown', e => { atKeyPress(e.key) });
+foreCanv.addEventListener('click', touchDialB4SmplInit);
 canvRBeat.addEventListener('click', e => { beatCountCtrlOprtn(e) });
 canvLBeat.addEventListener('click', e => { beatCountCtrlOprtn(e) });
 canvPlayStop.addEventListener('click', playStopBtnOprtnB4SmplInit);
-if (!mobile) {  // poslušalci za spremembo tempa; najprej, če miška;
+//infoIcon
+infoIcon.addEventListener('click', infoClick);
+divJokerCloseIcon.addEventListener('click', retireJoker);
+if (!mobile) {  // poslušalci, ki merijo trajanje ali spremembo položaja klika in so zato ločeni glede na mobile ali ne;
     canvTempo.addEventListener('mousedown', (e) => {mouseDownOprtn(e)});
     canvTempo.addEventListener('mouseleave', (e) => {mouseLeaveOprtn(e)});
     canvTempo.addEventListener('mouseup', (e) => {mouseUpOprtn(e)});
     canvTempo.addEventListener('mousemove', (e) => {mouseMoveOprtn(e)});
-    //infoIcon
-    infoIcon.addEventListener('click', infoClick);
-    divJokerCloseIcon.addEventListener('click', retireJoker);
 } else {
     canvTempo.addEventListener('touchstart', (e) => {touchStartOprtn(e)}, {passive : false});
     canvTempo.addEventListener('touchmove', (e) => {touchMoveOprtn(e)}, {passive : false});
     canvTempo.addEventListener('touchend', (e) => {touchEndOprtn(e)}, {passive : false});
-    // infoIcon;
-    infoIcon.addEventListener('touchstart', () => {infoClick()}, {passive : false});
-    divJokerCloseIcon.addEventListener('touchstart', () => {retireJoker()}, {passive : false});
 }
-
