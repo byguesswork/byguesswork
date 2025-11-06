@@ -294,12 +294,12 @@ function mouseDownOprtn(e){
         if (reslt == TEMPO_UP) {
             if(tempoIntrvlChckr == null) { 
                 tempo(true);
-                tempoIntrvlChckr = setInterval(tempo, 100, true); 
+                tempoIntrvlChckr = setInterval(tempo, 70, true); 
             }
         } else if(reslt == TEMPO_DOWN){
             if(tempoIntrvlChckr == null) {
                 tempo(false);
-                tempoIntrvlChckr = setInterval(tempo, 100, false);
+                tempoIntrvlChckr = setInterval(tempo, 70, false);
             }
         }
     }

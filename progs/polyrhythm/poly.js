@@ -1,5 +1,6 @@
 'use strict';
 
+// če ni mobile, lahko gumb azempo malo hitrejhe dela
 // Malvec placa pod naslovom
 // Spreminjanje dob in hitrosti je vse skupaj v enem divu?
 // začasno da vodoravno ni na voljo
@@ -284,11 +285,7 @@ function setListnrsAftrInit() {
     canvPlayStop.removeEventListener('click', playStopBtnOprtnB4SmplInit);
     canvPlayStop.addEventListener('click', playStopBtnOprtn);
     // na številčnici pa se ga samo odstrani, ker trenutno ne dela zaustavljanje s klikom na številčnico; znova je dodan ob zaustavitvi
-    if(mobile) {
-        foreCanv.removeEventListener('touchstart', touchDialB4SmplInit, {passive : false});
-    } else {
-        foreCanv.removeEventListener('click', touchDialB4SmplInit);
-    }
+    foreCanv.removeEventListener('click', touchDialB4SmplInit);
 }
 
 function beatCountCtrlOprtn(e) {
@@ -471,8 +468,7 @@ function startRotating() {
 
 async function restOfStartRottng() {
     drawStopBtn();
-    if(mobile) foreCanv.removeEventListener('touchstart', touchDial, {passive : false}); 
-        else foreCanv.removeEventListener('click', touchDial); 
+    foreCanv.removeEventListener('click', touchDial);   // prvikrat je ta klic prazen, ker poodprtju appa tega listenerja še ni, nastavi se ob prvi ustavitvi;
 }
 
 function stopRotation() {
@@ -485,8 +481,7 @@ function stopRotation() {
     notches.left.nextBlinkIdx = 0;
     notchesResets.length = 0;
     drawPlayBtn();
-    if(mobile) foreCanv.addEventListener('touchstart', touchDial, {passive : false});  // da s pritiskom številčnice ponastaviš kazalec (ki po zaustavitvi ostane, kjer je bil);
-        else foreCanv.addEventListener('click', touchDial);
+    foreCanv.addEventListener('click', touchDial);
 }
 
 function resetForeCanv() {
