@@ -1,5 +1,6 @@
 'use strict';
 
+// i ozadje visoko kot je rect.height, ne pa da določiš bottom, ker slednje ne prekrije celega zaslona
 // Spreminjanje dob in hitrosti je vse skupaj v enem divu?
 // Ftekvenca je lahko picaa ejsa pr majhnem bpm, pol pa mora najvec 10, recmo pr 240
 // prilagdoljiva/različna hitrost L in D udarca (blinkanja) glede na njuno hitrost
@@ -286,23 +287,25 @@ function chkLyout() {
             // tempo div padding bottom je 8 (na 2?)
         } else (console.log('ni blema'))
     } else {
-        displayHrzWarn();
+        displayHrzWarn(false);
     }
 }
 
-function displayHrzWarn() { // display warning at horizontal orientation;
+function displayHrzWarn(specialCase) { // display warning at horizontal orientation;
     canvDiv.style.display = 'none';
     foreCanvDiv.style.display = 'none';
     document.getElementById('controls').style.display = 'none';
     divJokerBckgnd.style.position = 'fixed';
     divJokerCloseIcon.style.display = 'none';
     
-    raiseJoker('Currently does not support horizontal');
+    raiseJoker('Currently does not support horizontal', specialCase);
 }
 
 function atOrntnCgh() { // at orientation change;
     if(screen.orientation.angle == 0 || screen.orientation.angle == 180) location.reload();
-    else if(screen.orientation.angle == 90 || screen.orientation.angle == 270) displayHrzWarn();
+    else if(screen.orientation.angle == 90 || screen.orientation.angle == 270) {
+        displayHrzWarn(true);
+    }
 }
 
 function atKeyPress(keyKey) {

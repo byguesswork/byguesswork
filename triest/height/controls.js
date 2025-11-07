@@ -375,7 +375,7 @@ function infoClick() {
     raiseJoker(msg);
 }
 
-function raiseJoker(msg) {
+function raiseJoker(msg, specialCase) {
     jokerOpen = true;
     if(isRotating) {
         clearInterval(isRotating);
@@ -383,9 +383,15 @@ function raiseJoker(msg) {
         wasRunngB4Joker = true;
     } 
     divJokerBckgnd.style.top = '0px';
-    divJokerBckgnd.style.bottom = '0px';
-    divJokerBckgnd.style.left = '0px';
     divJokerBckgnd.style.right = '0px';
+    divJokerBckgnd.style.left = '0px';
+    // specialCase je, če imel vertikalno in potem obrnil horizontalno, ..
+    // ker takrat višine ne izračuna takoj, uporabim kar prejšnjo širino (ki postane višina) za background;
+    // ker pa ne vemo, koliko je visoka naslovna vrstica&co, damo foreground od oka nekih 80;
+    if(specialCase) {
+        divJokerBckgnd.style.height = `${viewPrtRect.width}px`;
+        divJokerForegnd.style.height = '80px';  // ta višina != višina BoundingRect; ta višina ne upošteva paddinga in borderja;
+    } else divJokerBckgnd.style.height = `${viewPrtRect.height}px`;
     divJokerForegnd.classList.remove('hidden');
     divJokerCloseIcon.classList.remove('hidden');
     jokerContent.innerHTML = msg;
@@ -394,9 +400,9 @@ function raiseJoker(msg) {
 function retireJoker() {
     jokerOpen = false;
     divJokerBckgnd.style.top = 'auto';
-    divJokerBckgnd.style.bottom = 'auto';
-    divJokerBckgnd.style.left = 'auto';
     divJokerBckgnd.style.right = 'auto';
+    divJokerBckgnd.style.left = 'auto';
+    divJokerBckgnd.style.height = '0';
     divJokerForegnd.classList.add('hidden');
     divJokerCloseIcon.classList.add('hidden');
     jokerContent.innerHTML = '';
