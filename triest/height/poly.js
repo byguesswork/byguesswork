@@ -1,15 +1,13 @@
 'use strict';
 
-// Malvec placa pod naslovom
 // Spreminjanje dob in hitrosti je vse skupaj v enem divu?
-// pol bo treba hendlat spremembe orientacije
-    // če se je začelo vodoravno, to zabeležit, in ob spremembi reload itd;
+// Ftekvenca je lahko picaa ejsa pr majhnem bpm, pol pa mora najvec 10, recmo pr 240
 // prilagdoljiva/različna hitrost L in D udarca (blinkanja) glede na njuno hitrost
     // v bistvu bi moralo upoštevat tudi kje je naslednji drugi udarec..
     // ..(na trajanje D udarca vpliva, kdaj se pojavi naslednji L udarec, če je to prej kot naslednji D udarec); 
 // izklop zvoka; morda na po dva klikerja na vsaki strani: izklop zvoka in izklop blinkanja (še vedno se vedno vrti kazalec);
 // beats per bar
-// zagon s klikom na številčnico (če je že zaustavitev tako)
+// zaustavitev s klikom na številčnico (če je že zagon tako)
 // če zmanjša levega na manj kot 2, ga izklopiš;
 // dodat uvajalno odštevanje (opcija);
 
@@ -58,24 +56,24 @@ const INVALID = 'inv';  // neveljaven klik;
 const TEMPO_UP = 'u';
 const TEMPO_DOWN = 'd';
 
-const dialColr = 'honeydew';
-const bckgndColor = '#686868';  // preveri, da je isto v css!;
+const dialColr = '#f0fff0'; // honeydew;
 const btnColor = '#a2f083'; // kulska: #81D95E
 const btnColorShaded = '#85ac75';
 const btnColorShadedDarkrCentr = '#7f9e72';
 const btnColorShadedDarkr = '#717d6b';   // ko dosežeš mejo nastavitev in gumb postane neaktiven;
 const digitColrShaded = '#85ac75';    // #84c46bff ; včasih je bil gumb malo svetlejšo od cifer;
+// const bckgndColor = '#686868';  // trenutno se ne uporablja, je pa verjetno ta prava barva;
 
-const notchWidth = 11;
 const startRad = -Math.PI / 2; // to je kot točke, ki je na vrhu kroga;
 const twoPI = 2 * Math.PI;
-const frameDurtn = 20;  // na koliko ms se sproži interval, ki izrisuje kroženje;
+const notchWidth = 11;
 
 let baseDimension, notchLength, r, crclX, crclY; // basedimention je stranica kvadratnega canvasa; crclX in Y sta koordinati središča kroga, na sredini width oz. hght canvasa;
 let mainBeat = 4; // na desni oz. zunaj kroga;
 let leftBeat = 3; // znotraj kroga;
 let bpm = 60;   // beatsPerMinute; potem bo treba ločit še bars per minute;
-let revltnDurtn, revltnConst, blinkDurtn;
+let frameDurtn = 16;  // na koliko ms se sproži interval, ki izrisuje kroženje;
+let revltnDurtn, revltnConst, blinkDurtn = 150;
 const notches = {
     main: {
         coords: [], // tu so shranjeni podatki, kako osvetlimo neko zarezo
@@ -197,7 +195,7 @@ function defineDimensions() {
         
         document.getElementById('home').style.position = 'absolute';
         document.getElementById('title').style.paddingTop = '10px';
-        infoIcon.style.right = '12px';
+        infoIcon.style.fontSize = '18px';
         
         divJokerForegnd.style.top = '80px';
         divJokerForegnd.style.left = '32px';
@@ -222,7 +220,6 @@ function defineDimensions() {
         const toRemove = document.getElementsByClassName('label')
         toRemove[0].innerHTML = '';
         toRemove[1].innerHTML = '';
-        console.log('define dimensions, ie. Pt I done')
     }
 
     crclX = baseDimension / 2;  // polovica od width oz. hght canvasa;
@@ -243,7 +240,6 @@ function defineDimensions() {
 }
 
 function positionElems() {
-    console.log('posEle,s, ie. Pt II, start')
     // obvezno najprej .top, ker preden daš top, canvas sega globoko dol in se pojavi stranski skrolbar..
     // ..ko določiš top, stranski scrollbar zgine in šele takrat pravilno odčitaš left, ker se širina spremeni in zadnji kanvas se premakne na novo sredino;
     foreCanvDiv.style.top = `${canv.getBoundingClientRect().top}px`;
@@ -275,24 +271,38 @@ function positionElems() {
     lBeatDigit.style.color = digitColrShaded;
     lBeatDigit.innerHTML = leftBeat;
     
-    console.log('posEle,s, ie. Pt II done');
-
     chkLyout();
 }
 
 function chkLyout() {
-    if(screen.orientation.angle == 0) { // type : "portrait-primary";
-        if(document.body.getBoundingClientRect().height > viewPrtRect.height - 100) console.log('problem')
-            else (console.log('ni blema'))
+    if(screen.orientation.angle == 0 || screen.orientation.angle == 180) { // type : "portrait-primary";
+        if(document.body.getBoundingClientRect().height > viewPrtRect.height - 100) {
+            console.log('problem')
+            // div controls m bottom 20
+            // canvar leftbeat canvas center control canvas right beat  m top 16
+                // najprej naredi da je samo en zgornji margin ne pa vsak svojega
+            // canvas centercontrol geigh bi se dalo znižat za 16
 
+            // tempo div padding bottom je 8 (na 2?)
+        } else (console.log('ni blema'))
     } else {
-        canvDiv.style.display = 'none';
-        foreCanvDiv.style.display = 'none';
-        document.getElementById('controls').style.display = 'none';
-        divJokerBckgnd.style.position = 'fixed';
-
-        raiseJoker('Currently does not support horizontal');
+        displayHrzWarn();
     }
+}
+
+function displayHrzWarn() { // display warning at horizontal orientation;
+    canvDiv.style.display = 'none';
+    foreCanvDiv.style.display = 'none';
+    document.getElementById('controls').style.display = 'none';
+    divJokerBckgnd.style.position = 'fixed';
+    divJokerCloseIcon.style.display = 'none';
+    
+    raiseJoker('Currently does not support horizontal');
+}
+
+function atOrntnCgh() { // at orientation change;
+    if(screen.orientation.angle == 0 || screen.orientation.angle == 180) location.reload();
+    else if(screen.orientation.angle == 90 || screen.orientation.angle == 270) displayHrzWarn();
 }
 
 function atKeyPress(keyKey) {
@@ -396,13 +406,26 @@ function defineRevltnDurtn() {
     revltnDurtn = (60 / (bpm / mainBeat)) * 1000;  //  čas, potreben za en krog, v milisekundah; 60, ker 60 sekund v minuti;
     revltnConst = twoPI / revltnDurtn;
     
-    const temp = (60 / bpm) * 1000; // trajanje (v ms) enega udarca;
-    if(temp <= 200) {
-        blinkDurtn = 0.9 * temp;
-        if(blinkDurtn > 150) {
-            blinkDurtn = 150;
-        } else if (blinkDurtn < 110) blinkDurtn = 110;
-    } else blinkDurtn = 150;
+    // frameDuration
+    if(bpm > 176)
+        if(bpm < 185) 
+            if(bpm <= 180) {
+                frameDurtn = 16;
+                console.log('frame 16');
+            } else {
+                frameDurtn = 10;
+                console.log('frame 10');
+            }
+
+    // blink duration;
+    // eh, naj bo trenutno kar vedno 150ms;
+    // const temp = (60 / bpm) * 1000; // trajanje (v ms) enega udarca;
+    // if(temp <= 200) {
+    //     blinkDurtn = 0.9 * temp;
+    //     if(blinkDurtn > 150) {
+    //         blinkDurtn = 150;
+    //     } else if (blinkDurtn < 110) blinkDurtn = 110;
+    // } else blinkDurtn = 150;
 }
 
 function rotate() {
@@ -695,6 +718,8 @@ canvPlayStop.addEventListener('click', playStopBtnOprtnB4SmplInit);
 //infoIcon
 infoIcon.addEventListener('click', infoClick);
 divJokerCloseIcon.addEventListener('click', retireJoker);
+// usmeritev;
+screen.orientation.addEventListener('change', atOrntnCgh);
 if (!mobile) {  // poslušalci, ki merijo trajanje ali spremembo položaja klika in so zato ločeni glede na mobile ali ne;
     canvTempo.addEventListener('mousedown', (e) => {mouseDownOprtn(e)});
     canvTempo.addEventListener('mouseleave', (e) => {mouseLeaveOprtn(e)});
