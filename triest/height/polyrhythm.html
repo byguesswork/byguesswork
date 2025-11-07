@@ -21,7 +21,7 @@
     <div id="info_icon">i</div>
     
     <div>
-        <p id="title">Polyrhythm Dial - Beta 10/16</p>
+        <p id="title">Polyrhythm Dial - Beta</p>
     </div>
     
     <div id="canvas_div">
@@ -32,7 +32,9 @@
     </div>
     
     <div id="controls">
-        <p id="left_beat_digit" class="no-margin no-click"></p>
+        <div id="left_beat_digit" class="beat-count-digit no-click">
+            <!-- tle pride leva številka  -->
+        </div>
         <div>
             <canvas id="left_beat"></canvas>
             <p class="center-text label">Marks inside circle<br>(beats per bar)</p>
@@ -44,11 +46,13 @@
             <canvas id="right_beat"></canvas>
             <p class="center-text label">Marks outside circle<br>(beats per bar)</p>
         </div>
-        <p id="right_beat_digit" class="no-margin no-click"></p>
+        <div id="right_beat_digit" class="beat-count-digit no-click">
+            <!-- tle pride desna številka  -->
+        </div>
     </div>
 
     <div id="tempo_div">
-        <p id="b_per_minute" class="beat-selector">Beats per minute</p>
+        <p id="b_per_minute" class="beat-per-minute-label">Beats per minute</p>
         <p id="display_tempo">100</p>
         <canvas id="canv_tempo"></div>
     </div>

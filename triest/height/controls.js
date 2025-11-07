@@ -90,7 +90,7 @@ function drawBeatCount(which, upper, lower) {
 
 function resetPlayStopCanv() {
     canvPlayStop.height = 0;
-    canvPlayStop.height = 136;
+    canvPlayStop.height = 108;  // ena pojavitev je tudi v .js;
     ctxPlayStop.fillStyle = btnColor;
     ctxPlayStop.strokeStyle = digitColrShaded;
     ctxPlayStop.lineWidth = 1.5;

@@ -38,6 +38,7 @@ const ctxTempo = canvTempo.getContext('2d');
 const infoIcon = document.getElementById('info_icon');
 const canvDiv = document.getElementById('canvas_div');  // se načeloma ne rabi, ma ni odveč imet;
 const foreCanvDiv = document.getElementById('foreground_canvas_div');
+const contrlsDiv = document.getElementById('controls');
 const rBeatDigit = document.getElementById('right_beat_digit');
 const lBeatDigit = document.getElementById('left_beat_digit');
 const bPMinuteLbl = document.getElementById('b_per_minute');
@@ -108,7 +109,7 @@ const tempoCnvsRect = {
     right: 0,
     bottom: 0
 }
-const tempoCanvPos = { // top je mera, kje je vrh L/D gumba za beat;
+const beatCanvPos = { // top je mera, kje je vrh L/D gumba za beat;
     top: 0,
     x: 0,
     y: 0
@@ -169,7 +170,7 @@ function defineDimensions() {
     if(!mobile) {
         baseDimension = 444;
         notchLength = 20;
-        r = 200;    // baseDim - 2*20(notch) - 2*2 (zaradi debeline 3, da ni prirezano)
+
         canvPlayStop.width = 80;
         
         divJokerForegnd.style.left = `${window.innerWidth * 0.2}px`;
@@ -192,7 +193,6 @@ function defineDimensions() {
         baseDimension = viewPrtRect.width - 36; // 18 roba na vsaki strani;
         if(baseDimension % 2 == 1) baseDimension = baseDimension - 1;
         notchLength = 16;
-        r = (baseDimension - 2 * 16 - 2 * 2) / 2;
         
         document.getElementById('home').style.position = 'absolute';
         document.getElementById('title').style.paddingTop = '10px';
@@ -207,22 +207,43 @@ function defineDimensions() {
         jokerContent.style.bottom = '32px';
         jokerContent.style.overflowY = 'scroll';
         
-        canvLBeat.style.marginTop = '16px';
-        canvLBeat.style.marginRight = '4px';
-        canvRBeat.style.marginTop = '16px';
-        canvRBeat.style.marginLeft = '4px';
-        lBeatDigit.style.fontSize = '44px';
-        lBeatDigit.style.paddingRight = '0.15em';
-        rBeatDigit.style.fontSize = '44px';
-        rBeatDigit.style.paddingLeft = '0.15em';
-        canvPlayStop.style.marginTop = '30px';
+        contrlsDiv.style.marginTop = '16px';
+        canvPlayStop.style.marginTop = '14px';  // mal je treba povečat odmik zgoraj, ker je slikca manjša na mobile;
         canvPlayStop.width = 60;
+        canvLBeat.style.marginLeft = '4px';
+        canvLBeat.style.marginRight = '4px';
+        canvRBeat.style.marginLeft = '4px';
+        canvRBeat.style.marginRight = '4px';
+
+        lBeatDigit.style.fontSize = '44px';
+        rBeatDigit.style.fontSize = '44px';
         
         const toRemove = document.getElementsByClassName('label')
-        toRemove[0].innerHTML = '';
+        toRemove[0].classList.add('hidden');
+        toRemove[0].style.marginBottom = '0px';
         toRemove[1].innerHTML = '';
+        toRemove[1].style.marginBottom = '0px';
     }
 
+    deriveFrmBaseDim();
+
+    canvLBeat.width = 60;
+    canvLBeat.height = 136;
+    canvRBeat.width = 60;
+    canvRBeat.height = 136;
+    canvPlayStop.height = 108;   // ena pojavitev je tudi v controls.js;
+    canvTempo.width = 48;
+    canvTempo.height = 108;
+
+    rBeatDigit.innerHTML = mainBeat;
+    lBeatDigit.innerHTML = leftBeat;
+}
+
+function deriveFrmBaseDim() { // izpelji odvisne vrednosti iz baseDimension; baseDimension je širina/višina glavnega kanvasa;
+    if(!mobile) r = 200;    // baseDim - 2*20(notch) - 2*2 (zaradi debeline 3, da ni prirezano);
+        else r = (baseDimension - 2 * 16 - 2 * 2) / 2;
+        console.log(baseDimension, r);
+    
     crclX = baseDimension / 2;  // polovica od width oz. hght canvasa;
     crclY = baseDimension / 2;
 
@@ -230,17 +251,10 @@ function defineDimensions() {
     canv.height = baseDimension;
     foreCanv.width = baseDimension;
     foreCanv.height = baseDimension;
-
-    canvLBeat.width = 60;
-    canvLBeat.height = 136;
-    canvRBeat.width = 60;
-    canvRBeat.height = 136;
-    canvPlayStop.height = 136;
-    canvTempo.width = 48;
-    canvTempo.height = 108;
 }
 
 function positionElems() {
+    console.log('- - - - - -positionElems')
     // obvezno najprej .top, ker preden daš top, canvas sega globoko dol in se pojavi stranski skrolbar..
     // ..ko določiš top, stranski scrollbar zgine in šele takrat pravilno odčitaš left, ker se širina spremeni in zadnji kanvas se premakne na novo sredino;
     foreCanvDiv.style.top = `${canv.getBoundingClientRect().top}px`;
@@ -249,43 +263,48 @@ function positionElems() {
     foreCanvRect.top = foreCanvDiv.getBoundingClientRect().top;
     foreCanvRect.left = foreCanvDiv.getBoundingClientRect().left;
     
+    beatCanvPos.top = canvRBeat.getBoundingClientRect().top; // levi in desni gumb imata isti top, zato zabeležimo samo enkrat;
+
     tempoCnvsRect.left = canvTempo.getBoundingClientRect().left;
     tempoCnvsRect.top = canvTempo.getBoundingClientRect().top;
     tempoCnvsRect.right = canvTempo.getBoundingClientRect().right;
     tempoCnvsRect.bottom = canvTempo.getBoundingClientRect().bottom;
 
-    tempoCanvPos.top = canvRBeat.getBoundingClientRect().top; // levi in desni gumb imata isti top, zato zabeležimo samo enkrat;
-
-    playBtnTop = canvPlayStop.getBoundingClientRect().top;
+    playBtnTop = canvPlayStop.getBoundingClientRect().top;  // to se ne rabi za postavite, ampak za računanje klika;
     if(mobile) {
         playBtnTop += 16;   // ker tolko od roba se začne gumb (21) + malo gor, da lažje prime;
         playBtnHght = 70;   // naredimo malo višje (je 60), da lažje prime;
     } else playBtnTop += 28; // height pa je že pravilno 80; 
 
-    rBeatDigit.style.left = `${canvRBeat.getBoundingClientRect().right}px`;
-    rBeatDigit.style.top = `${tempoCanvPos.top + 60 - 17}px`;  // -17 (al kolko pač) od oka da je črka bolja na sredini
-    rBeatDigit.style.color = digitColrShaded;
-    rBeatDigit.innerHTML = mainBeat;
+    document.removeEventListener("DOMContentLoaded", positionElems);
 
-    lBeatDigit.style.right = `${window.innerWidth - canvLBeat.getBoundingClientRect().left}px`;
-    lBeatDigit.style.top = `${tempoCanvPos.top + 60 - 17}px`;  // -17 (al kolko pač) od oka da je črka bolja na sredini
-    lBeatDigit.style.color = digitColrShaded;
-    lBeatDigit.innerHTML = leftBeat;
-    
     chkLyout();
 }
 
 function chkLyout() {
     if(screen.orientation.angle == 0 || screen.orientation.angle == 180) { // type : "portrait-primary";
-        if(document.body.getBoundingClientRect().height > viewPrtRect.height - 100) {
-            console.log('problem')
-            // div controls m bottom 20
-            // canvar leftbeat canvas center control canvas right beat  m top 16
-                // najprej naredi da je samo en zgornji margin ne pa vsak svojega
-            // canvas centercontrol geigh bi se dalo znižat za 16
-
-            // tempo div padding bottom je 8 (na 2?)
-        } else (console.log('ni blema'))
+        if(document.body.getBoundingClientRect().height > viewPrtRect.height) {
+            console.log('treba urejat velikost postavitve, velikost bila:', document.body.getBoundingClientRect().height );
+            // pridobiš 34; normalna postavitev je 680 (gledano z document.body.getBoundingClientRect().height, body ima takrat 679);
+            contrlsDiv.style.marginTop = '4px'; // pridobil 12 na prejšnjih 16;
+            contrlsDiv.style.marginBottom = '4px'; // pridobil 16 na prejšnjih 20;
+            document.getElementById('tempo_div').style.paddingBottom = '2px'; // pridobil 6 na prejšnjih 8;
+            console.log('po prvem zmanjšanju je velikost:', document.body.getBoundingClientRect().height );
+            if(document.body.getBoundingClientRect().height > viewPrtRect.height) {
+                console.log('manjšamo še krog');
+                let diff = document.body.getBoundingClientRect().height - viewPrtRect.height;
+                if(diff % 2 == 1) diff += 3;
+                    else diff += 2;
+                baseDimension -= diff;
+                deriveFrmBaseDim();
+                drawControls();
+                setNotchCoords(BOTH);
+                positionElems();
+            }
+        }
+        if(viewPrtRect.width > 360) {
+            // še tle
+        }
     } else {
         displayHrzWarn(false);
     }
@@ -294,7 +313,7 @@ function chkLyout() {
 function displayHrzWarn(specialCase) { // display warning at horizontal orientation;
     canvDiv.style.display = 'none';
     foreCanvDiv.style.display = 'none';
-    document.getElementById('controls').style.display = 'none';
+    contrlsDiv.style.display = 'none';
     divJokerBckgnd.style.position = 'fixed';
     divJokerCloseIcon.style.display = 'none';
     
@@ -360,9 +379,9 @@ function beatCountCtrlOprtn(e) {
     }
     let doChange = false; 
     let wasMaxed = false; // shrani potrditev, da je gumb, preden si ga pritisnil, bil razbarvan/neaktiven (imel največjo vrednost navzgor ali navzdol);
-    tempoCanvPos.y = e.clientY - tempoCanvPos.top;
+    beatCanvPos.y = e.clientY - beatCanvPos.top;
 
-    if (tempoCanvPos.y < 60) {
+    if (beatCanvPos.y < 60) {
         // pritisk na zgornjo puščico, za povečanje števila dob;
         if(actionedBeat < 12) {
             if(actionedBeat == 2) wasMaxed = true;  // je bil neaktiven na spodnji meji;
@@ -376,7 +395,7 @@ function beatCountCtrlOprtn(e) {
                 else drawBeatCount(LEFT, true, true);
             }
         }
-    } else if(tempoCanvPos.y > 76) {   // pritisk na spodnjo puščico, za zmanjšanje števila dob;
+    } else if(beatCanvPos.y > 76) {   // pritisk na spodnjo puščico, za zmanjšanje števila dob;
         if(actionedBeat > 2) {
             if(actionedBeat == 12) wasMaxed = true;  // je bil neaktiven na zgornji meji;
             actionedBeat--;
@@ -700,17 +719,19 @@ function playSample(audioBuffer, time) {    // to je način za predvajanje audia
     sample.start(time); // ta start je kot play() v HTML 5;
 }
 
+function checkB4ReadingDimensions() {
+    if (document.readyState == 'loading') {
+        document.addEventListener("DOMContentLoaded", positionElems);  // domcontent loaded je lahko "complete" ali pa "interactive";
+    } else {
+        positionElems;
+    }
+}
 
 //   -  -  -   IZVAJANJE  -  - 
 initialize();
 drawControls();
 setNotchCoords(BOTH);
-if (document.readyState == 'loading') {
-    document.addEventListener("DOMContentLoaded", positionElems);  // domcontent loaded je lahko "complete" ali pa "interactive";
-} else {
-    positionElems;
-}
-
+checkB4ReadingDimensions();
 
 //   -  -  -   POSLUŠALCI  -  -  vsaj en mora bit šele zdaj, ker je odvisen od stanja spremenljivke mobile;
 document.addEventListener('keydown', e => { atKeyPress(e.key) });
