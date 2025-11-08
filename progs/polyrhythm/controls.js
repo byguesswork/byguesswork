@@ -85,12 +85,11 @@ function drawBeatCount(which, upper, lower) {
         ctxRBeat.lineTo(12.7, 96);
         ctxRBeat.fill();
     }
-
 }
 
 function resetPlayStopCanv() {
     canvPlayStop.height = 0;
-    canvPlayStop.height = 136;
+    canvPlayStop.height = 108;  // ena pojavitev je tudi v .js;
     ctxPlayStop.fillStyle = btnColor;
     ctxPlayStop.strokeStyle = digitColrShaded;
     ctxPlayStop.lineWidth = 1.5;
@@ -215,7 +214,6 @@ function drawTempo() {
     ctxTempo.fill();
 
     displayTempo.innerHTML = bpm;
-
 }
 
 
@@ -366,6 +364,11 @@ function infoClick() {
     Used under the license &quot;Creative Commons CC0 1.0 Universal&quot; extended by the author.</span>
     <br><br><br><span style="font-size:12px;">Ivo Makuc, 2025</span>
     <br><span style="font-size:12px;">byguesswork@gmail.com</span>`;
+    
+    // test
+    // raiseJoker(testMsg);
+    // !test
+    
     raiseJoker(msg);
 }
 
@@ -376,21 +379,17 @@ function raiseJoker(msg) {
         isRotating = null;
         wasRunngB4Joker = true;
     } 
-    divJokerBckgnd.style.top = '0px';
-    divJokerBckgnd.style.bottom = '0px';
-    divJokerBckgnd.style.left = '0px';
-    divJokerBckgnd.style.right = '0px';
+    divJokerBckgnd.classList.remove('hidden');
     divJokerForegnd.classList.remove('hidden');
-    divJokerCloseIcon.classList.remove('hidden');
+    // v primeru da gre za horizWarning (special al ne special), spodnjo ukaz ne deluje, ..
+    // kr ga prekliče divJokerCloseIcon.style.display = 'none' ker je bolj specifičen (style vs class specificity);
+    divJokerCloseIcon.classList.remove('hidden');   
     jokerContent.innerHTML = msg;
 }
 
 function retireJoker() {
     jokerOpen = false;
-    divJokerBckgnd.style.top = 'auto';
-    divJokerBckgnd.style.bottom = 'auto';
-    divJokerBckgnd.style.left = 'auto';
-    divJokerBckgnd.style.right = 'auto';
+    divJokerBckgnd.classList.add('hidden');
     divJokerForegnd.classList.add('hidden');
     divJokerCloseIcon.classList.add('hidden');
     jokerContent.innerHTML = '';

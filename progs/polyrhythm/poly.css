@@ -63,7 +63,7 @@ p {
 }
 
 #foreground_canvas_div {
-    position: absolute; /* zaradi positioon absolute se tišči na levo in ne na sredino vodoravnega bloka*/
+    position: absolute;
     background: none;
 }
 
@@ -72,6 +72,7 @@ p {
 }
 
 #controls  {
+    margin-top: 30px;
     margin-bottom: 20px;
 }
 
@@ -80,19 +81,7 @@ p {
 }
 
 #left_beat, #center_control, #right_beat {
-    margin: 30px 30px 2px;
-}
-
-#right_beat_digit {
-    position: absolute;
-    font-size: 50px;
-    padding-left: 0.25em;
-}
-
-#left_beat_digit {
-    position: absolute;
-    font-size: 50px;
-    padding-right: 0.25em;
+    margin: 0px 30px 2px;
 }
 
 #display_tempo {
@@ -100,34 +89,41 @@ p {
     font-size: 36px;
     margin-right: 12px;
     align-self: center;
-
 }
 
 #joker_bckgnd {
-    position: absolute;
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    left: 0px;
+    bottom: 0px;
     background: #bbbbbb66;
 }
 
 #joker_foregnd {
-    position: absolute;
-    background: #686868;
-    padding: 24px 20px 32px;
-    top: 120px;
+    position: fixed;
+
+    padding-top: 58px;
+    padding-right: 32px;
+    padding-left: 24px;
+    padding-bottom: 32px;
     
     border-width: 1px;
     border-style: solid;
     border-radius: 10px;
+    background: #686868;
 }
 
 #joker_close_icon {
-    position: relative;
-    justify-self: right;
+    position: absolute;
+    top: 24px;
+    right: 20px;
     
     border-radius: 50%;
-    border-color: #fff ; /* whitesmoke */
+    border-color: #fff ; /* prej bilo whitesmoke */
     border-width: 1px;
     border-style: solid;
-    color: #fff ;    /* whitesmoke */
+    color: #fff ;    /* prej bilo whitesmoke */
     
     font-size: 18px;
     height: 1.1em;
@@ -146,14 +142,14 @@ p {
 }
 
 #joker_content {
-    top: 56px;
+    top: 58px;
     right: 28px;
     left: 24px;
     background: #686868;
     color: #eeece4;
 }
 
-.beat-selector {
+.beat-per-minute-label {
     color: #2e2d2d;
     background-color: #999;
     font-size: 18px;
@@ -163,13 +159,14 @@ p {
     border-radius: 0.4em;
 }
 
-.center-text {
-    text-align: center;
+.beat-count-digit {
+    font-size: 50px;
+    color: #85ac75; /* digitColrShaded */
+    padding-top: 40px;
 }
 
-.no-margin {
-    margin-top: 0;
-    margin-bottom: 0;
+.center-text {
+    text-align: center;
 }
 
 .no-click{

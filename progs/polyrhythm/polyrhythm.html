@@ -21,7 +21,6 @@
     <div id="info_icon">i</div>
     
     <div>
-
         <p id="title">Polyrhythm Dial - Beta</p>
     </div>
     
@@ -32,8 +31,10 @@
        <canvas id="foreground_canvas"></div>
     </div>
     
-    <p id="left_beat_digit" class="no-margin no-click"></p>
     <div id="controls">
+        <div id="left_beat_digit" class="beat-count-digit no-click">
+            <!-- tle pride leva številka  -->
+        </div>
         <div>
             <canvas id="left_beat"></canvas>
             <p class="center-text label">Marks inside circle<br>(beats per bar)</p>
@@ -45,20 +46,21 @@
             <canvas id="right_beat"></canvas>
             <p class="center-text label">Marks outside circle<br>(beats per bar)</p>
         </div>
+        <div id="right_beat_digit" class="beat-count-digit no-click">
+            <!-- tle pride desna številka  -->
+        </div>
     </div>
-    <p id="right_beat_digit" class="no-margin no-click"></p>
 
     <div id="tempo_div">
-        <p id="b_per_minute" class="beat-selector">Beats per minute</p>
+        <p id="b_per_minute" class="beat-per-minute-label">Beats per minute</p>
         <p id="display_tempo">100</p>
         <canvas id="canv_tempo"></div>
     </div>
 
-    <div id="joker_bckgnd">
+    <div id="joker_bckgnd" class="hidden">
         <div id="joker_foregnd" class="hidden">
             <div id="joker_close_icon" class="hidden">X</div>
             <div id="joker_content">
-                <!-- <p id="joker_content"> tle se vstavlja z innerHTML </p> -->
             </div>
         </div>
     </div>
