@@ -52,8 +52,16 @@
     </div>
 
     <div id="tempo_div">
-        <p id="b_per_minute" class="beat-per-minute-label">Beats per minute</p>
-        <p id="display_tempo">100</p>
+        <div id="bpm_cluster">
+            <div id="beats_per_min_line" class="inline-data-div">
+                <span class="bpm-label bpm-label-selected no-click">Beats per minute</span>
+                <span id="value_beats_minute" class="bpm-digit bpm-digit-selctd no-click">100</span>
+            </div>
+            <div id="bars_per_min_line" class="inline-data-div">
+                <span class="bpm-label no-click">Bars per minute&nbsp;&nbsp;</span>
+                <span id="value_bars_minute" class="bpm-digit no-click">15</span>
+            </div>
+        </div>
         <canvas id="canv_tempo"></div>
     </div>
 

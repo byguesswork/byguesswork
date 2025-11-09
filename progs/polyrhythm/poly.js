@@ -42,8 +42,10 @@ const contrlsDiv = document.getElementById('controls');
 const rBeatDigit = document.getElementById('right_beat_digit');
 const lBeatDigit = document.getElementById('left_beat_digit');
 const tempoDiv = document.getElementById('tempo_div');
-const bPMinuteLbl = document.getElementById('b_per_minute');
-const displayTempo = document.getElementById('display_tempo');
+const tempoBeatsPMinLine = document.getElementById('beats_per_min_line');
+const tempoBarsPMinLine = document.getElementById('bars_per_min_line');
+const valueBeatPMin = document.getElementById('value_beats_minute');
+const valueBarsPMin = document.getElementById('value_bars_minute');
 const divJokerBckgnd = document.getElementById('joker_bckgnd');
 const divJokerForegnd = document.getElementById('joker_foregnd');
 const divJokerCloseIcon = document.getElementById('joker_close_icon');
@@ -60,8 +62,8 @@ const TEMPO_UP = 'u';
 const TEMPO_DOWN = 'd';
 
 const dialColr = '#f0fff0'; // honeydew;
-const btnColor = '#a2f083'; // kulska: #81D95E
-const btnColorShaded = '#85ac75';
+const btnColor = '#a2f083'; // za puščico v sredini; kulska: #81D95E
+const btnColorShaded = '#85ac75'; // za zunanji del gumbom, uno, k ni puščica;
 const btnColorShadedDarkrCentr = '#7f9e72';
 const btnColorShadedDarkr = '#717d6b';   // ko dosežeš mejo nastavitev in gumb postane neaktiven;
 const digitColrShaded = '#85ac75';    // #84c46bff ; včasih je bil gumb malo svetlejšo od cifer;
@@ -74,7 +76,11 @@ const notchWidth = 11;
 let baseDimension, notchLength, r, crclX, crclY; // basedimention je stranica kvadratnega canvasa; crclX in Y sta koordinati središča kroga, na sredini width oz. hght canvasa;
 let mainBeat = 4; // na desni oz. zunaj kroga;
 let leftBeat = 3; // znotraj kroga;
-let bpm = 60;   // beatsPerMinute; potem bo treba ločit še bars per minute;
+const tempo = {
+    beatsPM: 60,    // beats per minte;
+    barsPM: 15,      // bars per minte;
+    isBeat: true,   // pove, al je trenutno izbran beat per minute (in ne bar per minute);
+};
 let frameDurtn = 16;  // na koliko ms se sproži interval, ki izrisuje kroženje;
 let revltnDurtn, revltnConst, blinkDurtn = 150;
 const notches = {
@@ -125,6 +131,7 @@ const viewPrtRect = { // viewport rectangle;
     height : 0,
     width : 0
 }
+let bpmlabels, bpmDigits;    // za shranit DOM elemente za bpm (beats/bars per min) da jih lahko urejamo;
 
 const notchesResets = [];   // tabela, v kateri si shraniš podatke, kdaj izbrisat obarvanje katere oznake;
     // noter grejo (push, bereš od začetka) arrayi s tako sestavo: triggerTime, startX, startY, endX, endY;
@@ -447,14 +454,38 @@ function beatCountCtrlOprtn(e) {
     }
 }
 
+function atBPMClick(e, isBeat){ // isBeat kot nasprotje isBarsPerMinute; pomeni da je bila kliknjena izbira za neat per minute;
+    if(bpmlabels === undefined) {
+        bpmlabels = document.getElementsByClassName('bpm-label');
+        bpmDigits = document.getElementsByClassName('bpm-digit');
+    }
+    if(isBeat) {
+        if(!bpmlabels[0].classList.contains('bpm-label-selected')) {    // v nasprotnem primeru ni terba delat;
+            tempo.isBeat = true;
+            bpmlabels[0].classList.add('bpm-label-selected');
+            bpmDigits[0].classList.add('bpm-digit-selctd');
+            bpmlabels[1].classList.remove('bpm-label-selected');
+            bpmDigits[1].classList.remove('bpm-digit-selctd');
+        }
+    } else if(!bpmlabels[1].classList.contains('bpm-label-selected')) {
+        tempo.isBeat = false;
+        bpmlabels[1].classList.add('bpm-label-selected');
+        bpmDigits[1].classList.add('bpm-digit-selctd');
+        bpmlabels[0].classList.remove('bpm-label-selected');
+        bpmDigits[0].classList.remove('bpm-digit-selctd');
+    }
+}
+
 function defineRevltnDurtn() {
-    revltnDurtn = (60 / (bpm / mainBeat)) * 1000;  //  čas, potreben za en krog, v milisekundah; 60, ker 60 sekund v minuti;
+    if(tempo.isBeat) tempo.barsPM = Math.round(tempo.beatsPM / mainBeat);
+        else tempo.beatsPM = tempo.barsPM * mainBeat;
+    revltnDurtn = (60 / tempo.barsPM) * 1000;  //  čas, potreben za en krog, v milisekundah; 60, ker 60 sekund v minuti;
     revltnConst = twoPI / revltnDurtn;
     
     // frameDuration
-    if(bpm > 176)
-        if(bpm < 185) 
-            if(bpm <= 180) {
+    if(tempo.beatsPM > 176)
+        if(tempo.beatsPM < 185) 
+            if(tempo.beatsPM <= 180) {
                 frameDurtn = 16;
                 console.log('frame 16');
             } else {
@@ -464,7 +495,7 @@ function defineRevltnDurtn() {
 
     // blink duration;
     // eh, naj bo trenutno kar vedno 150ms;
-    // const temp = (60 / bpm) * 1000; // trajanje (v ms) enega udarca;
+    // const temp = (60 / tempo.beatsPM) * 1000; // trajanje (v ms) enega udarca;
     // if(temp <= 200) {
     //     blinkDurtn = 0.9 * temp;
     //     if(blinkDurtn > 150) {
@@ -755,6 +786,8 @@ if(initializeLayout()) {
     canvRBeat.addEventListener('click', e => { beatCountCtrlOprtn(e) });
     canvLBeat.addEventListener('click', e => { beatCountCtrlOprtn(e) });
     canvPlayStop.addEventListener('click', playStopBtnOprtnB4SmplInit);
+    tempoBeatsPMinLine.addEventListener('click', (e) => {atBPMClick(e, true)} );
+    tempoBarsPMinLine.addEventListener('click', (e) => {atBPMClick(e, false)} );
     //infoIcon
     infoIcon.addEventListener('click', infoClick);
     divJokerCloseIcon.addEventListener('click', retireJoker);

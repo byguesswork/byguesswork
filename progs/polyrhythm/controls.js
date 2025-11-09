@@ -213,7 +213,7 @@ function drawTempo() {
     ctxTempo.lineTo(24, 100);
     ctxTempo.fill();
 
-    displayTempo.innerHTML = bpm;
+    updBpmDisp();
 }
 
 
@@ -291,13 +291,13 @@ function mouseDownOprtn(e){
         mouseOrTchPosOnTempo.btn = reslt;
         if (reslt == TEMPO_UP) {
             if(tempoIntrvlChckr == null) { 
-                tempo(true);
-                tempoIntrvlChckr = setInterval(tempo, 70, true); 
+                chgTempo(true);
+                tempoIntrvlChckr = setInterval(chgTempo, 70, true); 
             }
         } else if(reslt == TEMPO_DOWN){
             if(tempoIntrvlChckr == null) {
-                tempo(false);
-                tempoIntrvlChckr = setInterval(tempo, 70, false);
+                chgTempo(false);
+                tempoIntrvlChckr = setInterval(chgTempo, 70, false);
             }
         }
     }
@@ -342,15 +342,21 @@ function invldteTempoClick() {
     tempoIntrvlChckr = null;
 }
 
-function tempo(up){
-    if(up) {bpm++;}
-        else {bpm--;}
+function chgTempo(up){
+    if(up) {
+        if(tempo.isBeat) tempo.beatsPM++;
+            else tempo.barsPM++;
+    }else {
+        if(tempo.isBeat) tempo.beatsPM--;
+            else tempo.barsPM--;
+    }
     defineRevltnDurtn();
     updBpmDisp();
 }
 
 async function updBpmDisp(){
-    displayTempo.innerHTML = bpm;
+    valueBeatPMin.innerHTML = tempo.beatsPM;
+    valueBarsPMin.innerHTML = tempo.barsPM;
 }
 
 // info btn&co

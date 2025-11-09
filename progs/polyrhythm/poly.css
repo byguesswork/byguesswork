@@ -76,19 +76,16 @@ p {
     margin-bottom: 20px;
 }
 
-#tempo_div {
-    padding-bottom: 8px;
-}
-
 #left_beat, #center_control, #right_beat {
     margin: 0px 30px 2px;
 }
 
-#display_tempo {
-    color: #85ac75;
-    font-size: 36px;
-    margin-right: 12px;
-    align-self: center;
+#tempo_div {
+    padding-bottom: 8px;
+}
+
+#bpm_cluster{
+    padding-top: 16px;
 }
 
 #joker_bckgnd {
@@ -149,20 +146,43 @@ p {
     color: #eeece4;
 }
 
-.beat-per-minute-label {
-    color: #2e2d2d;
+.beat-count-digit {
+    font-size: 50px;
+    color: #85ac75; /* digitColrShaded */
+    padding-top: 40px;
+}
+
+.inline-data-div{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.bpm-label {
+    color: #494747;
     background-color: #999;
-    font-size: 18px;
+    font-size: 16px;
     padding: 2px 8px;
     margin-right: 12px;
     align-self: center;
     border-radius: 0.4em;
 }
 
-.beat-count-digit {
-    font-size: 50px;
-    color: #85ac75; /* digitColrShaded */
-    padding-top: 40px;
+.bpm-label-selected{
+    background-color: #85ac75;
+    color: #ccf7be;
+    /* opcije za color tudi   #c9f7b9 #ccf7be #e6ffde #2e2d2d;*/
+}
+
+.bpm-digit {
+    color: #717d6b;
+    font-size: 32px;
+    margin-right: 16px;
+    align-self: center;
+}
+
+.bpm-digit-selctd {
+    color: #85ac75;
 }
 
 .center-text {
