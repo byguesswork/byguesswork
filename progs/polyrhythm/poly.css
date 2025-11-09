@@ -175,14 +175,14 @@ p {
 }
 
 .bpm-digit {
-    color: #717d6b;
+    color: #72816b; /* 74856c izvirno morda: 717d6b */
     font-size: 32px;
     margin-right: 16px;
     align-self: center;
 }
 
 .bpm-digit-selctd {
-    color: #85ac75;
+    color: #8dc079; /* izvirno bilo: #85ac75 svetla opcija: a2f083 vmes: 93ce7c */
 }
 
 .center-text {

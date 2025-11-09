@@ -100,7 +100,7 @@ function drawPlayBtn () {
     
     // okvir;
     ctxPlayStop.beginPath();
-    if(!mobile) {
+    if(!mobileSizeWise) {
         ctxPlayStop.moveTo(0, 28);
         ctxPlayStop.lineTo(80, 28);
         ctxPlayStop.lineTo(80, 108);
@@ -117,7 +117,7 @@ function drawPlayBtn () {
 
     // puščica;
     ctxPlayStop.beginPath();
-    if(!mobile) {
+    if(!mobileSizeWise) {
         ctxPlayStop.moveTo(12, 38);
         ctxPlayStop.lineTo(70, 68);
         ctxPlayStop.lineTo(12, 98);
@@ -133,7 +133,7 @@ function drawStopBtn() {
     resetPlayStopCanv();
 
     ctxPlayStop.beginPath();
-     if(!mobile) {
+     if(!mobileSizeWise) {
         ctxPlayStop.moveTo(0, 28);
         ctxPlayStop.lineTo(80, 28);
         ctxPlayStop.lineTo(80, 108);
@@ -149,7 +149,7 @@ function drawStopBtn() {
     ctxPlayStop.stroke();
 
     ctxPlayStop.beginPath();
-    if(!mobile) {
+    if(!mobileSizeWise) {
         ctxPlayStop.moveTo(15, 43);
         ctxPlayStop.lineTo(65, 43);
         ctxPlayStop.lineTo(65, 93);
@@ -245,8 +245,8 @@ function touchMoveOprtn(e) {
 }
 
 function touchDial(e) {
-    if(isRotating == null) {
-        if(evalClick(e)) {
+    if(evalClick(e)) {
+        if(isRotating == null) {
              if(azzerato) {
                 e.stopImmediatePropagation();
                 startRotating();    // če je zaustavljeno in tudi ponastavljen kazalec (kar je tudi stanje ob odprtju appa), zaženeš; 
@@ -254,6 +254,9 @@ function touchDial(e) {
                 e.stopImmediatePropagation();
                 azzerareAfterStop();  // če je zaustavljeno, prvi klik ponastavi številčnico;
             }
+        } else {
+            e.stopImmediatePropagation();
+            stopRotation();
         }
     }
 }
@@ -321,7 +324,7 @@ function mouseLeaveOprtn() {
 }
 
 function detrmnMousPosOnTempoCnvs(e) {
-    if (!mobile) {
+    if (!mobileTouchWise) {
         mouseOrTchPosOnTempo.x = e.clientX - tempoCnvsRect.left;
         mouseOrTchPosOnTempo.y = e.clientY - tempoCnvsRect.top;
     } else {
@@ -351,7 +354,6 @@ function chgTempo(up){
             else tempo.barsPM--;
     }
     defineRevltnDurtn();
-    updBpmDisp();
 }
 
 async function updBpmDisp(){

@@ -1,16 +1,12 @@
 'use strict';
 
 // Spreminjanje dob in hitrosti je vse skupaj v enem divu?
-// Ftekvenca je lahko picaa ejsa pr majhnem bpm, pol pa mora najvec 10, recmo pr 240
 // prilagdoljiva/različna hitrost L in D udarca (blinkanja) glede na njuno hitrost
     // v bistvu bi moralo upoštevat tudi kje je naslednji drugi udarec..
     // ..(na trajanje D udarca vpliva, kdaj se pojavi naslednji L udarec, če je to prej kot naslednji D udarec); 
 // izklop zvoka; morda na po dva klikerja na vsaki strani: izklop zvoka in izklop blinkanja (še vedno se vedno vrti kazalec);
-// beats per bar
-// zaustavitev s klikom na številčnico (če je že zagon tako)
 // če zmanjša levega na manj kot 2, ga izklopiš;
 // dodat uvajalno odštevanje (opcija);
-// v check4mobile je verjetno iPad odveč
 
 // moj stari: 360*560
 // moj trenuten:  384*785 
@@ -100,7 +96,9 @@ let angle, prevT;   // angle služi hkrati tudi kot prevAngle;
 let isRotating = null;  // interval checker za vrtenje kazalca;
 let tempoIntrvlChckr = null; // interval checker za tempo gumb;
 let azzerato = true;   // to je za vodenje evidence al si esc pritisnil enkrat (samo ustaviš) ali dvakrat (ponastaviš kazalec); na začetku je true, ker je kazalec ponastavljen;
-let mobile = false;
+// 2 spremenljivki za touch; štartamo s false, ker na začetku je vse nastavljeno za namizni računalnik;
+let mobileTouchWise = false;    // true pomeni, da je touch naprava (android/iphone/ipad)
+let mobileSizeWise = false;     // true pomeni, da je mobileTouchWise true IN touch naprava velikosti telefona (android/iphone), čeprav to zajame morebitne android tablice;
 let mousePressIsValid = false;
 let jokerOpen = false;
 let wasRunngB4Joker = false;
@@ -160,23 +158,32 @@ function initializeLayout() {
 
 function check4mobile() {
     if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null) {
-        console.log('mobile');
-        mobile = true;
-
-        // usmeritev;
-        screen.orientation.addEventListener('change', atOrntnCgh);
+        mobileTouchWise = true;
     }
 }
 
 function defineDimensions() {
-
+    
     // velikost ekrana oz točneje viewporta;
     viewPrtRect.width = document.documentElement.clientWidth < window.innerWidth ? document.documentElement.clientWidth : window.innerWidth;
     if(screen.width < viewPrtRect.width) viewPrtRect.width = screen.width;
     viewPrtRect.height = document.documentElement.clientHeight < window.innerHeight ? document.documentElement.clientHeight : window.innerHeight;
     if(screen.height < viewPrtRect.height) viewPrtRect.height = screen.height;
+    
+    if(mobileTouchWise) {
+        if(((screen.orientation.angle == 0 || screen.orientation.angle == 180) && viewPrtRect.height < 870 && viewPrtRect.width < 570) || // mobilc navpično;
+        ((screen.orientation.angle == 90 || screen.orientation.angle == 270) && viewPrtRect.width < 870 && viewPrtRect.height < 570)) { // mobilc vodoravno;
+            mobileSizeWise = true;  // gre za pravo mobilno napravo, mobilni telefon;
+            
+            // poslušalec za spremembo usmeritve;
+            screen.orientation.addEventListener('change', atOrntnCgh);
 
-    if(!mobile) {
+        } // else nič, ker mobileSizeWise je že false;
+    }
+    console.log('mobileTouchWise:', mobileTouchWise);
+    console.log('mobileSizeWise:', mobileSizeWise); // na mobilnem tellefonu sta oba true, le ipad ima mešano;
+
+    if(!mobileSizeWise) {
         baseDimension = 444;
         notchLength = 20;
 
@@ -248,6 +255,8 @@ function defineDimensions() {
                 rBeatDigit.style.fontSize = '36px';
                 lBeatDigit.style.paddingTop = '44px';
                 rBeatDigit.style.paddingTop = '44px';
+                valueBeatPMin.style.marginRight = '8px';
+                valueBarsPMin.style.marginRight = '8px';
             }
             diff = 30 - diff / 2;   // diff tukaj v resnici postane nov margin, ne diff; 30, ker je 30 margin LD okoli srednjega gumba in tega zmanjšujemo;
             if(diff < 4) diff = 4;
@@ -279,7 +288,7 @@ function defineDimensions() {
     }
     
     // izpeljemo iz baseDim;
-    if(!mobile) r = 200;    // baseDim - 2*20(notch) - 2*2 (zaradi debeline 3, da ni prirezano);
+    if(!mobileSizeWise) r = 200;    // baseDim - 2*20(notch) - 2*2 (zaradi debeline 3, da ni prirezano);
         else r = (baseDimension - 2 * 16 - 2 * 2) / 2;
     crclX = baseDimension / 2;  // središče kroga; polovica od width oz. hght canvasa;
     crclY = baseDimension / 2;
@@ -326,7 +335,7 @@ function positionElems() {  // postavitev ali odčitanje koordinat elementov, ka
     tempoCnvsRect.bottom = canvTempo.getBoundingClientRect().bottom;
 
     playBtnTop = canvPlayStop.getBoundingClientRect().top;  // to se ne rabi za postavite, ampak za računanje klika;
-    if(mobile) {
+    if(mobileSizeWise) {
         playBtnTop += 16;   // ker tolko od roba se začne gumb (21) + malo gor, da lažje prime;
         playBtnHght = 70;   // naredimo malo višje (je 60), da lažje prime;
     } else playBtnTop += 28; // height pa je že pravilno 80; 
@@ -337,12 +346,11 @@ function positionElems() {  // postavitev ali odčitanje koordinat elementov, ka
 
 function displayHrzWarn(specialCase) { // display warning at horizontal orientation; specialCase je, če imel vertikalno in potem obrnil horizontalno;
     if(specialCase) {
-        // če si odprl app pri horiz postavitvi (nespecial case), spodnjih ni treba skrivat, ker niso prikazani;
         canvDiv.style.display = 'none';
         foreCanvDiv.style.display = 'none';
         contrlsDiv.style.display = 'none';
         tempoDiv.style.display = 'none';
-    }
+    } // else si odprl app pri nespecial case (horiz postavitev) in zgornjih ni treba skrivat, ker niso prikazani;
     // da ni mogoče zapret opozorila ampak da imaš sao možnost dat v navpično
     divJokerCloseIcon.style.display = 'none';   // ta preglasi not Hidden v raise joker, ker je bolj specifičen;
     
@@ -391,11 +399,12 @@ function playStopBtnOprtnB4SmplInit(e) {
 }
 
 function setListnrsAftrInit() {
-    // na play gumbu se ju zaenja;
+    // na play gumbu se ju zamenja;
     canvPlayStop.removeEventListener('click', playStopBtnOprtnB4SmplInit);
     canvPlayStop.addEventListener('click', playStopBtnOprtn);
-    // na številčnici pa se ga samo odstrani, ker trenutno ne dela zaustavljanje s klikom na številčnico; znova je dodan ob zaustavitvi
+    // na številčnici prav tako:
     foreCanv.removeEventListener('click', touchDialB4SmplInit);
+    foreCanv.addEventListener('click', touchDial);
 }
 
 function beatCountCtrlOprtn(e) {
@@ -440,7 +449,7 @@ function beatCountCtrlOprtn(e) {
         }
     }
     if(doChange) {
-        stopRotation();
+        if(isRotating!= null) stopRotation();
         if(e.target == canvRBeat) { 
             mainBeat = actionedBeat;
             rBeatDigit.innerHTML = mainBeat;
@@ -454,7 +463,7 @@ function beatCountCtrlOprtn(e) {
     }
 }
 
-function atBPMClick(e, isBeat){ // isBeat kot nasprotje isBarsPerMinute; pomeni da je bila kliknjena izbira za neat per minute;
+function atBPMClick(isBeat){ // isBeat kot nasprotje isBarsPerMinute; pomeni da je bila kliknjena izbira za neat per minute;
     if(bpmlabels === undefined) {
         bpmlabels = document.getElementsByClassName('bpm-label');
         bpmDigits = document.getElementsByClassName('bpm-digit');
@@ -493,15 +502,18 @@ function defineRevltnDurtn() {
                 console.log('frame 10');
             }
 
+    updBpmDisp();
+ 
+    // neki zastarelega oz trenutno neuporabljenega;
     // blink duration;
     // eh, naj bo trenutno kar vedno 150ms;
     // const temp = (60 / tempo.beatsPM) * 1000; // trajanje (v ms) enega udarca;
     // if(temp <= 200) {
-    //     blinkDurtn = 0.9 * temp;
-    //     if(blinkDurtn > 150) {
-    //         blinkDurtn = 150;
-    //     } else if (blinkDurtn < 110) blinkDurtn = 110;
-    // } else blinkDurtn = 150;
+        //     blinkDurtn = 0.9 * temp;
+        //     if(blinkDurtn > 150) {
+            //         blinkDurtn = 150;
+            //     } else if (blinkDurtn < 110) blinkDurtn = 110;
+            // } else blinkDurtn = 150;
 }
 
 function rotate() {
@@ -602,20 +614,19 @@ function startRotating() {
     prevT = Date.now();
     angle = 0;
 
-    // ponastavimo videz ali kontrolno spremenljivko;
-    if (!azzerato) {    // to prav pri prvem zagonu odveč riše še enkrat, ampak naj bo
-        drawBckgnd(); // ker blinkanje (vsaj zdaj ko je fiksno) pusti sled na krogu, zato je pred novim vrtenjem treba narisat krog; vrstica gre pozneje ven, verjetno;
-    } else azzerato = false;    // smo že ponastavili kazale, ni treba še enkrat izrisovat, je pa treba ponastavit ta checker;
+    // če treba, ponastavimo videz;
+    if (!azzerato) {
+        drawDialAndIndicator(); // ker blinkanje (vsaj zdaj ko je fiksno) pusti sled na krogu, zato je pred novim vrtenjem treba narisat krog; vrstica gre pozneje ven, verjetno;
+    }
     
     // zagon;
-    rotate();   // ta je da obarvaš prvo dobo + narišeš ta prvo, navpično črto (ki ni narisana, če ne zaganjaš prvič) (črta se sicer trenutno riše že v drawBckgnd, ampak ta bo morda umaknjena);
+    rotate();   // ta je da obarvaš prvo dobo + narišeš ta prvo, navpično črto (ki ni narisana, če ne zaganjaš prvič) (črta se sicer trenutno riše že v drawDialAndIndicator, ampak ta bo morda umaknjena);
     isRotating = setInterval(rotate, frameDurtn);
     restOfStartRottng();    // v async da ne dela zamud;
 }
 
 async function restOfStartRottng() {
     drawStopBtn();
-    foreCanv.removeEventListener('click', touchDial);   // prvikrat je ta klic prazen, ker poodprtju appa tega listenerja še ni, nastavi se ob prvi ustavitvi;
 }
 
 function stopRotation() {
@@ -627,8 +638,8 @@ function stopRotation() {
     notches.left.nextBlinkAngle = 0;
     notches.left.nextBlinkIdx = 0;
     notchesResets.length = 0;
+    azzerato = false;    // ker kazalec lahko zdaj stoji kjerkoli in potencialno ga želimo ponastaviti;
     drawPlayBtn();
-    foreCanv.addEventListener('click', touchDial);
 }
 
 function resetForeCanv() {
@@ -638,7 +649,7 @@ function resetForeCanv() {
     foreCtx.lineWidth = 2;
 }
 
-function drawBckgnd() {
+function drawDialAndIndicator() {
     // reset bckgCanvas
     canv.height = 0;
     canv.height = baseDimension;
@@ -664,17 +675,19 @@ function drawBckgnd() {
     helper(notches.main.coords);
     helper(notches.left.coords);
 
-    // navpičen kazalec; ko odpreš program, mora bit navpičen kazalec že narisan in čaka;
+    // narisat foreground canvas; navpičen kazalec; ko odpreš program, mora bit navpičen kazalec že narisan in čaka;
     resetForeCanv();
     foreCtx.beginPath();
     foreCtx.moveTo(crclX, crclY  - r);
     foreCtx.lineTo(crclX, crclY);
     foreCtx.stroke();
+
+    azzerato = true;
 }
 
 function azzerareAfterStop() {
-    azzerato = true;
-    drawBckgnd(); // treba prav ozadje nova izrisat, da razbarvaš oznake, prestaviš kazalec in odstraniš ostanke obarvanj z robov oznak;
+    drawDialAndIndicator(); // treba prav ozadje nova izrisat, da razbarvaš oznake, prestaviš kazalec in odstraniš ostanke obarvanj z robov oznak;
+    // azzerato gre na true v drawDialAndIndicator
 }
 
 function setNotchCoords(WHICH) {    // ne samo izračuna oznake, ampak jih tudi izriše;
@@ -704,7 +717,7 @@ function setNotchCoords(WHICH) {    // ne samo izračuna oznake, ampak jih tudi 
     }
 
     // izris ozadja in s tem tudi oznak;
-    drawBckgnd();
+    drawDialAndIndicator();
 }
 
 function zvok(which) {
@@ -786,12 +799,12 @@ if(initializeLayout()) {
     canvRBeat.addEventListener('click', e => { beatCountCtrlOprtn(e) });
     canvLBeat.addEventListener('click', e => { beatCountCtrlOprtn(e) });
     canvPlayStop.addEventListener('click', playStopBtnOprtnB4SmplInit);
-    tempoBeatsPMinLine.addEventListener('click', (e) => {atBPMClick(e, true)} );
-    tempoBarsPMinLine.addEventListener('click', (e) => {atBPMClick(e, false)} );
+    tempoBeatsPMinLine.addEventListener('click', () => {atBPMClick(true)} );
+    tempoBarsPMinLine.addEventListener('click', () => {atBPMClick(false)} );
     //infoIcon
     infoIcon.addEventListener('click', infoClick);
     divJokerCloseIcon.addEventListener('click', retireJoker);
-    if (!mobile) {  // poslušalci, ki merijo trajanje ali spremembo položaja klika in so zato ločeni glede na mobile ali ne;
+    if (!mobileTouchWise) {  // poslušalci, ki merijo trajanje ali spremembo položaja klika in so zato ločeni glede na mobile ali ne;
         canvTempo.addEventListener('mousedown', (e) => {mouseDownOprtn(e)});
         canvTempo.addEventListener('mouseleave', (e) => {mouseLeaveOprtn(e)});
         canvTempo.addEventListener('mouseup', (e) => {mouseUpOprtn(e)});
