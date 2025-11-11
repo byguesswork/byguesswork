@@ -325,9 +325,9 @@ function avgHexInfoClick() {
     const msg = `A utility with which to calculate the hex value of a color some way between 2 hex code RGB colors on the color wheel.
     <br><br>For hex color inputs, acceptable characters are hex digits (0-9, a-f, A-F).<br>
     Values must be 2, 3 or 6 digits long. 3-digit &quot;f80&quot; is stretched to &quot;ff8800&quot;.
-    <br><br>By default the color just middle-of-way between 2 colors is output (ratio = 0.5).
-    A ratio between 0 and 1 can be selected (values outside this range default to 0.5),
-    meaning the point where the result sits on the way from input 1 to input 2.`;
+    <br><br>By default the color just middle-of-way between the 2 given colors is output (ratio = 0.5).
+    A ratio between 0 and 1 can be selected, meaning the point where the result sits on the way from input 1 to input 2.
+    Ratio values outside valid range default to 0.5`;
     raiseJoker(msg);
 }
 

@@ -38,6 +38,7 @@ const contrlsDiv = document.getElementById('controls');
 const rBeatDigit = document.getElementById('right_beat_digit');
 const lBeatDigit = document.getElementById('left_beat_digit');
 const tempoDiv = document.getElementById('tempo_div');
+const bpmCluster = document.getElementById('bpm_cluster');
 const tempoBeatsPMinLine = document.getElementById('beats_per_min_line');
 const tempoBarsPMinLine = document.getElementById('bars_per_min_line');
 const valueBeatPMin = document.getElementById('value_beats_minute');
@@ -47,7 +48,33 @@ const divJokerForegnd = document.getElementById('joker_foregnd');
 const divJokerCloseIcon = document.getElementById('joker_close_icon');
 const jokerContent = document.getElementById('joker_content');
 
-const samplePaths = ['Perc_Can_hi.wav','Perc_Clap_hi.wav'];
+// za testirat zvoke, da imaš samo en samplePaths;
+// const samplePaths = ['Perc_Can_hi.wav','Perc_Clap_hi.wav'];
+
+const choices = [];
+choices.push(['Perc_Can_hi.wav','Perc_Clap_hi.wav']);
+choices.push(['Perc_MusicStand_hi.wav','Perc_Clap_hi.wav']);
+choices.push(['Perc_MetronomeQuartz_hi.wav','Perc_Clap_hi.wav']);
+choices.push(['Perc_PracticePad_hi.wav','Perc_Tongue_hi.wav']);
+choices.push(['Perc_PracticePad_hi.wav','Synth_Block_C_hi.wav']);
+choices.push(['Perc_MetronomeQuartz_hi.wav','Synth_Block_C_hi.wav']);
+const samplePaths = choices[Math.floor(Math.random() * choices.length)]; 
+console.log(samplePaths)
+
+// ZIHR:
+// const samplePaths = ['Perc_Can_hi.wav','Perc_Clap_hi.wav'];
+// const samplePaths = ['Perc_MusicStand_hi.wav','Perc_Clap_hi.wav'];
+// const samplePaths = ['Perc_MetronomeQuartz_hi.wav','Perc_Clap_hi.wav'];
+// const samplePaths = ['Perc_PracticePad_hi.wav','Perc_Tongue_hi.wav'];
+// const samplePaths = ['Perc_PracticePad_hi.wav','Synth_Block_C_hi.wav'];
+// const samplePaths = ['Perc_MetronomeQuartz_hi.wav','Synth_Block_C_hi.wav'];
+
+// ni slabo
+// const samplePaths = ['Perc_MetronomeQuartz_hi.wav','Perc_MusicStand_hi.wav'];
+// const samplePaths = ['Perc_MetronomeQuartz_hi.wav','Perc_Tamb_B_hi.wav'];
+// const samplePaths = ['Perc_Tongue_hi.wav','Perc_MusicStand_hi.wav'];
+
+// Perc_Tongue_hi.wav - dober, suh, rezek, ampak prveč odrezav, preveč napade 
 
 // konstante
 const RIGHT = 'r';
@@ -475,6 +502,10 @@ function atBPMClick(isBeat){ // isBeat kot nasprotje isBarsPerMinute; pomeni da 
             bpmDigits[0].classList.add('bpm-digit-selctd');
             bpmlabels[1].classList.remove('bpm-label-selected');
             bpmDigits[1].classList.remove('bpm-digit-selctd');
+            bpmCluster.style.paddingTop = '24px';
+            bpmCluster.style.paddingBottom = '0px';
+            tempoBeatsPMinLine.classList.add('bpm_line_selctd');
+            tempoBarsPMinLine.classList.remove('bpm_line_selctd');
         }
     } else if(!bpmlabels[1].classList.contains('bpm-label-selected')) {
         tempo.isBeat = false;
@@ -482,6 +513,10 @@ function atBPMClick(isBeat){ // isBeat kot nasprotje isBarsPerMinute; pomeni da 
         bpmDigits[1].classList.add('bpm-digit-selctd');
         bpmlabels[0].classList.remove('bpm-label-selected');
         bpmDigits[0].classList.remove('bpm-digit-selctd');
+        bpmCluster.style.paddingTop = '0px';
+        bpmCluster.style.paddingBottom = '24px';
+        tempoBeatsPMinLine.classList.remove('bpm_line_selctd');
+        tempoBarsPMinLine.classList.add('bpm_line_selctd');
     }
 }
 

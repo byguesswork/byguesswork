@@ -85,7 +85,15 @@ p {
 }
 
 #bpm_cluster{
-    padding-top: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 24px;
+    transition-duration: 200ms;
+}
+
+#canv_tempo {
+    margin-left: 16px;
 }
 
 #joker_bckgnd {
@@ -155,34 +163,45 @@ p {
 .inline-data-div{
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
+    justify-content: center;
+    padding-left: 10px;
+}
+
+.bpm_line_selctd {
+    padding-left: 0px;
+    transition-duration: 200ms;
 }
 
 .bpm-label {
     color: #494747;
     background-color: #999;
-    font-size: 16px;
-    padding: 2px 8px;
+    font-size: 14px;
+    padding: 1px 8px;
     margin-right: 12px;
     align-self: center;
     border-radius: 0.4em;
+    transition-duration: 200ms;
 }
 
 .bpm-label-selected{
     background-color: #85ac75;
-    color: #ccf7be;
-    /* opcije za color tudi   #c9f7b9 #ccf7be #e6ffde #2e2d2d;*/
+    color: #ccf7be;     /* opcije za color tudi   #c9f7b9 #ccf7be #e6ffde #2e2d2d;*/
+    font-size: 18px;
+    padding: 3px 8px;
+    transition-duration: 200ms;
 }
 
 .bpm-digit {
     color: #72816b; /* 74856c izvirno morda: 717d6b */
-    font-size: 32px;
-    margin-right: 16px;
+    font-size: 24px;
     align-self: center;
+    transition-duration: 200ms;
 }
 
 .bpm-digit-selctd {
     color: #8dc079; /* izvirno bilo: #85ac75 svetla opcija: a2f083 vmes: 93ce7c */
+    font-size: 36px;
+    transition-duration: 200ms;
 }
 
 .center-text {
