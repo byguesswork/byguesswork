@@ -295,12 +295,14 @@ function mouseDownOprtn(e){
         if (reslt == TEMPO_UP) {
             if(tempoIntrvlChckr == null) { 
                 chgTempo(true);
-                tempoIntrvlChckr = setInterval(chgTempo, 70, true); 
+                if(tempo.isBeat) tempoIntrvlChckr = setInterval(chgTempo, 70, true); 
+                    else tempoIntrvlChckr = setInterval(chgTempo, 100, true); // da se počasneje odvija pri bars per minute;
             }
         } else if(reslt == TEMPO_DOWN){
             if(tempoIntrvlChckr == null) {
                 chgTempo(false);
-                tempoIntrvlChckr = setInterval(chgTempo, 70, false);
+                if(tempo.isBeat) tempoIntrvlChckr = setInterval(chgTempo, 70, false);
+                    else tempoIntrvlChckr = setInterval(chgTempo, 100, false); // da se počasneje odvija pri bars per minute;
             }
         }
     }
