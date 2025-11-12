@@ -121,6 +121,8 @@ const notches = {
 
 let angle, prevT;   // angle služi hkrati tudi kot prevAngle;
 let isRotating = null;  // interval checker za vrtenje kazalca;
+let tempoRepeatDelayChecker = 0;    // MS Long Press Register Delayu reče Repeat Delay (kar pa se dogaja za tem pa je Repeat Rate)..
+    // .. ta pa je checker za to, neki tazga kot je intervalChecker integer, ki se povečuje z vsako zagnano serijo intervalov;
 let tempoIntrvlChckr = null; // interval checker za tempo gumb;
 let azzerato = true;   // to je za vodenje evidence al si esc pritisnil enkrat (samo ustaviš) ali dvakrat (ponastaviš kazalec); na začetku je true, ker je kazalec ponastavljen;
 // 2 spremenljivki za touch; štartamo s false, ker na začetku je vse nastavljeno za namizni računalnik;

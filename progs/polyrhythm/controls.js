@@ -296,13 +296,23 @@ function mouseDownOprtn(e){
             if(tempoIntrvlChckr == null) { 
                 chgTempo(true);
                 if(tempo.isBeat) tempoIntrvlChckr = setInterval(chgTempo, 70, true); 
-                    else tempoIntrvlChckr = setInterval(chgTempo, 100, true); // da se počasneje odvija pri bars per minute;
+                    else {  // da se počasneje odvija pri bars per minute in to po zamiku (okoli 200);
+                        tempoRepeatDelayChecker = setTimeout(function() {
+                            tempoIntrvlChckr = setInterval(chgTempo, 100, true);
+                            tempoRepeatDelayChecker = null;
+                        }, 200);
+                    } 
             }
         } else if(reslt == TEMPO_DOWN){
             if(tempoIntrvlChckr == null) {
                 chgTempo(false);
                 if(tempo.isBeat) tempoIntrvlChckr = setInterval(chgTempo, 70, false);
-                    else tempoIntrvlChckr = setInterval(chgTempo, 100, false); // da se počasneje odvija pri bars per minute;
+                    else {
+                        tempoRepeatDelayChecker = setTimeout(function() {
+                            tempoRepeatDelayChecker = null;
+                            tempoIntrvlChckr = setInterval(chgTempo, 100, false);
+                        }, 200);
+                    } 
             }
         }
     }
@@ -343,8 +353,13 @@ function detrmnMousPosOnTempoCnvs(e) {
 
 function invldteTempoClick() {
     mousePressIsValid = false;
-    clearInterval(tempoIntrvlChckr);
-    tempoIntrvlChckr = null;
+    if(tempoIntrvlChckr != null) {
+        clearInterval(tempoIntrvlChckr);
+        tempoIntrvlChckr = null;
+    } else if (tempoRepeatDelayChecker != null) {
+        clearTimeout(tempoRepeatDelayChecker);
+        tempoRepeatDelayChecker = null;
+    }
 }
 
 function chgTempo(up){
