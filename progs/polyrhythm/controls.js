@@ -295,19 +295,19 @@ function mouseDownOprtn(e){
         if (reslt == TEMPO_UP) {
             if(tempoIntrvlChckr == null) { 
                 chgTempo(true);
-                if(tempo.isBeat) tempoIntrvlChckr = setInterval(chgTempo, 70, true); 
+                if(tempo.isBeat) tempoIntrvlChckr = setInterval(chgTempo, 90, true); 
                     else {  // da se počasneje odvija pri bars per minute in to po zamiku (okoli 200);
                         tempoRepeatDelayChecker = setTimeout(function() {
-                            tempoIntrvlChckr = setInterval(chgTempo, 100, true);
                             tempoRepeatDelayChecker = null;
+                            tempoIntrvlChckr = setInterval(chgTempo, 100, true);
                         }, 200);
                     } 
             }
         } else if(reslt == TEMPO_DOWN){
             if(tempoIntrvlChckr == null) {
                 chgTempo(false);
-                if(tempo.isBeat) tempoIntrvlChckr = setInterval(chgTempo, 70, false);
-                    else {
+                if(tempo.isBeat) tempoIntrvlChckr = setInterval(chgTempo, 90, false);
+                    else {  // da se počasneje odvija pri bars per minute in to po zamiku (okoli 200);
                         tempoRepeatDelayChecker = setTimeout(function() {
                             tempoRepeatDelayChecker = null;
                             tempoIntrvlChckr = setInterval(chgTempo, 100, false);
@@ -356,7 +356,7 @@ function invldteTempoClick() {
     if(tempoIntrvlChckr != null) {
         clearInterval(tempoIntrvlChckr);
         tempoIntrvlChckr = null;
-    } else if (tempoRepeatDelayChecker != null) {
+    } else if (tempoRepeatDelayChecker != null) {   // itak ne moreta biti hkrati
         clearTimeout(tempoRepeatDelayChecker);
         tempoRepeatDelayChecker = null;
     }
@@ -367,8 +367,13 @@ function chgTempo(up){
         if(tempo.isBeat) tempo.beatsPM++;
             else tempo.barsPM++;
     }else {
-        if(tempo.isBeat) tempo.beatsPM--;
-            else tempo.barsPM--;
+        if(tempo.isBeat) {
+            if(tempo.beatsPM > 1) tempo.beatsPM--;
+            else if(tempoIntrvlChckr != null) invldteTempoClick();
+        } else {
+            if(tempo.barsPM > 1) tempo.barsPM--;
+            else if(tempoIntrvlChckr != null) invldteTempoClick();
+        }
     }
     defineRevltnDurtn();
 }
