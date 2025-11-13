@@ -1,6 +1,5 @@
 'use strict';
 
-// če zmanjša levega na manj kot 2, ga izklopiš;
 // tick sounds
 // prilagdoljiva/različna hitrost L in D udarca (blinkanja) glede na njuno hitrost
     // v bistvu bi moralo upoštevat tudi kje je naslednji drugi udarec..
@@ -438,13 +437,15 @@ function setListnrsAftrInit() {
 }
 
 function beatCountCtrlOprtn(e) {
-    let actionedBeat, isActionedRBeat;
+    let actionedBeat, isActionedRBeat, minLimit;
     if(e.target == canvRBeat) {
         actionedBeat = mainBeat;
         isActionedRBeat = true;
+        minLimit = 2;   // katera je najmanjša vrednost, ki jo lahko zavzame ta beat count; desni == 2;
     } else {
         actionedBeat = leftBeat;
         isActionedRBeat = false;
+        minLimit = 1;   // 1 služi za izklop, pri ena je levi beat izklopljen;
     }
     let doChange = false; 
     let wasMaxed = false; // shrani potrditev, da je gumb, preden si ga pritisnil, bil razbarvan/neaktiven (imel največjo vrednost navzgor ali navzdol);
@@ -453,26 +454,26 @@ function beatCountCtrlOprtn(e) {
     if (beatCanvPos.y < 60) {
         // pritisk na zgornjo puščico, za povečanje števila dob;
         if(actionedBeat < 12) {
-            if(actionedBeat == 2) wasMaxed = true;  // je bil neaktiven na spodnji meji;
+            if(actionedBeat == minLimit) wasMaxed = true;  // je bil neaktiven na spodnji meji;
             actionedBeat++;
             doChange = true;
             if(actionedBeat == 12) {    // če si dosegel zgornji max, deaktivirat zgornjo puščico;
                 if(isActionedRBeat) drawBeatCount(RIGHT, false, true);
                 else drawBeatCount(LEFT, false, true);
-            } else if(wasMaxed) { // če si zapustil spodnjo mejo, aktivirat spodnjo puščico;
+            } else if(wasMaxed) { // če pa si zapustil spodnjo mejo, aktivirat spodnjo puščico;
                 if(isActionedRBeat) drawBeatCount(RIGHT, true, true);
                 else drawBeatCount(LEFT, true, true);
             }
         }
     } else if(beatCanvPos.y > 76) {   // pritisk na spodnjo puščico, za zmanjšanje števila dob;
-        if(actionedBeat > 2) {
+        if(actionedBeat > minLimit) {
             if(actionedBeat == 12) wasMaxed = true;  // je bil neaktiven na zgornji meji;
             actionedBeat--;
             doChange = true;
-            if(actionedBeat == 2) { // če si dosegel spodnji max, deaktivirat spodnjo puščico;
+            if(actionedBeat == minLimit) { // če si dosegel spodnji max, deaktivirat spodnjo puščico;
                 if(isActionedRBeat) drawBeatCount(RIGHT, true, false);
                 else drawBeatCount(LEFT, true, false)
-            } else if(wasMaxed) {   // če si zapustil zgornje nedovoljeno območje, aktivirat zgornjo puščico;
+            } else if(wasMaxed) {   // če pa si zapustil zgornje nedovoljeno območje, aktivirat zgornjo puščico;
                 if(isActionedRBeat) drawBeatCount(RIGHT, true, true);
                 else drawBeatCount(LEFT, true, true);
             }
@@ -480,15 +481,19 @@ function beatCountCtrlOprtn(e) {
     }
     if(doChange) {
         if(isRotating!= null) stopRotation();
-        if(e.target == canvRBeat) { 
+        if(isActionedRBeat) { 
             mainBeat = actionedBeat;
             rBeatDigit.innerHTML = mainBeat;
-            setNotchCoords(RIGHT);
-            defineRevltnDurtn(); // samo če si spremenil desni beat, ker je on merilo 
+            setNotchCoordsNdDraw(RIGHT);
+            defineRotationParams(); // samo če si spremenil desni beat, ker je on merilo 
         } else {
             leftBeat = actionedBeat;
-            lBeatDigit.innerHTML = leftBeat;
-            setNotchCoords(LEFT);
+            if(leftBeat > 1) {
+                lBeatDigit.innerHTML = leftBeat;
+            } else {
+                lBeatDigit.innerHTML = '–';    // shranjeno je 1, prikazano je –;
+            }
+            setNotchCoordsNdDraw(LEFT);
         }
     }
 }
@@ -523,7 +528,7 @@ function atBpmLblClick(isBeat){ // isBeat kot nasprotje isBarsPerMinute; pomeni 
     }
 }
 
-function defineRevltnDurtn() {
+function defineRotationParams() {
     if(tempo.isBeat) {
         tempo.barsPM = Math.round(tempo.beatsPM / mainBeat);
         if(tempo.barsPM == 0) tempo.barsPM++;
@@ -564,7 +569,7 @@ function rotate() {
     angle += (nowT - prevT) * revltnConst // delež kota 360'; če ne bi prej izračunal konstante, bi bilo tako: dAngle = (dT / revltnDurtn) * twoPI; dT = nowT - prevT;
     if(angle > twoPI) angle -= twoPI;
     prevT = nowT;
-    let doR = false, doL = false; // gre na true, če se pri preverjanju zvoka ugotovi, da je izpolnjen pogoj za blinkanje (L/R);
+    let doR = false, doL = false; // doL, doR pomeni doLeft, doRight; gre na true, če se pri preverjanju zvoka ugotovi, da je izpolnjen pogoj za blinkanje (L/R);
 
     function doSnd(passdNotches, which) {  // do sound helper;
         // najprej pogledamo, al je treba dodat kak element v array za blinkanje;
@@ -616,11 +621,11 @@ function rotate() {
 
     // najprej zvok;
     doSnd(notches.main, RIGHT);
-    doSnd(notches.left, LEFT);
+    if(leftBeat > 1) doSnd(notches.left, LEFT);
     
     // risanje utripanja;
     if(doR) helper(notches.main, RIGHT);
-    if(doL) helper(notches.left, LEFT);
+    if(doL) helper(notches.left, LEFT); // če je levi beat == 1 je itak doL false, ni treba ločeno preverjat;
 
     // brisanje predhodno osvetljenih oznak;
     if(notchesResets.length > 0) {
@@ -714,8 +719,10 @@ function drawDialAndIndicator() {
 
     ctx.strokeStyle = dialColr;
     ctx.lineWidth = notchWidth;
-    helper(notches.main.coords);
-    helper(notches.left.coords);
+    helper(notches.main.coords);    // desnega narišemo v vsakem primeru;
+    if (leftBeat > 1) {     // levega pa pogojno - pri 1 ne izrišemo zareze, levi beat je neaktiven;
+        helper(notches.left.coords);
+    }
 
     // narisat foreground canvas; navpičen kazalec; ko odpreš program, mora bit navpičen kazalec že narisan in čaka;
     resetForeCanv();
@@ -732,7 +739,7 @@ function azzerareAfterStop() {
     // azzerato gre na true v drawDialAndIndicator
 }
 
-function setNotchCoords(WHICH) {    // ne samo izračuna oznake, ampak jih tudi izriše;
+function setNotchCoordsNdDraw(WHICH) {    // ne samo izračuna oznake, ampak jih tudi izriše;
 
     function helper(passdBeat, passdNotchCoords) {
         const angleSlice = twoPI / passdBeat; // kot celega kroga deljeno s številom dob;
@@ -751,10 +758,11 @@ function setNotchCoords(WHICH) {    // ne samo izračuna oznake, ampak jih tudi 
         }
     }
 
-    if (WHICH == RIGHT || WHICH == BOTH) {
+    // izračun lokacij oznak dob na krožnici;
+    if (WHICH == RIGHT || WHICH == BOTH) {  // obe hkrati izračunamo samo pri zagonu programa;
         helper(mainBeat, notches.main.coords);
     }
-    if (WHICH == LEFT || WHICH == BOTH) {
+    if ((WHICH == LEFT && leftBeat > 1) || WHICH == BOTH) { // pri 1 ne rabimo računat, levi beat je izklopljen - ni oznak, ni zvoka;
         helper(leftBeat, notches.left.coords);
     }
 
@@ -831,9 +839,9 @@ function playSample(audioBuffer, time) {    // to je način za predvajanje audia
 
 //   -  -  -   IZVAJANJE  -  - 
 if(initializeLayout()) {
-    defineRevltnDurtn();
+    defineRotationParams();
     drawControls();
-    setNotchCoords(BOTH);
+    setNotchCoordsNdDraw(BOTH);
     
     //   -  -  -   POSLUŠALCI  -  -  vsaj en mora bit šele zdaj, ker je odvisen od stanja spremenljivke mobile;
     document.addEventListener('keydown', e => { atKeyPress(e.key) });

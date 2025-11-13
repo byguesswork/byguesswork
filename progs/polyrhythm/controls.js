@@ -375,7 +375,7 @@ function chgTempo(up){
             else if(tempoIntrvlChckr != null) invldteTempoClick();
         }
     }
-    defineRevltnDurtn();
+    defineRotationParams();
 }
 
 async function updBpmDisp(){
@@ -386,8 +386,9 @@ async function updBpmDisp(){
 // info btn&co
 function infoClick() {
     const msg = `A polyrhythm metronome.<br><br>
-    Right value determines beat marks on the outside of the dial, left value determines the beat shown by the marks on
-    the inside of the circle. Possible values: 2-12.
+    The beats per bar value on the right determines the beat marks on the outside of the circle, 
+    the left value determines beat marks on the inside of the circle. Possible values: 2-12. 
+    Decreasing the left beat count below 2 turns off the clicks for the left side, leaving you with a normal metronome.
     <br><br>The &quot;Beats per minute&quot; setting affects the speed of the beat count on the right,
     ie. the speed with which the indicator visits the marks on the outside of the circle.
     <br><br><br><span style="font-size:12px;">Metronome sounds by Ludwig Peter Müller (December 2020).
