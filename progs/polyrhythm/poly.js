@@ -1,11 +1,11 @@
 'use strict';
 
-// Spreminjanje dob in hitrosti je vse skupaj v enem divu?
+// če zmanjša levega na manj kot 2, ga izklopiš;
+// tick sounds
 // prilagdoljiva/različna hitrost L in D udarca (blinkanja) glede na njuno hitrost
     // v bistvu bi moralo upoštevat tudi kje je naslednji drugi udarec..
     // ..(na trajanje D udarca vpliva, kdaj se pojavi naslednji L udarec, če je to prej kot naslednji D udarec); 
 // izklop zvoka; morda na po dva klikerja na vsaki strani: izklop zvoka in izklop blinkanja (še vedno se vedno vrti kazalec);
-// če zmanjša levega na manj kot 2, ga izklopiš;
 // dodat uvajalno odštevanje (opcija);
 
 // moj stari: 360*560
@@ -296,6 +296,7 @@ function defineDimensions() {
         
         document.getElementById('home').style.position = 'absolute';
         titleP.style.paddingTop = '10px';
+        titleP.classList.add('no-click');
         infoIcon.style.fontSize = '18px';
         
         jokerContent.style.position = 'absolute';   // da dobi scroll bar in da ne sega tekst v globino;
@@ -492,7 +493,7 @@ function beatCountCtrlOprtn(e) {
     }
 }
 
-function atBPMClick(isBeat){ // isBeat kot nasprotje isBarsPerMinute; pomeni da je bila kliknjena izbira za neat per minute;
+function atBpmLblClick(isBeat){ // isBeat kot nasprotje isBarsPerMinute; pomeni da je bila kliknjena izbira za neat per minute;
     if(bpmlabels === undefined) {
         bpmlabels = document.getElementsByClassName('bpm-label');
         bpmDigits = document.getElementsByClassName('bpm-digit');
@@ -523,9 +524,13 @@ function atBPMClick(isBeat){ // isBeat kot nasprotje isBarsPerMinute; pomeni da 
 }
 
 function defineRevltnDurtn() {
-    if(tempo.isBeat) tempo.barsPM = Math.round(tempo.beatsPM / mainBeat);
-        else tempo.beatsPM = tempo.barsPM * mainBeat;
-    revltnDurtn = (60 / tempo.barsPM) * 1000;  //  čas, potreben za en krog, v milisekundah; 60, ker 60 sekund v minuti;
+    if(tempo.isBeat) {
+        tempo.barsPM = Math.round(tempo.beatsPM / mainBeat);
+        if(tempo.barsPM == 0) tempo.barsPM++;
+    } else tempo.beatsPM = tempo.barsPM * mainBeat;
+    //  čas, potreben za en krog, v milisekundah; 60, ker 60 sekund v minuti;
+    // obvezno ga je treba računat iz tempo.beatsPM, ker barsPM == 1 lahko obsega recimo beatsPM od 2 do 12
+    revltnDurtn = (60 / (tempo.beatsPM / mainBeat)) * 1000;
     revltnConst = twoPI / revltnDurtn;
     
     // frameDuration
@@ -836,8 +841,8 @@ if(initializeLayout()) {
     canvRBeat.addEventListener('click', e => { beatCountCtrlOprtn(e) });
     canvLBeat.addEventListener('click', e => { beatCountCtrlOprtn(e) });
     canvPlayStop.addEventListener('click', playStopBtnOprtnB4SmplInit);
-    tempoBeatsPMinLine.addEventListener('click', () => {atBPMClick(true)} );
-    tempoBarsPMinLine.addEventListener('click', () => {atBPMClick(false)} );
+    tempoBeatsPMinLine.addEventListener('click', () => {atBpmLblClick(true)} );
+    tempoBarsPMinLine.addEventListener('click', () => {atBpmLblClick(false)} );
     //infoIcon
     infoIcon.addEventListener('click', infoClick);
     divJokerCloseIcon.addEventListener('click', retireJoker);

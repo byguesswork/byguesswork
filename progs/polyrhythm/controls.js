@@ -216,9 +216,49 @@ function drawTempo() {
     updBpmDisp();
 }
 
+// - - - DIAL  -  -  -  
 
-//  -  -  če mobile  -  -  -  -  -  - 
+function touchDial(e) {
+    if(evalDialClick(e)) {
+        if(isRotating == null) {
+            if(azzerato) {
+                e.stopImmediatePropagation();
+                startRotating();    // če je zaustavljeno in tudi ponastavljen kazalec (kar je tudi stanje ob odprtju appa), zaženeš; 
+            } else {
+                e.stopImmediatePropagation();
+                azzerareAfterStop();  // če je zaustavljeno, prvi klik ponastavi številčnico;
+            }
+        } else {
+            e.stopImmediatePropagation();
+            stopRotation();
+        }
+    }
+}
 
+function evalDialClick(e) {
+    // merimo klik, zato je lahko ista procedura za mobile/!mobile; če bi merili premik, bi rabili ločit, tako pa ne;
+    let reslt = false;
+    const tchX = e.clientX - foreCanvRect.left;
+    const tchY = e.clientY - foreCanvRect.top;
+    const rr = ((tchX - crclX)**2 + (tchY - crclY)**2)**(0.5);
+    if(rr <= r + 5) reslt = true;
+    return reslt;
+}
+
+function touchDialB4SmplInit(e) {
+    if(evalDialClick(e)) {
+        setupSamplesPt2(arrayBfrs).then((response) => { // za videt je podobna playStopBtnOprtnB4SmplInit(), ampak ni ista!!;
+            // uredit zvoke;
+            audioSmpls = response;
+            // zagnat;
+            startRotating();
+            // uredit listenerje;
+            setListnrsAftrInit();
+        });
+    }
+}
+
+//  -  -  BEAT COUNT -  - -  če mobile  -  -  -  -  -  - 
 function touchStartOprtn(e) {
     if (!mousePressIsValid) {   // to naj bi bilo zato, da za zdaj je mogoče le en dotik naenkrat;
         mouseDownOprtn(e);  // lahko uporabimo isto funkcijo;
@@ -241,46 +281,6 @@ function touchMoveOprtn(e) {
         invldteTempoClick();
     } else {
         mouseMoveOprtn(e);   // lahko uporabimo kar od miši;
-    }
-}
-
-function touchDial(e) {
-    if(evalClick(e)) {
-        if(isRotating == null) {
-             if(azzerato) {
-                e.stopImmediatePropagation();
-                startRotating();    // če je zaustavljeno in tudi ponastavljen kazalec (kar je tudi stanje ob odprtju appa), zaženeš; 
-            } else {
-                e.stopImmediatePropagation();
-                azzerareAfterStop();  // če je zaustavljeno, prvi klik ponastavi številčnico;
-            }
-        } else {
-            e.stopImmediatePropagation();
-            stopRotation();
-        }
-    }
-}
-
-function evalClick(e) {
-    // merimo klik, zato je lahko ista procedura za mobile/!mobile; če bi merili premik, bi rabili ločit, tako pa ne;
-    let reslt = false;
-    const tchX = e.clientX - foreCanvRect.left;
-    const tchY = e.clientY - foreCanvRect.top;
-    const rr = ((tchX - crclX)**2 + (tchY - crclY)**2)**(0.5);
-    if(rr <= r + 5) reslt = true;
-    return reslt;
-}
-
-function touchDialB4SmplInit(e) {
-    if(evalClick(e)) {
-        setupSamplesPt2(arrayBfrs).then((response) => { // za videt je podobna playStopBtnOprtnB4SmplInit(), ampak ni ista!!;
-            // uredit zvoke;
-            audioSmpls = response;
-            // zagnat;
-            startRotating();
-            // uredit listenerje;
-            setListnrsAftrInit();
-        });
     }
 }
 
