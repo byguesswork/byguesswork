@@ -10,6 +10,14 @@
 // moj stari: 360*560
 // moj trenuten:  384*785 
 
+// preverit
+// v34
+// --
+// širina info viewa na ne-mobile v css;
+// priloagodljiva širina na nemobile
+// listener za spremembo širine na nemobile
+
+let vers = 34;
 
 // canvasi in njihovi konteksti;
 // skala in kazalec;
@@ -95,7 +103,8 @@ const startRad = -Math.PI / 2; // to je kot točke, ki je na vrhu kroga;
 const twoPI = 2 * Math.PI;
 const notchWidth = 11;
 
-let baseDimension, notchLength, r, crclX, crclY; // basedimention je stranica kvadratnega canvasa; crclX in Y sta koordinati središča kroga, na sredini width oz. hght canvasa;
+let baseDimension, notchLength; // basedimention je stranica kvadratnega canvasa;
+let r, rWas, crclX, crclY; //  crclX in Y sta koordinati središča kroga, na sredini width oz. hght canvasa; rWas je samo neka kontrolna, da pri resizanju ne-mobila ne računamo vedno notchev;
 let mainBeat = 4; // na desni oz. zunaj kroga;
 let leftBeat = 3; // znotraj kroga;
 const tempo = {
@@ -175,6 +184,8 @@ function initializeLayout() {
     check4mobile();
     let doContinue = false;
     if(defineDimensions()) {
+        console.log('mobileTouchWise:', mobileTouchWise);   // to mora bit tukaj, ker če ne se pri resizanju vedno znova kliče
+        console.log('mobileSizeWise:', mobileSizeWise); // na mobilnem tellefonu sta oba true, le ipad ima mešano;
         setupSamplesPt1StpBfrz(samplePaths).then((response) => {
             arrayBfrs = response;
             console.log('arrays done');
@@ -208,19 +219,20 @@ function defineDimensions() {
 
         } // else nič, ker mobileSizeWise je že false;
     }
-    console.log('mobileTouchWise:', mobileTouchWise);
-    console.log('mobileSizeWise:', mobileSizeWise); // na mobilnem tellefonu sta oba true, le ipad ima mešano;
 
     if(!mobileSizeWise) {
         baseDimension = 444;
         notchLength = 20;
 
         canvPlayStop.width = 80;
-        
-        divJokerForegnd.style.top = '120px';
-        divJokerForegnd.style.right = `${window.innerWidth * 0.2}px`;
-        // divJokerForegnd - višine al bottoma nima določene, da se lahko prilagodi dolžini besedila;
-        divJokerForegnd.style.left = `${window.innerWidth * 0.2}px`;
+
+        if(arrayBfrs == undefined) window.addEventListener('resize', () => {
+            defineDimensions();
+            drawControls();
+            if(r == rWas) drawDialAndIndicator();
+                else setNotchCoordsNdDraw(BOTH);
+            rWas = r;
+        });
     } else {
         // treba dat sem, ker mora veljat tako za pokončni kot za ležeči začetek, v naslednji vrstici pa je potencialno return;
         divJokerForegnd.style.top = '80px';
@@ -228,8 +240,8 @@ function defineDimensions() {
         divJokerForegnd.style.bottom = '60px';
         divJokerForegnd.style.left = '32px';
 
-        // app si torej začel v horiz. postavitvi, takoj damo opozorilo, da to ne gre in de facto končamo;
         if(screen.orientation.angle == 90 || screen.orientation.angle == 270) {
+            // app si torej začel v horiz. postavitvi, takoj damo opozorilo, da to ne gre in de facto končamo;
             displayHrzWarn(false);
             return false;
         }
@@ -238,61 +250,10 @@ function defineDimensions() {
         if(baseDimension % 2 == 1) baseDimension = baseDimension - 1;
         notchLength = 16;
         
-        // preverimo, al bo treba krajšat po višini;
-        const currHght = viewPrtRect.width + 302;
-        // 302 je sestavljeno tako:
-        // 43 (div titleP) + (viewPrtRect.width - 36 (basedimension = višina canvasa)) + 178 (visok beat div )+ 116 (visok bpmDiv) + 1 (borderBody);
-        if((currHght > viewPrtRect.height)) {
-            const totalDiffToBridge = currHght - viewPrtRect.height;
-            console.log('treba urejat velikost postavitve, višina bila:',  currHght, 'skinit bo treba: ', totalDiffToBridge);
-            let bridged = 0;
-            if(totalDiffToBridge < 40) {
-                titleP.style.marginBottom = '10px';    // pridobil 2 na prejšnjih 12;
-                contrlsDiv.style.marginTop = '8px'; // pridobil 8 na prejšnjih 16;
-                contrlsDiv.style.marginBottom = '12px'; // pridobil 8 na prejšnjih 20;
-                tempoDiv.style.paddingBottom = '6px'; // pridobil 2 na prejšnjih 8;
-                bridged = 20;
-            } else {
-                titleP.style.marginBottom = '6px';    // pridobil 6 na prejšnjih 12;
-                contrlsDiv.style.marginTop = '4px'; // pridobil 12 na prejšnjih 16;
-                contrlsDiv.style.marginBottom = '4px'; // pridobil 16 na prejšnjih 20;
-                tempoDiv.style.paddingBottom = '2px'; // pridobil 6 na prejšnjih 8;
-                bridged = 40;
-            }
-
-            if(totalDiffToBridge > bridged) {
-                console.log('manjšamo še krog');
-                let diff = totalDiffToBridge - bridged;
-                if(diff % 2 == 1) diff += 3;
-                    else diff += 2;
-                // ta glavna reč!!
-                baseDimension -= diff;
-            }
-        } else { contrlsDiv.style.marginTop = '16px';  }  // ker je za ne-mobile drugačno;
-        
         // to mora bit tu, ker se pozneje lahko spremeni, obraten vrstni red pa ne gre;
         lBeatDigit.style.fontSize = '44px';
         rBeatDigit.style.fontSize = '44px';
-        
-        // še čekirat širino;
-        if(viewPrtRect.width < 360) {
-            let diff = 360 - viewPrtRect.width;
-            if(diff % 2 == 1) diff++;
-            if(diff >= 24) {
-                lBeatDigit.style.fontSize = '36px';
-                rBeatDigit.style.fontSize = '36px';
-                lBeatDigit.style.paddingTop = '44px';
-                rBeatDigit.style.paddingTop = '44px';
-                valueBeatPMin.style.marginRight = '8px';
-                valueBarsPMin.style.marginRight = '8px';
-            }
-            diff = 30 - diff / 2;   // diff tukaj v resnici postane nov margin, ne diff; 30, ker je 30 margin LD okoli srednjega gumba in tega zmanjšujemo;
-            if(diff < 4) diff = 4;
-            console.log('nov margin L/D od PlayStop: ', diff);
-            canvPlayStop.style.marginLeft = `${diff}px`;
-            canvPlayStop.style.marginRight = `${diff}px`;
-        }
-        
+
         document.getElementById('home').style.position = 'absolute';
         titleP.style.paddingTop = '10px';
         titleP.classList.add('no-click');
@@ -315,9 +276,11 @@ function defineDimensions() {
         toRemove[1].innerHTML = '';
         toRemove[1].style.marginBottom = '0px';
     }
+
+    chkDimnsnConstrnts();
     
     // izpeljemo iz baseDim;
-    if(!mobileSizeWise) r = 200;    // baseDim - 2*20(notch) - 2*2 (zaradi debeline 3, da ni prirezano);
+    if(baseDimension == 444) r = 200;    // 444 je na namiznem, ki ima dovolj velik viewport; baseDim - 2*20(notch) - 2*2 (zaradi debeline 3, da ni prirezano);
         else r = (baseDimension - 2 * 16 - 2 * 2) / 2;
     crclX = baseDimension / 2;  // središče kroga; polovica od width oz. hght canvasa;
     crclY = baseDimension / 2;
@@ -338,13 +301,90 @@ function defineDimensions() {
     rBeatDigit.innerHTML = mainBeat;
     lBeatDigit.innerHTML = leftBeat;
 
-    if (document.readyState == 'loading') {
+    if (document.readyState == 'loading') { // to je true samo pri loadanju strani, pri resizanju (ne-mobile) pa ne;
         document.addEventListener("DOMContentLoaded", positionElems);  // domcontent loaded je lahko "complete" ali pa "interactive";
     } else {
-        positionElems;
+        positionElems();
     }
 
     return true;
+}
+
+function chkDimnsnConstrnts(){
+    // zahteve: 
+    // ne-mobile: 500*870;
+    // mobile: 360*(širina + 302);
+
+    // preverimo, al bo treba krajšat po višini;
+    // postavitev na mobilni napravi je priveto taka: viewPrtRect.width + 302, pri čemer je 302 sestavljeno tako:
+    // 43 (div titleP) + (viewPrtRect.width - 36 (basedimension = višina canvasa)) + 178 (visok beat div )+ 116 (visok bpmDiv) + 1 (borderBody);
+    // neobdelana postavitev na ne-mobilni napravi je visoka 870;
+    const defaultHght = mobileSizeWise ? viewPrtRect.width + 302 : 870;  
+    if((defaultHght > viewPrtRect.height)) {
+        const totalDiffToBridge = defaultHght - viewPrtRect.height;
+        console.log('treba urejat velikost postavitve, višina bila:',  defaultHght, 'skinit bo treba: ', totalDiffToBridge);
+        let bridged = 0;
+        if(totalDiffToBridge < 40) {
+            titleP.style.marginBottom = '10px';    // pridobil 2 na prejšnjih 12;
+            contrlsDiv.style.marginTop = '8px'; // pridobil 8 na prejšnjih 16;
+            contrlsDiv.style.marginBottom = '12px'; // pridobil 8 na prejšnjih 20;
+            tempoDiv.style.paddingBottom = '6px'; // pridobil 2 na prejšnjih 8;
+            bridged = 20;
+        } else {
+            titleP.style.marginBottom = '6px';    // pridobil 6 na prejšnjih 12;
+            contrlsDiv.style.marginTop = '4px'; // pridobil 12 na prejšnjih 16;
+            contrlsDiv.style.marginBottom = '4px'; // pridobil 16 na prejšnjih 20;
+            tempoDiv.style.paddingBottom = '2px'; // pridobil 6 na prejšnjih 8;
+            bridged = 40;
+        }
+
+        if(totalDiffToBridge > bridged) {
+            console.log('manjšamo še krog');
+            let diff = totalDiffToBridge - bridged;
+            if(diff % 2 == 1) diff += 3;
+                else diff += 2;
+            // ta glavna reč!!
+            baseDimension -= diff;
+        }
+    } else { contrlsDiv.style.marginTop = '16px';  }  // ker je za ne-mobile drugačno;
+    
+    // še čekirat širino;
+    const minWidth = mobileSizeWise ? 360 : 500;
+    if(viewPrtRect.width < minWidth) {
+        // za določit r kroga;
+        baseDimension = viewPrtRect.width - 36; // 18 roba na vsaki strani;
+        if(baseDimension % 2 == 1) baseDimension = baseDimension - 1;
+
+        // za popravit margine in fonte;
+        let diff = minWidth - viewPrtRect.width;
+        if(diff % 2 == 1) diff++;
+        if(diff >= 24) {
+            lBeatDigit.style.fontSize = '36px';
+            rBeatDigit.style.fontSize = '36px';
+            lBeatDigit.style.paddingTop = '44px';
+            rBeatDigit.style.paddingTop = '44px';
+            valueBeatPMin.style.marginRight = '6px';
+            valueBarsPMin.style.marginRight = '6px';
+            canvTempo.style.marginLeft = '4px';
+            if(!mobileSizeWise) { // na namiznem je treba še dodatno ožat, pri mobile smo to že;
+                // izbrišemo lable, ker vplivajo na širino;
+                const toRemove = document.getElementsByClassName('label')
+                toRemove[0].classList.add('hidden');
+                toRemove[0].style.marginBottom = '0px'; // hidden ne zadošča, je treba tudi margin ločeno skint, ker če ne zaseda višino;
+                toRemove[1].innerHTML = '';
+                toRemove[1].style.marginBottom = '0px';
+                // še margini on gumbov za število dob;
+                canvLBeat.style.marginLeft = '12px';
+                canvLBeat.style.marginRight = '24px';
+                canvRBeat.style.marginLeft = '24px';
+                canvRBeat.style.marginRight = '12px';
+            }
+        }
+        diff = 30 - diff / 2;   // diff tukaj v resnici postane nov margin, ne diff; 30, ker je 30 margin LD okoli srednjega gumba in tega zmanjšujemo;
+        if(diff < 4) diff = 4;
+        canvPlayStop.style.marginLeft = `${diff}px`;
+        canvPlayStop.style.marginRight = `${diff}px`;
+    }
 }
 
 function positionElems() {  // postavitev ali odčitanje koordinat elementov, katerih položaj je odvisen od dokončanja postavitve položaja drugih ali sebe;
@@ -491,7 +531,7 @@ function beatCountCtrlOprtn(e) {
             if(leftBeat > 1) {
                 lBeatDigit.innerHTML = leftBeat;
             } else {
-                lBeatDigit.innerHTML = '–';    // shranjeno je 1, prikazano je –;
+                lBeatDigit.innerHTML = '--';    // shranjeno je 1, prikazano je –;
             }
             setNotchCoordsNdDraw(LEFT);
         }
@@ -543,10 +583,8 @@ function defineRotationParams() {
         if(tempo.beatsPM < 185) 
             if(tempo.beatsPM <= 180) {
                 frameDurtn = 16;
-                console.log('frame 16');
             } else {
                 frameDurtn = 10;
-                console.log('frame 10');
             }
 
     updBpmDisp();
@@ -740,7 +778,6 @@ function azzerareAfterStop() {
 }
 
 function setNotchCoordsNdDraw(WHICH) {    // ne samo izračuna oznake, ampak jih tudi izriše;
-
     function helper(passdBeat, passdNotchCoords) {
         const angleSlice = twoPI / passdBeat; // kot celega kroga deljeno s številom dob;
         const diff = passdNotchCoords == notches.main.coords ? 20 : -20;
@@ -842,6 +879,7 @@ if(initializeLayout()) {
     defineRotationParams();
     drawControls();
     setNotchCoordsNdDraw(BOTH);
+    rWas = r;   // se koristi samo pri ne-mobile, če pride do resize; se mora shranit na tej točki, ne tekom definiranja dimenzij, ker se uporabi po definiranju dimenzijhj
     
     //   -  -  -   POSLUŠALCI  -  -  vsaj en mora bit šele zdaj, ker je odvisen od stanja spremenljivke mobile;
     document.addEventListener('keydown', e => { atKeyPress(e.key) });

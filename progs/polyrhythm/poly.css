@@ -108,6 +108,11 @@ p {
 #joker_foregnd {
     position: fixed;
 
+    top: 120px;
+    right:19%;
+    left: 19%;
+    /* višine al bottoma nima določene, da se lahko prilagodi dolžini besedila; */
+
     padding-top: 58px;
     padding-right: 32px;
     padding-left: 24px;
