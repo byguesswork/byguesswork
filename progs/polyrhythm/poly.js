@@ -1,6 +1,7 @@
 'use strict';
 
 // tick sounds
+// dat klice asyncov v try catch al kaj takega;
 // prilagdoljiva/različna hitrost L in D udarca (blinkanja) glede na njuno hitrost
     // v bistvu bi moralo upoštevat tudi kje je naslednji drugi udarec..
     // ..(na trajanje D udarca vpliva, kdaj se pojavi naslednji L udarec, če je to prej kot naslednji D udarec); 
@@ -11,13 +12,9 @@
 // moj trenuten:  384*785 
 
 // preverit
-// v34
-// --
-// širina info viewa na ne-mobile v css;
-// priloagodljiva širina na nemobile
-// listener za spremembo širine na nemobile
+// v35
 
-let vers = 34;
+let vers = 35;
 
 // canvasi in njihovi konteksti;
 // skala in kazalec;
@@ -54,34 +51,6 @@ const divJokerBckgnd = document.getElementById('joker_bckgnd');
 const divJokerForegnd = document.getElementById('joker_foregnd');
 const divJokerCloseIcon = document.getElementById('joker_close_icon');
 const jokerContent = document.getElementById('joker_content');
-
-// za testirat zvoke, da imaš samo en samplePaths;
-// const samplePaths = ['Perc_Can_hi.wav','Perc_Clap_hi.wav'];
-
-const choices = [];
-choices.push(['Perc_Can_hi.wav','Perc_Clap_hi.wav']);
-choices.push(['Perc_MusicStand_hi.wav','Perc_Clap_hi.wav']);
-choices.push(['Perc_MetronomeQuartz_hi.wav','Perc_Clap_hi.wav']);
-choices.push(['Perc_PracticePad_hi.wav','Perc_Tongue_hi.wav']);
-choices.push(['Perc_PracticePad_hi.wav','Synth_Block_C_hi.wav']);
-choices.push(['Perc_MetronomeQuartz_hi.wav','Synth_Block_C_hi.wav']);
-const samplePaths = choices[Math.floor(Math.random() * choices.length)]; 
-console.log(samplePaths)
-
-// ZIHR:
-// const samplePaths = ['Perc_Can_hi.wav','Perc_Clap_hi.wav'];
-// const samplePaths = ['Perc_MusicStand_hi.wav','Perc_Clap_hi.wav'];
-// const samplePaths = ['Perc_MetronomeQuartz_hi.wav','Perc_Clap_hi.wav'];
-// const samplePaths = ['Perc_PracticePad_hi.wav','Perc_Tongue_hi.wav'];
-// const samplePaths = ['Perc_PracticePad_hi.wav','Synth_Block_C_hi.wav'];
-// const samplePaths = ['Perc_MetronomeQuartz_hi.wav','Synth_Block_C_hi.wav'];
-
-// ni slabo
-// const samplePaths = ['Perc_MetronomeQuartz_hi.wav','Perc_MusicStand_hi.wav'];
-// const samplePaths = ['Perc_MetronomeQuartz_hi.wav','Perc_Tamb_B_hi.wav'];
-// const samplePaths = ['Perc_Tongue_hi.wav','Perc_MusicStand_hi.wav'];
-
-// Perc_Tongue_hi.wav - dober, suh, rezek, ampak prveč odrezav, preveč napade 
 
 // konstante
 const RIGHT = 'r';
@@ -140,7 +109,7 @@ let mousePressIsValid = false;
 let jokerOpen = false;
 let wasRunngB4Joker = false;
 let audioCtx = new AudioContext();
-let audioSmpls, arrayBfrs;
+const arrayBfrsTmp = [];
 const foreCanvRect = {
     top: 0,
     left: 0,
@@ -180,18 +149,65 @@ class Notch {
     }
 }
 
+class ClickSample {
+    constructor(path) {
+        this.path = path;
+        this.buffer = undefined;
+    }
+}
+
+const clickSmpls = [];
+clickSmpls.push(new ClickSample('Perc_Can_hi.wav'));   // 0
+clickSmpls.push(new ClickSample('Perc_Clap_hi.wav'));
+clickSmpls.push(new ClickSample('Perc_MusicStand_hi.wav'));
+clickSmpls.push(new ClickSample('Perc_MetronomeQuartz_hi.wav'));  // 3
+clickSmpls.push(new ClickSample('Perc_PracticePad_hi.wav'));
+clickSmpls.push(new ClickSample('Perc_Tongue_hi.wav'));
+clickSmpls.push(new ClickSample('Synth_Block_C_hi.wav'));   // 6
+
+// navedba 6 izbranih dvojic za referenco;
+// (['Perc_Can_hi.wav','Perc_Clap_hi.wav']);
+// (['Perc_MusicStand_hi.wav','Perc_Clap_hi.wav']);
+// (['Perc_MetronomeQuartz_hi.wav','Perc_Clap_hi.wav']);
+// (['Perc_PracticePad_hi.wav','Perc_Tongue_hi.wav']);
+// (['Perc_PracticePad_hi.wav','Synth_Block_C_hi.wav']);
+// (['Perc_MetronomeQuartz_hi.wav','Synth_Block_C_hi.wav']);
+
+// ni slabo
+// ['Perc_MetronomeQuartz_hi.wav','Perc_MusicStand_hi.wav'];
+// ['Perc_MetronomeQuartz_hi.wav','Perc_Tamb_B_hi.wav'];
+// ['Perc_Tongue_hi.wav','Perc_MusicStand_hi.wav'];
+
+// Perc_Tongue_hi.wav - dober, suh, rezek, ampak prveč odrezav, preveč napade;
+
+const clickDuos = {
+    selctd : [0, 1],
+    selctdDuoIdx : 0,
+    catalog: [  // posamezen idx v katalogu pove, kateri sample se uporablja za desni beat ([0]) in kateri za levega ([1]);
+        [0, 1],
+        [2, 1],
+        [3, 1],
+        [4, 5],
+        [4, 6],
+        [3, 6]
+    ],
+    allLoaded: false
+}
+
+//  -  -  -  -  -   FUNKCIJE  -  -  -  -  -  -
+
 function initializeLayout() {
     check4mobile();
     let doContinue = false;
     if(defineDimensions()) {
         console.log('mobileTouchWise:', mobileTouchWise);   // to mora bit tukaj, ker če ne se pri resizanju vedno znova kliče
         console.log('mobileSizeWise:', mobileSizeWise); // na mobilnem tellefonu sta oba true, le ipad ima mešano;
-        setupSamplesPt1StpBfrz(samplePaths).then((response) => {
-            arrayBfrs = response;
+        setupSamplesPt1StpBfrz(/*samplePaths*/).then((/*response*/) => {
+            // arrayBfrs = response;    // tako je bilo včasih, ko smo še prejemali response; setupSamplesPt1StpBfrz sicer samodejno vrača Promise, ker je async/await;
             console.log('arrays done');
         });
         doContinue = true;
-    }   // else sporočimo, da se app ne bo zagnal;
+    }   // else (samo v primeru mobile + horiz.postavitev) smo prikazali displayHrzWarn(false), tj. sporočilo, da se app ne bo zagnal;
     return doContinue;
 }
 
@@ -226,7 +242,8 @@ function defineDimensions() {
 
         canvPlayStop.width = 80;
 
-        if(arrayBfrs == undefined) window.addEventListener('resize', () => {
+        // ta rWas == undefined je zato, da se listener doda samo 1x; če večkrat dodaš event listener, se večkrat izvaja, tako je blo videt ...
+        if(rWas == undefined) window.addEventListener('resize', () => {
             defineDimensions();
             drawControls();
             if(r == rWas) drawDialAndIndicator();
@@ -451,19 +468,31 @@ function atKeyPress(keyKey) {
 }
 
 function playStopBtnOprtn(e) {
-    if((e.clientY > playBtnTop) && (e.clientY < (playBtnTop + playBtnHght))) {
+    if(evalStartBtnClick(e)) {
         if(isRotating == null) startRotating();
         else stopRotation();
     }
 }
 
+function evalStartBtnClick(e) {
+    let reslt = false;
+    if((e.clientY > playBtnTop) && (e.clientY < (playBtnTop + playBtnHght))) reslt = true;
+    return reslt;
+
+}
+
+function initAudioAndStart() {
+    setupSamplesPt2().then(() => {
+        startRotating(); // zagnat;
+        setListnrsAftrInit();   // poštimat listenerje;
+        console.log('čas:', Date.now())
+        preLoadNext();
+    });
+}
+
 function playStopBtnOprtnB4SmplInit(e) {
-    if((e.clientY > playBtnTop) && (e.clientY < (playBtnTop + playBtnHght))) {
-        setupSamplesPt2(arrayBfrs).then((response) => { // za videt je podobna touchDialB4SmplInit(), ampak ni ista!!;
-            audioSmpls = response;
-            playStopBtnOprtn(e); // zagnat;
-            setListnrsAftrInit();   // poštimat listenerje;
-        });
+    if(evalStartBtnClick(e)) {
+        initAudioAndStart();
     }
 }
 
@@ -778,6 +807,7 @@ function azzerareAfterStop() {
 }
 
 function setNotchCoordsNdDraw(WHICH) {    // ne samo izračuna oznake, ampak jih tudi izriše;
+    
     function helper(passdBeat, passdNotchCoords) {
         const angleSlice = twoPI / passdBeat; // kot celega kroga deljeno s številom dob;
         const diff = passdNotchCoords == notches.main.coords ? 20 : -20;
@@ -809,11 +839,12 @@ function setNotchCoordsNdDraw(WHICH) {    // ne samo izračuna oznake, ampak jih
 
 function zvok(which) {
     if(which == RIGHT) {
-        playSample(audioSmpls[0], 0);
-    } else playSample(audioSmpls[1], 0);
+        playSample(clickSmpls[0].buffer);
+    } else playSample(clickSmpls[1].buffer);
 }
 
-// AudioContext
+//  -  -  -  -   AudioContext  - - - - - -
+// varianta funkcije getFile v enem kosu (ko je audioCtx že aktiven);
 async function getFile(path) {
     const response = await fetch(path);
     const arrayBuffer = await response.arrayBuffer();
@@ -832,45 +863,94 @@ async function getFilePt2(bfr) {    // del po audioCtx, nisem prepričan da je t
     return audioBuffer;
 }
 
+// varianta funkcije setupSamples v enem kosu (ko je audioCtx že aktiven)
 async function setupSamples(paths) {
     const audioBuffers = [];
-
     for (const path of paths) {
         const sample = await getFile(path);
         audioBuffers.push(sample);
     }
-
     return audioBuffers;
 }
 
-async function setupSamplesPt1StpBfrz(paths) { // setup array buffers;
-    const arrayBuffers = [];
-
-    for (const path of paths) {
-        const bfr = await getFilePt1(path);
-        arrayBuffers.push(bfr);
+async function setupSamplesPt1StpBfrz(/*paths*/) { // setup array buffers;
+    
+    for(let i = 0; i < 2; i++) {
+        const bfr = await getFilePt1(clickSmpls[i].path);
+        arrayBfrsTmp.push(bfr);
     }
-
-    return arrayBuffers;
+    
+    // originalna implmentacija z returnom; na isti način je bil narejen pt2;
+    // const arrayBuffers = [];
+    // for (const path of paths) {
+    //     const bfr = await getFilePt1(path);
+    //     arrayBuffers.push(bfr);
+    // }
+    // return arrayBuffers;
 }
 
-async function setupSamplesPt2(bfrs) {
-    const audioBuffers = [];
-
-    for (const bfr of bfrs) {
-        const sample = await getFilePt2(bfr);
-        audioBuffers.push(sample);
+async function setupSamplesPt2() {  // naštima clickSmpls 0 in 1;
+    
+    for (let i = 0; i < 2; i++) {
+        clickSmpls[i].buffer = await getFilePt2(arrayBfrsTmp[i]);;
     }
-
     console.log('audio buffers done');  // 2 ms rabi za ta postopek, če sta arraybufferja že narejena;
-    return audioBuffers;
 }
 
-function playSample(audioBuffer, time) {    // to je način za predvajanje audia v Web audio (audioContext);
+async function preLoadNext() {
+    const toLoad = [];
+    if(clickDuos.selctdDuoIdx < (clickDuos.catalog.length - 2)) {
+        for(let i = 0; i < 2; i++) {
+            const pathIdx = clickDuos.catalog[clickDuos.selctdDuoIdx + 1][i];
+            if(clickSmpls[pathIdx].buffer == undefined) {
+                toLoad.push(pathIdx);
+                console.log('treba naloadat sample idx:', pathIdx);
+            } else console.log('NI treba naloadat sampla idx:', pathIdx);
+        }
+    } else console.log('čuden primer');
+    console.log(toLoad);
+
+    if(toLoad.length > 0) for(const idx of toLoad) {  // prejme torej idx v clickSmpls, ki ga je treba naloadat;
+        clickSmpls[idx].buffer = await getFile(clickSmpls[idx].path);
+        console.log(Date.now());
+    }
+    // pribl. 10ms za naloadat 1 sample doma v Visual Studio Code;
+    // pribl. 15ms za naloadat 2 sampla doma v Visual Studio Code;
+        
+    if(!clickDuos.allLoaded) {
+        let allLoadd = true;
+        for (let i = 0; i < clickSmpls.length; i++) {
+            if(clickSmpls[i].buffer == undefined) {
+                allLoadd = false;
+            }
+        }
+        if(allLoadd) clickDuos.allLoaded = true;
+    }
+}
+
+function sampleClick() {
+    const nextIdx = clickDuos.selctdDuoIdx == clickDuos.catalog.length - 1 ? 0 : clickDuos.selctdDuoIdx + 1;
+    const idxs = clickDuos.catalog[nextIdx] // array 2 idx-ov ki predstavljata položaj v clickSamples;
+    console.log(nextIdx, clickDuos.selctdDuoIdx, idxs);
+    // torej ali so vsi naloadani ali pa sta sampla naslednjega idxa preloadana;
+    if(clickDuos.allLoaded || (clickSmpls[idxs[0]].buffer != undefined && clickSmpls[idxs[1]].buffer != undefined)) {
+        // če tako, zamenjamo idx izbranega;
+        clickDuos.selctdDuoIdx = nextIdx;
+        clickDuos.selctd = clickDuos.catalog[clickDuos.selctdDuoIdx];
+        console.log('selctdIdx:', clickDuos.selctdDuoIdx, 'selected duo:', clickDuos.selctd);
+        // če še ni vse naloadano, vnaprej preloadamo naslednjega;
+        if(!clickDuos.allLoaded) {
+            console.log('začetek:', Date.now());
+            preLoadNext();
+        }
+    } else console.log('bufferji niso bili pripravljeni')
+}
+
+function playSample(audioBuffer) {    // to je način za predvajanje audia v Web audio (audioContext);
     const sample = audioCtx.createBufferSource();
     sample.buffer = audioBuffer;
     sample.connect(audioCtx.destination);
-    sample.start(time); // ta start je kot play() v HTML 5;
+    sample.start(0); // ta start je kot play() v HTML 5;
 }
 
 
@@ -879,7 +959,7 @@ if(initializeLayout()) {
     defineRotationParams();
     drawControls();
     setNotchCoordsNdDraw(BOTH);
-    rWas = r;   // se koristi samo pri ne-mobile, če pride do resize; se mora shranit na tej točki, ne tekom definiranja dimenzij, ker se uporabi po definiranju dimenzijhj
+    rWas = r;   // se koristi samo pri ne-mobile, ko resize; se mora shranit šele na tej točki, ne tekom definiranja dimenzij, ker se uporabi po definiranju dimenzij;
     
     //   -  -  -   POSLUŠALCI  -  -  vsaj en mora bit šele zdaj, ker je odvisen od stanja spremenljivke mobile;
     document.addEventListener('keydown', e => { atKeyPress(e.key) });
@@ -889,6 +969,7 @@ if(initializeLayout()) {
     canvPlayStop.addEventListener('click', playStopBtnOprtnB4SmplInit);
     tempoBeatsPMinLine.addEventListener('click', () => {atBpmLblClick(true)} );
     tempoBarsPMinLine.addEventListener('click', () => {atBpmLblClick(false)} );
+    titleP.addEventListener('click', sampleClick);
     //infoIcon
     infoIcon.addEventListener('click', infoClick);
     divJokerCloseIcon.addEventListener('click', retireJoker);

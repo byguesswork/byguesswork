@@ -247,14 +247,7 @@ function evalDialClick(e) {
 
 function touchDialB4SmplInit(e) {
     if(evalDialClick(e)) {
-        setupSamplesPt2(arrayBfrs).then((response) => { // za videt je podobna playStopBtnOprtnB4SmplInit(), ampak ni ista!!;
-            // uredit zvoke;
-            audioSmpls = response;
-            // zagnat;
-            startRotating();
-            // uredit listenerje;
-            setListnrsAftrInit();
-        });
+        initAudioAndStart();
     }
 }
 
