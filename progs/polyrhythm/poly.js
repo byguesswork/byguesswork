@@ -12,9 +12,10 @@
 // moj trenuten:  384*785 
 
 // preverit
-// v35
+// v36
+// prehiter klik v macu
 
-let vers = 35;
+let vers = 36;
 
 // canvasi in njihovi konteksti;
 // skala in kazalec;
@@ -485,7 +486,7 @@ function initAudioAndStart() {
     setupSamplesPt2().then(() => {
         startRotating(); // zagnat;
         setListnrsAftrInit();   // poštimat listenerje;
-        console.log('čas:', Date.now())
+        console.log('Začetek preloadanja, čas:', Date.now())
         preLoadNext();
     });
 }
@@ -897,26 +898,26 @@ async function setupSamplesPt2() {  // naštima clickSmpls 0 in 1;
     console.log('audio buffers done');  // 2 ms rabi za ta postopek, če sta arraybufferja že narejena;
 }
 
-async function preLoadNext() {
+async function preLoadNext() {  // ko recimo izberemo dvojico zvokov z indeksom 1, se preloadajo že zvoki za dvojico zvokov z indeksom 2, da je pripravljeno;
     const toLoad = [];
     if(clickDuos.selctdDuoIdx < (clickDuos.catalog.length - 2)) {
         for(let i = 0; i < 2; i++) {
             const pathIdx = clickDuos.catalog[clickDuos.selctdDuoIdx + 1][i];
             if(clickSmpls[pathIdx].buffer == undefined) {
                 toLoad.push(pathIdx);
-                console.log('treba naloadat sample idx:', pathIdx);
-            } else console.log('NI treba naloadat sampla idx:', pathIdx);
+                console.log('Preloadamo za idx:', clickDuos.selctdDuoIdx + 1, ', treba naloadat sample idx:', pathIdx);
+            } else console.log('Preloadamo za idx:', clickDuos.selctdDuoIdx + 1, ', NI treba naloadat sampla idx:', pathIdx);
         }
-    } else console.log('čuden primer');
-    console.log(toLoad);
-
-    if(toLoad.length > 0) for(const idx of toLoad) {  // prejme torej idx v clickSmpls, ki ga je treba naloadat;
-        clickSmpls[idx].buffer = await getFile(clickSmpls[idx].path);
-        console.log(Date.now());
     }
+
     // pribl. 10ms za naloadat 1 sample doma v Visual Studio Code;
     // pribl. 15ms za naloadat 2 sampla doma v Visual Studio Code;
-        
+    // od 20-140 ms/sample za naloadat z dejanskega spletnega mesta v brskalniku;
+    if(toLoad.length > 0) for(const idx of toLoad) {  // prejme torej idx v clickSmpls, ki ga je treba naloadat;
+        clickSmpls[idx].buffer = await getFile(clickSmpls[idx].path);
+        console.log('Naloadano, čas:', Date.now());
+    }
+    
     if(!clickDuos.allLoaded) {
         let allLoadd = true;
         for (let i = 0; i < clickSmpls.length; i++) {
@@ -924,26 +925,40 @@ async function preLoadNext() {
                 allLoadd = false;
             }
         }
-        if(allLoadd) clickDuos.allLoaded = true;
+        if(allLoadd) {
+            clickDuos.allLoaded = true;
+            console.log('- - -  VSI NALOŽENI  - - -')
+        }
     }
+    console.log('- - - - -');
+}
+
+function perfrmDuoChg(nextIdx) {
+    clickDuos.selctdDuoIdx = nextIdx;
+    clickDuos.selctd = clickDuos.catalog[clickDuos.selctdDuoIdx];
+    console.log('Nastavljamo izbiro; selctdIdx:', clickDuos.selctdDuoIdx, 'selected duo:', clickDuos.selctd);
 }
 
 function sampleClick() {
     const nextIdx = clickDuos.selctdDuoIdx == clickDuos.catalog.length - 1 ? 0 : clickDuos.selctdDuoIdx + 1;
-    const idxs = clickDuos.catalog[nextIdx] // array 2 idx-ov ki predstavljata položaj v clickSamples;
-    console.log(nextIdx, clickDuos.selctdDuoIdx, idxs);
-    // torej ali so vsi naloadani ali pa sta sampla naslednjega idxa preloadana;
-    if(clickDuos.allLoaded || (clickSmpls[idxs[0]].buffer != undefined && clickSmpls[idxs[1]].buffer != undefined)) {
-        // če tako, zamenjamo idx izbranega;
-        clickDuos.selctdDuoIdx = nextIdx;
-        clickDuos.selctd = clickDuos.catalog[clickDuos.selctdDuoIdx];
-        console.log('selctdIdx:', clickDuos.selctdDuoIdx, 'selected duo:', clickDuos.selctd);
-        // če še ni vse naloadano, vnaprej preloadamo naslednjega;
-        if(!clickDuos.allLoaded) {
-            console.log('začetek:', Date.now());
+    console.log('sample click; currentIdx:', clickDuos.selctdDuoIdx, 'nextIdx:', nextIdx);
+    if(clickDuos.allLoaded) { // če so vsi že naloadani;
+        // samo zamenjamo idx izbranega;
+        perfrmDuoChg(nextIdx);
+        console.log('- - (vsi naloženi) - - -');
+    } else {
+        const idxs = clickDuos.catalog[nextIdx] // array 2 idx-ov ki predstavljata položaj v clickSamples;
+        // preklop na novi idx in preloadanje še naslednjega naredimo le, če sta sampla za novi idx že preloadana..
+        // ..do taga lahko pride le, če je preloadanje za naslednji idx že bilo sproženo, a še ni končano!!.. 
+        // ..če bi kdo prehitro klikal, bi se torej nova izbira ne izvedla in tudi naslednje preloadanje se ne bi sprožilo;
+        if(clickSmpls[idxs[0]].buffer != undefined && clickSmpls[idxs[1]].buffer != undefined) {
+            // najprej zamenjamo idx izbranega;
+            perfrmDuoChg(nextIdx);
+            // preloadamo naslednjega;
+            console.log('Preloadanje naslednjega; začetek:', Date.now());
             preLoadNext();
-        }
-    } else console.log('bufferji niso bili pripravljeni')
+        } else console.log(' -  -   prehitro si kliknil  -  -  -')
+    }
 }
 
 function playSample(audioBuffer) {    // to je način za predvajanje audia v Web audio (audioContext);
