@@ -12,10 +12,10 @@
 // moj trenuten:  384*785 
 
 // preverit
-// v36
-// prehiter klik v macu
+// v37
+// init tudi s klikom na campleChg
 
-let vers = 36;
+let vers = 37;
 
 // canvasi in njihovi konteksti;
 // skala in kazalec;
@@ -504,6 +504,9 @@ function setListnrsAftrInit() {
     // na številčnici prav tako:
     foreCanv.removeEventListener('click', touchDialB4SmplInit);
     foreCanv.addEventListener('click', touchDial);
+    // za spremembo samplov;
+    titleP.removeEventListener('click', sampleClckB4Init);
+    titleP.addEventListener('click', sampleClick);
 }
 
 function beatCountCtrlOprtn(e) {
@@ -631,6 +634,38 @@ function defineRotationParams() {
             // } else blinkDurtn = 150;
 }
 
+function rotateMainHlpr(passdNotches, which, nowT) {
+
+    // na tem mestu v zanki vemo, da bo na tem mestu na številčnici blink;
+    
+    // pomožne spremenljivke;
+    const passdNotchCoords = passdNotches.coords;
+    const blinkIdx = passdNotches.nextBlinkIdx; // do posodobitve (bolj spodaj) je nextBlinkIdx dejansko currentIdx!!;
+    
+    // blink
+    const startX = passdNotchCoords[blinkIdx].start.x;
+    const startY = passdNotchCoords[blinkIdx].start.y;
+    const endX = passdNotchCoords[blinkIdx].end.x;
+    const endY = passdNotchCoords[blinkIdx].end.y;
+    ctx.lineWidth = notchWidth;
+    if(which == RIGHT) ctx.strokeStyle = '#fa0707';
+    else ctx.strokeStyle = '#0707fa';
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(endX, endY);
+    ctx.stroke();
+    
+    // si zabeležimo, da izbrišemo čez čas, okoli 150ms;
+    // zvoka trajata okoli 169 ms, morda je OK, če sveti približno toliko
+    notchesResets.push([nowT + blinkDurtn, startX, startY, endX, endY]);
+    
+    // dodamo trigger za naslednji blink;
+    // najprej njegov index;
+    if (blinkIdx == passdNotchCoords.length - 1) passdNotches.nextBlinkIdx = 0;
+    else passdNotches.nextBlinkIdx++;
+    passdNotches.nextBlinkAngle = passdNotchCoords[passdNotches.nextBlinkIdx].angle // nato še njegov kot;
+}
+
 function rotate() {
     // izračunamo kot, kamor trenutno kaže kazalec;
     const nowT = Date.now();
@@ -655,45 +690,13 @@ function rotate() {
         }
     }
 
-    function helper(passdNotches, which) {
-
-        // na tem mestu v zanki vemo, da bo na tem mestu na številčnici blink;
-        
-        // pomožne spremenljivke;
-        const passdNotchCoords = passdNotches.coords;
-        const blinkIdx = passdNotches.nextBlinkIdx; // do posodobitve (bolj spodaj) je nextBlinkIdx dejansko currentIdx!!;
-        
-        // blink
-        const startX = passdNotchCoords[blinkIdx].start.x;
-        const startY = passdNotchCoords[blinkIdx].start.y;
-        const endX = passdNotchCoords[blinkIdx].end.x;
-        const endY = passdNotchCoords[blinkIdx].end.y;
-        ctx.lineWidth = notchWidth;
-        if(which == RIGHT) ctx.strokeStyle = '#fa0707';
-        else ctx.strokeStyle = '#0707fa';
-        ctx.beginPath();
-        ctx.moveTo(startX, startY);
-        ctx.lineTo(endX, endY);
-        ctx.stroke();
-        
-        // si zabeležimo, da izbrišemo čez čas, okoli 100ms;
-        // zvoka trajata okoli 169 ms, morda je OK, če sveti približno toliko
-        notchesResets.push([nowT + blinkDurtn, startX, startY, endX, endY]);
-        
-        // dodamo trigger za naslednji blink;
-        // najprej njegov index;
-        if (blinkIdx == passdNotchCoords.length - 1) passdNotches.nextBlinkIdx = 0;
-        else passdNotches.nextBlinkIdx++;
-        passdNotches.nextBlinkAngle = passdNotchCoords[passdNotches.nextBlinkIdx].angle // nato še njegov kot;
-    }
-
     // najprej zvok;
     doSnd(notches.main, RIGHT);
-    if(leftBeat > 1) doSnd(notches.left, LEFT);
+    if(leftBeat > 1) doSnd(notches.left, LEFT); // če je levi beat == 1 je itak doL false, ni treba ločeno preverjat;
     
     // risanje utripanja;
-    if(doR) helper(notches.main, RIGHT);
-    if(doL) helper(notches.left, LEFT); // če je levi beat == 1 je itak doL false, ni treba ločeno preverjat;
+    if(doR) rotateMainHlpr(notches.main, RIGHT, nowT);
+    if(doL) rotateMainHlpr(notches.left, LEFT , nowT); // če je levi beat == 1 je itak doL false, ni treba ločeno preverjat;
 
     // brisanje predhodno osvetljenih oznak;
     if(notchesResets.length > 0) {
@@ -840,8 +843,8 @@ function setNotchCoordsNdDraw(WHICH) {    // ne samo izračuna oznake, ampak jih
 
 function zvok(which) {
     if(which == RIGHT) {
-        playSample(clickSmpls[0].buffer);
-    } else playSample(clickSmpls[1].buffer);
+        playSample(clickSmpls[clickDuos.selctd[0]].buffer); // 0 je za glevnega, desnega;
+    } else playSample(clickSmpls[clickDuos.selctd[1]].buffer); // 1 je zvok za levi beat;
 }
 
 //  -  -  -  -   AudioContext  - - - - - -
@@ -940,6 +943,7 @@ function perfrmDuoChg(nextIdx) {
 }
 
 function sampleClick() {
+    console.log('sample click normal (after init)')
     const nextIdx = clickDuos.selctdDuoIdx == clickDuos.catalog.length - 1 ? 0 : clickDuos.selctdDuoIdx + 1;
     console.log('sample click; currentIdx:', clickDuos.selctdDuoIdx, 'nextIdx:', nextIdx);
     if(clickDuos.allLoaded) { // če so vsi že naloadani;
@@ -949,7 +953,7 @@ function sampleClick() {
     } else {
         const idxs = clickDuos.catalog[nextIdx] // array 2 idx-ov ki predstavljata položaj v clickSamples;
         // preklop na novi idx in preloadanje še naslednjega naredimo le, če sta sampla za novi idx že preloadana..
-        // ..do taga lahko pride le, če je preloadanje za naslednji idx že bilo sproženo, a še ni končano!!.. 
+        // ..do nasprotnega primera bi lahko prišlo le, če je preloadanje za naslednji idx že bilo sproženo, a še ni končano!!.. 
         // ..če bi kdo prehitro klikal, bi se torej nova izbira ne izvedla in tudi naslednje preloadanje se ne bi sprožilo;
         if(clickSmpls[idxs[0]].buffer != undefined && clickSmpls[idxs[1]].buffer != undefined) {
             // najprej zamenjamo idx izbranega;
@@ -959,6 +963,17 @@ function sampleClick() {
             preLoadNext();
         } else console.log(' -  -   prehitro si kliknil  -  -  -')
     }
+}
+
+function sampleClckB4Init() {
+    // najprej dokončat loadanje idxov 0 in 1, kot da bi kliknil start, samo brez 
+    setupSamplesPt2().then(() => {
+        setListnrsAftrInit();   // poštimat listenerje;
+        console.log('Začetek preloadanja, čas:', Date.now())
+        preLoadNext().then(() => {
+            sampleClick();
+        });
+    });
 }
 
 function playSample(audioBuffer) {    // to je način za predvajanje audia v Web audio (audioContext);
@@ -984,7 +999,7 @@ if(initializeLayout()) {
     canvPlayStop.addEventListener('click', playStopBtnOprtnB4SmplInit);
     tempoBeatsPMinLine.addEventListener('click', () => {atBpmLblClick(true)} );
     tempoBarsPMinLine.addEventListener('click', () => {atBpmLblClick(false)} );
-    titleP.addEventListener('click', sampleClick);
+    titleP.addEventListener('click', sampleClckB4Init);
     //infoIcon
     infoIcon.addEventListener('click', infoClick);
     divJokerCloseIcon.addEventListener('click', retireJoker);
