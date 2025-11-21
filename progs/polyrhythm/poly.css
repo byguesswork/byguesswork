@@ -71,6 +71,14 @@ p {
     background: none;
 }
 
+#sample_div {
+    position: absolute;
+    background-color: #85ac75;  /* bcgcoior in color kot .bpm-label-selected */
+    color: #ccf7be;
+    padding: 4px;
+    border-radius: 4px;
+}
+
 #controls  {
     margin-top: 30px;
     margin-bottom: 20px;
@@ -225,4 +233,16 @@ p {
 
 .hidden {
     display: none;
+}
+
+.no-margin {
+    margin: 0;
+}
+
+.transparent {
+    background-color: transparent;
+}
+
+.color-inhrt {
+    color: inherit;
 }

@@ -12,10 +12,10 @@
 // moj trenuten:  384*785 
 
 // preverit
-// v37
-// init tudi s klikom na campleChg
+// v38
+// gumb sample
 
-let vers = 37;
+let vers = 38;
 
 // canvasi in njihovi konteksti;
 // skala in kazalec;
@@ -39,6 +39,8 @@ const titleP = document.getElementById('title');
 const infoIcon = document.getElementById('info_icon');
 const canvDiv = document.getElementById('canvas_div');  // se načeloma ne rabi, ma ni odveč imet;
 const foreCanvDiv = document.getElementById('foreground_canvas_div');
+const sampleDiv = document.getElementById('sample_div');
+const sampleDigt = document.getElementById('sample_digit');
 const contrlsDiv = document.getElementById('controls');
 const rBeatDigit = document.getElementById('right_beat_digit');
 const lBeatDigit = document.getElementById('left_beat_digit');
@@ -383,7 +385,7 @@ function chkDimnsnConstrnts(){
             rBeatDigit.style.paddingTop = '44px';
             valueBeatPMin.style.marginRight = '6px';
             valueBarsPMin.style.marginRight = '6px';
-            canvTempo.style.marginLeft = '4px';
+            canvTempo.style.marginLeft = '4px'; // pazi, ta vrednost se uporablja za preverjanje v positionElems;
             if(!mobileSizeWise) { // na namiznem je treba še dodatno ožat, pri mobile smo to že;
                 // izbrišemo lable, ker vplivajo na širino;
                 const toRemove = document.getElementsByClassName('label')
@@ -413,6 +415,14 @@ function positionElems() {  // postavitev ali odčitanje koordinat elementov, ka
     
     foreCanvRect.top = foreCanvDiv.getBoundingClientRect().top;
     foreCanvRect.left = foreCanvDiv.getBoundingClientRect().left;
+
+    // viewPrtRect.width < 480 je proksi za ugotovitev stanja, da je širina problem, in potem je treba gumb potisnit bolj v robove kanvasa;
+    const rightOffset = viewPrtRect.width < 480 ? 0 : 8;
+    const topOffset = viewPrtRect.width < 480 ? 46 : 52;
+    const rright = viewPrtRect.width - canv.getBoundingClientRect().right + rightOffset; // namesto +8 je + 0 če po širini problem;
+    const ttop = foreCanvRect.top + baseDimension - topOffset; // namesto - 52 je - 40 če po širini problem;
+    sampleDiv.style.right = `${rright}px`;
+    sampleDiv.style.top = `${ttop}px`;
     
     beatCanvPos.top = canvRBeat.getBoundingClientRect().top; // levi in desni gumb imata isti top, zato zabeležimo samo enkrat;
 
@@ -486,7 +496,7 @@ function initAudioAndStart() {
     setupSamplesPt2().then(() => {
         startRotating(); // zagnat;
         setListnrsAftrInit();   // poštimat listenerje;
-        console.log('Začetek preloadanja, čas:', Date.now())
+        console.log('Preloadanje naslednjega; začetek:', Date.now())
         preLoadNext();
     });
 }
@@ -505,8 +515,8 @@ function setListnrsAftrInit() {
     foreCanv.removeEventListener('click', touchDialB4SmplInit);
     foreCanv.addEventListener('click', touchDial);
     // za spremembo samplov;
-    titleP.removeEventListener('click', sampleClckB4Init);
-    titleP.addEventListener('click', sampleClick);
+    sampleDiv.removeEventListener('click', sampleClckB4Init);
+    sampleDiv.addEventListener('click', sampleClick);
 }
 
 function beatCountCtrlOprtn(e) {
@@ -740,10 +750,10 @@ function startRotating() {
     // zagon;
     rotate();   // ta je da obarvaš prvo dobo + narišeš ta prvo, navpično črto (ki ni narisana, če ne zaganjaš prvič) (črta se sicer trenutno riše že v drawDialAndIndicator, ampak ta bo morda umaknjena);
     isRotating = setInterval(rotate, frameDurtn);
-    restOfStartRottng();    // v async da ne dela zamud;
+    roStartRotating();
 }
 
-async function restOfStartRottng() {
+async function roStartRotating() {  // roStartRotating > rest of start rotating; v async, da ne dela zamud;
     drawStopBtn();
 }
 
@@ -899,6 +909,7 @@ async function setupSamplesPt2() {  // naštima clickSmpls 0 in 1;
         clickSmpls[i].buffer = await getFilePt2(arrayBfrsTmp[i]);;
     }
     console.log('audio buffers done');  // 2 ms rabi za ta postopek, če sta arraybufferja že narejena;
+    console.log('- - - - -');
 }
 
 async function preLoadNext() {  // ko recimo izberemo dvojico zvokov z indeksom 1, se preloadajo že zvoki za dvojico zvokov z indeksom 2, da je pripravljeno;
@@ -908,8 +919,8 @@ async function preLoadNext() {  // ko recimo izberemo dvojico zvokov z indeksom 
             const pathIdx = clickDuos.catalog[clickDuos.selctdDuoIdx + 1][i];
             if(clickSmpls[pathIdx].buffer == undefined) {
                 toLoad.push(pathIdx);
-                console.log('Preloadamo za idx:', clickDuos.selctdDuoIdx + 1, ', treba naloadat sample idx:', pathIdx);
-            } else console.log('Preloadamo za idx:', clickDuos.selctdDuoIdx + 1, ', NI treba naloadat sampla idx:', pathIdx);
+                // console.log('Preloadamo za idx:', clickDuos.selctdDuoIdx + 1, ', treba naloadat sample idx:', pathIdx);
+            } // else console.log('Preloadamo za idx:', clickDuos.selctdDuoIdx + 1, ', NI treba naloadat sampla idx:', pathIdx);
         }
     }
 
@@ -939,17 +950,15 @@ async function preLoadNext() {  // ko recimo izberemo dvojico zvokov z indeksom 
 function perfrmDuoChg(nextIdx) {
     clickDuos.selctdDuoIdx = nextIdx;
     clickDuos.selctd = clickDuos.catalog[clickDuos.selctdDuoIdx];
+    sampleDigt.innerHTML = clickDuos.selctdDuoIdx < (clickDuos.catalog.length) ? clickDuos.selctdDuoIdx + 1 : 1; 
     console.log('Nastavljamo izbiro; selctdIdx:', clickDuos.selctdDuoIdx, 'selected duo:', clickDuos.selctd);
 }
 
 function sampleClick() {
-    console.log('sample click normal (after init)')
     const nextIdx = clickDuos.selctdDuoIdx == clickDuos.catalog.length - 1 ? 0 : clickDuos.selctdDuoIdx + 1;
-    console.log('sample click; currentIdx:', clickDuos.selctdDuoIdx, 'nextIdx:', nextIdx);
     if(clickDuos.allLoaded) { // če so vsi že naloadani;
         // samo zamenjamo idx izbranega;
         perfrmDuoChg(nextIdx);
-        console.log('- - (vsi naloženi) - - -');
     } else {
         const idxs = clickDuos.catalog[nextIdx] // array 2 idx-ov ki predstavljata položaj v clickSamples;
         // preklop na novi idx in preloadanje še naslednjega naredimo le, če sta sampla za novi idx že preloadana..
@@ -969,7 +978,7 @@ function sampleClckB4Init() {
     // najprej dokončat loadanje idxov 0 in 1, kot da bi kliknil start, samo brez 
     setupSamplesPt2().then(() => {
         setListnrsAftrInit();   // poštimat listenerje;
-        console.log('Začetek preloadanja, čas:', Date.now())
+        console.log('Preloadanje naslednjega; začetek:', Date.now())
         preLoadNext().then(() => {
             sampleClick();
         });
@@ -999,7 +1008,7 @@ if(initializeLayout()) {
     canvPlayStop.addEventListener('click', playStopBtnOprtnB4SmplInit);
     tempoBeatsPMinLine.addEventListener('click', () => {atBpmLblClick(true)} );
     tempoBarsPMinLine.addEventListener('click', () => {atBpmLblClick(false)} );
-    titleP.addEventListener('click', sampleClckB4Init);
+    sampleDiv.addEventListener('click', sampleClckB4Init);
     //infoIcon
     infoIcon.addEventListener('click', infoClick);
     divJokerCloseIcon.addEventListener('click', retireJoker);
