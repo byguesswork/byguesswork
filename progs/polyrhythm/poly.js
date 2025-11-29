@@ -385,7 +385,7 @@ function chkDimnsnConstrnts(){
             rBeatDigit.style.paddingTop = '44px';
             valueBeatPMin.style.marginRight = '6px';
             valueBarsPMin.style.marginRight = '6px';
-            canvTempo.style.marginLeft = '4px'; // pazi, ta vrednost se uporablja za preverjanje v positionElems;
+            canvTempo.style.marginLeft = '4px';
             if(!mobileSizeWise) { // na namiznem je treba še dodatno ožat, pri mobile smo to že;
                 // izbrišemo lable, ker vplivajo na širino;
                 const toRemove = document.getElementsByClassName('label')
@@ -419,8 +419,8 @@ function positionElems() {  // postavitev ali odčitanje koordinat elementov, ka
     // viewPrtRect.width < 480 je proksi za ugotovitev stanja, da je širina problem, in potem je treba gumb potisnit bolj v robove kanvasa;
     const rightOffset = viewPrtRect.width < 480 ? 0 : 8;
     const topOffset = viewPrtRect.width < 480 ? 46 : 52;
-    const rright = viewPrtRect.width - canv.getBoundingClientRect().right + rightOffset; // namesto +8 je + 0 če po širini problem;
-    const ttop = foreCanvRect.top + baseDimension - topOffset; // namesto - 52 je - 40 če po širini problem;
+    const rright = viewPrtRect.width - canv.getBoundingClientRect().right + rightOffset;
+    const ttop = foreCanvRect.top + baseDimension - topOffset;
     sampleDiv.style.right = `${rright}px`;
     sampleDiv.style.top = `${ttop}px`;
     

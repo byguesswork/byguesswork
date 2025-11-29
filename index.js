@@ -3,6 +3,7 @@
 // ----------------     SELEKTORJI
 
 const bodyNode = document.getElementsByTagName('body');
+const statement = document.getElementById('statment');
 const leftContainer = document.getElementById('left_container');
 const leftUpperContent = document.getElementById('left_upper_content');
 const upperPosition4Blog = document.getElementById('upper_position_4_blog');
@@ -189,6 +190,14 @@ function doLayout() {
       rightContainer.style.width = `${560 - (40 + 1 + 1)}px`;  // širina 2. stolpca je ciljna širina (560) - (padding 2. stolpca + border + rezerva, ker če ne se pojavi Hskrolbar);
     }
   }
+
+  // statement; al pustimo line break (default) al ne; 
+  // PRIVZAMEMO, da je line height == 15, ker lineHeight = fontSize (ki je 15 (vse) * 0,8 (comment)) * lineHeight (ki je privzeto normal oz. 1.2) = pribl. 15;
+  // 3 vrstice so, dejmo rečt, če je višina več kot 42;
+  if (statement.getBoundingClientRect().height > 42) {
+    document.getElementsByClassName('statement_hide_if_1_col')[0].classList.add('hidden');
+  };
+  
 
   // s tem pa čekiramo & prilagodimo višino
   checkAbsolutes();
