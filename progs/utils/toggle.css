@@ -1,0 +1,95 @@
+:root {
+    --knob-on: #00ff00;   /* knob on: pomeni barvo štoflca, ko je štoflc (knob, tj. katero stanje stikala je izbrano) na strani on (on); */
+    --knob-off: #ff0000;
+    /*  od tu dol so tle samo deklarirane, prave vrednosti se izračunajo v .js in izhajajo iz dveh vrednosti tu zgoraj; */ 
+    --bckgnd-on-side: #00ff00;
+    --bckgnd-off-side: #ff0000;
+    --inactive-knob-on: #00ff00;
+    --inactive-knob-off: #ff0000;
+    --inactive-bckgnd-on-side: #00ff00;
+    --inactive-bckgnd-off-side: #ff0000;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    background-color: #888888;
+}
+
+.switch-holder {
+    margin-left: 8px;
+    width: 2rem; 
+    height:1rem;
+}
+
+.switch-hldr-right {    /* ko je štoflc desno (vklopljeno stanje), se vidi ozadje na levi, ki je ta rdeča stran, stran za izklop */
+    background: var(--bckgnd-off-side);  /* nazadnje: #eccccc ; #aa000088 #f0b9b9 */
+    transition-property: background;
+    transition-duration: 0.3s;
+}
+.inactive-switch-hldr-right {    /* ko je štoflc desno (vklopljeno stanje), se vidi ozadje na levi, ki je ta rdeča stran, stran za izklop */
+    background: var(--inactive-bckgnd-off-side);  /* nazadnje: #eccccc ; #aa000088 #f0b9b9 */
+}
+
+.switch-hldr-left {    /* ko je štoflc levo (izklopljeno stanje), se vidi ozadje na desni, ki je ta zelene stran, stran za vklop */
+    background: var(--bckgnd-on-side); /* nazadnje: #c1ebc1; #00a30088 #b4eeb4 */
+    transition-property: background;
+    transition-duration: 0.3s;
+}
+.inactive-switch-hldr-left {    /* ko je štoflc levo (izklopljeno stanje), se vidi ozadje na desni, ki je ta zelene stran, stran za vklop */
+    background: var(--inactive-bckgnd-on-side); /* nazadnje: #c1ebc1; #00a30088 #b4eeb4 */
+}
+
+.test_barv { 
+    background: #e0e0e0;
+    background: #818181;
+ }
+
+.toggle {
+    border-radius: 50%;
+    height: 1rem;
+    width: 1rem;
+}
+
+.toggle-flush-left {
+    transform: translateX(0rem);   
+    background-color: var(--knob-off);
+}
+.inactive-toggle-flush-left {
+    transform: translateX(0rem);   
+    background-color: var(--inactive-knob-off);
+}
+
+.toggle-transitioning-right {
+    transform: translateX(1rem);
+    background-color: var(--knob-on);
+    transition-property: all;
+    transition-duration: 0.3s;
+}
+
+.toggle-flush-right {
+    transform: translateX(1rem);
+    background-color: var(--knob-on);
+}
+.inactive-toggle-flush-right {
+    transform: translateX(1rem);
+    background-color: var(--inactive-knob-on);
+}
+
+.toggle-transitioning-left {
+    transform: translateX(0rem);
+    background-color: var(--knob-off);
+    transition-property: all;
+    transition-duration: 0.3s;
+}
+
+td {
+    padding: 4px 0px 2px 10px;
+}
+
+.more-td-headroom {
+    padding-top: 8px;
+    padding-left: 4px
+}

@@ -95,6 +95,11 @@ input[type="reset"] {
     align-items: center;
 }
 
+/* toggles */
+#toggles {
+    margin-left: 24px;
+}
+
 #sigture {
     position: absolute;
     bottom: 0px;
@@ -174,6 +179,9 @@ input[type="reset"] {
     margin-right: 50px;
 }
 
+h2 {
+    padding-bottom: 6px;
+}
 .hidden {
     display: none;
 }

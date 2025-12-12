@@ -130,6 +130,8 @@ function atKeyDown(e) {
     }
 }
 
+
+//  -  -  -  -   Hex sensus stricto  -  -  -  -;
 function avgHexChkInptFields(clicked, other) {
     
     function helper(which) {
@@ -161,8 +163,8 @@ function avgHexChkInptFields(clicked, other) {
             if(otherVal !== false) {    // treba dat tako preverjanje, ker != najde tudi falsi rezultate, kot je 000000, ki pa je legitimen rezulat;
                 if(clickedVal.length == otherVal.length) {
                     // da pošljemo vedno tako , da 1. argument pošilja podatek za 1. (gornji) input;
-                    if(isClickedInput1) avgHexCalc(clickedVal, otherVal);
-                        else avgHexCalc(otherVal, clickedVal);
+                    if(isClickedInput1) avgHexCalcNDisplay(clickedVal, otherVal);
+                        else avgHexCalcNDisplay(otherVal, clickedVal);
                 } else avgHexResltError('The 2 entered values shall be of same length. Length of 3 counts as length of 6');
             } else {other.focus(); } // če je v drugi celici napaka (izpisana v helperju), se prestavimo tja;
         } else {
@@ -225,7 +227,23 @@ function avgHexValdteCalcBtn(e) {
     if(focused.value.length == 0 || other.value.length == 0) avgHexResltError('Input field is empty, enter some data.');
 }
 
-function avgHexCalc(firstHex, secondHex) {
+// za rabo v ozadju, v kodi
+function avgHexCalc(firstHex, secondHex, ratio) {
+    // oba hexa morata biti 6-mestna in veljavna, ratio mora bit med 0 in 1; ni preverjanja za napake;
+    
+    // izračuni;
+    let reslt = ''; // ker je to string, se bojo spodaj številke samodejno spremenile v besedilo;
+    for (let i = 0; 2 * i < firstHex.length; i++) { // ker imata oba isto dolžino (predhodno preverjanje), prverjamo tu samo enega;
+        const firstDec = hex2dec2digits(firstHex.slice(2 * i, 2 * i + 2));
+        const secondDec = hex2dec2digits(secondHex.slice(2 * i, 2 * i + 2));
+        let midOfWayHex;
+        midOfWayHex = decToHex(firstDec + (secondDec - firstDec) * ratio);
+        reslt += midOfWayHex;   // ker je to string se rezultati dodajajo v string;
+    }
+    return reslt;
+}
+
+function avgHexCalcNDisplay(firstHex, secondHex) {
     // ratio
     let ratio;
     if(inptAvgHexRatio.value == '') ratio = 0.5;
@@ -320,7 +338,32 @@ function hex2dec2digits(niz) {  // prejme 2-mestni hex niz in vrne razpon 0-255;
     let ver255 = verHex[0] * 16 + verHex[1];
     return ver255;
 }
+//  -  -  -  -   end Hex sensus stricto  -  -  -  -;
 
+
+//  - - - - -  toggles sensus stricto;
+const regularDiv = document.getElementById('regular');
+const masterDiv = document.getElementById('master');
+const sub1Div = document.getElementById('sub1');
+const sub2Div = document.getElementById('sub2');
+const sub3Div = document.getElementById('sub3');
+const inactiveDiv = document.getElementById('inactive');
+const inactive2Div = document.getElementById('inactive2');
+const regular2Div = document.getElementById('regular2');
+
+const regular = new Toggle(regularDiv, null, null);
+const master = new Toggle(masterDiv, 'On');
+const sub1 = new Toggle(sub1Div, master, true);
+const sub2 = new Toggle(sub2Div, master);
+const sub3 = new Toggle(sub3Div, false, master);
+const inactive = new Toggle(inactiveDiv, undefined, true);
+const inactive2 = new Toggle(inactive2Div, 'ON', true);
+const regular2 = new Toggle(regular2Div, 'on');
+
+//  -  -  -  -  -   end toggles  -  -  -  -;
+
+
+//  -  -  -  -  -  -  PRIKAZ  -  -  -  -  ;
 function avgHexInfoClick() {
     const msg = `A utility with which to calculate the hex value of a color some way between 2 hex code RGB colors on the color wheel.
     <br><br>For hex color inputs, acceptable characters are hex digits (0-9, a-f, A-F).<br>
@@ -352,5 +395,7 @@ function retireJoker() {
     divJokerCloseIcon.classList.add('hidden');
     jokerContent.innerHTML = '';
 }
+//  -  -  -  -  -  -  end PRIKAZ  -  -  -  -  ;
 
+//  -  -  -  -  -  IZVAJANJE  -  -  -  -  -;
 initialize();

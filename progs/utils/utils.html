@@ -9,6 +9,7 @@
     <title>Some utils · byGuesswork</title>
     <link rel="icon" href="/images/favicon.ico">
     <link href="utils.css" rel="stylesheet">
+    <link href="toggle.css" rel="stylesheet">
 </head>
 
 <body>
@@ -18,13 +19,13 @@
 
     <div id="Utilities_title_section">
         <h1>Some utilities</h1>
-        <p>OK, currently there's only 1 utility below, but others might follow.</p>
-
     </div>
 
+    <!-- hex calc; -->
     <div id="div_avg_hex">  <!-- oktober 2025 -->
         <div id="avg_hex_info_icon">i</div>
         <form id="form_avg_hex">
+            <h2>Hex color midpoint calculator</h2>
             <legend class="margin-bottom-2 margin-right-50">Find point between two hexadecimal numbers for RGB colors</legend>
             <fieldset>
                 1st hex number:&nbsp;<input id="inpt_avg_hex_1" type="text" class="margin-bottom-2">
@@ -42,6 +43,63 @@
             <input id="btn_reset" type="reset" value="Reset">
         </form>
     </div>
+    <br><br><br>
+
+    <!-- toggles, december 2025 -->
+    <div id="toggles">
+        <h2>Simple helper class for managing toggles</h2>
+        <table>
+            <tr>
+                <td>Some option</td>
+                <td><div id="regular"></div></td>
+            </tr>
+            <tr>
+                <td colspan="2" class="more-td-headroom">Group of connected options</td>
+            </tr>
+            <tr>
+                <td>Master toogle</td>
+                <td><div id="master"></div></td>
+            </tr>
+            <tr>
+                <td>Some subordinated toggle</td>
+                <td><div id="sub1"></div></td>
+            </tr>
+            <tr>
+                <td>Some subordinated toggle</td>
+                <td><div id="sub2"></div></td>
+            </tr>
+            <tr>
+                <td>Some subordinated toggle</td>
+                <td><div id="sub3"></div></td>
+            </tr>
+            <tr>
+                <td colspan="2" class="more-td-headroom">Some individual options again</td>
+            </tr>
+            <tr>
+                <td>Some inactive toggle</td>
+                <td><div id="inactive"></div></td>
+            </tr>
+            <tr>
+                <td>Yet another inactive toggle</td>
+                <td><div id="inactive2"></div></td>
+            </tr>
+            <tr>
+                <td>Some regular toggle again</td>
+                <td><div id="regular2"></div></td>
+            </tr>
+            <!-- <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr> -->
+        </table>
+    </div>
+
+
 
     <div id="sigture">
         <br>
@@ -57,6 +115,8 @@
         </div>
     </div>
 <!-- a -->
-    <script src="utils.js"></script>
+
+<script src="toggle_class.js"></script>
+<script src="utils.js"></script>
 </body>
 </html>
