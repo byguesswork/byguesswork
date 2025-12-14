@@ -32,17 +32,17 @@
             <p id="date">December 2025</p>
 
             <p>
-                I am not a programmer and my theoretical background is that of an amateur hobbyist (in my case quite lacking) and so I might be getting things completely wrong here, but
-                the way I understand it is that when using classes in JavaScript, private instance methods take up more memory than 
-                public methods because the first are stored in each instance of the class (as a separate copy of that method that belongs to each particular
-                instance only) while the latter are only stored once in the prototype of the class and are available to any instance from there and
-                so do not put on extra weight to an instance.
+                I am not a programmer and my theoretical background is that of an amateur hobbyist (in my case quite lacking) and so I might be getting things 
+                completely wrong here, but the way I understand it is that when using classes in JavaScript, private instance methods take up more memory than 
+                public methods because the first are stored in each instance of the class (as a separate copy of that method that is accessible to that particular
+                instance only), while the latter are only stored once in the prototype of the class and from there are available to each instance of the class and
+                so do not add any extra weight to an instance.
             </p>
             <p>
-                I was working on this little thing the other day and for no real reason at all I set out to make some method private but - again for no other reason than
-                pure curiosity - was weighing the potential memory impact this would have in case many instances of its class would be created and was dabbling around 
-                on how to make it work and I had this idea to minimize the size of the private method by having it only serve as a gateway that enables the execution 
-                of a code heavy public method, say of an event handler that should only be accessible from within the class. Like so:
+                I was working on this little thing the other day and for no real reason set out to make some method private but - again for no other reason than
+                pure curiosity - was also considering the potential memory impact this would have in case many instances of its class would be created. So I was dabbling around 
+                on how to prevent an unnecessary increase of memory usage and I had this idea to minimize the size of the private method by having it only serve as a gateway 
+                that enables the execution of a code heavy public method, say of an event handler that should ideally be accessible only from within the class. Like so:
             </p>
 <br>
                 class SomeClass {<br>
@@ -62,19 +62,23 @@
 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;someCodeHeavyEventHandler() {<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if(this.#passGranted) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// some huge amount of code<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this.#passGranted = false;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// considerable amount of code<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
 &nbsp;&nbsp;&nbsp;&nbsp;}<br>
 }<br><br>
 <p>
-    Nothing big, nothing new, but within the bounds of my own journey with programming this was a discovery I came up with by myself and have not
-    learned about elsewhere. In my hobbyist work such moments of eureka are really like the best thing there is, when you set out to solve a conundrum
+    So someCodeHeavyEventHandler() is public and therefore optimized in the sense of memory management, but its execution is as if it were not public,
+    i.e. it is not possible to run it at will from outside of the class as the pass to run it is granted in the private method that is called only as an event handler.
+    Sort of the best of both worlds (if I understand correctly). 
+    Nothing big really, and nothing new, but within the arc of my journey with learning to program, this was a discovery I came up with by myself and have not
+    learned about elsewhere. In my hobbyist work such moments of eureka are really like the best thing there is. When you set out to solve a conundrum
     and succeed in coming up with an effective and efficient solution it feels like a small victory and the feeling this brings is really like the best thing there is.
 </p>
 <p>
     It&apos;s also quite interesting how our brains work. When still trying to solve this thing, I remember at a certain point I recalled the singleton pattern from Java,
-    which is sort of a similar concept, and started thinking about it and a minute later this solution came to my mind. It is as if while you are mulling about something
+    which is sort of a similar concept (lots of beating around the bush to get to a thing, but in this way making sure to keep it secure),
+    and started thinking about it and some minutes later this solution came to my mind. It is as if while you are mulling about something
     the brain combines 1 + 1 in the background and then floats a solution to your consciousness. Quite a beautiful and interesting experience.
 </p>
             <!-- najprej, PREDEN SKOPIRAŠ SEM NOTER, zamenjaj ustrezne v:

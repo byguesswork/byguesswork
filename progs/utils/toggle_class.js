@@ -19,7 +19,7 @@ class Toggle{
                                         // ne smeš podat master kot 2. argument in isUnactionable kot 3.; v takem primeru bi obveljal master..
                                         // ..(ne moreta obstajati hkrati, ker ne moreš slediti masterju, hkrati pa je toggle osviljen; osivljen toggle se ne premika);
     ) {
-        if(divNode != null && divNode != undefined && (divNode.nodeName == 'DIV' || divNode.nodeName == 'div')) {
+        if(divNode != null && divNode != undefined && divNode.nodeName != undefined && divNode.nodeName.toLowerCase() == 'div') {
 
             // začetne;
             this.#isOn = false; // privzeto je false;
@@ -113,6 +113,7 @@ class Toggle{
 
     doToggle() {
         if(this.#toggleTickt) {
+            this.#toggleTickt = false;
             let movedTowrdsOn = undefined;  // v nadaljevanju bomo SAMO ČE JE INSTANCA MASTER ob premiku zabeležili, v katero smer je premik,..
                                             // da bojo potem isto še subsi (true za ON/desno, false za OFF/levo);
     
@@ -160,7 +161,7 @@ class Toggle{
     
                 if(this.#subordinates != undefined) { movedTowrdsOn = false; }
     
-            }   // else če se zadeva premika, klik ni veljave oz registriran;
+            }  else console.log('Klik med premikom, ni dovoljeno');
     
             // če je instanca master, po potrebi dregnemo še podrejene instance;
             if (movedTowrdsOn != undefined) {
@@ -168,10 +169,8 @@ class Toggle{
                     if(element.#isOn != movedTowrdsOn) element.#toggle();   // če je sub na levi (false), master pa se je premaknil na desno (true), dregnemo suba;
                 });
             }
-
-            this.#toggleTickt = false;
         } else {
-            console.log('klican doToggle, ampak brez dovoljenja;')
+            console.log('Klican doToggle, ampak brez dovoljenja;')
         }
     }
 
