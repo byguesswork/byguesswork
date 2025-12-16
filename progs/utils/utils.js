@@ -11,11 +11,14 @@ const avgHexInpt2ColrThumb = document.getElementById('avg_hx_inpt2_colr');
 const avgHexResltOutput = document.getElementById('avg_hex_reslt_output');
 const avgHexResltColrThumb = document.getElementById('avg_hx_reslt_colr');
 const btnReset = document.getElementById('btn_reset');
+const infoIcons = document.getElementsByClassName('info_icon_desktop');
 const divAvgHexInfo = document.getElementById('avg_hex_info_icon');
+const divTogglesInfo = document.getElementById('toggles_info_icon');
 const divJokerBckgnd = document.getElementById('joker_bckgnd');
 const divJokerForegnd = document.getElementById('joker_foregnd');
 const divJokerCloseIcon = document.getElementById('joker_close_icon');
 const jokerContent = document.getElementById('joker_content');
+
 
 btnAvgHexCalc.addEventListener('click', (e) => { avgHexValdteCalcBtn(e) });
 document.addEventListener('keydown', (e) => { atKeyDown(e) });  // mora bit keydown, ker keypress ne zaznava Esc (in še kakšne druge tipke);
@@ -24,6 +27,7 @@ btnReset.addEventListener('click', () => {
     inptAvgHex1.focus();
 });
 divAvgHexInfo.addEventListener('click', avgHexInfoClick);
+divTogglesInfo.addEventListener('click', togglesInfoClick);
 divJokerCloseIcon.addEventListener('click', retireJoker);
 
 const resltBckgnd = '#bbbbbb';
@@ -62,19 +66,17 @@ function defineDimensions() {
         divJokerForegnd.style.left = '40px';
         divJokerForegnd.style.right = '40px';
     }
-    if(width < 900) {
-        divAvgHexInfo.style.right = '32px';
-        divAvgHexInfo.style.borderColor = 'whitesmoke'; //  da vzame isto kot color;
-        divAvgHexInfo.style.color = 'whitesmoke';
-        divAvgHexInfo.style.background = '#808080';
+    if(width < 900) { 
+        for(let i = 0; i < infoIcons.length; i++) {
+            infoIcons[i].classList.add('info_icon_white'); // to naredi info krog bel (prej zelen);
+        }
     }
 
      if(mobile) {
         divJokerForegnd.style.top = '120px';
-        divAvgHexInfo.style.position = 'relative';
-        divAvgHexInfo.style.justifySelf = 'end';
-        divAvgHexInfo.style.marginRight = '8px';
-        divAvgHexInfo.style.marginBottom = '12px';
+        for(let i = 0; i < infoIcons.length; i++) {
+            infoIcons[i].classList.add('info_icon_mobile'); // to naredi, da se info krog premakne eno vrstico nad vsebino, da se ne prekriva;
+        }
         document.getElementById('div_avg_hex').style.marginLeft = '24px';
 
         btnAvgHexCalc.style.marginLeft = '8px';
@@ -363,7 +365,7 @@ const regular2 = new Toggle(regular2Div, 'on');
 //  -  -  -  -  -   end toggles  -  -  -  -;
 
 
-//  -  -  -  -  -  -  PRIKAZ  -  -  -  -  ;
+//  -  -  -  -  -  -  PRIKAZ info -  -  -  -  ;
 function avgHexInfoClick() {
     const msg = `A utility with which to calculate the hex value of a color some way between 2 hex code RGB colors on the color wheel.
     <br><br>For hex color inputs, acceptable characters are hex digits (0-9, a-f, A-F).<br>
@@ -371,6 +373,11 @@ function avgHexInfoClick() {
     <br><br>By default the color just middle-of-way between the 2 given colors is output (ratio = 0.5).
     A ratio between 0 and 1 can be selected, meaning the point where the result sits on the way from input 1 to input 2.
     Ratio values outside valid range default to 0.5`;
+    raiseJoker(msg);
+}
+
+function togglesInfoClick() {
+    const msg = `bla`;
     raiseJoker(msg);
 }
 
