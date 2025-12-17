@@ -68,15 +68,16 @@
 &nbsp;&nbsp;&nbsp;&nbsp;}<br>
 }<br><br>
 <p>
-    So someCodeHeavyEventHandler() is public and therefore optimized in the sense of memory management, but its execution is as if it were not public,
-    i.e. it is not possible to run it at will from outside of the class as the pass to run it is granted in the private method that is called only as an event handler.
-    Sort of the best of both worlds (if I understand correctly). 
-    Nothing big really, and nothing new, but within the arc of my journey with learning to program, this was a discovery I came up with by myself and have not
+    So someCodeHeavyEventHandler() is public and therefore optimized in the sense of memory management, but its execution is as if it were 
+    not a public method, since it is not possible to run it at will from outside of the class as the pass to run it (#passGranted, a private 
+    variable that cannot be changed from outside the class) is granted in a private method that is only called in reposnse to a predefined 
+    event (someEvent). Sort of the best of both worlds (if I understand correctly). 
+    Nothing big really, and nothing new, but within the arc of my journey with learning to program, this was a solution I came up with by myself and have not
     learned about elsewhere. In my hobbyist work such moments of eureka are really like the best thing there is. When you set out to solve a conundrum
     and succeed in coming up with an effective and efficient solution it feels like a small victory and the feeling this brings is really like the best thing there is.
 </p>
 <p>
-    It&apos;s also quite interesting how our brains work. When still trying to solve this thing, I remember at a certain point I recalled the singleton pattern from Java,
+    It&apos;s also quite interesting how our brains work. While working to solve this thing, I remember at a certain point I recalled the singleton pattern from Java,
     which is sort of a similar concept (lots of beating around the bush to get to a thing, but in this way making sure to keep it secure),
     and started thinking about it and some minutes later this solution came to my mind. It is as if while you are mulling about something
     the brain combines 1 + 1 in the background and then floats a solution to your consciousness. Quite a beautiful and interesting experience.

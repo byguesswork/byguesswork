@@ -62,14 +62,16 @@ function decToHex(num) {    // prejet mora število od 0-255;
 
 class Toggle{
 
-    #isOn;  // <boolean> - tells, whether the toggle knob is in the "on" position (true; position to the right) or the off position (false, position to the left);
-    #subordinates; // optional - an array containing the nodes that are subordinate to this instancese (which is a "master"); when the master changes (say from on to off) its subordinates change the same way;
+    #isOn;  // <boolean> - when true, the toggle knob is in the "on" state (position to the right), when false, it is in the "off" state (position to the left);
+            // state can be queried with the isOn() getter;
+    #subordinates;  // optional - an array containing Toggle class instances that are subordinate to this instance (which is a "master");
+                    // when the master changes (say from on to off) its subordinates change the same way;
     #toggleTickt; // <boolean> - a granter variable that determines whether the toggle() public method may run; 
                 // was conceived to allow to move the bulk of the code from a private instance method to a public method (whose execution behaves as if it were public due to this ticket);
-    #isUnactionable;    // <boolean> - determines, whether the toggle is inactive or unactionable, i.e. it is not possible to change the position of its knob and the toggle is greyed out;
+    #isUnactionable;    // <boolean> - when true, the toggle is inactive or unactionable, i.e. it is not possible to change the position of its knob and the toggle is greyed out;
 
-    static #areBckgdClrsCmptd = false;  // for computing CSV custom properties;
-    static #areInactveClrsCmptd = false;    // for computing CSV custom properties;
+    static #areBckgdClrsCmptd = false;  // state hold for computing CSV custom properties;
+    static #areInactveClrsCmptd = false;    // state hold for computing CSV custom properties;
 
     constructor(
         divNode, // <div html node> (HTMLDivElement): the html div element in which the toggle will be created; obligatorily a <div>; NOTE: any contents of passed div will be deleted;
@@ -169,6 +171,10 @@ class Toggle{
     //   -  -  konec constructor  - - - - - 
 
     //   -  -  -  -  METODE  -  -  -  - 
+
+    isOn() {    // getter za #isOn;
+        return this.#isOn;
+    }
 
     #toggleGranter() {
         this.#toggleTickt = true;
@@ -274,10 +280,6 @@ class Toggle{
         document.documentElement.style.setProperty('--inactive-bckgnd-off-side', neki);
 
         Toggle.#areInactveClrsCmptd = true;
-    }
-
-    isOn() {    // getter za #isOn;
-        return this.#isOn;
     }
 
     receiveSubHello(sub) {  // s tem se togglu nek drugi toggle (sub) javi, da mu je podrejen (da je "sub" pordejen temu, na katerem je klicana ta metoda); 

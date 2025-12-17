@@ -27,7 +27,33 @@
         <form id="form_avg_hex">
             <h2>Hex color midpoint calculator</h2>
             <legend class="margin-bottom-2 margin-right-50">Find point between two hexadecimal numbers for RGB colors</legend>
-            <fieldset>
+
+            <table class="avg-hex-table">
+                <tr>
+                    <td>1st hex value:</td>
+                    <td><input id="inpt_avg_hex_1" type="text"></td>
+                    <td><span id="avg_hx_inpt1_colr" class="colr-display hidden">&nbsp;&nbsp;</span></td>
+                    <td><input id="inpt_avg_hex_ratio" type="number" placeholder="0.5"><br></td>
+                </tr>
+                <tr>
+                    <td>Result:</td>
+                    <td><span id="avg_hex_reslt_output">&nbsp;&nbsp;</span></td>
+                    <td><span id="avg_hx_reslt_colr" class="colr-display hidden">&nbsp;&nbsp;</span></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>2nd hex value:</td>
+                    <td><input id="inpt_avg_hex_2" type="text"></td>
+                    <td><span id="avg_hx_inpt2_colr" class="colr-display hidden">&nbsp;&nbsp;</span></td>
+                    <td class="no-padding"><button id="btn_avg_hex_calc">Calculate</button><br></td>
+                </tr>
+                <tr id="error_line" class="hidden">
+                    <td>Error:</td>
+                    <td colspan="3"><span id="avg_hex_err_output">&nbsp;&nbsp;</span></td>
+                </tr>
+            </table>
+
+            <!-- <fieldset>
                 1st hex number:&nbsp;<input id="inpt_avg_hex_1" type="text" class="margin-bottom-2">
                 <span id="avg_hx_inpt1_colr" class="colr-display hidden">&nbsp;&nbsp;</span>
                 <input id="inpt_avg_hex_ratio" type="number" placeholder="0.5"><br>
@@ -38,7 +64,7 @@
             <div id="div_reslt">
                 <p>Result: <span id="avg_hex_reslt_output">&nbsp;&nbsp;</span>
                 </p><span id="avg_hx_reslt_colr" class="colr-display hidden">&nbsp;&nbsp;</span><br>
-            </div>
+            </div> -->
             <input id="btn_reset" type="reset" value="Reset">
         </form>
     </div>
