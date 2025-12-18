@@ -22,7 +22,7 @@
     </div>
 
     <!-- hex calc; -->
-    <div id="div_avg_hex">  <!-- oktober 2025 -->
+    <div id="div_avg_hex" class="util_div">  <!-- začeto oktober 2025, nazadnje dec 2025 -->
         <div id="avg_hex_info_icon" class="info_icon_desktop">i</div>
         <form id="form_avg_hex">
             <h2>Hex color midpoint calculator</h2>
@@ -35,7 +35,7 @@
                     <td><span id="avg_hx_inpt1_colr" class="colr-display hidden">&nbsp;&nbsp;</span></td>
                     <td><input id="inpt_avg_hex_ratio" type="number" placeholder="0.5"><br></td>
                 </tr>
-                <tr>
+                <tr id="reslt_row" class="hidden">
                     <td>Result:</td>
                     <td><span id="avg_hex_reslt_output">&nbsp;&nbsp;</span></td>
                     <td><span id="avg_hx_reslt_colr" class="colr-display hidden">&nbsp;&nbsp;</span></td>
@@ -48,30 +48,17 @@
                     <td class="no-padding"><button id="btn_avg_hex_calc">Calculate</button><br></td>
                 </tr>
                 <tr id="error_line" class="hidden">
-                    <td>Error:</td>
-                    <td colspan="3"><span id="avg_hex_err_output">&nbsp;&nbsp;</span></td>
+                    <td colspan="4" class="margin-left-8"><span id="avg_hex_err_output">&nbsp;&nbsp;</span></td>
                 </tr>
             </table>
 
-            <!-- <fieldset>
-                1st hex number:&nbsp;<input id="inpt_avg_hex_1" type="text" class="margin-bottom-2">
-                <span id="avg_hx_inpt1_colr" class="colr-display hidden">&nbsp;&nbsp;</span>
-                <input id="inpt_avg_hex_ratio" type="number" placeholder="0.5"><br>
-                2nd hex number:&nbsp;<input id="inpt_avg_hex_2" type="text" class="margin-bottom-2">
-                <span id="avg_hx_inpt2_colr" class="colr-display hidden">&nbsp;&nbsp;</span>
-                <button id="btn_avg_hex_calc">Calculate</button><br>
-            </fieldset>
-            <div id="div_reslt">
-                <p>Result: <span id="avg_hex_reslt_output">&nbsp;&nbsp;</span>
-                </p><span id="avg_hx_reslt_colr" class="colr-display hidden">&nbsp;&nbsp;</span><br>
-            </div> -->
             <input id="btn_reset" type="reset" value="Reset">
         </form>
     </div>
-    <br><br><br>
+    <br>
 
     <!-- toggles, december 2025 -->
-    <div id="toggles">
+    <div id="toggles" class="util_div">
         <div id="toggles_info_icon" class="info_icon_desktop">i</div>
         <h2 class="margin-right-50">Simple helper class for managing toggles</h2>
         <table>

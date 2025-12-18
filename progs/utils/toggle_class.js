@@ -1,65 +1,5 @@
 'use strict';
 
-// spodnje 3 funkcije vzete iz utils, kjer imajo tudi isto ime, ampak to ni težava; Tu na voljo, da je fajl celovit in uporaben, ne da bi rabil še utils.js;
-// In JavaScript, when you define multiple functions with the same name, the one that appears last will replace the earlier function declarations. This is called "function hosting".
-function avgHexCalc(firstHex, secondHex, ratio) {
-
-    // oba hexa morata biti 6-mestna in veljavna, ratio mora bit med 0 in 1; ni preverjanja za napake;
-    
-    // izračuni;
-    let reslt = ''; // ker je to string, se bojo spodaj številke samodejno spremenile v besedilo;
-    for (let i = 0; 2 * i < firstHex.length; i++) { // ker imata oba isto dolžino (predhodno preverjanje), prverjamo tu samo enega;
-        const firstDec = hex2dec2digits(firstHex.slice(2 * i, 2 * i + 2));
-        const secondDec = hex2dec2digits(secondHex.slice(2 * i, 2 * i + 2));
-        let midOfWayHex;
-        midOfWayHex = decToHex(firstDec + (secondDec - firstDec) * ratio);
-        reslt += midOfWayHex;   // ker je to string se rezultati dodajajo v string;
-    }
-    return reslt;
-}
-
-function hex2dec2digits(niz) {  // prejme 2-mestni hex niz in vrne razpon 0-255;
-    // if (niz.length != 2) {   // trenutno to preverjanje ni potrebno, ker sem pošilja samo, če je dvomestno (in ima le hex znake);
-    //     console.log('predolg ali prekratek niz poslan v hex2dec2digits; niz mora biti dolg točno 2 znaka in predstavljati mora hex vrednost');
-    //     return
-    // }
-    let verHex = [niz[0], niz[1]];  // na nizu (stringu) ni mogoče zagnat forEach, zato v array;
-    verHex.forEach(function (val, i) {
-        if (val === 'a' || val == 'A') verHex[i] = 10; else
-            if (val === 'b' || val == 'B') verHex[i] = 11; else
-                if (val === 'c' || val == 'C') verHex[i] = 12; else
-                    if (val === 'd' || val == 'D') verHex[i] = 13; else
-                        if (val === 'e' || val == 'E') verHex[i] = 14; else
-                            if (val === 'f' || val == 'F') verHex[i] = 15;
-        else verHex[i] = Number(verHex[i]); // za številke od 0-9, ki so do sedaj zapisane kot znaki;
-    })
-    let ver255 = verHex[0] * 16 + verHex[1];
-    return ver255;
-}
-
-function decToHex(num) {    // prejet mora število od 0-255;
-    let quot = Math.floor(num / 16);
-    if (quot > 9) switch (quot) {
-        case (10): quot = 'a'; break;
-        case (11): quot = 'b'; break;
-        case (12): quot = 'c'; break;
-        case (13): quot = 'd'; break;
-        case (14): quot = 'e'; break;
-        case (15): quot = 'f'; break;
-    }
-    let rem = Math.floor(num % 16);
-    if (rem > 9) switch (rem) {
-        case (10): rem = 'a'; break;
-        case (11): rem = 'b'; break;
-        case (12): rem = 'c'; break;
-        case (13): rem = 'd'; break;
-        case (14): rem = 'e'; break;
-        case (15): rem = 'f'; break;
-    }
-    return `${quot}${rem}`;
-}
-
-
 class Toggle{
 
     #isOn;  // <boolean> - when true, the toggle knob is in the "on" state (position to the right), when false, it is in the "off" state (position to the left);
@@ -82,6 +22,12 @@ class Toggle{
                         // info types masterToggle and isUnactionable are mutually exclusive; if both are passed (say as 2nd and 3rd argument), only the master is valid, info calling for isUnactionable is discarded;
                         // if masterToggle: <instance of Toogle class> - optional; tells that this passed masterToggle is the master toggle for the Toggle instance being created;
                         // if isUnactionable: <boolean>: if true, it means the toggle is inactive (unactionable, greyed out), i.e. clicking it does not budge it from its initial state (which can be off or on);
+
+                // examples of use: 
+                // const someToggle = new Toggle(document.getElementById('someDivElement'), 'On'); // toggle that is initially set to "on";
+                // const someSubordinateToogle = new Toggle(document.getElementById('someDivElement2'), masterToogleInstance);  // a toggle that is subordinate (moves same way) to a Toogle class instance named masterToogleInstance;
+                // const someInactiveToggle =  new Toggle(document.getElementById('someDivElement3'), "on", true);  // a toggle that is initially set to "on" and then greyed out (clicking it does not change its state);
+
         // stateOnOrOff_string_optional je zanalašč string (lahko bi bil bool), da lahko preverjamo, kateri podatek se pošilja s katerim argumentom, na podlagi vrste argumenta (string, Toggle, bool);
         // opcija je bila, da bi dal isUnactionable kot bool pred <div html node> potem bi tudi stateOnOrOff lahko bil bool (ali pa njuni mesti zamenjani), med njima pa bi bil div node, da ju razloči;
     ) {
@@ -290,4 +236,65 @@ class Toggle{
         // obenem tudi master podrejenemu vrne svoje stanje;
         return this.#isOn;
     }
+}
+
+
+
+// spodnje 3 funkcije vzete iz utils, kjer imajo tudi isto ime, ampak to ni težava; Tu na voljo, da je fajl celovit in uporaben, ne da bi rabil še utils.js;
+// In JavaScript, when you define multiple functions with the same name, the one that appears last will replace the earlier function declarations. This is called "function hosting".
+function avgHexCalc(firstHex, secondHex, ratio) {
+
+    // oba hexa morata biti 6-mestna in veljavna, ratio mora bit med 0 in 1; ni preverjanja za napake;
+    
+    // izračuni;
+    let reslt = ''; // ker je to string, se bojo spodaj številke samodejno spremenile v besedilo;
+    for (let i = 0; 2 * i < firstHex.length; i++) { // ker imata oba isto dolžino (predhodno preverjanje), prverjamo tu samo enega;
+        const firstDec = hex2dec2digits(firstHex.slice(2 * i, 2 * i + 2));
+        const secondDec = hex2dec2digits(secondHex.slice(2 * i, 2 * i + 2));
+        let midOfWayHex;
+        midOfWayHex = decToHex(firstDec + (secondDec - firstDec) * ratio);
+        reslt += midOfWayHex;   // ker je to string se rezultati dodajajo v string;
+    }
+    return reslt;
+}
+
+function hex2dec2digits(niz) {  // prejme 2-mestni hex niz in vrne razpon 0-255;
+    // if (niz.length != 2) {   // trenutno to preverjanje ni potrebno, ker sem pošilja samo, če je dvomestno (in ima le hex znake);
+    //     console.log('predolg ali prekratek niz poslan v hex2dec2digits; niz mora biti dolg točno 2 znaka in predstavljati mora hex vrednost');
+    //     return
+    // }
+    let verHex = [niz[0], niz[1]];  // na nizu (stringu) ni mogoče zagnat forEach, zato v array;
+    verHex.forEach(function (val, i) {
+        if (val === 'a' || val == 'A') verHex[i] = 10; else
+            if (val === 'b' || val == 'B') verHex[i] = 11; else
+                if (val === 'c' || val == 'C') verHex[i] = 12; else
+                    if (val === 'd' || val == 'D') verHex[i] = 13; else
+                        if (val === 'e' || val == 'E') verHex[i] = 14; else
+                            if (val === 'f' || val == 'F') verHex[i] = 15;
+        else verHex[i] = Number(verHex[i]); // za številke od 0-9, ki so do sedaj zapisane kot znaki;
+    })
+    let ver255 = verHex[0] * 16 + verHex[1];
+    return ver255;
+}
+
+function decToHex(num) {    // prejet mora število od 0-255;
+    let quot = Math.floor(num / 16);
+    if (quot > 9) switch (quot) {
+        case (10): quot = 'a'; break;
+        case (11): quot = 'b'; break;
+        case (12): quot = 'c'; break;
+        case (13): quot = 'd'; break;
+        case (14): quot = 'e'; break;
+        case (15): quot = 'f'; break;
+    }
+    let rem = Math.floor(num % 16);
+    if (rem > 9) switch (rem) {
+        case (10): rem = 'a'; break;
+        case (11): rem = 'b'; break;
+        case (12): rem = 'c'; break;
+        case (13): rem = 'd'; break;
+        case (14): rem = 'e'; break;
+        case (15): rem = 'f'; break;
+    }
+    return `${quot}${rem}`;
 }

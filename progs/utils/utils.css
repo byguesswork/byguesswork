@@ -18,7 +18,7 @@
     margin-right: 8px;
 }
 
-#div_avg_hex {
+.util_div {
     position: relative;
     margin-top: 32px;
     margin-left: 32px;
@@ -117,13 +117,6 @@ input[type="reset"] {
     align-items: center;
 }
 
-/* toggles */
-#toggles {
-    position: relative;
-    margin-left: 24px;
-}
-/*  end toggles */
-
 #sigture {
     position: absolute;
     bottom: 0px;
@@ -182,7 +175,6 @@ input[type="reset"] {
     color: #eeece4;
 }
 
-
 .no-padding {
     padding: 0 0 0 0;
 }
@@ -196,10 +188,11 @@ input[type="reset"] {
 }
 
 h1 {
-    font-size: 20px;
+    font-size: 24px;
 }
 
 h2 {
+    font-size: 20px;
     padding-bottom: 6px;
 }
 
@@ -209,6 +202,10 @@ h2 {
 
 .avg-hex-table tr td {
     padding: 1px 0px 1px 2px;
+}
+
+.avg-hex-table tr td.margin-left-8 {
+    padding: 2px 4px 2px 20px;
 }
 
 .hidden {
