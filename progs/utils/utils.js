@@ -1,7 +1,10 @@
 'use strict';
 
-// 4em, ko mobile
-// avgHex: najprej preverjat, al so nedovoljeni znaki (nima smisla pred tem preverjat al je polje prazno)
+// Mobile 5em - prav zares daj tako
+// Je font res manjsi ko mobile?, ni videt
+// Kako je v mobile postavljen joker, zavesa ne pokrije vsega ko gledas i za toggle
+    // Uporabit fixed, al je ze?
+// morda na nek način še prikaz v tileih, če vneseš le 2 cifri, recimo da bi bila polja neke barve (črna?) in samo menjaš prosojnost glede na sifro;
 // da se pojavi copy to clipboard, ko da rezultat (in izgine ko daš reset ali se pojavi napaka ali kličeš spraznjenje polja za rezultat);
 
 const avgHexHandles = {
@@ -9,11 +12,11 @@ const avgHexHandles = {
     value1_input: document.getElementById('inpt_avg_hex_1'),
     value2_input: document.getElementById('inpt_avg_hex_2'),
     ratio_input: document.getElementById('inpt_avg_hex_ratio'),
-    color1_thumb: document.getElementById('avg_hx_inpt1_colr'), // thumb so una polja, kjer je not prikazana barva;
-    color2_thumb: document.getElementById('avg_hx_inpt2_colr'),
+    color1_tile: document.getElementById('avg_hx_inpt1_colr'), // tile so una polja, kjer je not prikazana barva;
+    color2_tile: document.getElementById('avg_hx_inpt2_colr'),
     reslt_row: document.getElementById('reslt_row'),
     reslt_outputSpan: document.getElementById('avg_hex_reslt_output'),
-    colorResult_thumb: document.getElementById('avg_hx_reslt_colr'),
+    colorResult_tile: document.getElementById('avg_hx_reslt_colr'),
     err_tableRow: document.getElementById('error_line'),
     err_output: document.getElementById('avg_hex_err_output'),
     reset_btn: document.getElementById('btn_reset'),
@@ -26,10 +29,15 @@ const divJokerForegnd = document.getElementById('joker_foregnd');
 const divJokerCloseIcon = document.getElementById('joker_close_icon');
 const jokerContent = document.getElementById('joker_content');
 
-avgHexHandles.calc_btn.addEventListener('click', (e) => { avgHexValdteCalcBtn(e) });
+avgHexHandles.calc_btn.addEventListener('click', (e) => { 
+    e.preventDefault();
+    avgHexValdteCalcBtn(e) 
+});
 document.addEventListener('keydown', (e) => { atKeyDown(e) });  // mora bit keydown, ker keypress ne zaznava Esc (in še kakšne druge tipke);
 avgHexHandles.reset_btn.addEventListener('click', () => { 
-    avgHexClrResltFld();
+    avgHexClrResltFldNTile();    
+    // vnosni polji input1 in 2 se samodejno počistita, ker ima gumb reset nastavljeno type=reset, prav tako se s tem  počisti ratio polje;
+    disactvteInputTiles();  // ploščici z barvo pri inputuh 1 in 2 pa je treba ročno ponastaviti;
     avgHexhideErrRow();
     avgHexHandles.value1_input.focus();
 });
@@ -38,8 +46,18 @@ divTogglesInfo.addEventListener('click', togglesInfoClick);
 divJokerCloseIcon.addEventListener('click', retireJoker);
 
 const avgHex = {
-    lastInteracted: undefined,
+    lastInteractdInput: undefined, // tisto input polje, v katerm si (nazadnje bil);
+    otherThanIntrctd: undefined,    // tisto input polje, ki ni lastInteractdInput;
     isResltRowShown: false,
+    isAreColrTilesShwn: false,
+    inactveTileBckgnd: `linear-gradient(to top right,
+             #bbbbbb 0%,
+             #bbbbbb calc(50% - 0.8px),
+             #555555 50%,
+             #bbbbbb calc(50% + 0.8px),
+             #bbbbbb 100%)`,
+    inactveTileBordrColr: '#555555',
+    activeTileBordrColr: '#404040',
 }
 let mobile = false;
 let divSigture, lesserHeight; // sigture in lesserHeight se bo rabilo, samo če bo mobile;
@@ -47,6 +65,8 @@ let mobileIntervalChecker = null;
 let jokerOpen = false;
 let width;
 
+
+//   -  -  -  -  -   FUNKCIJE  -  -  -  
 function initialize() {
     check4mobile();
     defineDimensions();
@@ -123,20 +143,17 @@ function mobileHozAdjstmsDo() {
 }
 
 function atKeyDown(e) {
-    if(document.activeElement == avgHexHandles.value1_input) avgHex.lastInteracted = document.activeElement;
-        else if(document.activeElement == avgHexHandles.value2_input) avgHex.lastInteracted = document.activeElement; 
+    if(document.activeElement == avgHexHandles.value1_input) {
+        avgHex.lastInteractdInput = avgHexHandles.value1_input;
+        avgHex.otherThanIntrctd = avgHexHandles.value2_input;
+    } else if(document.activeElement == avgHexHandles.value2_input) {
+        avgHex.lastInteractdInput = avgHexHandles.value2_input;
+        avgHex.otherThanIntrctd = avgHexHandles.value1_input;
+    }
     if(e.code == 'Enter') {
         if(e.target == avgHexHandles.value1_input || e.target == avgHexHandles.value2_input) {
             e.preventDefault(); // dam sem in ne prej, ker na gumbu Calculate mora vseeno delat; samo na teh dveh ne sme;
-            let clicked, other;
-            if (e.target == avgHexHandles.value1_input) {
-                clicked = avgHexHandles.value1_input;
-                other = avgHexHandles.value2_input;
-            } else {
-                clicked = avgHexHandles.value2_input;
-                other = avgHexHandles.value1_input;
-            }
-            avgHexChkInptFields(clicked, other);
+            avgHexChkInptFieldsNCalc();
         }
     } else if (e.key == 'Escape' || e.code == 'Esc' || e.code == 'Escape' || e.key == 'Esc') {
         if(jokerOpen) retireJoker();
@@ -145,8 +162,15 @@ function atKeyDown(e) {
 
 
 //  -  -  -  -   Hex sensus stricto  -  -  -  -;
-function avgHexChkInptFields(clicked, other) {
+function avgHexChkInptFieldsNCalc() {
+
+    // preverja po vrstnem redu: najprej avgHex.lastInteractdInput, potem ta drugi, ni pa važno, al je lastInteractdInput input1 ali input2 (slednje je važno pri izračunu rezultata);
     
+    function helper2(which) {
+        if(which == avgHexHandles.value1_input) disactvteTile(avgHexHandles.color1_tile);
+            else disactvteTile(avgHexHandles.color2_tile);
+    }
+
     function helper(which) {
         if(!avgHexChkIfEmpty(which.value)) {
             let hexVal = avgHexChkLgth(which.value);
@@ -155,52 +179,52 @@ function avgHexChkInptFields(clicked, other) {
                     return hexVal;
                 } else {
                     avgHexOutputErrMsg('Invalid characters.<br>Allowed: 0-9, a-f, A-F');
-                    if(!mobile) avgHxFlattnErrLine();
+                    helper2(which);
                     return false;
                 }
             } else {
                 avgHexOutputErrMsg('Input length not OK.<br>Should be 2, 3 or 6 chars (see info icon)');
-                if(!mobile) avgHxFlattnErrLine();
+                helper2(which);
                 return false;
             }
         } else {
             avgHexOutputErrMsg('Input field is empty, enter some data.');
+            helper2(which);
             return false;
         }
     }
     
-    avgHexClrResltFld();
+    avgHexClrResltFldNTile();
     avgHexhideErrRow();
-    const isClickedInput1 = clicked == avgHexHandles.value1_input ? true : false;  // to je pomembno, da pravi input obarvamo s pravo barvo pozneje;
-    const clickedVal = helper(clicked);  // to dela preverjanja in iz 3-mestne naredi 6-mestno;
-    if(clickedVal !== false) {  // treba dat tako preverjanje, ker != najde tudi falsi rezultate, kot je 000000, ki pa je legitimen rezulat;
-        if(other.value.length != 0) {
-            const otherVal = helper(other);
-            if(otherVal !== false) {    // treba dat tako preverjanje, ker != najde tudi falsi rezultate, kot je 000000, ki pa je legitimen rezulat;
-                if(clickedVal.length == otherVal.length) {
+    let informCalcValidator = false;    // če je to true, obvestimo avgHexValdteCalcBtn, da je prvo polje imelo error, da potem ne preverja še drugega polja;
+        // ker če ne je tako, da prvo polje odkrije recimo "Invalid characters", ampak če je drugo prazno, se prikaže error "input field is empty", kar je mal zavajajoče;
+        const lastIntractdInptVal = helper(avgHex.lastInteractdInput);  // to dela preverjanja in iz 3-mestne naredi 6-mestno;
+        if(lastIntractdInptVal !== false) {  // treba dat tako preverjanje, ker != najde tudi falsi rezultate, kot je 000000, ki pa je legitimen rezulat;
+            if(avgHex.otherThanIntrctd.value.length != 0) {
+                const otherVal = helper(avgHex.otherThanIntrctd);
+                if(otherVal !== false) {    // treba dat tako preverjanje, ker != najde tudi falsi rezultate, kot je 000000, ki pa je legitimen rezulat;
+                    if(lastIntractdInptVal.length == otherVal.length) {
                     // da pošljemo vedno tako , da 1. argument pošilja podatek za 1. (gornji) input;
-                    if(isClickedInput1) avgHexCalcNDisplay(clickedVal, otherVal);
-                        else avgHexCalcNDisplay(otherVal, clickedVal);
+                    if(avgHex.lastInteractdInput == avgHexHandles.value1_input) {
+                        avgHexCalcNDisplay(lastIntractdInptVal, otherVal);
+                    } else {
+                        avgHexCalcNDisplay(otherVal, lastIntractdInptVal);
+                    }
                 } else {
                     avgHexOutputErrMsg('The 2 inputs shall be of same length.<br>Length of 3 counts as length of 6');
-                    if(!mobile) avgHxFlattnErrLine();
                 }
-            } else {other.focus(); } // če je v drugi celici napaka (izpisana v helperju), se prestavimo tja;
+            } else {avgHex.otherThanIntrctd.focus(); } // če je v drugi celici napaka (izpisana v helperju), se prestavimo tja;
         } else {
-            other.focus();
+            avgHex.otherThanIntrctd.focus();
             avgHexhideErrRow(); // da izbrišemo morebitni error v reslt fld;
-            // avgHexClrResltFld(); // včasih, ko je eno polje bilo za reslt in err, je bila ta vrstica;
         }
-    } // elze nič, ker če je clicked false, čakamo, error je bil že izpisan;
+    } else informCalcValidator = true;
+    return informCalcValidator; // to vrednost bere/rabi samo avgHexValdteCalcBtn, opisano zgoraj, zakaj; glej tudi dotično fx;
 }
 
 function avgHexOutputErrMsg(msg) {
     avgHexHandles.err_tableRow.classList.remove('hidden');
     avgHexHandles.err_output.innerHTML = msg;
-}
-
-function avgHxFlattnErrLine() {
-
 }
 
 function avgHexChkIfEmpty(passdStr) {
@@ -233,21 +257,17 @@ function avgHcChkCharsValid(passdStr) {
     return reslt;
 }
 
-function avgHexValdteCalcBtn(e) {
-    e.preventDefault();
-    let focused, other;
-    if(avgHex.lastInteracted == avgHexHandles.value1_input) {
-        focused = avgHexHandles.value1_input;
-        other = avgHexHandles.value2_input;
-    } else {
-        focused = avgHexHandles.value2_input;
-        other = avgHexHandles.value1_input;
-    }
-    focused.focus();    // nazadnje obdelanemu vrnemo fokus, ker ob kliku na gumb dobi gumb fokus;
-    avgHexChkInptFields(focused, other);
-    // ker obstaja možnost, da je eno polje prazno (do zdaj te je samo dalo vanj, ker taka je funkcionalnost, če pritisneš enter) ..
-    // .. je treba še preverit za praznost katerega od polj;
-    if(focused.value.length == 0 || other.value.length == 0) avgHexOutputErrMsg('Input field is empty, enter some data.');
+// rabi se samo za klik na gumb Calculate;
+function avgHexValdteCalcBtn(e) {   // za enter se ne rabi, ker nima veze, da ti izpiše error, ko na prvem polju stisneš enter, samo prestavi te v drugega;
+    // nazadnje obdelanemu vrnemo fokus, ker ob kliku na gumb dobi gumb fokus;
+    avgHex.lastInteractdInput.focus();
+    const firstFieldFailed = avgHexChkInptFieldsNCalc();
+    // ker obstaja možnost, da je eno polje prazno (do zdaj te je samo dalo vanj, ker taka je funkcionalnost pri avgHexChkInptFieldsNCalc(), ..
+    // .. saj ob pristisku na enter (tudi uporablja avgHexChkInpt...) te samo prestavi v naslednje polje), je treba še preverit za praznost drugega polja;
+    if(!firstFieldFailed && (avgHex.lastInteractdInput.value.length == 0 || avgHex.otherThanIntrctd.value.length == 0)) {
+        avgHexOutputErrMsg('Input field is empty, enter some data.');
+        console.log('poseben primer');
+    };
 }
 
 // za rabo v ozadju, v kodi
@@ -298,34 +318,48 @@ function avgHexCalcNDisplay(firstHex, secondHex) {
 
     // morebiten izris barv;
     if(reslt.length == 6) {
-        avgHexHandles.color1_thumb.style.background = `#${firstHex}`;
-        avgHexHandles.color2_thumb.style.background = `#${secondHex}`;
-        avgHexHandles.colorResult_thumb.style.background = `#${reslt}`;
-        avgHexShowColorThumbs();
+        renderColorTile(avgHexHandles.color1_tile, "#" + firstHex);
+        renderColorTile(avgHexHandles.color2_tile, `#${secondHex}`);
+        renderColorTile(avgHexHandles.colorResult_tile, `#${reslt}`);
+        
+        // to se izvede samo enkrat;
+        if(!avgHex.isAreColrTilesShwn) {
+            avgHexShowColorTiles();
+            avgHex.isAreColrTilesShwn = true;
+        }
     }
     // console.log('rezultat:', reslt);
     console.log('- - - - - -');
 }
 
-function avgHexClrResltFld() {
-    avgHexHandles.reslt_outputSpan.innerHTML = '&nbsp;&nbsp;';   // mora imet nbst, ker elemtn nima določene višine, brez nbsp bi se sesedel;
-    avgHexHideColorThumbs();
+function renderColorTile(tile, colr) {
+    tile.style.borderColor = avgHex.activeTileBordrColr;
+    tile.style.background = colr;
+}
+
+function avgHexClrResltFldNTile() {
+    avgHexHandles.reslt_outputSpan.innerHTML = '&nbsp;&nbsp;';   // mora imet nbsp, ker elemnt nima določene višine, brez nbsp bi se sesedel;
+    disactvteTile(avgHexHandles.colorResult_tile);
+}
+
+function disactvteInputTiles() {    // to je mišljeno disactivate color tiles of inputs (input1 in input2)
+    disactvteTile(avgHexHandles.color1_tile);
+    disactvteTile(avgHexHandles.color2_tile);
+}
+
+function disactvteTile(tile) {  // to je mišljeno, da uno ploščico, kjer je not prikazana barva, izrišeš kot neaktivno, tj sivo in prečrtano;
+    tile.style.borderColor = avgHex.inactveTileBordrColr;
+    tile.style.background = avgHex.inactveTileBckgnd;
 }
 
 function avgHexhideErrRow(){
     avgHexHandles.err_tableRow.classList.add('hidden');
 }
 
-function avgHexHideColorThumbs() {
-    avgHexHandles.colorResult_thumb.classList.add('hidden');
-    avgHexHandles.color1_thumb.classList.add('hidden');
-    avgHexHandles.color2_thumb.classList.add('hidden');
-}
-
-function avgHexShowColorThumbs() {
-    avgHexHandles.colorResult_thumb.classList.remove('hidden');
-    avgHexHandles.color1_thumb.classList.remove('hidden');
-    avgHexHandles.color2_thumb.classList.remove('hidden');
+function avgHexShowColorTiles() {   // ta se izvede samo enkrat;
+    avgHexHandles.colorResult_tile.classList.remove('hidden');
+    avgHexHandles.color1_tile.classList.remove('hidden');
+    avgHexHandles.color2_tile.classList.remove('hidden');
 }
 
 function decToHex(num) {    // prejet mora število od 0-255;
@@ -406,8 +440,8 @@ function avgHexInfoClick() {
 
 function togglesInfoClick() {
     const msg = `An exercise in creating a reusable class, in this case for creating and using toggles.<br><br>
-    By adding two files that can be saved/downloaded from this web page (toggle_class.js and toggle.css) to a html project,
-    all is ready to use such toggles (info in toggle_class.js).`;
+    By adding two files that can be saved/downloaded from this web page to a html project, all is ready to use such toggles
+    (the 2 files are toggle_class.js and toggle.css; info on use method in toggle_class.js).`;
     raiseJoker(msg);
 }
 

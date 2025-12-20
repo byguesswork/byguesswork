@@ -69,7 +69,7 @@
 }
 /* end - info icon(s) */
 
-input[type="text"], input[type="number"], #avg_hex_reslt_output {
+input[type="text"], input[type="number"] {
     background: #dad9d9;
     padding: 1px 2px;
     width: 6em;
@@ -104,7 +104,7 @@ input[type="reset"] {
 #avg_hex_reslt_output {
         display: inline-block;
         background: #bbbbbb;
-        width: 4em;
+        width: 5em;
 }
 
 #avg_hex_err_output {
