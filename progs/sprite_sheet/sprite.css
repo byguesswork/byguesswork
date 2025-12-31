@@ -5,9 +5,9 @@
     font-family: Helvetica, Arial, sans-serif;
 }
 
-body {
+/* body {
     position: relative;
-}
+} */
 
 #no_collapse {
     background: transparent;
@@ -21,13 +21,14 @@ body {
     border: 1px solid black;
 }
 
-#canvas2 {
+#canvas {
     display: none;
     position: absolute;
     border: 1px solid black;
 }
 
 .center {
+    position: relative;
     display: block;
     margin: 0px  auto;
     width: 600px;

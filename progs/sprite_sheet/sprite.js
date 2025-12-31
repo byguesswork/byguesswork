@@ -1,18 +1,9 @@
 'use strict';
 
-
-// tetris popravit linke
-// tetris naredit, da je no click
-// oblaki već njih
-// konec igre
-// mal pavze pred animPt2
-
-
-//  -  -  -  -  -  -  -  
 const bckgndcnvs = document.getElementById('bckgnd-canvas');
 const ctxBckgnd = bckgndcnvs.getContext('2d');
-const canvas2 = document.getElementById('canvas2');
-const ctx2 = canvas2.getContext('2d');       
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');       
 
 const R = 'r';
 const L = 'l';
@@ -92,7 +83,7 @@ class Screen {
         const thisScreen = Screen.screens[Screen.currScreen];
 
         // izbrišemo ospredje;
-        ctx2.clearRect(0, 0, Screen.width, Screen.height);
+        ctx.clearRect(0, 0, Screen.width, Screen.height);
 
         // naložimo ovire;
         ovire.length = 0;   // da izbrišeš vsebino;
@@ -108,26 +99,26 @@ class Screen {
     }
 
     static endAnimationPt2() {
-        ctx2.clearRect(390,170,200,100);
+        ctx.clearRect(390,170,200,100);
         Screen.counter += 4;
-        ctx2.font = `${Screen.counter}px serif`;
-        ctx2.strokeText('The End', 400, 180 + Screen.counter)    // 48 končna
+        ctx.font = `${Screen.counter}px serif`;
+        ctx.strokeText('The End', 400, 180 + Screen.counter)    // 48 končna
         if(Screen.counter >= 48) {
             clearInterval(intervalIDs.endAnim);
         }
     }
 
     static endAnimationPt1() {
-        ctx2.clearRect(420, 170, 95, 175);
-        ctx2.drawImage(endAnimPics, (Screen.counter % 10) * 96 + 1, 0, 94, 175, 420, 170, 94, 175);
+        ctx.clearRect(420, 170, 95, 175);
+        ctx.drawImage(endAnimPics, (Screen.counter % 10) * 96 + 1, 0, 94, 175, 420, 170, 94, 175);
         Screen.counter++;
         if(Screen.counter >= 40) {
             clearInterval(intervalIDs.endAnim);
-            ctx2.clearRect(420, 170, 95, 175);
+            ctx.clearRect(420, 170, 95, 175);
             setTimeout(() => {
                 Screen.counter = 8; // velikost fonta;
-                ctx2.font = "8px serif";
-                ctx2.strokeText('The End', 400, 180 + Screen.counter)    // 48 končna velikost fonta
+                ctx.font = "8px serif";
+                ctx.strokeText('The End', 400, 180 + Screen.counter)    // 48 končna velikost fonta
                 intervalIDs.endAnim = setInterval(Screen.endAnimationPt2, 60);
             }, 800);
         }
@@ -149,10 +140,10 @@ class ScreenObj {
 
     render(toColor) {   // ali naj nariše v barvi ali v ne (če false, se izriše prozoren oz. se izbriše)
         if(toColor) {
-            ctx2.drawImage(assets, this.sx, this.sy, this.width, this.height, this.xPos, (Screen.height - this.yPos) - this.height, this.width, this.height)
+            ctx.drawImage(assets, this.sx, this.sy, this.width, this.height, this.xPos, (Screen.height - this.yPos) - this.height, this.width, this.height)
             // console.log('vert frames:', this.vertFrames, this.yPos)  // da preverimo, kolko v višino je skočil;
         } else {
-            ctx2.clearRect(this.xPos, Screen.height - (this.yPos + this.height), this.width, this.height)
+            ctx.clearRect(this.xPos, Screen.height - (this.yPos + this.height), this.width, this.height)
         }
     }
 }
@@ -451,7 +442,7 @@ class Sprite extends ScreenObj {
 
 function startClouds() {
     // shranit nebo za oblaki;
-    behindClouds = ctxBckgnd.getImageData(0, 30, Screen.width, clouds.height + 30);
+    cloudsStarts.skyBehindClouds = ctxBckgnd.getImageData(0, 30, Screen.width, clouds.height + 30);
     for (const cloud  of cloudsStarts.farther) {
         ctxBckgnd.drawImage(clouds, 280, 0, 193, 60, cloud, 87, 193, 60);
     }
@@ -463,7 +454,7 @@ function startClouds() {
 
 function doClouds() {
     // izrisat čisto nebo za oblaki;
-    ctxBckgnd.putImageData(behindClouds, 0, 30);
+    ctxBckgnd.putImageData(cloudsStarts.skyBehindClouds, 0, 30);
     intervalIDs.cloudsCounter++;
     // oddaljeni oblaki;
     if(cloudsStarts.farther.length > 0) {
@@ -498,14 +489,14 @@ function doClouds() {
 
 //  -  -  -   IZVAJANJE -- -- --
 
+bckgndcnvs.width = Screen.width;
+bckgndcnvs.height = Screen.height;
+canvas.width = Screen.width;
+canvas.height = Screen.height;
+
 document.addEventListener("DOMContentLoaded", positionCanvs);
 document.addEventListener('keydown', keyDownHndlr);
 document.addEventListener('keyup', keyUpHndlr);
-
-bckgndcnvs.width = Screen.width;
-bckgndcnvs.height = Screen.height;
-canvas2.width = Screen.width;
-canvas2.height = Screen.height;
 
 const intervalIDs = {   // mora bit pred bckgndPics.onload, ker se tam rabi;
     main: 0,
@@ -515,23 +506,25 @@ const intervalIDs = {   // mora bit pred bckgndPics.onload, ker se tam rabi;
     endAnim: 0, // ID za končno animacijo;
 };
 
-const bckgndPics = new Image();
-bckgndPics.src = 'bckScr2.png';
-const clouds = new Image();
-let behindClouds;
+// loadanje ozadja;
+const clouds = new Image(); // tu sta sliki oblakov; odvijajo se na canvasu ozadja; src določimo pozneje;
 const cloudsStarts = {
+    skyBehindClouds: undefined,
     farther: [-170, 220, 450],
     closer: [-270, 20, 470]
 }
+
+const bckgndPics = new Image(); // tu je slika pokrajine; prikazana je na canvasu ozadja;
+bckgndPics.src = 'bckScr2.png';
 bckgndPics.onload = function() {
     ctxBckgnd.drawImage(bckgndPics, 0, 0, 600, 420, 0, 0, 600, 420);
     clouds.src = 'cloud.png';
     clouds.onload = startClouds;
 }
 
-const assets = new Image();
-assets.src = 'sprites3.png';
-let endAnimPics = new Image();
+// loadanje ospredja;
+const assets = new Image(); // src se naloada v handlerju positionCanvs();
+const endAnimPics = new Image();    // to bi lahko spravil v assets ...;
 
 const sprite = new Sprite(500, 0, 85);
 const ovire = [];
@@ -542,17 +535,54 @@ const exits = {
 
 
 function positionCanvs() {
-    // poravnamo delovni canvas s sanvasom ozadja;
-    let left = bckgndcnvs.getBoundingClientRect().left;
-    let top = bckgndcnvs.getBoundingClientRect().top;
-    canvas2.style.display = 'unset';    // prej mora bit skrit, sicer vpliva na postavitev ozadnega canvasa, ki se potem premakne po premiku tega;
-    canvas2.style.top = `${top}px`;
-    canvas2.style.left = `${left}px`;
     
+    function helper(lesserWidth) {
+        console.log('+a smo')
+        let newCenterWidth = lesserWidth - 24;  // 12 px placa L/D;
+        if(newCenterWidth % 2 == 1) newCenterWidth--;   // da je sodo število;
+        document.getElementsByClassName('center')[0].style.width = `${newCenterWidth}px`;
+    
+        const ratio = (newCenterWidth - 2) / Screen.width;  // -2, ker je treba odsštet border od canvasa, ki mora priti v center;
+        const newWidth = ratio * Screen.width;
+        const newHeight = ratio * Screen.height;
+        bckgndcnvs.style.width = `${newWidth}px`;
+        bckgndcnvs.style.height = `${newHeight}px`;
+        // obenem nastavimo isto dimenzijo tudi kanvacu ospredja, čeprav je zdaj še skrit;
+        canvas.style.width = `${newWidth}px`;
+        canvas.style.height = `${newHeight}px`;
+    }
+
+    // preverjanje dimenzij, ali je morda treba zmanjšat canvas (pred tem pa centerwrapper);
+    const lesserWidth = document.documentElement.clientWidth <= screen.width ? document.documentElement.clientWidth : screen.width;
+    console.log('document.documentElement.clientWidth:', document.documentElement.clientWidth, 'screen.width:', screen.width, 'lesser', lesserWidth);
+    if(lesserWidth < 624) { helper(lesserWidth) }
+    
+    // ker se zadeve pri spreminjanju velikosti lahko spremenijo (pojavi se kak drsnik), znova odčitamo in preverimo še enkrat;
+    const newLesserWidth = document.documentElement.clientWidth <= screen.width ? document.documentElement.clientWidth : screen.width;
+    console.log('document.documentElement.clientWidth:', document.documentElement.clientWidth, 'screen.width:', screen.width, 'lesser', newLesserWidth);
+    if(newLesserWidth < lesserWidth) { helper(newLesserWidth) }
+    console.log('širina canvasa:', bckgndcnvs.getBoundingClientRect().width - 2); // -2 ker rect upošteva tudi border, nas pa zanima canvas;
+
+    // poravnamo delovni canvas s canvasom ozadja (da se prekrivata);
+    const centerRect = document.getElementsByClassName('center')[0].getBoundingClientRect();
+    const centerTop = centerRect.top;
+    const centerLeft = centerRect.left;
+    console.log('center top/left:', centerTop, centerLeft)
+    const bckgndTop = bckgndcnvs.getBoundingClientRect().top;
+    const bckgndLeft = bckgndcnvs.getBoundingClientRect().left;
+    console.log('bckgndCanvas top/left:', bckgndTop, bckgndLeft)
+    // ker je canvas absolute glede na center, moramo izračunat razliko (ne moremo mu določit top in left absolutno gledano, ampak relativno na center);
+    const canvasTop = bckgndTop - centerTop;
+    const canvasLeft = bckgndLeft - centerLeft; 
+    canvas.style.display = 'unset';    // prej mora bit skrit, sicer vpliva na postavitev ozadnega canvasa, ki se potem premakne po premiku tega;
+    canvas.style.top = `${canvasTop}px`;
+    canvas.style.left = `${canvasLeft}px`;
+    
+    assets.src = 'sprites3.png';
     assets.onload = function() {
         // naložimo cel zaslon (ospredje);
         Screen.load(); // currScreen je po defaultu 0;
-        // tle lahko leno nalagamo endAnim slikec;
+        // tle lahko leno nalagamo endAnim slikce;
         endAnimPics.src = 'sprites2.jpg';
     }
 }

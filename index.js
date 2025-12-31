@@ -154,12 +154,8 @@ function init() {
 
   // dinamično nastavit linke za appe (samo na strani index.html);
   if (fuelLink != null) {
-    if (navigator.language != '') {
-      langString = navigator.language;
-    } else if (navigator.userLanguage != '') {
-      langString = navigator.userLanguage;
-    };
-    if (langString == 'sl' || langString == 'sl-si' || langString == 'sl-SI' || langString == 'si') {
+    
+    if (langString == 'sl') {
       fuelLink.href = "app/fuel/sl/index.html";
     } else {
       fuelLink.href = "app/fuel/en/index.html";
