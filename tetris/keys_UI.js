@@ -70,13 +70,24 @@ function assignGameDirectionKeys() {
 function atKeyPress(e) {
     if (!controlsTemporarilyOff) {
         if (isAGameRunning && !isGamePaused) {
-            if (e.key === keyForMovementLeft) { maneuver('left'); return };
-            if (e.key === keyForMovementRight) { maneuver('right'); return };
+            if (e.key === keyForMovementLeft) {
+                e.preventDefault();
+                maneuver('left');
+                return;
+            };
+            if (e.key === keyForMovementRight) { 
+                e.preventDefault();
+                maneuver('right');
+                return };
             if (e.key === keyForFasterMvmtDown) {
+                e.preventDefault();
                 if (canFormMoveDownHuh()) moveForm('down');
                 return;
             }
-            if (e.key === keyForRotation || e.key === 'Enter') { rotate(); return };
+            if (e.key === keyForRotation || e.key === 'Enter') {
+                e.preventDefault();
+                rotate();
+                return };
             if (e.key === " " || e.code === 'ControlRight') { actionWhenSpacePressed(); return };
         };
 

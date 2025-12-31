@@ -52,9 +52,9 @@ function displayHighScores() {
                 <td colspan="6">&nbsp;&nbsp;ALL-TIME HIGH SCORES !</td>
             </tr>
             <tr>
-                <td>Rank</td>
-                <td>Score</td>
+                <td></td>
                 <td>Name</td>
+                <td>Score</td>
                 <td>Date</td>
                 <td>Grid</td>
                 <td>Interval</td>
@@ -64,9 +64,9 @@ function displayHighScores() {
             <td colspan="6">&nbsp;&nbsp;NAJVEČJE LEGENDE VSEH ČASOV!</td>
         </tr>
         <tr>
-            <td>X&nbsp;</td>
-            <td>točk</td>
+            <td></td>
             <td>ime</td>
+            <td>točke</td>
             <td>datum</td>
             <td>igr.polje</td>
             <td>interval</td>
@@ -78,8 +78,8 @@ function displayHighScores() {
             innerText = `
             <tr>
                 <td>${i + 1} </td>
-                <td>${el.score} </td>
                 <td>${el.name} </td>
+                <td>${el.score} </td>
                 <td style='font-size:13px'>${el.date}</td>
                 <td style='font-size:13px'>${el.grid}</td>
                 <td style='font-size:12px'>${intervalText}</td>

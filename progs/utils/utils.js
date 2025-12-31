@@ -1,7 +1,7 @@
 'use strict';
 
 // Mobile 5em - prav zares daj tako
-// Je font res manjsi ko mobile?, ni videt
+// Je font res manjsi ko mobile?, ni videt (v DuckDuckGo ni popravka velikosti, v Edge je)
 // Kako je v mobile postavljen joker, zavesa ne pokrije vsega ko gledas i za toggle
     // Uporabit fixed, al je ze?
 // morda na nek način še prikaz v tileih, če vneseš le 2 cifri, recimo da bi bila polja neke barve (črna?) in samo menjaš prosojnost glede na sifro;
@@ -306,7 +306,6 @@ function avgHexCalcNDisplay(firstHex, secondHex) {
         const secondDec = hex2dec2digits(secondHex.slice(2 * i, 2 * i + 2));
         let midOfWayHex;
         midOfWayHex = decToHex(firstDec + (secondDec - firstDec) * ratio);
-        // midOfWayHex = decToHex((firstDec + secondDec) / 2);
         reslt += midOfWayHex;   // ker je to string se rezultati dodajajo v string;
         // console.log(firstHex.slice(2 * i, 2 * i + 2), secondHex.slice(2 * i, 2 * i + 2), 'vmesna vrednost:', midOfWayHex);
     }
@@ -328,8 +327,6 @@ function avgHexCalcNDisplay(firstHex, secondHex) {
             avgHex.isAreColrTilesShwn = true;
         }
     }
-    // console.log('rezultat:', reslt);
-    console.log('- - - - - -');
 }
 
 function renderColorTile(tile, colr) {
@@ -384,11 +381,7 @@ function decToHex(num) {    // prejet mora število od 0-255;
     return `${quot}${rem}`;
 }
 
-function hex2dec2digits(niz) {  // prejme 2-mestni hex niz in vrne razpon 0-255;
-    // if (niz.length != 2) {   // trenutno to preverjanje ni potrebno, ker sem pošilja samo, če je dvomestno (in ima le hex znake);
-    //     console.log('predolg ali prekratek niz poslan v hex2dec2digits; niz mora biti dolg točno 2 znaka in predstavljati mora hex vrednost');
-    //     return
-    // }
+function hex2dec2digits(niz) {  // prejme 2-mestni hex niz (obvezno, ker ni preverjanja tukaj) in vrne razpon 0-255;
     let verHex = [niz[0], niz[1]];  // na nizu (stringu) ni mogoče zagnat forEach, zato v array;
     verHex.forEach(function (val, i) {
         if (val === 'a' || val == 'A') verHex[i] = 10; else

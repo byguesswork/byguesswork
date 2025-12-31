@@ -30,6 +30,7 @@ const themeQ = '?theme=blue'; // query za določanje modre teme;
 
 let lesserWidth;
 let isMobile = false;
+let langString = 'en';
 let isFirstTimeOneColumn = true;
 let isBlueTheme = false; 
 
@@ -108,7 +109,20 @@ function doBlue () {
 
 
 function init() {
-  // if (forTest != null) forTest.innerHTML = `forDebug`;
+  // jezik;po defaultu je 'en', tukaj pa lahko postane 'sl';
+  if (navigator.language != '') {
+    const aa = navigator.language;
+    if (aa == 'sl' || aa == 'sl-si' || aa == 'sl-SI' || aa == 'si') langString = 'sl';
+  } else if (navigator.userLanguage != '') {
+    const aa = navigator.userLanguage;
+    if (aa == 'sl' || aa == 'sl-si' || aa == 'sl-SI' || aa == 'si') langString = 'sl';
+  };
+
+  if(langString == 'sl') {
+    if (tetrisLink != null) tetrisLink.href = "tetris/tetris_SL.html";  // ta se v primeru mobile sicer še enkrat spremeni, ampak nič zato;
+    if(document.getElementById('risarLink') != null) document.getElementById('risarLink').href='risar/sorta-paint_SL.html'
+  }
+
   if (navigator.userAgent.match(/(android|iphone|ipad)/i) != null) {    // todo to bi veljalo izboljšat s čekiranjem še širine
     isMobile = true;
     // dinamično nastavimo href takoj po prihodu na stran (samo na index.html);
@@ -136,13 +150,10 @@ function init() {
       programs_arr.forEach(p => { inflate(p) });
     }
 
-  } else {
-    if (tetrisLink != null) tetrisLink.href = "tetris/tetris_EN.html";  // link za tetris, če stran ni prikazana mobile (koda relevantna samo za index.html);
   }
 
   // dinamično nastavit linke za appe (samo na strani index.html);
   if (fuelLink != null) {
-    let langString = 'en';
     if (navigator.language != '') {
       langString = navigator.language;
     } else if (navigator.userLanguage != '') {

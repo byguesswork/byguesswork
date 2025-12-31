@@ -1,0 +1,38 @@
+* {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-family: Helvetica, Arial, sans-serif;
+}
+
+body {
+    position: relative;
+}
+
+#no_collapse {
+    background: transparent;
+    height: 16px;
+    width: 36px;
+}
+
+#bckgnd-canvas {
+    display: block;
+    margin: 100px  auto;
+    border: 1px solid black;
+}
+
+#canvas2 {
+    display: none;
+    position: absolute;
+    border: 1px solid black;
+}
+
+.center {
+    display: block;
+    margin: 0px  auto;
+    width: 600px;
+}
+
+p {
+    margin-bottom: 8px;
+}

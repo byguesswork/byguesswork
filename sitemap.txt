@@ -18,6 +18,7 @@ https://byguesswork.org/progs/wormhole/wormhole.html
 https://byguesswork.org/progs/3D_models/threeDmodels.html
 https://byguesswork.org/progs/utils/utils.html
 https://byguesswork.org/progs/polyrhythm/polyrhythm.html
+https://byguesswork.org/progs/sprite_sheet/sprite_sheet.html
 https://byguesswork.org/app/igrajmose/privacy/privacy_en.html
 https://byguesswork.org/app/fuel/en/index.html
 
