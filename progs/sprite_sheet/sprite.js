@@ -8,11 +8,10 @@ const ctxBckgnd = bckgndcnvs.getContext('2d');
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');       
 
-const R = 'r';
-const L = 'l';
-const MAIN = 'main';
+const R = 'r';  // kot right pri pritiskanju tipk na tipkovnci;
+const L = 'l';  // kot left;
+const MAIN = 'main'; // interval identifier;
 const TURN = 'turn';
-const CLOUDS = 'clouds';
 
 
 class Screen {
@@ -20,6 +19,11 @@ class Screen {
     static width = 600;
     static currScreen = 0;
     static endAnimCounter = 0; // se rabi za končno animacijo;
+    static ovire = [];
+    static exits = {
+        right: undefined,
+        left: undefined,
+    }
 
     static catalogue = {
         turf10_40 : {
@@ -46,8 +50,8 @@ class Screen {
         // 1 zaslon;
         {
             ovire: [
-                {type: 'turfLevitating', x: 280, y: 40},
-                {type: 'turfLevitating', x: 300, y: 160}, // orig 300 160
+                {type: 'turfLevitating', x: 280, y: 30},
+                {type: 'turfLevitating', x: 300, y: 160},
                 {type: 'turfLevitating', x: 100, y: 100},
                 {type: 'turfLevitating', x: 500, y: 220},
                 {type: 'turfLevitating', x: 560, y: 220},
@@ -120,10 +124,10 @@ class Screen {
         ctx.clearRect(0, 0, Screen.width, Screen.height);
 
         // naložimo ovire;
-        ovire.length = 0;   // da izbrišeš vsebino;
+        Screen.ovire.length = 0;   // da izbrišeš vsebino;
         for(let i = 0; i < thisScreen.ovire.length; i++) {
             const type = thisScreen.ovire[i].type;
-            ovire.push(new ScreenObj(thisScreen.ovire[i].x, thisScreen.ovire[i].y,
+            Screen.ovire.push(new ScreenObj(thisScreen.ovire[i].x, thisScreen.ovire[i].y,
                 Screen.catalogue[type].sx,
                 Screen.catalogue[type].sy,
                 Screen.catalogue[type].width,
@@ -134,8 +138,25 @@ class Screen {
         // narišemo možička (položaj mu je vselej določen že predhodno);
         sprite.render(true);
 
-        exits.right = thisScreen.exits.right;
-        exits.left = thisScreen.exits.left;
+        // naložimo izhode iz ekrana;
+        Screen.exits.right = thisScreen.exits.right;
+        Screen.exits.left = thisScreen.exits.left;
+    }
+
+    static endAnimationPt1() {
+        ctx.clearRect(420, 170, 95, 175);
+        ctx.drawImage(endAnimPics, (Screen.endAnimCounter % 10) * 96 + 1, 0, 94, 175, 420, 160, 94, 175);
+        Screen.endAnimCounter++;
+        if(Screen.endAnimCounter >= 40) {
+            clearInterval(intervalIDs.endAnim);
+            ctx.clearRect(420, 160, 95, 175);
+            setTimeout(() => {
+                Screen.endAnimCounter = 8; // velikost fonta;
+                ctx.font = "8px serif";
+                ctx.strokeText('The End', 400, 180 + Screen.endAnimCounter)    // 48 končna velikost fonta
+                intervalIDs.endAnim = setInterval(Screen.endAnimationPt2, 60);
+            }, 1000);
+        }
     }
 
     static endAnimationPt2() {
@@ -145,22 +166,6 @@ class Screen {
         ctx.strokeText('The End', 400, 180 + Screen.endAnimCounter)    // 48 končna
         if(Screen.endAnimCounter >= 48) {
             clearInterval(intervalIDs.endAnim);
-        }
-    }
-
-    static endAnimationPt1() {
-        ctx.clearRect(420, 170, 95, 175);
-        ctx.drawImage(endAnimPics, (Screen.endAnimCounter % 10) * 96 + 1, 0, 94, 175, 420, 170, 94, 175);
-        Screen.endAnimCounter++;
-        if(Screen.endAnimCounter >= 40) {
-            clearInterval(intervalIDs.endAnim);
-            ctx.clearRect(420, 170, 95, 175);
-            setTimeout(() => {
-                Screen.endAnimCounter = 8; // velikost fonta;
-                ctx.font = "8px serif";
-                ctx.strokeText('The End', 400, 180 + Screen.endAnimCounter)    // 48 končna velikost fonta
-                intervalIDs.endAnim = setInterval(Screen.endAnimationPt2, 60);
-            }, 800);
         }
     }
 }
@@ -206,10 +211,10 @@ class Sprite extends ScreenObj {
         this.sy = 0;   // y koordinata slike sprajta na source sliki; sy v pomenu, kot ga ima v drawImage(); je vedno 0;
         this.sxBase = 43; // ker ima sprajt več sličic, je tu shranjen sx začetne sličice, ostale se preračunajo iz te;
         // gibanje sprajta;
-        this.vertSpeed = 0;
+        this.vertSpeed = 0; // v px; število pikslov, koliko se sprajt premakne navzgor (poz)/navzdol (neg) v enem turnu;
         this.vertFrames = 0; // koliko framov že poteka gibanje gor oz je že pritisnjen gumb za gor;
         this.upContinuslyPressd = false;    // če ne držiš gumba za gor, ampak ga samo na kratko pritisneš, je skok nižji;
-        this.latSpeed = 0; // poz v desno, neg v levo;
+        this.latSpeed = 0; // poz v desno, neg v levo; št. pikslov (px), klikor se sprajt premakne L/D v enem turnu;
     }
     
     place(xPos, yPos, sx = 43) {    // 43 - pogled v desno, 85 - v levo, 125 - naravnost v gledalca;
@@ -245,27 +250,30 @@ class Sprite extends ScreenObj {
     }
 
     latPressed(which) {
-        if(this.latSpeed == 0) {
-            // console.log('- - - - -  vstran - - - - - ');
-            if(which == R) {
+        // console.log('- - - - -  vstran - - - - - ');
+        if(which == R) {
+            keyPressd.right = true;
+            if(this.latSpeed == 0) {    
                 this.latSpeed = Sprite.latMovtSpeedDef;
-                keyPressd.R = true;
-            } else {
-                this.latSpeed = -Sprite.latMovtSpeedDef;
-                keyPressd.L = true;
+                if(intervalIDs.main == 0) this.startInterval();
             }
-            if(intervalIDs.main == 0) this.startInterval();
+        } else if(which == L) {
+            keyPressd.left = true;
+            if(this.latSpeed == 0) {    
+                this.latSpeed = -Sprite.latMovtSpeedDef;
+                if(intervalIDs.main == 0) this.startInterval();
+            }
         }
     }
 
     latReleased(which) {
         // console.log('- - - -  lat released - - - - - ');
         if(which == R) {
+            keyPressd.right = false;
             if(this.latSpeed > 0) this.latSpeed = 0;
-            keyPressd.R = false;
         } else {
+            keyPressd.left = false;
             if(this.latSpeed < 0) this.latSpeed = 0;
-            keyPressd.L = false;
         }
     }
     
@@ -274,73 +282,66 @@ class Sprite extends ScreenObj {
         // ko pa je treba pripisat novo vrednost hitrosti, jo pripišemo this.vertSpeed!!!;
 
         // potencialni nov vertikalni položaj;
-            if(speed > 0) {
-                if(this.vertFrames < Sprite.minVertFrames) {
-                    this.vertFrames++;
-                } else if(this.upContinuslyPressd) {
-                    this.vertFrames++;  // ta vrednost je tolikera ponovitev dejanja;
-                    if(this.vertFrames == Sprite.maxVertFrames) {
-                        this.upContinuslyPressd = false // proxy za to, da bo to zadnji premik gor;
-                    }
-                } else {
-                    // začnemo padat;
-                    this.vertSpeed = -Sprite.maxVertSpeed; 
-                    speed = -Sprite.maxVertSpeed;   // moramo tudi temu pripisat, ker spodaj je this.yPos += speed in speed mora tam imet pravo vrednost;
+        if(speed > 0) {
+            if(this.vertFrames < Sprite.minVertFrames) {
+                this.vertFrames++;
+            } else if(this.upContinuslyPressd) {
+                this.vertFrames++;  // ta vrednost je tolikera ponovitev dejanja;
+                if(this.vertFrames == Sprite.maxVertFrames) {
+                    this.upContinuslyPressd = false // proxy za to, da bo to zadnji premik gor;
                 }
-                this.yPos += speed;
             } else {
-                this.yPos += speed; // ki je že od prej negativen;
+                // začnemo padat;
+                this.vertSpeed = -Sprite.maxVertSpeed; 
+                speed = -Sprite.maxVertSpeed;   // moramo tudi temu pripisat, ker spodaj je this.yPos += speed in speed mora tam imet pravo vrednost;
             }
+            this.yPos += speed;
+        } else {
+            this.yPos += speed; // speed je tu negativen, ker za ta del zanke velja speed < 0;
+        }
 
-            // preverjanje izvedljivosti potencialnega novega vertikalnega položaja;
-            // najprej preverjanje prekoračenja po horizontali;
-            const potntlObstructns = [];
-    
-            if(speed > 0) { // pri premiku navzgor;
-                // preverjamo, če je zgornji rob sprajta (this.yPos + this.height) posegel čez spodnji rob kake ovire (ovira.yPos);
-                const upprSpriteEdge = this.yPos + this.height;
-                for (const ovira of ovire) {
-                    if(upprSpriteEdge > ovira.yPos && (upprSpriteEdge - speed) <= ovira.yPos) { // tak vrstni red, da potencialno manj kalkulacij (eno odštevanje manj);
-                        potntlObstructns.push(ovira);
-                    }
-                }
-            } else {    // preverjanje za morebiten trk ob oviro (oporo) pri gibanju navzdol;
-                for (const ovira of ovire) {
-                    const oviraTopEdge = ovira.yPos + ovira.height;    // zgornji rob ovire;
-                    if(startYPos >= oviraTopEdge && this.yPos < oviraTopEdge) {
-                        potntlObstructns.push(ovira); // prekoračili smo po horizontali (spodnji rob sprajta skozi zgornji rob ovire);
-                    }
-                }
-            }
+        // preverjanje izvedljivosti potencialnega novega vertikalnega položaja;
+        // najprej preverjanje prekoračenja po horizontali;
+        const potntlObstructns = [];
 
-            // če prekoračena horizontala, preverimo še, al se sprite in ovira prekrivata v vertikalni dimenziji, kar bi dejansko pomenilo prekoračenje;
-            let obstclBordrBreachd = false;
-            if(potntlObstructns.length > 0) {
-                const rightEdgeX = this.xPos + this.width;
-                let doBreak = false;
-                for (const ovira of potntlObstructns) {
-                    let x = this.xPos;
-                    while (x < rightEdgeX) {
-                        if(x >= ovira.xPos && x < (ovira.xPos + ovira.width)) {   // pomembno, da < (in ne <=), ker če ne se zaletiš v kot, mimo katerega palahko greš;
-                            // zaznali smo oviro in to javimo;
-                            obstclBordrBreachd = true;
-                            x = rightEdgeX; // da končamo while;
-                            doBreak = true; // da končamo tudi for-of;
-                        }
-                        x += 10;
-                    }
-                    if(doBreak) break;
+        if(speed > 0) { // pri premiku navzgor;
+            // preverjamo, če je zgornji rob sprajta (this.yPos + this.height) posegel čez spodnji rob kake ovire (ovira.yPos);
+            const upprSpriteEdge = this.yPos + this.height;
+            for (const ovira of Screen.ovire) {
+                if(upprSpriteEdge > ovira.yPos && (upprSpriteEdge - speed) <= ovira.yPos) { // tak vrstni red, da potencialno manj kalkulacij (eno odštevanje manj);
+                    potntlObstructns.push(ovira);
                 }
             }
-            return obstclBordrBreachd;
+        } else {    // preverjanje za morebiten trk ob oviro (oporo) pri gibanju navzdol;
+            for (const ovira of Screen.ovire) {
+                const oviraTopEdge = ovira.yPos + ovira.height;    // zgornji rob ovire;
+                if(startYPos >= oviraTopEdge && this.yPos < oviraTopEdge) {
+                    potntlObstructns.push(ovira); // prekoračili smo po horizontali (spodnji rob sprajta skozi zgornji rob ovire);
+                }
+            }
+        }
+
+        // če prekoračena horizontala, preverimo še, al se sprite in ovira prekrivata v vertikalni dimenziji, kar bi dejansko pomenilo prekoračenje;
+        if(potntlObstructns.length > 0) {
+            const rightEdgeX = this.xPos + this.width;
+            for (const ovira of potntlObstructns) {
+                let x = this.xPos;
+                while (x < rightEdgeX) {
+                    if(x >= ovira.xPos && x < (ovira.xPos + ovira.width)) {   // pomembno, da < (in ne <=), ker če ne se zaletiš v kot, mimo katerega palahko greš;
+                        return true;  // zaznali smo oviro in to javimo;
+                    }
+                    x += 10;
+                }
+            }
+        }
+        return false;
     }
 
     chk4Support() {
         const potntlSupprt = [];
-        let found = false;  // kot supportFound;
         
         // poiščemo kandidate za oporo (stvari, ki imajo zgornji rob na višini spodnjega roba sprajta);
-        for (const element of ovire) {
+        for (const element of Screen.ovire) {
             if((element.yPos + element.height) == this.yPos) {
                 potntlSupprt.push(element);
             }
@@ -348,26 +349,23 @@ class Sprite extends ScreenObj {
 
         // preverimo kandidate, ali morda zares stojimo na katerem od njih in predstavlja oporo;
         if(potntlSupprt.length > 0) {
-            const rightSideSupport = this.xPos + this.width - 20; // da čekiraš 10px desno (ker spodaj x = this.xPos + 10) od levega spodnjega oglišča sprajta in 10px levo od desnega oglišča;
+            const rightSideSupport = this.xPos + this.width - 10; // da čekiraš 10px desno (ker spodaj x = this.xPos + 10) od levega spodnjega oglišča sprajta in 10px levo od desnega oglišča;
             for (const candidate of potntlSupprt) {
                 let x = this.xPos + 10;
                 while (x <= rightSideSupport) {
                     if(x >= candidate.xPos && x <= (candidate.xPos + candidate.width)) {   // tuki pa mora bit <= (in ne <);
-                        // potrdiliu smo, da stojimo na opori in brejknemo (vertSpeed je že 0,..
+                        // potrdiliu smo, da stojimo na opori in returnamo (vertSpeed je že 0,..
                         // ..ker vertikalni del stranskega premika med skokom je urejen na začetku provcesiranja vertikalnega gibanja in gre na 0 že tam;
-                        x = rightSideSupport; // da končamo while;
-                        found = true;
+                        return true;
                     }
                     x += 10;
                 }
-                if(found) break; // brejknemo for zanko, da ne preiskujemo še drugih kandidatov;
             }
         }
-
-        return found;
+        return false;
     }
 
-    processLatChg(speed) {
+    processLatChg(speed, startXPos) {
 
         // potencialni nov lateralni položaj;
         this.xPos += speed;
@@ -378,43 +376,44 @@ class Sprite extends ScreenObj {
 
         if(speed > 0) { // pri premiku v desno;
             // preverjamo, če je desni rob sprajta (this.xPos + this.width) posegel čez levi rob kake ovire (ovira.xPos, ker xPos je točka na levi);
-            const xREdge = this.xPos + this.width;  // xREdge = x desnega roba;
-            for (const ovira of ovire) {
-                if((xREdge - speed) <= ovira.xPos && xREdge > ovira.xPos) { 
+            const xREdge = this.xPos + this.width;  // xREdge = x desnega roba sprajta;
+            for (const ovira of Screen.ovire) {
+                if(startXPos <= ovira.xPos && xREdge > ovira.xPos) { 
                     potntlObstructns.push(ovira);   // prekoračili smo po vertikali;
                 }
             }
         } else {
-            for (const ovira of ovire) {
+            for (const ovira of Screen.ovire) {
                 const oviraREdge = ovira.xPos + ovira.width;    // desni rob ovire;
-                if((this.xPos + Math.abs(speed)) >= oviraREdge && this.xPos < oviraREdge) { // ker je hitrost tukaj negativna, rabimo absolutno;
+                if(startXPos >= oviraREdge && this.xPos < oviraREdge) {
                     potntlObstructns.push(ovira);   // prekoračili smo po vertikali;
                 }
             }
         }
 
         // če prekoračena vertikala, preverimo še, al se prekriva tudi v horizontalni dimenziji;
-        let obstacleBorderBreached = false;
         if(potntlObstructns.length > 0) {
             const upperY = this.yPos + this.height;
-            let doBreak = false;
             for (const ovira of potntlObstructns) {
                 let y = this.yPos;
                 while (y < upperY) {
                     if(y >= ovira.yPos && y < (ovira.yPos + ovira.height)) {   // pomembno, da < (in ne <=), ker če ne se zaletiš v kot, ki bi ga lahko preskočil;
-                        obstacleBorderBreached = true; // zaznali smo oviro in to javimo;
-                        y = upperY; // da končamo while;
-                        doBreak = true; // da kočamo tudi for-of;
+                        return true; // zaznali smo oviro in to javimo;
                     }
                     y += 10;
                 }
-                if(doBreak) break; // ker smo našli oviro, v katero smo se zaleteli in premik ni mogoč;
             }
         }
-        return obstacleBorderBreached;
+        return false;
     }
 
     processChanges() { // v smislu process the changes;
+
+        // to je zato, ker od prej, če si zaleten v neko oviro, imaš latSpeed == 0, čeprav imaš pritisnjen gumb za vstran, in če recimo skočiš, ne upošteva gumba za vstran;
+        if(this.latSpeed == 0) {
+            if(keyPressd.right && !keyPressd.left) this.latSpeed = Sprite.latMovtSpeedDef; // nastavimo hitrost in če smo zaleteni, bo itak spodaj dalo na 0, če pa gremo v skok, bo lahok šlo tudi lateralno;
+            else if(keyPressd.left && !keyPressd.right) this.latSpeed = -Sprite.latMovtSpeedDef;
+        }
 
         if(this.vertSpeed != 0 || this.latSpeed != 0) { // to preverjanje je proxi za ugotovitev, da bo treba izbrisat sprajt; pred koncem te zanke ga je treba spet narisat;
 
@@ -441,9 +440,8 @@ class Sprite extends ScreenObj {
                         // ne moremo izvest premika, povrnemo y-položaj in pozneje tudi azzeriramo ostale y vrednosti, ker smo naleteli na oviro (strop pri gibanju gor, oporo pri gibanju dol);
                         // console.log('vertikalna polovička neuspešna')
                         this.yPos = startYPos;
-                    } else {
-                        console.log('vertikalna polovička uspešna')
                     }
+                    // te pa moramo, ko enkrat začnemo iskat poloviško, naredit, ne glede na to, al je polovička uspela ali ne;
                     this.upContinuslyPressd = false;
                     this.vertFrames = 0;
                     if(this.vertSpeed < 0) {
@@ -452,11 +450,9 @@ class Sprite extends ScreenObj {
     
                 } else {
                     // pri padanju navzdol preverimo, ali smo na doseženem položaju zadeli ob oporo in torej ustavimo padanje
-                    // TODO - morda bi isto moralo naredit tudi pri gibanju navzgor;
                     if(this.vertSpeed < 0) {
                         if(this.chk4Support()) {
                             // najdena opora pri padanju navzdol, azzeriramo vrednosti vertikalnega gibanja;
-                            console.log('pri padanju navzdol je bila najdena opora');
                             this.vertSpeed = 0;
                             this.vertFrames = 0;
                             this.upContinuslyPressd = false;
@@ -467,9 +463,11 @@ class Sprite extends ScreenObj {
                 // padec v luknjo ...;
                 if(this.yPos < -60) {
                     this.stopInterval(MAIN);
-                    console.log('-  -  -  -  -  -  ')
+                    ctx.font = "60px serif";
+                    ctx.fillText('Game Over', 100, 90);
+                    ctx.font = "24px serif";
+                    ctx.fillText('Refresh page to start over', 110, 124);
                     console.log('-  -  - KONEC IGRE, daj F5 -  -  -  ')
-                    console.log('-  -  -  -  -  -  ')
                 }
             } 
             
@@ -482,14 +480,14 @@ class Sprite extends ScreenObj {
 
                 // processLatChg vrne stanje obstacleBorderBreached; če true, premika ne moremo izvesti in moramo povrniti stanje kot pred poskusom premika;
                 // če vrne false, pomeni, da je bil izveden stranski premik na novo lokacijo in gibanje se še nadaljuje;
-                if(this.processLatChg(this.latSpeed)) {
+                if(this.processLatChg(this.latSpeed, startXPos)) {
                     // probamo polovičen premik, najprej vrnemo začetno vrednost;
                     this.xPos = startXPos;
-                    if(this.processLatChg(this.latSpeed / 2)) {
+                    if(this.processLatChg(this.latSpeed / 2, startXPos)) {
                         // torej tudi polovičnega premika ni mogoče izvest;
                         hozMovtCanDo = false;   // le v tem priemru gre ta na false;
                         this.xPos = startXPos;  // povrnemo začetni položaj, ker ni mogoče nikakor sprmeniti lateralnega položaja;
-                    } else console.log('lateralna polovička USPELA');
+                    }
                     // to pa je treba nastavit ne glede na to, al je polovička uspela, ali ne: nek rob smo pač našli in ne moremo več naprej;
                     this.latSpeed = 0;
                     this.upContinuslyPressd = false;    // proxy za to, da ne greš več navzgor (če si se zaletel, ne moreš več gor);
@@ -499,13 +497,13 @@ class Sprite extends ScreenObj {
                 if(hozMovtCanDo) {
     
                     // al smo morda že zapustili ekran;
-                    if(exits.right != undefined && this.xPos >= exits.right.x) {
-                        sprite.place(exits.right.spritePos.x, exits.right.spritePos.y, exits.right.spritePos.sx)
+                    if(Screen.exits.right != undefined && this.xPos >= Screen.exits.right.x) {
+                        sprite.place(Screen.exits.right.spritePos.x, Screen.exits.right.spritePos.y, Screen.exits.right.spritePos.sx)
                         Screen.currScreen++;
                         Screen.load();
                         return;
-                    } else if(exits.left != undefined && this.xPos <= exits.left.x) {
-                        sprite.place(exits.left.spritePos.x, exits.left.spritePos.y, exits.left.spritePos.sx)
+                    } else if(Screen.exits.left != undefined && this.xPos <= Screen.exits.left.x) {
+                        sprite.place(Screen.exits.left.spritePos.x, Screen.exits.left.spritePos.y, Screen.exits.left.spritePos.sx)
                         Screen.currScreen--;
                         Screen.load();
                         return;
@@ -518,7 +516,7 @@ class Sprite extends ScreenObj {
                         // začnemo animacijo;
                         setTimeout(() => {
                             intervalIDs.endAnim = setInterval(() => { Screen.endAnimationPt1() }, 90);
-                        }, 500);
+                        }, 800);
                         return;
                     } else {
     
@@ -526,16 +524,24 @@ class Sprite extends ScreenObj {
                         if(this.yPos > 0 && this.vertSpeed == 0) {
                             if(!this.chk4Support()) {
                                 this.vertSpeed = -Sprite.maxVertSpeed; // nismo našli opore, tj. stopili smo v prazno, sprožimo padec;
-                                console.log('pri hoz preverjanju nismo našli opore, padamo')
+                                // console.log('pri hoz preverjanju nismo našli opore, padamo')
                             }
                         }  
                     }
                 }
             } // konec procesiranja lateralnega gibanja;
             
-            // izbira sličice (v bistvu je odvisna od tega, ali drižiš katerega od smernih gumbov);
-            if(keyPressd.R) { this.sx = this.sxBase }
-            else if(keyPressd.L)  { this.sx = this.sxBase + 42 }
+            // izbira sličice možička;
+            // najprej je odvisna od smeri gibanja L/D;
+            if(this.latSpeed > 0) {
+                this.sx = this.sxBase; 
+            } else if(this.latSpeed < 0) {
+                this.sx = this.sxBase + 42;
+            } else { // če pa se ne giba L/D pa od pristka gumbov;
+                if(keyPressd.right && keyPressd.left) this.sx = this.sxBase + 84; // če držiđ pritisnjena oba hkrati, te gleda naravnost;
+                else if(keyPressd.right) this.sx = this.sxBase;
+                else if(keyPressd.left) this.sx = this.sxBase + 42;
+            }
     
             // narišemo na novem/istem položaju;
             this.render(true);
@@ -647,14 +653,9 @@ const assets = new Image(); // src se naloada v handlerju positionCanvs();
 const endAnimPics = new Image();    // to bi lahko spravil v assets ...;
 
 const sprite = new Sprite(360, 10, 85); // orig: 500, 0 , 85
-const ovire = [];
-const exits = {
-    right: undefined,
-    left: undefined,
-}
 const keyPressd = {
-    L: false,
-    R: false,
+    left: false,
+    right: false,
 }
 
 function positionCanvs() {
