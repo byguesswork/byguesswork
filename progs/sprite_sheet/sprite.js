@@ -150,6 +150,7 @@ class Screen {
         if(Screen.endAnimCounter >= 40) {
             clearInterval(intervalIDs.endAnim);
             ctx.clearRect(420, 160, 95, 175);
+            sprite.render(true);
             setTimeout(() => {
                 Screen.endAnimCounter = 8; // velikost fonta;
                 ctx.font = "8px serif";
@@ -223,7 +224,8 @@ class Sprite extends ScreenObj {
         this.sx = sx;   // x koordinata slike sprajta na source sliki; sx v pomenu, kot ga ima v drawImage();
     }
     
-    startInterval() {
+    startInterval(/*who*/) {
+        // console.log(who); // koristno za debuganje
         this.processChanges();
         intervalIDs.main = setInterval(() => {this.processChanges()}, 90); // 80 je normalno
         if(intervalIDs.turn != 0) { this.stopInterval(TURN); }
@@ -235,15 +237,17 @@ class Sprite extends ScreenObj {
     }
 
     upPressed() {
+        // console.log('- - - - -  gor - - - - ');
+        keyPressd.up = true;
         if(this.vertSpeed == 0) {
-            // console.log('- - - - -  gor - - - - ');
             this.vertSpeed = Sprite.maxVertSpeed;
             this.upContinuslyPressd = true;
-            if(intervalIDs.main == 0) this.startInterval();
+            if(intervalIDs.main == 0) this.startInterval(/*'up'*/);
         }
     }
 
     upReleased() {
+        keyPressd.up = false;
         if(this.vertSpeed > 0) {
             this.upContinuslyPressd = false;
         }
@@ -255,13 +259,13 @@ class Sprite extends ScreenObj {
             keyPressd.right = true;
             if(this.latSpeed == 0) {    
                 this.latSpeed = Sprite.latMovtSpeedDef;
-                if(intervalIDs.main == 0) this.startInterval();
+                if(intervalIDs.main == 0) this.startInterval(/*'lat r'*/);
             }
         } else if(which == L) {
             keyPressd.left = true;
             if(this.latSpeed == 0) {    
                 this.latSpeed = -Sprite.latMovtSpeedDef;
-                if(intervalIDs.main == 0) this.startInterval();
+                if(intervalIDs.main == 0) this.startInterval(/*'lat l'*/);
             }
         }
     }
@@ -277,7 +281,7 @@ class Sprite extends ScreenObj {
         }
     }
     
-    processVertCgh(speed, startYPos) {  // vrne true, če na koncu ugotovi, da smo zadeli oviro;
+    processVertCgh(speed, startYPos) {  // vrne false, če na koncu ugotovi, da smo zadeli oviro (false kot premik ni mogoč);
         // speed se rabi pri primerjavah (speed > 0 ) in spreminjanju this.yPos;
         // ko pa je treba pripisat novo vrednost hitrosti, jo pripišemo this.vertSpeed!!!;
 
@@ -328,13 +332,13 @@ class Sprite extends ScreenObj {
                 let x = this.xPos;
                 while (x < rightEdgeX) {
                     if(x >= ovira.xPos && x < (ovira.xPos + ovira.width)) {   // pomembno, da < (in ne <=), ker če ne se zaletiš v kot, mimo katerega palahko greš;
-                        return true;  // zaznali smo oviro in to javimo;
+                        return false;  // zaznali smo oviro in javimo, da premik ni mogoč (false);
                     }
                     x += 10;
                 }
             }
         }
-        return false;
+        return true;
     }
 
     chk4Support() {
@@ -365,7 +369,7 @@ class Sprite extends ScreenObj {
         return false;
     }
 
-    processLatChg(speed, startXPos) {
+    processLatChg(speed, startXPos) { // dela 2 stvari: splošne preračune, na koncu pa vrne, al je tak premik mogoč;
 
         // potencialni nov lateralni položaj;
         this.xPos += speed;
@@ -398,22 +402,18 @@ class Sprite extends ScreenObj {
                 let y = this.yPos;
                 while (y < upperY) {
                     if(y >= ovira.yPos && y < (ovira.yPos + ovira.height)) {   // pomembno, da < (in ne <=), ker če ne se zaletiš v kot, ki bi ga lahko preskočil;
-                        return true; // zaznali smo oviro in to javimo;
+                        return false; // zaznali smo oviro in to javimo (false kot premika ni mogoče izvesti);
                     }
                     y += 10;
                 }
             }
         }
-        return false;
+        return true;
     }
 
     processChanges() { // v smislu process the changes;
 
-        // to je zato, ker od prej, če si zaleten v neko oviro, imaš latSpeed == 0, čeprav imaš pritisnjen gumb za vstran, in če recimo skočiš, ne upošteva gumba za vstran;
-        if(this.latSpeed == 0) {
-            if(keyPressd.right && !keyPressd.left) this.latSpeed = Sprite.latMovtSpeedDef; // nastavimo hitrost in če smo zaleteni, bo itak spodaj dalo na 0, če pa gremo v skok, bo lahok šlo tudi lateralno;
-            else if(keyPressd.left && !keyPressd.right) this.latSpeed = -Sprite.latMovtSpeedDef;
-        }
+        // console.log('vFrms:', this.vertFrames, 'contPr', this.upContinuslyPressd, 'vSp', this.vertSpeed, 'lSp', this.latSpeed, /* 'x:', this.xPos, */ 'y:', this.yPos, 'ID', intervalIDs.main);
 
         if(this.vertSpeed != 0 || this.latSpeed != 0) { // to preverjanje je proxi za ugotovitev, da bo treba izbrisat sprajt; pred koncem te zanke ga je treba spet narisat;
 
@@ -428,20 +428,19 @@ class Sprite extends ScreenObj {
                 const startVertFrames = this.vertFrames;
                 const startUpContinuslyPressd = this.upContinuslyPressd;
     
-                // processVertCgh vrne stanje obstacleBorderBreached; če true, premika ne moremo izvesti in moramo povrniti stanje kot pred poskusom premika;
-                // če vrne false, pomeni, da je bil izveden premik skozi zrak na novo lokacijo in gibanje se še nadaljuje;
-                if(this.processVertCgh(this.vertSpeed, startYPos)) {
+                // processVertCgh izvede stranski premik in vrne false, če premika ne moremo izvesti in moramo povrniti stanje kot pred poskusom premika;
+                // če vrne true, pomeni, da je bil izveden premik skozi zrak na novo lokacijo in gibanje se še nadaljuje;
+                if(!this.processVertCgh(this.vertSpeed, startYPos)) {
                     // probamo s polovičnim premikom (proxy za to je polovična hitrost), a najprej povrnemo vrednosti;
                     this.yPos = startYPos;
                     this.vertFrames = startVertFrames;
                     this.upContinuslyPressd = startUpContinuslyPressd;
     
-                    if(this.processVertCgh(this.vertSpeed / 2, startYPos)) {
+                    if(!this.processVertCgh(this.vertSpeed / 2, startYPos)) {
                         // ne moremo izvest premika, povrnemo y-položaj in pozneje tudi azzeriramo ostale y vrednosti, ker smo naleteli na oviro (strop pri gibanju gor, oporo pri gibanju dol);
-                        // console.log('vertikalna polovička neuspešna')
                         this.yPos = startYPos;
                     }
-                    // te pa moramo, ko enkrat začnemo iskat poloviško, naredit, ne glede na to, al je polovička uspela ali ne;
+                    // te pa moramo, ko enkrat začnemo iskat polovičko, naredit, ne glede na to, al je polovička uspela ali ne;
                     this.upContinuslyPressd = false;
                     this.vertFrames = 0;
                     if(this.vertSpeed < 0) {
@@ -478,12 +477,12 @@ class Sprite extends ScreenObj {
                 const startXPos = this.xPos;
                 let hozMovtCanDo = true;
 
-                // processLatChg vrne stanje obstacleBorderBreached; če true, premika ne moremo izvesti in moramo povrniti stanje kot pred poskusom premika;
-                // če vrne false, pomeni, da je bil izveden stranski premik na novo lokacijo in gibanje se še nadaljuje;
-                if(this.processLatChg(this.latSpeed, startXPos)) {
+                // processLatChg izvede premik in vrne false, če premika ne moremo izvesti in moramo povrniti stanje kot pred poskusom premika;
+                // če vrne true, pomeni, da je bil izveden stranski premik na novo lokacijo in gibanje se še nadaljuje;
+                if(!this.processLatChg(this.latSpeed, startXPos)) {
                     // probamo polovičen premik, najprej vrnemo začetno vrednost;
                     this.xPos = startXPos;
-                    if(this.processLatChg(this.latSpeed / 2, startXPos)) {
+                    if(!this.processLatChg(this.latSpeed / 2, startXPos)) {
                         // torej tudi polovičnega premika ni mogoče izvest;
                         hozMovtCanDo = false;   // le v tem priemru gre ta na false;
                         this.xPos = startXPos;  // povrnemo začetni položaj, ker ni mogoče nikakor sprmeniti lateralnega položaja;
@@ -524,7 +523,6 @@ class Sprite extends ScreenObj {
                         if(this.yPos > 0 && this.vertSpeed == 0) {
                             if(!this.chk4Support()) {
                                 this.vertSpeed = -Sprite.maxVertSpeed; // nismo našli opore, tj. stopili smo v prazno, sprožimo padec;
-                                // console.log('pri hoz preverjanju nismo našli opore, padamo')
                             }
                         }  
                     }
@@ -547,6 +545,21 @@ class Sprite extends ScreenObj {
             this.render(true);
         }
 
+        // preverjamo ali so gumbi pritisnjeni in ustrezno ukrepamo;
+        // to je zato, ker od prej, če si lateralno zaleten v neko oviro, imaš latSpeed == 0, čeprav imaš pritisnjen gumb za vstran, in če recimo skočiš, ne upošteva gumba za vstran;
+        // zakaj to tukaj? ker če ne bi zdaj, bi se spodaj ustavil interval; tako ohranimo interval živ in tukaj nastavljene vrednosti so prečekeirajo v naslednjem krogu;
+        // zakaj ne čekirat v keydown? ker če držiš gor in potem pritisneš še v desno, se sproža samo zadnji pritisnjen (morda odvisno od OS-a),..
+        // v tem primeru uni za v desno, kljub temu da je za gor še vedno pritisnjen (ni se še sprožil keyup za gumb gor);
+        // zato moraš čekirat boolean, ki ga sam urejaš;
+        if(this.latSpeed == 0) {
+            if(keyPressd.right && !keyPressd.left) this.latSpeed = Sprite.latMovtSpeedDef; // nastavimo hitrost in če smo zaleteni, bo itak spodaj dalo na 0, če pa gremo v skok, bo lahok šlo tudi lateralno;
+            else if(keyPressd.left && !keyPressd.right) this.latSpeed = -Sprite.latMovtSpeedDef;
+        } // isto za gumb gor;
+        if(this.vertSpeed == 0 && keyPressd.up) {
+            this.vertSpeed = Sprite.maxVertSpeed;
+            this.upContinuslyPressd = true;
+        }
+
         // odločanje o ustavitvi intervala;
         // ta je zunaj delovne zanke, ker hitrosti lahko dosežejo 0 med gibanjem (ovira) ali pa zaradi izpustitve gumba za premikanje;
         if(this.latSpeed == 0 && this.vertSpeed == 0)  {
@@ -561,7 +574,6 @@ class Sprite extends ScreenObj {
                 }, 300);
             }
         }
-
     }   // konec processChanges;
 }       // konec klasa Sprajt;
 
@@ -652,10 +664,11 @@ bckgndPics.onload = function() {
 const assets = new Image(); // src se naloada v handlerju positionCanvs();
 const endAnimPics = new Image();    // to bi lahko spravil v assets ...;
 
-const sprite = new Sprite(360, 10, 85); // orig: 500, 0 , 85
+const sprite = new Sprite(360, 10, 85);
 const keyPressd = {
     left: false,
     right: false,
+    up: false,
 }
 
 function positionCanvs() {
