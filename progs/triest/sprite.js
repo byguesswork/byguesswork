@@ -803,17 +803,19 @@ function detrmnTchPosOnCtrlsCnvs(e) {
             }
         } else { // desna polovica;
             if (tchPosOnCtrls.x < 50) {
-                helper('levo');
+                helper('L');
             } else if (tchPosOnCtrls.x > 111) {
-                helper('desno');
+                helper('D');
             }
         };
     }
 
     function helper(sender) {
+        sender += `, chgT.len:${e.changedTouches.length},`;
         for (let i = 0; i < e.changedTouches.length; i++) {
-            sender += `, chgT[${i}]: ${e.changedTouches[i].identifier}`;
+            sender += `[${i}]: ${e.changedTouches[i].identifier}`;
         }
+        sender += `, tgtT.len: ${e.targetTouches.length}`
         test.innerHTML += `<br>${sender}`;
         console.log(sender);
     }
