@@ -12,10 +12,12 @@ const ctrlsCtx = ctrlsCnvs.getContext('2d');
 
 const test = document.getElementById('test');
 
-const R = 'r';  // kot right pri pritiskanju tipk na tipkovnci;
-const L = 'l';  // kot left;
 const MAIN = 'main'; // interval identifier;
-const TURN = 'turn';
+const TURN = 'turn';    // interval ID za obrat možička (turn) proti gledalcu;
+const LEFT = 'left';
+const RIGHT = 'right';
+const UP = 'up';
+const INVALID = 'invld';
 
 
 class Screen {
@@ -241,8 +243,7 @@ class Sprite extends ScreenObj {
     }
 
     upPressed() {
-        // console.log('- - - - -  gor - - - - ');
-        keyPressd.up = true;
+        ctrlPressd.up = true;
         if(this.vertSpeed == 0) {
             this.vertSpeed = Sprite.maxVertSpeed;
             this.upContinuslyPressd = true;
@@ -251,38 +252,23 @@ class Sprite extends ScreenObj {
     }
 
     upReleased() {
-        keyPressd.up = false;
+        ctrlPressd.up = false;
         if(this.vertSpeed > 0) {
             this.upContinuslyPressd = false;
         }
     }
 
     latPressed(which) {
-        // console.log('- - - - -  vstran - - - - - ');
-        if(which == R) {
-            keyPressd.right = true;
-            if(this.latSpeed == 0) {    
-                this.latSpeed = Sprite.latMovtSpeedDef;
-                if(intervalIDs.main == 0) this.startInterval(/*'lat r'*/);
-            }
-        } else if(which == L) {
-            keyPressd.left = true;
-            if(this.latSpeed == 0) {    
-                this.latSpeed = -Sprite.latMovtSpeedDef;
-                if(intervalIDs.main == 0) this.startInterval(/*'lat l'*/);
-            }
+        ctrlPressd[which] = true;
+        if(this.latSpeed == 0) {    
+            this.latSpeed = which == RIGHT ? Sprite.latMovtSpeedDef : -Sprite.latMovtSpeedDef;
+            if(intervalIDs.main == 0) this.startInterval(/* which */);
         }
     }
 
     latReleased(which) {
-        // console.log('- - - -  lat released - - - - - ');
-        if(which == R) {
-            keyPressd.right = false;
-            if(this.latSpeed > 0) this.latSpeed = 0;
-        } else {
-            keyPressd.left = false;
-            if(this.latSpeed < 0) this.latSpeed = 0;
-        }
+        ctrlPressd[which] = false;
+        this.latSpeed = 0;
     }
     
     processVertCgh(speed, startYPos) {  // vrne false, če na koncu ugotovi, da smo zadeli oviro (false kot premik ni mogoč);
@@ -540,9 +526,9 @@ class Sprite extends ScreenObj {
             } else if(this.latSpeed < 0) {
                 this.sx = this.sxBase + 42;
             } else { // če pa se ne giba L/D pa od pristka gumbov;
-                if(keyPressd.right && keyPressd.left) this.sx = this.sxBase + 84; // če držiđ pritisnjena oba hkrati, te gleda naravnost;
-                else if(keyPressd.right) this.sx = this.sxBase;
-                else if(keyPressd.left) this.sx = this.sxBase + 42;
+                if(ctrlPressd.right && ctrlPressd.left) this.sx = this.sxBase + 84; // če držiđ pritisnjena oba hkrati, te gleda naravnost;
+                else if(ctrlPressd.right) this.sx = this.sxBase;
+                else if(ctrlPressd.left) this.sx = this.sxBase + 42;
             }
     
             // narišemo na novem/istem položaju;
@@ -556,10 +542,10 @@ class Sprite extends ScreenObj {
         // v tem primeru uni za v desno, kljub temu da je za gor še vedno pritisnjen (ni se še sprožil keyup za gumb gor);
         // zato moraš čekirat boolean, ki ga sam urejaš;
         if(this.latSpeed == 0) {
-            if(keyPressd.right && !keyPressd.left) this.latSpeed = Sprite.latMovtSpeedDef; // nastavimo hitrost in če smo zaleteni, bo itak spodaj dalo na 0, če pa gremo v skok, bo lahok šlo tudi lateralno;
-            else if(keyPressd.left && !keyPressd.right) this.latSpeed = -Sprite.latMovtSpeedDef;
+            if(ctrlPressd.right && !ctrlPressd.left) this.latSpeed = Sprite.latMovtSpeedDef; // nastavimo hitrost in če smo zaleteni, bo itak spodaj dalo na 0, če pa gremo v skok, bo lahok šlo tudi lateralno;
+            else if(ctrlPressd.left && !ctrlPressd.right) this.latSpeed = -Sprite.latMovtSpeedDef;
         } // isto za gumb gor;
-        if(this.vertSpeed == 0 && keyPressd.up) {
+        if(this.vertSpeed == 0 && ctrlPressd.up) {
             this.vertSpeed = Sprite.maxVertSpeed;
             this.upContinuslyPressd = true;
         }
@@ -649,6 +635,7 @@ if(!mobile) {
     document.getElementById('controls_div').style.display = 'block';
     ctrlsCnvs.addEventListener('touchstart', touchStartHndlr, {passive : false});
     ctrlsCnvs.addEventListener('touchend', touchEndHndlr, {passive : false});
+    ctrlsCnvs.addEventListener('touchmove', touchMoveHndlr, {passive : false});
 }
 
 const intervalIDs = {   // mora bit pred bckgndPics.onload, ker se tam rabi;
@@ -680,11 +667,16 @@ const assets = new Image(); // src se naloada v handlerju positionCanvs();
 const endAnimPics = new Image();    // to bi lahko spravil v assets ...;
 
 const sprite = new Sprite(360, 10, 85);
-const keyPressd = {
+const ctrlPressd = {
     left: false,
     right: false,
     up: false,
 };
+const tchIDs = {
+    left: -1,
+    right: -1,
+    up: -1
+}
 const tchPosOnCtrls = {
     x: 0,
     y: 0,
@@ -761,10 +753,10 @@ function keyDownHndlr(e) {
         sprite.upPressed();
     } else if(e.key == 'ArrowRight') {
         e.preventDefault();
-        sprite.latPressed(R);
+        sprite.latPressed(RIGHT);
     } else if(e.key == 'ArrowLeft') {
         e.preventDefault();
-        sprite.latPressed(L);
+        sprite.latPressed(LEFT);
     } else if(e.key == 'Escape') {
         if(intervalIDs.main != 0) { sprite.stopInterval(MAIN); }
     }
@@ -774,63 +766,101 @@ function keyUpHndlr(e) {
     if(e.key == 'ArrowUp') {
         sprite.upReleased();
     } else if(e.key == 'ArrowRight') {
-        sprite.latReleased(R);
+        sprite.latReleased(RIGHT);
     } else if (e.key == 'ArrowLeft') {
-        sprite.latReleased(L);
+        sprite.latReleased(LEFT);
     }
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/API/Touch_events/Using_Touch_Events
 // https://stackoverflow.com/questions/7056026/variation-of-e-touches-e-targettouches-and-e-changedtouches
 
-function detrmnTchPosOnCtrlsCnvs(e) {
-    tchPosOnCtrls.x = e.changedTouches[0].clientX - contrlsCnvsRect.left;
-    tchPosOnCtrls.y = e.changedTouches[0].clientY - contrlsCnvsRect.top;
+function detrmnTchPosOnCtrlsCnvs(chgdTch) {
+    tchPosOnCtrls.x = chgdTch.clientX - contrlsCnvsRect.left;
+    tchPosOnCtrls.y = chgdTch.clientY - contrlsCnvsRect.top;
+    let reslt = INVALID;    // lahko pa se v nadaljevanju spremeni;
     
-    console.log(tchPosOnCtrls.x, tchPosOnCtrls.y);
+    // console.log(tchPosOnCtrls.x, tchPosOnCtrls.y);
     if (tchPosOnCtrls.y < 50) {  // zgornja vrstica
         whichBtnInRow(true);
     } else if (tchPosOnCtrls.y > 55) {   // spodnja vrstica
         whichBtnInRow(false);
-    } else {
-        console.log('za zdaj samo javimo invalid')
-    };
+    }
+    return reslt;
 
     function whichBtnInRow(isUpper) {   // če true, zgornja vrstica, sicer spodnja;
         if (isUpper) {
             if (tchPosOnCtrls.x > 55 && tchPosOnCtrls.x < 105) {
-                helper('gor');
+                // helper('gor');
+                reslt = UP;
             }
-        } else { // desna polovica;
+        } else {    // spodnja vrstica, tj. L/D;
             if (tchPosOnCtrls.x < 50) {
-                helper('L');
+                // helper('L');
+                reslt = LEFT;
             } else if (tchPosOnCtrls.x > 111) {
-                helper('D');
+                // helper('D');
+                reslt = RIGHT;
             }
-        };
-    }
-
-    function helper(sender) {
-        sender += `, chgT.len:${e.changedTouches.length},`;
-        for (let i = 0; i < e.changedTouches.length; i++) {
-            sender += `[${i}]: ${e.changedTouches[i].identifier}`;
         }
-        sender += `, tgtT.len: ${e.targetTouches.length}`
-        test.innerHTML += `<br>${sender}`;
-        console.log(sender);
     }
 }
 
 function touchStartHndlr(e) {
     e.preventDefault();
     console.log(e);
-    detrmnTchPosOnCtrlsCnvs(e);
+    console.log('tch Start, chgdTchs.len = ', e.changedTouches.length);
+    for (let i = 0; i < e.changedTouches.length; i++) {
+        const which = detrmnTchPosOnCtrlsCnvs(e.changedTouches[i]);
+        console.log('chgdTchs[', i, ']:', which);
+        if(which != INVALID && ctrlPressd[which] == false) { // POMEMBNO: to pomeni, da je treba ctrlPressd[which] in tchIDs[which] hkrati nastavit, pozneje tudi hkrati nevtralizirati !!!
+            tchIDs[which] = e.changedTouches[i].identifier;
+            if(which == UP) sprite.upPressed(); // tu se tudi nastavi ctrlPressd[UP];
+            else sprite.latPressed(which); // tu se tudi nastavi ctrlPressd[which];
+            console.log(tchIDs[which]);
+        }
+    }
 }
 
 function touchEndHndlr(e) {
     e.preventDefault();
     console.log(e);
-    test.innerHTML += '<br>- - - -';
+    console.log('tch End, chgdTchs.len = ', e.changedTouches.length);
+    for (let i = 0; i < e.changedTouches.length; i++) {
+        const which = detrmnTchPosOnCtrlsCnvs(e.changedTouches[i]);
+        console.log('chgdTchs[', i, ']:', which);
+        if(which != INVALID && ctrlPressd[which] == true) {
+            tchIDs[which] = -1;
+            if(which == UP) sprite.upReleased(); // tu se tudi nastavi ctrlPressd[UP];
+            else sprite.latReleased(which); // tu se tudi nastavi ctrlPressd[which];
+            console.log(tchIDs[which])
+        }
+    }
+}
+
+function touchMoveHndlr(e) {    // ta je pomemben le, če se iz gumba pomakneš na INVALID (prostor zunaj gumba);
+    e.preventDefault();
+    console.log(e);
+    console.log('tch MOVE, chgdTchs.len = ', e.changedTouches.length);
+    for (let i = 0; i < e.changedTouches.length; i++) {
+        const which = detrmnTchPosOnCtrlsCnvs(e.changedTouches[i]);
+        console.log('chgdTchs[', i, ']:', which);
+        if(which == INVALID) {
+            const id = e.changedTouches[i].identifier;
+            if(id == tchIDs.up) {
+                tchIDs.up = -1;
+                sprite.upReleased(); // tu se tudi nastavi ctrlPressd[UP];
+            } else if(id == tchIDs.right) {
+                tchIDs.right = -1;
+                sprite.latReleased(RIGHT);
+            } else if(id == tchIDs.left) {
+                tchIDs.left = -1;
+                sprite.latReleased(LEFT);
+            }
+        }
+        // ne vem, al je treba čekirat še za which == smer, to bi bilo relevantno le,..
+        // ..če bi lahko potegnil brez vmesnih postankov z enega gumba na drugega, pa ne vem, al je to možno;
+    }
 }
 
 //  -  -  -  -  -   izris krmilja  -  -  -  -  ;
