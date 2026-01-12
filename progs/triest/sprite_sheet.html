@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="exercise in sprite sheet animation in a platform game">
+
+    <meta property="og:url" content="https://byguesswork.org/progs/spritesheet.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="An exercise in sprite sheet animation in a platform game">
+    <meta property="og:description" content="An exercise in sprite sheet animation in a platform game">
+    <meta property="og:image" content="https://byguesswork.org/images/byGuesswork_logo_600x315.PNG">
+    <meta property="og:image:width" content="600">
+    <meta property="og:image:height" content="315">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform game exercise</title>
+    <link href="sprite.css" rel="stylesheet">
+</head>
+
+<!-- december 2025 -->
+
+<body>
+    <div id="no_collapse"></div>
+    
+    <div class="center">
+        <div id="home">
+           <a href="/index.html" title="back to byGuesswork"><img src="/images/home.PNG" alt="home"></a>
+        </div>
+        <canvas id="bckgnd_canvas"></canvas>
+        <canvas id="canvas"></canvas>
+        <div id="controls_div">
+            <canvas id="ctrls_canvas"></canvas>
+        </div>
+
+        <!-- test -->
+         <div id="test"></div>
+        <!-- !test -->
+
+        <p class="mrg_top_36">An exercise in the use of a sprite sheet and the logic of a platform arcade game.
+        </p>
+        <p>
+            Use arrow keys (left/right, up) to animate the character.
+        </p>
+        <p>Not mobile friendly.</p>
+        <br><br><br><br><br><br>
+        <span style="background-color: inherit; font-size: 14px;">Ivo Makuc, 2025</span><br>
+        <span style="background-color: inherit; font-size: 13px;">byguesswork@gmail.com</span>
+        <br><br>
+    </div>
+
+    <!-- end animation character styled after static pic found here: https://www.vecteezy.com/free-videos/man-walking-animation
+    where static pic is credited to: Mulya Sri Wahyuni -->
+
+    <script src="../utils_general_use.js"></script>
+    <script src="sprite.js"></script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+* {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-family: Helvetica, Arial, sans-serif;
+}
+
+#no_collapse {
+    background: transparent;
+    height: 16px;
+    width: 36px;
+}
+
+.center {   /* to bi bilo bolje imenovat center_wrapper */
+    position: relative;
+    display: block;
+    margin: 0px  auto;
+    width: 600px;
+}
+
+#bckgnd_canvas {
+    display: block;
+    margin: 100px auto 40px;
+    border: 1px solid black;
+}
+
+#canvas {
+    position: absolute;
+    display: none;  /*  ! !  P A Z I  - na začetku je display none   !!  */
+    border: 1px solid black;
+}
+
+#controls_div {
+    display: none;  /* na začetku je skrito, ker je stran privzeto nastavljena za namizno;  */
+    margin: 0px auto;
+    width: 160px;
+}
+
+.mrg_top_36 {
+    margin-top: 36px;
+}
+
+p {
+    margin-bottom: 8px;
+}
