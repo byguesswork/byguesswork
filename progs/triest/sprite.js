@@ -160,7 +160,8 @@ class Screen {
             setTimeout(() => {
                 Screen.endAnimCounter = 8; // velikost fonta;
                 ctx.font = "8px serif";
-                ctx.strokeText('The End', 400, 180 + Screen.endAnimCounter)    // 48 končna velikost fonta
+                if(!mobile) ctx.strokeText('The End', 400, 180 + Screen.endAnimCounter);    // 48 končna velikost fonta;
+                    else ctx.fillText('The End', 400, 180 + Screen.endAnimCounter);    // 48 končna velikost fonta;
                 intervalIDs.endAnim = setInterval(Screen.endAnimationPt2, 60);
             }, 1000);
         }
@@ -233,7 +234,7 @@ class Sprite extends ScreenObj {
     startInterval(/*who*/) {
         // console.log(who); // koristno za debuganje
         this.processChanges();
-        intervalIDs.main = setInterval(() => {this.processChanges()}, 90); // 80 je normalno
+        intervalIDs.main = setInterval(() => {this.processChanges()}, intrvlLen); // 90 je normalno za desktop;
         if(intervalIDs.turn != 0) { this.stopInterval(TURN); }
     }
 
@@ -622,20 +623,27 @@ bckgndcnvs.height = Screen.height;
 canvas.width = Screen.width;
 canvas.height = Screen.height;
 ctrlsCnvs.width = 160;
-ctrlsCnvs.height = 103;
+ctrlsCnvs.height = 119;
 
 const mobile = isMobile();
 const navigatorLang = getLang();
+let intrvlLen = 90;
 
 document.addEventListener("DOMContentLoaded", positionCanvs);
 if(!mobile) {
     document.addEventListener('keydown', keyDownHndlr);
     document.addEventListener('keyup', keyUpHndlr);
 } else {
+    bckgndcnvs.style.marginTop = '40px';
     document.getElementById('controls_div').style.display = 'block';
     ctrlsCnvs.addEventListener('touchstart', touchStartHndlr, {passive : false});
     ctrlsCnvs.addEventListener('touchend', touchEndHndlr, {passive : false});
     ctrlsCnvs.addEventListener('touchmove', touchMoveHndlr, {passive : false});
+    ctrlsCnvs.addEventListener('touchcancel', touchCancelHndlr, {passive : false});
+    intrvlLen = 110;
+    for (const element of document.getElementsByClassName('hide-if-mobile')) {
+        element.style.display = 'none';
+    }
 }
 
 const intervalIDs = {   // mora bit pred bckgndPics.onload, ker se tam rabi;
@@ -772,9 +780,6 @@ function keyUpHndlr(e) {
     }
 }
 
-// https://developer.mozilla.org/en-US/docs/Web/API/Touch_events/Using_Touch_Events
-// https://stackoverflow.com/questions/7056026/variation-of-e-touches-e-targettouches-and-e-changedtouches
-
 function detrmnTchPosOnCtrlsCnvs(chgdTch) {
     tchPosOnCtrls.x = chgdTch.clientX - contrlsCnvsRect.left;
     tchPosOnCtrls.y = chgdTch.clientY - contrlsCnvsRect.top;
@@ -808,43 +813,58 @@ function detrmnTchPosOnCtrlsCnvs(chgdTch) {
 
 function touchStartHndlr(e) {
     e.preventDefault();
-    console.log(e);
     console.log('tch Start, chgdTchs.len = ', e.changedTouches.length);
     for (let i = 0; i < e.changedTouches.length; i++) {
         const which = detrmnTchPosOnCtrlsCnvs(e.changedTouches[i]);
-        console.log('chgdTchs[', i, ']:', which);
+        // console.log('chgdTchs[', i, ']:', which);
         if(which != INVALID && ctrlPressd[which] == false) { // POMEMBNO: to pomeni, da je treba ctrlPressd[which] in tchIDs[which] hkrati nastavit, pozneje tudi hkrati nevtralizirati !!!
             tchIDs[which] = e.changedTouches[i].identifier;
             if(which == UP) sprite.upPressed(); // tu se tudi nastavi ctrlPressd[UP];
             else sprite.latPressed(which); // tu se tudi nastavi ctrlPressd[which];
-            console.log(tchIDs[which]);
+            // console.log(tchIDs[which]);
         }
     }
 }
 
 function touchEndHndlr(e) {
     e.preventDefault();
-    console.log(e);
     console.log('tch End, chgdTchs.len = ', e.changedTouches.length);
     for (let i = 0; i < e.changedTouches.length; i++) {
         const which = detrmnTchPosOnCtrlsCnvs(e.changedTouches[i]);
-        console.log('chgdTchs[', i, ']:', which);
+        // console.log('chgdTchs[', i, ']:', which);
         if(which != INVALID && ctrlPressd[which] == true) {
             tchIDs[which] = -1;
             if(which == UP) sprite.upReleased(); // tu se tudi nastavi ctrlPressd[UP];
             else sprite.latReleased(which); // tu se tudi nastavi ctrlPressd[which];
-            console.log(tchIDs[which])
+            // console.log(tchIDs[which])
         }
     }
 }
 
-function touchMoveHndlr(e) {    // ta je pomemben le, če se iz gumba pomakneš na INVALID (prostor zunaj gumba);
+function touchCancelHndlr(e) {
     e.preventDefault();
-    console.log(e);
+    console.log('tch -- C A N C E L -- , chgdTchs.len = ', e.changedTouches.length);
+    // kr skenslamo vse povprek;
+    if(tchIDs.up != -1) {
+        tchIDs.up = -1;
+        sprite.upReleased();
+    }
+    if(tchIDs.left != -1) {
+        tchIDs.left = -1;
+        sprite.latReleased(LEFT);
+    }
+    if(tchIDs.right != -1) {
+        tchIDs.right = -1;
+        sprite.latReleased(RIGHT);
+    }
+}
+
+function touchMoveHndlr(e) {    // ta je pomemben le, če se z gumba pomakneš na INVALID (če torej zapustiš nek gumb);
+    e.preventDefault();
     console.log('tch MOVE, chgdTchs.len = ', e.changedTouches.length);
     for (let i = 0; i < e.changedTouches.length; i++) {
         const which = detrmnTchPosOnCtrlsCnvs(e.changedTouches[i]);
-        console.log('chgdTchs[', i, ']:', which);
+        // console.log('chgdTchs[', i, ']:', which);
         if(which == INVALID) {
             const id = e.changedTouches[i].identifier;
             if(id == tchIDs.up) {
@@ -858,8 +878,6 @@ function touchMoveHndlr(e) {    // ta je pomemben le, če se iz gumba pomakneš 
                 sprite.latReleased(LEFT);
             }
         }
-        // ne vem, al je treba čekirat še za which == smer, to bi bilo relevantno le,..
-        // ..če bi lahko potegnil brez vmesnih postankov z enega gumba na drugega, pa ne vem, al je to možno;
     }
 }
 
@@ -871,9 +889,8 @@ function drawControlsIcons() {
     ctrlsCtx.fillStyle = '#c0ffa7';
     for (let i = 1;i <= 3; i++) {
         ctrlsCtx.beginPath();
-        const y = i % 2 == 0 ? 25 : 79; 
+        const y = i % 2 == 0 ? 25 : 95; 
         ctrlsCtx.arc((i - 1) * 56 + 24, y, 24, 0, 2 * Math.PI);
-        // ctrlsCtx.arc((i - 1) * 56 + 24, 79, 24, 0, 2 * Math.PI);
         ctrlsCtx.fill();
     }
 
@@ -883,20 +900,27 @@ function drawControlsIcons() {
     ctrlsCtx.beginPath();
     
     // spodnji levi gumb (ZA LEVO);
-    ctrlsCtx.moveTo(37, 78); // sredina: 25, 79
-    ctrlsCtx.lineTo(13, 78);
-    ctrlsCtx.lineTo(21, 70);
-    ctrlsCtx.moveTo(37, 79);
-    ctrlsCtx.lineTo(13, 79);
-    ctrlsCtx.lineTo(21, 87);
+    ctrlsCtx.moveTo(37, 94); // sredina: 25, 95
+    ctrlsCtx.lineTo(13, 94);
+    ctrlsCtx.lineTo(21, 86);
+    ctrlsCtx.moveTo(37, 95);
+    ctrlsCtx.lineTo(13, 95);
+    ctrlsCtx.lineTo(21, 103);
+    // izvirno:
+    //  ctrlsCtx.moveTo(37, 78); // sredina: 25, 103
+    // ctrlsCtx.lineTo(13, 78);
+    // ctrlsCtx.lineTo(21, 70);
+    // ctrlsCtx.moveTo(37, 79);
+    // ctrlsCtx.lineTo(13, 79);
+    // ctrlsCtx.lineTo(21, 87);
     
     // spodnji desni gumb (ZA DESNO);
-    ctrlsCtx.moveTo(123, 78); // serdina: 135
-    ctrlsCtx.lineTo(147, 78);
-    ctrlsCtx.lineTo(139, 70);
-    ctrlsCtx.moveTo(123, 79);
-    ctrlsCtx.lineTo(147, 79);
-    ctrlsCtx.lineTo(139, 87);
+    ctrlsCtx.moveTo(123, 94); // sredina: 135
+    ctrlsCtx.lineTo(147, 94);
+    ctrlsCtx.lineTo(139, 86);
+    ctrlsCtx.moveTo(123, 95);
+    ctrlsCtx.lineTo(147, 95);
+    ctrlsCtx.lineTo(139, 103);
     
     // zgornji srednji (ZA NAPREJ)
     ctrlsCtx.moveTo(79, 36); // sredina 56 + 24, 25

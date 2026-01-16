@@ -20,7 +20,7 @@
 
 #bckgnd_canvas {
     display: block;
-    margin: 100px auto 40px;
+    margin: 100px auto 24px;
     border: 1px solid black;
 }
 
@@ -37,7 +37,7 @@
 }
 
 .mrg_top_36 {
-    margin-top: 36px;
+    margin-top: 28px;
 }
 
 p {
