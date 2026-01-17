@@ -3,29 +3,32 @@
 // da bi najprej naredilo cel gib, šele nato računalo izvedljivost premika na novih koordinatah..
 // .. ker morda skok diagonalno je možen tam, kjer skok navpično ni
 
-const bckgndcnvs = document.getElementById('bckgnd-canvas');
+// 3 canvasi;
+const bckgndcnvs = document.getElementById('bckgnd_canvas');
 const ctxBckgnd = bckgndcnvs.getContext('2d');
 const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');       
+const ctx = canvas.getContext('2d');     
+const ctrlsCnvs = document.getElementById('ctrls_canvas');
+const ctrlsCtx = ctrlsCnvs.getContext('2d');  
 
-const R = 'r';  // kot right pri pritiskanju tipk na tipkovnci;
-const L = 'l';  // kot left;
+// konstante; 
 const MAIN = 'main'; // interval identifier;
-const TURN = 'turn';
+const TURN = 'turn';    // interval ID za obrat možička (turn) proti gledalcu;
+const LEFT = 'left';
+const RIGHT = 'right';
+const UP = 'up';
+const INVALID = 'invld';
 
+// const test = document.getElementById('test');   // za morebitne testne namene;
 
 class Screen {
     static height = 420;
     static width = 600;
-    static currScreen = 0;
+    static currScreenIdx;  // tu bo shranjen idx trenutnega zaslona;
+    static currScreen;  // tu bo shranjen objekt trenutnega zaslona;
     static endAnimCounter = 0; // se rabi za končno animacijo;
-    static ovire = [];
-    static exits = {
-        right: undefined,
-        left: undefined,
-    }
 
-    static catalogue = {
+    static scrItemsCatlg = {    // catalagoue of screen items;
         turf10_40 : {
             sx: 1,
             sy: 61,
@@ -46,10 +49,10 @@ class Screen {
         }
     }
 
-    static screens = [
-        // 1 zaslon;
+    static screensCatalogue = [
+        // 1. zaslon;
         {
-            ovire: [
+            ovireDef: [ // definicije ovir; to niso operativni podatki, ampak definicije zanje;
                 {type: 'turfLevitating', x: 280, y: 30},
                 {type: 'turfLevitating', x: 300, y: 160},
                 {type: 'turfLevitating', x: 100, y: 100},
@@ -68,6 +71,7 @@ class Screen {
                 {type: 'turf10_160', x: 480, y: 0},
                 {type: 'turf10_40', x: 470, y: 10},
             ],
+            ovire: [],  // popolnimo ko pride čas; to je seznam operativnih ovir;
             exits: {
                 right: {
                     x: 600,
@@ -83,7 +87,7 @@ class Screen {
 
         // 2. zaslon;
         {
-            ovire: [
+            ovireDef: [
                 {type: 'turfLevitating', x: 0, y: 220},
                 {type: 'turfLevitating', x: 40, y: 220},
                 {type: 'turfLevitating', x: 80, y: 220},
@@ -103,6 +107,7 @@ class Screen {
                 {type: 'turf10_160', x: 320, y: 0},
                 {type: 'turf10_160', x: 480, y: 0},
             ],
+            ovire: [],  // popolnimo ko pride čas;
             exits: {
                 right: undefined,
                 left: {
@@ -117,30 +122,33 @@ class Screen {
         },
     ]
 
-    static load() {
-        const thisScreen = Screen.screens[Screen.currScreen];
+    static load(scrIdx = 0) {
+        Screen.currScreenIdx = scrIdx;
+        Screen.currScreen = Screen.screensCatalogue[Screen.currScreenIdx];
 
         // izbrišemo ospredje;
         ctx.clearRect(0, 0, Screen.width, Screen.height);
 
-        // naložimo ovire;
-        Screen.ovire.length = 0;   // da izbrišeš vsebino;
-        for(let i = 0; i < thisScreen.ovire.length; i++) {
-            const type = thisScreen.ovire[i].type;
-            Screen.ovire.push(new ScreenObj(thisScreen.ovire[i].x, thisScreen.ovire[i].y,
-                Screen.catalogue[type].sx,
-                Screen.catalogue[type].sy,
-                Screen.catalogue[type].width,
-                Screen.catalogue[type].height
-            ))
+        // če še niso, naložimo ovire iz definicij (obenem se tudi izrišejo);
+        if(Screen.currScreen.ovire.length == 0) {
+            const ovireDef = Screen.currScreen.ovireDef;
+            for(let i = 0; i < ovireDef.length; i++) {
+                const type = ovireDef[i].type;
+                Screen.currScreen.ovire.push(new ScreenObj(ovireDef[i].x, ovireDef[i].y,
+                    Screen.scrItemsCatlg[type].sx,
+                    Screen.scrItemsCatlg[type].sy,
+                    Screen.scrItemsCatlg[type].width,
+                    Screen.scrItemsCatlg[type].height
+                ))
+            }        
+        } else {    // sicer samo izrišemo ovire;
+            for (const element of Screen.currScreen.ovire) {
+                element.render(true);
+            }
         }
 
         // narišemo možička (položaj mu je vselej določen že predhodno);
         sprite.render(true);
-
-        // naložimo izhode iz ekrana;
-        Screen.exits.right = thisScreen.exits.right;
-        Screen.exits.left = thisScreen.exits.left;
     }
 
     static endAnimationPt1() {
@@ -153,8 +161,8 @@ class Screen {
             sprite.render(true);
             setTimeout(() => {
                 Screen.endAnimCounter = 8; // velikost fonta;
-                ctx.font = "8px serif";
-                ctx.strokeText('The End', 400, 180 + Screen.endAnimCounter)    // 48 končna velikost fonta
+                ctx.font = "8px serif"; // končna velikost fonta bo 48;
+                ctx.strokeText('The End', 400, 180 + Screen.endAnimCounter);
                 intervalIDs.endAnim = setInterval(Screen.endAnimationPt2, 60);
             }, 1000);
         }
@@ -164,7 +172,8 @@ class Screen {
         ctx.clearRect(390,170,200,100);
         Screen.endAnimCounter += 4;
         ctx.font = `${Screen.endAnimCounter}px serif`;
-        ctx.strokeText('The End', 400, 180 + Screen.endAnimCounter)    // 48 končna
+        if(!mobile)ctx.strokeText('The End', 400, 180 + Screen.endAnimCounter);
+            else ctx.fillText('The End', 400, 180 + Screen.endAnimCounter)  // će mobile je fill, ker se na majhnem zaslonu sicer slabo vidi;
         if(Screen.endAnimCounter >= 48) {
             clearInterval(intervalIDs.endAnim);
         }
@@ -184,8 +193,8 @@ class ScreenObj {
         this.render(true);
     }
 
-    render(toColor) {   // ali naj nariše v barvi ali v ne (če false, se izriše prozoren oz. se izbriše)
-        if(toColor) {
+    render(visible) {   // ali naj nariše viden ali ne (če false, se izriše prozoren oz. se izbriše)
+        if(visible) {
             ctx.drawImage(assets, this.sx, this.sy, this.width, this.height, this.xPos, (Screen.height - this.yPos) - this.height, this.width, this.height)
             // console.log('vertFrams:', this.vertFrames, 'latSp:', this.latSpeed, 'vSp:', this.vertSpeed, 'x:', this.xPos, 'y:', this.yPos)  // da preverimo, kolko v višino je skočil;
         } else {
@@ -227,7 +236,7 @@ class Sprite extends ScreenObj {
     startInterval(/*who*/) {
         // console.log(who); // koristno za debuganje
         this.processChanges();
-        intervalIDs.main = setInterval(() => {this.processChanges()}, 90); // 80 je normalno
+        intervalIDs.main = setInterval(() => {this.processChanges()}, intrvlLen); // 90 je normalno za desktop;
         if(intervalIDs.turn != 0) { this.stopInterval(TURN); }
     }
 
@@ -237,8 +246,7 @@ class Sprite extends ScreenObj {
     }
 
     upPressed() {
-        // console.log('- - - - -  gor - - - - ');
-        keyPressd.up = true;
+        ctrlPressd.up = true;
         if(this.vertSpeed == 0) {
             this.vertSpeed = Sprite.maxVertSpeed;
             this.upContinuslyPressd = true;
@@ -247,38 +255,23 @@ class Sprite extends ScreenObj {
     }
 
     upReleased() {
-        keyPressd.up = false;
+        ctrlPressd.up = false;
         if(this.vertSpeed > 0) {
             this.upContinuslyPressd = false;
         }
     }
 
     latPressed(which) {
-        // console.log('- - - - -  vstran - - - - - ');
-        if(which == R) {
-            keyPressd.right = true;
-            if(this.latSpeed == 0) {    
-                this.latSpeed = Sprite.latMovtSpeedDef;
-                if(intervalIDs.main == 0) this.startInterval(/*'lat r'*/);
-            }
-        } else if(which == L) {
-            keyPressd.left = true;
-            if(this.latSpeed == 0) {    
-                this.latSpeed = -Sprite.latMovtSpeedDef;
-                if(intervalIDs.main == 0) this.startInterval(/*'lat l'*/);
-            }
+        ctrlPressd[which] = true;
+        if(this.latSpeed == 0) {    
+            this.latSpeed = which == RIGHT ? Sprite.latMovtSpeedDef : -Sprite.latMovtSpeedDef;
+            if(intervalIDs.main == 0) this.startInterval(/* which */);
         }
     }
 
     latReleased(which) {
-        // console.log('- - - -  lat released - - - - - ');
-        if(which == R) {
-            keyPressd.right = false;
-            if(this.latSpeed > 0) this.latSpeed = 0;
-        } else {
-            keyPressd.left = false;
-            if(this.latSpeed < 0) this.latSpeed = 0;
-        }
+        ctrlPressd[which] = false;
+        this.latSpeed = 0;
     }
     
     processVertCgh(speed, startYPos) {  // vrne false, če na koncu ugotovi, da smo zadeli oviro (false kot premik ni mogoč);
@@ -311,13 +304,13 @@ class Sprite extends ScreenObj {
         if(speed > 0) { // pri premiku navzgor;
             // preverjamo, če je zgornji rob sprajta (this.yPos + this.height) posegel čez spodnji rob kake ovire (ovira.yPos);
             const upprSpriteEdge = this.yPos + this.height;
-            for (const ovira of Screen.ovire) {
+            for (const ovira of Screen.currScreen.ovire) {
                 if(upprSpriteEdge > ovira.yPos && (upprSpriteEdge - speed) <= ovira.yPos) { // tak vrstni red, da potencialno manj kalkulacij (eno odštevanje manj);
                     potntlObstructns.push(ovira);
                 }
             }
         } else {    // preverjanje za morebiten trk ob oviro (oporo) pri gibanju navzdol;
-            for (const ovira of Screen.ovire) {
+            for (const ovira of Screen.currScreen.ovire) {
                 const oviraTopEdge = ovira.yPos + ovira.height;    // zgornji rob ovire;
                 if(startYPos >= oviraTopEdge && this.yPos < oviraTopEdge) {
                     potntlObstructns.push(ovira); // prekoračili smo po horizontali (spodnji rob sprajta skozi zgornji rob ovire);
@@ -345,7 +338,7 @@ class Sprite extends ScreenObj {
         const potntlSupprt = [];
         
         // poiščemo kandidate za oporo (stvari, ki imajo zgornji rob na višini spodnjega roba sprajta);
-        for (const element of Screen.ovire) {
+        for (const element of Screen.currScreen.ovire) {
             if((element.yPos + element.height) == this.yPos) {
                 potntlSupprt.push(element);
             }
@@ -381,13 +374,13 @@ class Sprite extends ScreenObj {
         if(speed > 0) { // pri premiku v desno;
             // preverjamo, če je desni rob sprajta (this.xPos + this.width) posegel čez levi rob kake ovire (ovira.xPos, ker xPos je točka na levi);
             const xREdge = this.xPos + this.width;  // xREdge = x desnega roba sprajta;
-            for (const ovira of Screen.ovire) {
+            for (const ovira of Screen.currScreen.ovire) {
                 if(startXPos <= ovira.xPos && xREdge > ovira.xPos) { 
                     potntlObstructns.push(ovira);   // prekoračili smo po vertikali;
                 }
             }
         } else {
-            for (const ovira of Screen.ovire) {
+            for (const ovira of Screen.currScreen.ovire) {
                 const oviraREdge = ovira.xPos + ovira.width;    // desni rob ovire;
                 if(startXPos >= oviraREdge && this.xPos < oviraREdge) {
                     potntlObstructns.push(ovira);   // prekoračili smo po vertikali;
@@ -496,17 +489,16 @@ class Sprite extends ScreenObj {
                 if(hozMovtCanDo) {
     
                     // al smo morda že zapustili ekran;
-                    if(Screen.exits.right != undefined && this.xPos >= Screen.exits.right.x) {
-                        sprite.place(Screen.exits.right.spritePos.x, Screen.exits.right.spritePos.y, Screen.exits.right.spritePos.sx)
-                        Screen.currScreen++;
-                        Screen.load();
+                    const exits = Screen.currScreen.exits;
+                    if(exits.right != undefined && this.xPos >= exits.right.x) {
+                        sprite.place(exits.right.spritePos.x, exits.right.spritePos.y, exits.right.spritePos.sx)
+                        Screen.load(Screen.currScreenIdx + 1);
                         return;
-                    } else if(Screen.exits.left != undefined && this.xPos <= Screen.exits.left.x) {
-                        sprite.place(Screen.exits.left.spritePos.x, Screen.exits.left.spritePos.y, Screen.exits.left.spritePos.sx)
-                        Screen.currScreen--;
-                        Screen.load();
+                    } else if(exits.left != undefined && this.xPos <= exits.left.x) {
+                        sprite.place(exits.left.spritePos.x, exits.left.spritePos.y, exits.left.spritePos.sx)
+                        Screen.load(Screen.currScreenIdx - 1);
                         return;
-                    } else if(this.xPos > 420 && Screen.currScreen == 1 ) {
+                    } else if(this.xPos > 420 && Screen.currScreenIdx == 1 ) {
                         // to je če si prišel do konca;
                         document.removeEventListener('keydown', keyDownHndlr);
                         this.stopInterval(MAIN);
@@ -536,9 +528,9 @@ class Sprite extends ScreenObj {
             } else if(this.latSpeed < 0) {
                 this.sx = this.sxBase + 42;
             } else { // če pa se ne giba L/D pa od pristka gumbov;
-                if(keyPressd.right && keyPressd.left) this.sx = this.sxBase + 84; // če držiđ pritisnjena oba hkrati, te gleda naravnost;
-                else if(keyPressd.right) this.sx = this.sxBase;
-                else if(keyPressd.left) this.sx = this.sxBase + 42;
+                if(ctrlPressd.right && ctrlPressd.left) this.sx = this.sxBase + 84; // če držiđ pritisnjena oba hkrati, te gleda naravnost;
+                else if(ctrlPressd.right) this.sx = this.sxBase;
+                else if(ctrlPressd.left) this.sx = this.sxBase + 42;
             }
     
             // narišemo na novem/istem položaju;
@@ -552,10 +544,10 @@ class Sprite extends ScreenObj {
         // v tem primeru uni za v desno, kljub temu da je za gor še vedno pritisnjen (ni se še sprožil keyup za gumb gor);
         // zato moraš čekirat boolean, ki ga sam urejaš;
         if(this.latSpeed == 0) {
-            if(keyPressd.right && !keyPressd.left) this.latSpeed = Sprite.latMovtSpeedDef; // nastavimo hitrost in če smo zaleteni, bo itak spodaj dalo na 0, če pa gremo v skok, bo lahok šlo tudi lateralno;
-            else if(keyPressd.left && !keyPressd.right) this.latSpeed = -Sprite.latMovtSpeedDef;
+            if(ctrlPressd.right && !ctrlPressd.left) this.latSpeed = Sprite.latMovtSpeedDef; // nastavimo hitrost in če smo zaleteni, bo itak spodaj dalo na 0, če pa gremo v skok, bo lahok šlo tudi lateralno;
+            else if(ctrlPressd.left && !ctrlPressd.right) this.latSpeed = -Sprite.latMovtSpeedDef;
         } // isto za gumb gor;
-        if(this.vertSpeed == 0 && keyPressd.up) {
+        if(this.vertSpeed == 0 && ctrlPressd.up) {
             this.vertSpeed = Sprite.maxVertSpeed;
             this.upContinuslyPressd = true;
         }
@@ -631,10 +623,29 @@ bckgndcnvs.width = Screen.width;
 bckgndcnvs.height = Screen.height;
 canvas.width = Screen.width;
 canvas.height = Screen.height;
+ctrlsCnvs.width = 160;
+ctrlsCnvs.height = 119;
+
+const mobile = isMobile();
+const navigatorLang = getLang();
+let intrvlLen = 90;
 
 document.addEventListener("DOMContentLoaded", positionCanvs);
-document.addEventListener('keydown', keyDownHndlr);
-document.addEventListener('keyup', keyUpHndlr);
+if(!mobile) {
+    document.addEventListener('keydown', keyDownHndlr);
+    document.addEventListener('keyup', keyUpHndlr);
+} else {
+    bckgndcnvs.style.marginTop = '40px';
+    document.getElementById('controls_div').style.display = 'block';
+    ctrlsCnvs.addEventListener('touchstart', touchStartHndlr, {passive : false});
+    ctrlsCnvs.addEventListener('touchend', touchEndHndlr, {passive : false});
+    ctrlsCnvs.addEventListener('touchmove', touchMoveHndlr, {passive : false});
+    ctrlsCnvs.addEventListener('touchcancel', touchCancelHndlr, {passive : false});
+    intrvlLen = 110;
+    for (const element of document.getElementsByClassName('hide-if-mobile')) {
+        element.style.display = 'none';
+    }
+}
 
 const intervalIDs = {   // mora bit pred bckgndPics.onload, ker se tam rabi;
     main: 0,
@@ -664,11 +675,26 @@ bckgndPics.onload = function() {
 const assets = new Image(); // src se naloada v handlerju positionCanvs();
 const endAnimPics = new Image();    // to bi lahko spravil v assets ...;
 
-const sprite = new Sprite(360, 10, 85);
-const keyPressd = {
+const sprite = new Sprite(360, 10, 85); // pravilno: new Sprite(360, 10, 85)
+const ctrlPressd = {
     left: false,
     right: false,
     up: false,
+};
+const tchIDs = {
+    left: -1,
+    right: -1,
+    up: -1
+}
+const tchPosOnCtrls = {
+    x: 0,
+    y: 0,
+};
+const contrlsCnvsRect = {
+    left: 0,
+    top: 0,
+    right: 0,
+    bottom: 0
 }
 
 function positionCanvs() {
@@ -716,13 +742,19 @@ function positionCanvs() {
     
     assets.src = 'sprites3.png';
     assets.onload = function() {
-        // naložimo cel zaslon (ospredje);
-        Screen.load(); // currScreen je po defaultu 0;
-        // tle lahko leno nalagamo endAnim slikce;
-        endAnimPics.src = 'sprites2.jpg';
+        Screen.load(); // naložimo cel zaslon (ospredje); currScreenIdx je po defaultu 0;
+        if(mobile) {
+            drawControlsIcons();    // narišemo gumbe, če mobile;
+            contrlsCnvsRect.left = ctrlsCnvs.getBoundingClientRect().left;
+            contrlsCnvsRect.top = ctrlsCnvs.getBoundingClientRect().top;
+            contrlsCnvsRect.right = ctrlsCnvs.getBoundingClientRect().right;
+            contrlsCnvsRect.bottom = ctrlsCnvs.getBoundingClientRect().bottom;
+        }
+        endAnimPics.src = 'sprites2.jpg';   // leno nalagamo endAnim slikce;
     }
 }
 
+// -  -  -  -  -  HENDLERJI -  -  -  -  
 function keyDownHndlr(e) {
     // console.log(e)
     if(e.key == 'ArrowUp') {
@@ -730,10 +762,10 @@ function keyDownHndlr(e) {
         sprite.upPressed();
     } else if(e.key == 'ArrowRight') {
         e.preventDefault();
-        sprite.latPressed(R);
+        sprite.latPressed(RIGHT);
     } else if(e.key == 'ArrowLeft') {
         e.preventDefault();
-        sprite.latPressed(L);
+        sprite.latPressed(LEFT);
     } else if(e.key == 'Escape') {
         if(intervalIDs.main != 0) { sprite.stopInterval(MAIN); }
     }
@@ -743,10 +775,161 @@ function keyUpHndlr(e) {
     if(e.key == 'ArrowUp') {
         sprite.upReleased();
     } else if(e.key == 'ArrowRight') {
-        sprite.latReleased(R);
+        sprite.latReleased(RIGHT);
     } else if (e.key == 'ArrowLeft') {
-        sprite.latReleased(L);
+        sprite.latReleased(LEFT);
     }
 }
 
+function detrmnTchPosOnCtrlsCnvs(chgdTch) {
+    tchPosOnCtrls.x = chgdTch.clientX - contrlsCnvsRect.left;
+    tchPosOnCtrls.y = chgdTch.clientY - contrlsCnvsRect.top;
+    let reslt = INVALID;    // lahko pa se v nadaljevanju spremeni;
+    
+    // console.log(tchPosOnCtrls.x, tchPosOnCtrls.y);
+    if (tchPosOnCtrls.y < 50) {  // zgornja vrstica
+        whichBtnInRow(true);
+    } else if (tchPosOnCtrls.y > 55) {   // spodnja vrstica
+        whichBtnInRow(false);
+    }
+    return reslt;
 
+    function whichBtnInRow(isUpper) {   // če true, zgornja vrstica, sicer spodnja;
+        if (isUpper) {
+            if (tchPosOnCtrls.x > 55 && tchPosOnCtrls.x < 105) {
+                // helper('gor');
+                reslt = UP;
+            }
+        } else {    // spodnja vrstica, tj. L/D;
+            if (tchPosOnCtrls.x < 50) {
+                // helper('L');
+                reslt = LEFT;
+            } else if (tchPosOnCtrls.x > 111) {
+                // helper('D');
+                reslt = RIGHT;
+            }
+        }
+    }
+}
+
+function touchStartHndlr(e) {
+    e.preventDefault();
+    console.log('tch Start, chgdTchs.len = ', e.changedTouches.length);
+    for (let i = 0; i < e.changedTouches.length; i++) {
+        const which = detrmnTchPosOnCtrlsCnvs(e.changedTouches[i]);
+        // console.log('chgdTchs[', i, ']:', which);
+        if(which != INVALID && ctrlPressd[which] == false) { // POMEMBNO: to pomeni, da je treba ctrlPressd[which] in tchIDs[which] hkrati nastavit, pozneje tudi hkrati nevtralizirati !!!
+            tchIDs[which] = e.changedTouches[i].identifier;
+            if(which == UP) sprite.upPressed(); // tu se tudi nastavi ctrlPressd[UP];
+            else sprite.latPressed(which); // tu se tudi nastavi ctrlPressd[which];
+            // console.log(tchIDs[which]);
+        }
+    }
+}
+
+function touchEndHndlr(e) {
+    e.preventDefault();
+    console.log('tch End, chgdTchs.len = ', e.changedTouches.length);
+    for (let i = 0; i < e.changedTouches.length; i++) {
+        const which = detrmnTchPosOnCtrlsCnvs(e.changedTouches[i]);
+        // console.log('chgdTchs[', i, ']:', which);
+        if(which != INVALID && ctrlPressd[which] == true) {
+            tchIDs[which] = -1;
+            if(which == UP) sprite.upReleased(); // tu se tudi nastavi ctrlPressd[UP];
+            else sprite.latReleased(which); // tu se tudi nastavi ctrlPressd[which];
+            // console.log(tchIDs[which])
+        }
+    }
+}
+
+function touchCancelHndlr(e) {
+    e.preventDefault();
+    console.log('tch -- C A N C E L -- , chgdTchs.len = ', e.changedTouches.length);
+    // kr skenslamo vse povprek;
+    if(tchIDs.up != -1) {
+        tchIDs.up = -1;
+        sprite.upReleased();
+    }
+    if(tchIDs.left != -1) {
+        tchIDs.left = -1;
+        sprite.latReleased(LEFT);
+    }
+    if(tchIDs.right != -1) {
+        tchIDs.right = -1;
+        sprite.latReleased(RIGHT);
+    }
+}
+
+function touchMoveHndlr(e) {    // ta je pomemben le, če se z gumba pomakneš na INVALID (če torej zapustiš nek gumb);
+    e.preventDefault();
+    console.log('tch MOVE, chgdTchs.len = ', e.changedTouches.length);
+    for (let i = 0; i < e.changedTouches.length; i++) {
+        const which = detrmnTchPosOnCtrlsCnvs(e.changedTouches[i]);
+        // console.log('chgdTchs[', i, ']:', which);
+        if(which == INVALID) {
+            const id = e.changedTouches[i].identifier;
+            if(id == tchIDs.up) {
+                tchIDs.up = -1;
+                sprite.upReleased(); // tu se tudi nastavi ctrlPressd[UP];
+            } else if(id == tchIDs.right) {
+                tchIDs.right = -1;
+                sprite.latReleased(RIGHT);
+            } else if(id == tchIDs.left) {
+                tchIDs.left = -1;
+                sprite.latReleased(LEFT);
+            }
+        }
+    }
+}
+
+//  -  -  -  -  -   izris krmilja  -  -  -  -  ;
+function drawControlsIcons() {
+
+    // narisat kroge;
+    ctrlsCtx.strokeStyle = '#c0ffa7';
+    ctrlsCtx.fillStyle = '#c0ffa7';
+    for (let i = 1;i <= 3; i++) {
+        ctrlsCtx.beginPath();
+        const y = i % 2 == 0 ? 25 : 95; 
+        ctrlsCtx.arc((i - 1) * 56 + 24, y, 24, 0, 2 * Math.PI);
+        ctrlsCtx.fill();
+    }
+
+    // narisat krivulje v krogih;
+    ctrlsCtx.lineWidth = 2;
+    ctrlsCtx.strokeStyle = '#313131';
+    ctrlsCtx.beginPath();
+    
+    // spodnji levi gumb (ZA LEVO);
+    ctrlsCtx.moveTo(37, 94); // sredina: 25, 95
+    ctrlsCtx.lineTo(13, 94);
+    ctrlsCtx.lineTo(21, 86);
+    ctrlsCtx.moveTo(37, 95);
+    ctrlsCtx.lineTo(13, 95);
+    ctrlsCtx.lineTo(21, 103);
+    // izvirno:
+    //  ctrlsCtx.moveTo(37, 78); // sredina: 25, 103
+    // ctrlsCtx.lineTo(13, 78);
+    // ctrlsCtx.lineTo(21, 70);
+    // ctrlsCtx.moveTo(37, 79);
+    // ctrlsCtx.lineTo(13, 79);
+    // ctrlsCtx.lineTo(21, 87);
+    
+    // spodnji desni gumb (ZA DESNO);
+    ctrlsCtx.moveTo(123, 94); // sredina: 135
+    ctrlsCtx.lineTo(147, 94);
+    ctrlsCtx.lineTo(139, 86);
+    ctrlsCtx.moveTo(123, 95);
+    ctrlsCtx.lineTo(147, 95);
+    ctrlsCtx.lineTo(139, 103);
+    
+    // zgornji srednji (ZA NAPREJ)
+    ctrlsCtx.moveTo(79, 36); // sredina 56 + 24, 25
+    ctrlsCtx.lineTo(79, 12);
+    ctrlsCtx.lineTo(72, 20);
+    ctrlsCtx.moveTo(80, 36);
+    ctrlsCtx.lineTo(80, 12);
+    ctrlsCtx.lineTo(88, 20);
+    
+    ctrlsCtx.stroke();
+}

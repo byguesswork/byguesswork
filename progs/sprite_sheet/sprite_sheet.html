@@ -27,15 +27,25 @@
         <div id="home">
            <a href="/index.html" title="back to byGuesswork"><img src="/images/home.PNG" alt="home"></a>
         </div>
-        <canvas id="bckgnd-canvas"></canvas>
+        <canvas id="bckgnd_canvas"></canvas>
         <canvas id="canvas"></canvas>
-        <p>An exercise in the use of a sprite sheet and the logic of a platform arcade game.
+        <div id="controls_div">
+            <canvas id="ctrls_canvas"></canvas>
+        </div>
+
+        <!-- test -->
+         <div id="test"></div>
+        <!-- !test -->
+
+        <p class="mrg_top_36">An exercise in the use of a sprite sheet and the logic of a platform arcade game.
         </p>
-        <p>
+        <p class="hide-if-mobile">
             Use arrow keys (left/right, up) to animate the character.
         </p>
-        <p>Not mobile friendly.</p>
-        <br><br><br><br><br><br>
+        <br><br>
+        <div class="hide-if-mobile">
+            <br><br><br><br>
+        </div>
         <span style="background-color: inherit; font-size: 14px;">Ivo Makuc, 2025</span><br>
         <span style="background-color: inherit; font-size: 13px;">byguesswork@gmail.com</span>
         <br><br>
@@ -44,6 +54,7 @@
     <!-- end animation character styled after static pic found here: https://www.vecteezy.com/free-videos/man-walking-animation
     where static pic is credited to: Mulya Sri Wahyuni -->
 
+    <script src="../utils_general_use.js"></script>
     <script src="sprite.js"></script>
 </body>
 </html>
