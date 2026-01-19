@@ -513,8 +513,14 @@ class Sprite extends ScreenObj {
                         Screen.load(Screen.currScreenIdx - 1);
                         return;
                     } else if(this.xPos > 420 && Screen.currScreenIdx == 1 ) {
+                        
                         // - - - PRIŠEL SI DO KONCA  - - - -;
-                        document.removeEventListener('keydown', keyDownHndlr);
+                        if(!mobile) document.removeEventListener('keydown', keyDownHndlr);
+                        else {
+                            ctrlsCnvs.removeEventListener('touchstart', touchStartHndlr, {passive : false});
+                            ctrlsCnvs.removeEventListener('touchend', touchEndHndlr, {passive : false});
+                            ctrlsCnvs.removeEventListener('touchmove', touchMoveHndlr, {passive : false});
+                        }
                         this.stopInterval(MAIN);
                         this.latSpeed == 0;
                         this.render(true);
@@ -529,7 +535,6 @@ class Sprite extends ScreenObj {
                         }
                         return;
                     } else {
-    
                         // če nismo zapustili ekrana, preverimo, ali imamo na novem položaju oporo (tj. da nismo stopili v prazno);
                         if(this.yPos > 0 && this.vertSpeed == 0) {
                             if(!this.chk4Support()) {
