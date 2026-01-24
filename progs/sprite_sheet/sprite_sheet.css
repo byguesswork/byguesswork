@@ -40,6 +40,10 @@
     margin-top: 36px;
 }
 
+#ver {
+    display: none;
+}
+
 p {
     margin-bottom: 12px;
 }

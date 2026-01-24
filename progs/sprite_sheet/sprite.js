@@ -1,194 +1,12 @@
 'use strict';
 
-// da bi najprej naredilo cel gib, šele nato računalo izvedljivost premika na novih koordinatah..
-// .. ker morda skok diagonalno je možen tam, kjer skok navpično ni
-
-// Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. 
-//  See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently
-
-// 3 canvasi;
-const bckgndcnvs = document.getElementById('bckgnd_canvas');
-const ctxBckgnd = bckgndcnvs.getContext('2d');
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');     
-const ctrlsCnvs = document.getElementById('ctrls_canvas');
-const ctrlsCtx = ctrlsCnvs.getContext('2d');  
-
-// konstante; 
-const MAIN = 'main'; // interval identifier;
-const TURN = 'turn';    // interval ID za obrat možička (turn) proti gledalcu;
-const LEFT = 'left';
-const RIGHT = 'right';
-const UP = 'up';
-const INVALID = 'invld';
-
-// const test = document.getElementById('test');   // za morebitne testne namene;
-
-class Screen {
-    static height = 420;
-    static width = 600;
-    static currScreenIdx;  // tu bo shranjen idx trenutnega zaslona;
-    static currScreen;  // tu bo shranjen objekt trenutnega zaslona;
-    static bckgnd;
-
-    static scrItemsCatlg = {    // catalagoue of screen items;
-        turf10_40 : {
-            sx: 1,
-            sy: 61,
-            width: 40,
-            height: 10
-        },
-        turf10_160 : {
-            sx: 43,
-            sy: 61,
-            width: 160,
-            height: 10
-        },
-        turfLevitating: {
-            sx: 1,
-            sy: 0,
-            width: 40,
-            height: 60
-        }
-    }
-
-    static screensCatalogue = [
-        // 1. zaslon;
-        {
-            ovireDef: [ // definicije ovir; to niso operativni podatki, ampak definicije zanje;
-                {type: 'turfLevitating', x: 280, y: 30},
-                {type: 'turfLevitating', x: 300, y: 160},
-                {type: 'turfLevitating', x: 100, y: 100},
-                {type: 'turfLevitating', x: 500, y: 220},
-                {type: 'turfLevitating', x: 560, y: 220},
-                {type: 'turfLevitating', x: 560, y: 20},
-                {type: 'turfLevitating', x: 560, y: 85},
-                {type: 'turfLevitating', x: 560, y: 150},
-                {type: 'turfLevitating', x: 50, y: 100},
-                {type: 'turfLevitating', x: -20, y: 40},
-                {type: 'turfLevitating', x: -20, y: 140},
-                {type: 'turfLevitating', x: -20, y: 240},
-                {type: 'turf10_160', x: 0, y: 0},
-                {type: 'turf10_160', x: 160, y: 0},
-                {type: 'turf10_160', x: 320, y: 0},
-                {type: 'turf10_160', x: 480, y: 0},
-                {type: 'turf10_40', x: 470, y: 10},
-            ],
-            ovire: [],  // popolnimo ko pride čas; to je seznam operativnih ovir;
-            exits: {
-                right: {
-                    x: 600,
-                    spritePos: {    // položaj, ki ga zavzame sprite na naslednjem ekranu, če uporabi ta izhod;
-                        x: 0,
-                        y: 280,
-                        sx: 43
-                    }
-                },
-                left: undefined,
-            },
-            bckgndIdx: 0,
-        },
-
-        // 2. zaslon;
-        {
-            ovireDef: [
-                {type: 'turfLevitating', x: 0, y: 220},
-                {type: 'turfLevitating', x: 40, y: 220},
-                {type: 'turfLevitating', x: 80, y: 220},
-                {type: 'turfLevitating', x: 340, y: 260},
-                {type: 'turfLevitating', x: 340, y: 170},
-                {type: 'turfLevitating', x: 340, y: 80},
-                {type: 'turfLevitating', x: 300, y: 80},
-                {type: 'turfLevitating', x: 260, y: 80},
-                {type: 'turfLevitating', x: 220, y: 80},
-                {type: 'turfLevitating', x: 180, y: 80},
-                {type: 'turfLevitating', x: 140, y: 80},
-                {type: 'turfLevitating', x: 100, y: 80},
-                {type: 'turfLevitating', x: 0, y: 30},
-                {type: 'turfLevitating', x: 0, y: 125},
-                {type: 'turf10_160', x: 0, y: 0},
-                {type: 'turf10_160', x: 160, y: 0},
-                {type: 'turf10_160', x: 320, y: 0},
-                {type: 'turf10_160', x: 480, y: 0},
-            ],
-            ovire: [],  // popolnimo ko pride čas;
-            exits: {
-                right: undefined,
-                left: {
-                    x: -40,
-                    spritePos: {    // položaj, ki ga zavzame sprite na naslednjem ekranu, če uporabi ta izhod;
-                        x: 560,
-                        y: 280,
-                        sx: 85
-                    }
-                },
-            },
-            bckgndIdx: 1,
-        },
-    ]
-
-    static load(scrIdx = 0) {
-        Screen.currScreenIdx = scrIdx;
-        Screen.currScreen = Screen.screensCatalogue[Screen.currScreenIdx];
-
-        // izris ozadja in zagon oblakov;
-        Screen.bckgnd.draw(Screen.currScreen.bckgndIdx);
-
-        // izbrišemo ospredje;
-        ctx.clearRect(0, 0, Screen.width, Screen.height);
-
-        // če še niso, naložimo ovire iz definicij (obenem se tudi izrišejo);
-        if(Screen.currScreen.ovire.length == 0) {
-            const ovireDef = Screen.currScreen.ovireDef;
-            for(let i = 0; i < ovireDef.length; i++) {
-                const type = ovireDef[i].type;
-                Screen.currScreen.ovire.push(new ScreenObj(ovireDef[i].x, ovireDef[i].y,
-                    Screen.scrItemsCatlg[type].sx,
-                    Screen.scrItemsCatlg[type].sy,
-                    Screen.scrItemsCatlg[type].width,
-                    Screen.scrItemsCatlg[type].height
-                ))
-            }        
-        } else {    // sicer jih samo izrišemo;
-            for (const element of Screen.currScreen.ovire) {
-                element.render(true);
-            }
-        }
-
-        // narišemo možička (položaj mu je vselej določen že predhodno);
-        sprite.render(true);
-    }
-
-    static endAnimationPt1(i) {
-        ctx.clearRect(420, 170, 95, 175);
-        ctx.drawImage(endAnimPics, (i % 10) * 96 + 1, 0, 94, 175, 420, 160, 94, 175);
-        if(i >= 40) {
-            ctx.clearRect(420, 160, 95, 175);
-            sprite.render(true);
-            setTimeout(() => {
-                ctx.font = "8px serif"; // končna velikost fonta bo 48;
-                ctx.strokeText('The End', 400, 180 + 8);
-                for(let j = 12; j <= 48; j = j + 4) {   // 12, ker se font povečuje po 4, pred tem pa je bil 8;
-                    setTimeout( () => { Screen.endAnimationPt2(j) }, 15 * j )   // setInterval bi bil 60ms, ampak ker je j po 4, moramo delit s 4;
-                }
-            }, 1000);
-        }
-    }
-
-    static endAnimationPt2(i) {
-        ctx.clearRect(390,170,200,100);
-        ctx.font = `${i}px serif`;
-        if(!mobile)ctx.strokeText('The End', 400, 180 + i);
-            else ctx.fillText('The End', 400, 180 + i)  // će mobile je fill, ker se na majhnem zaslonu sicer slabo vidi;
-        if(i >= 48) {
-            sprite.render(true);
-        }
-    }
-}
-
 class ScreenObj {
 
-    constructor(xPos, yPos, sx, sy, w, h) {
+    static #ctx;
+    static #assets;
+    static #screenH; // screen height;
+
+    constructor(xPos, yPos, sx, sy, w, h, drawAtInstantiation = true) {
         this.xPos = xPos;   // ta koordinata ima izhodišče spodaj levo
         this.yPos = yPos;   // ta koordinata ima izhodišče spodaj levo
         this.sx = sx,  // x koordinata na source sliki;
@@ -196,18 +14,26 @@ class ScreenObj {
         this.width = w;
         this.height = h;
         
-        this.render(true);
+        if(drawAtInstantiation) this.render(true);
+    }
+
+    static meetData(ctx, assets, screenH) {
+        ScreenObj.#ctx = ctx;
+        ScreenObj.#assets = assets;
+        ScreenObj.#screenH = screenH;
     }
 
     render(visible) {   // ali naj nariše viden ali ne (če false, se izriše prozoren oz. se izbriše)
         if(visible) {
-            ctx.drawImage(assets, this.sx, this.sy, this.width, this.height, this.xPos, (Screen.height - this.yPos) - this.height, this.width, this.height)
+            ScreenObj.#ctx.drawImage(ScreenObj.#assets, this.sx, this.sy, this.width, this.height, this.xPos, (ScreenObj.#screenH - this.yPos) - this.height, this.width, this.height)
             // console.log('vertFrams:', this.vertFrames, 'latSp:', this.latSpeed, 'vSp:', this.vertSpeed, 'x:', this.xPos, 'y:', this.yPos)  // da preverimo, kolko v višino je skočil;
         } else {
-            ctx.clearRect(this.xPos, Screen.height - (this.yPos + this.height), this.width, this.height)
+            ScreenObj.#ctx.clearRect(this.xPos, ScreenObj.#screenH - (this.yPos + this.height), this.width, this.height)
         }
     }
 }
+
+
 
 class Sprite extends ScreenObj {
 
@@ -215,26 +41,31 @@ class Sprite extends ScreenObj {
     static maxVertFrames = 6; // kolko framov deluje neprekinjen pritisk tipke navzgor;
     static minVertFrames = 3;    // kolikšen je skok, če samo na kratko pritisneš navzgor; 
     static latMovtSpeedDef = 20;    // def kot definition;
+
+    // vrednosti za sx za spritesheet
+    static look = {
+        left: 85,
+        right: 43,
+        straight: 127,
+    }
     
-    constructor(xPos, yPos, sx = 43) {
-        super();
-        // položaj in vir izrisa;
-        this.xPos = xPos;   // ta koordinata ima izhodišče spodaj levo; kje na ekranu je sprite;
-        this.yPos = yPos;   // ta koordinata ima izhodišče spodaj levo
-        this.height = 60;
-        this.width = 40;
-        this.sx = sx;   // x koordinata slike sprajta na source sliki; sx v pomenu, kot ga ima v drawImage();
-        this.sy = 0;   // y koordinata slike sprajta na source sliki; sy v pomenu, kot ga ima v drawImage(); je vedno 0;
-        this.sxBase = 43; // ker ima sprajt več sličic, je tu shranjen sx začetne sličice, ostale se preračunajo iz te;
+    constructor(xPos, yPos, sx = Sprite.look.right) {
+        super(xPos, yPos, sx, 0, 40, 60, false);    // mora bit false, ker ko kličemo new Sprite (kot je trenutno) je to pred nalaganjem img-jev, ki so vir izrisa;
+            // ima tudi this.sx, .sy, .width (40), .height (60), določeno s super zgoraj;
         // gibanje sprajta;
         this.vertSpeed = 0; // v px; število pikslov, koliko se sprajt premakne navzgor (poz)/navzdol (neg) v enem turnu;
         this.vertFrames = 0; // koliko framov že poteka gibanje gor oz je že pritisnjen gumb za gor;
         this.upContinuslyPressd = false;    // če ne držiš gumba za gor, ampak ga samo na kratko pritisneš, je skok nižji;
         this.xAtStartJmp = 0;   // za odločanje o tem, al se je lik zaletel med skokom;
         this.latSpeed = 0; // poz v desno, neg v levo; št. pikslov (px), klikor se sprajt premakne L/D v enem turnu;
+        this.specialCase = false;
     }
     
-    place(xPos, yPos, sx = 43) {    // 43 - pogled v desno, 85 - v levo, 125 - naravnost v gledalca;
+    meetScreen(screen) {
+        this.screen = screen;   // prejme class GameScreen;
+    }
+
+    place(xPos, yPos, sx = Sprite.look.right) {
         this.xPos = xPos;   // ta koordinata ima izhodišče spodaj levo; kje na ekranu je sprite;
         this.yPos = yPos;   // ta koordinata ima izhodišče spodaj levo
         this.sx = sx;   // x koordinata slike sprajta na source sliki; sx v pomenu, kot ga ima v drawImage();
@@ -250,6 +81,28 @@ class Sprite extends ScreenObj {
     stopInterval(which) {
         clearInterval(intervalIDs[which]);
         intervalIDs[which] = 0;
+    }
+
+    stopMvmtAndInterval() { // se rabi pri prehodu na drug zaslon;
+        this.latSpeed = 0;
+        this.vertSpeed = 0;
+        this.vertFrames = 0;
+        this.upContinuslyPressd = false;
+        if(intervalIDs.main != 0) this.stopInterval(MAIN);
+    }
+
+    stopListeners() {
+        if(!mobile) document.removeEventListener('keydown', keyDownHndlr);
+        else {
+            ctrlsCnvs.removeEventListener('touchstart', touchStartHndlr, {passive : false});
+            ctrlsCnvs.removeEventListener('touchend', touchEndHndlr, {passive : false});
+            ctrlsCnvs.removeEventListener('touchmove', touchMoveHndlr, {passive : false});
+        }
+    }
+
+    stopIntervalAndListnrs(){ // se rabi pri game over (padec v luknjo ...) ali če prideš do konca;
+        this.stopListeners();
+        this.stopInterval(MAIN);
     }
 
     upPressed() {
@@ -312,13 +165,13 @@ class Sprite extends ScreenObj {
         if(speed > 0) { // pri premiku navzgor;
             // preverjamo, če je zgornji rob sprajta (this.yPos + this.height) posegel čez spodnji rob kake ovire (ovira.yPos);
             const upprSpriteEdge = this.yPos + this.height;
-            for (const ovira of Screen.currScreen.ovire) {
+            for (const ovira of this.screen.currScreen.items_static) {
                 if(upprSpriteEdge > ovira.yPos && (upprSpriteEdge - speed) <= ovira.yPos) { // tak vrstni red, da potencialno manj kalkulacij (eno odštevanje manj);
                     potntlObstructns.push(ovira);
                 }
             }
         } else {    // preverjanje za morebiten trk ob oviro (oporo) pri gibanju navzdol;
-            for (const ovira of Screen.currScreen.ovire) {
+            for (const ovira of this.screen.currScreen.items_static) {
                 const oviraTopEdge = ovira.yPos + ovira.height;    // zgornji rob ovire;
                 if(startYPos >= oviraTopEdge && this.yPos < oviraTopEdge) {
                     potntlObstructns.push(ovira); // prekoračili smo po horizontali (spodnji rob sprajta skozi zgornji rob ovire);
@@ -346,7 +199,7 @@ class Sprite extends ScreenObj {
         const potntlSupprt = [];
         
         // poiščemo kandidate za oporo (stvari, ki imajo zgornji rob na višini spodnjega roba sprajta);
-        for (const element of Screen.currScreen.ovire) {
+        for (const element of this.screen.currScreen.items_static) {
             if((element.yPos + element.height) == this.yPos) {
                 potntlSupprt.push(element);
             }
@@ -382,13 +235,13 @@ class Sprite extends ScreenObj {
         if(speed > 0) { // pri premiku v desno;
             // preverjamo, če je desni rob sprajta (this.xPos + this.width) posegel čez levi rob kake ovire (ovira.xPos, ker xPos je točka na levi);
             const xREdge = this.xPos + this.width;  // xREdge = x desnega roba sprajta;
-            for (const ovira of Screen.currScreen.ovire) {
+            for (const ovira of this.screen.currScreen.items_static) {
                 if(startXPos <= ovira.xPos && xREdge > ovira.xPos) { 
                     potntlObstructns.push(ovira);   // prekoračili smo po vertikali;
                 }
             }
         } else {
-            for (const ovira of Screen.currScreen.ovire) {
+            for (const ovira of this.screen.currScreen.items_static) {
                 const oviraREdge = ovira.xPos + ovira.width;    // desni rob ovire;
                 if(startXPos >= oviraREdge && this.xPos < oviraREdge) {
                     potntlObstructns.push(ovira);   // prekoračili smo po vertikali;
@@ -459,16 +312,6 @@ class Sprite extends ScreenObj {
                         }
                     }
                 }
-    
-                // padec v luknjo ...;
-                if(this.yPos < -60) {
-                    this.stopInterval(MAIN);
-                    ctx.font = "60px serif";
-                    ctx.fillText('Game Over', 100, 90);
-                    ctx.font = "24px serif";
-                    ctx.fillText('Refresh page to start over', 110, 124);
-                    console.log('-  -  - KONEC IGRE, daj F5 -  -  -  ')
-                }
             } 
             
             // procesiranje stranskega gibanja; NE SME bit na else, ker lahko imaš oba;
@@ -501,38 +344,23 @@ class Sprite extends ScreenObj {
                 if(hozMovtCanDo) {
     
                     // al smo morda že zapustili ekran;
-                    const exits = Screen.currScreen.exits;
+                    const exits = this.screen.currScreen.exits;
                     if(exits.right != undefined && this.xPos >= exits.right.x) {
-                        Screen.bckgnd.stopClouds();
-                        sprite.place(exits.right.spritePos.x, exits.right.spritePos.y, exits.right.spritePos.sx)
-                        Screen.load(Screen.currScreenIdx + 1);
+                        this.stopMvmtAndInterval();
+                        this.place(exits.right.spritePos.x, exits.right.spritePos.y, Sprite.look[exits.right.spritePos.sx])
+                        this.screen.getNewsSpriteExited(RIGHT);
                         return;
                     } else if(exits.left != undefined && this.xPos <= exits.left.x) {
-                        Screen.bckgnd.stopClouds();
-                        sprite.place(exits.left.spritePos.x, exits.left.spritePos.y, exits.left.spritePos.sx)
-                        Screen.load(Screen.currScreenIdx - 1);
+                        this.stopMvmtAndInterval();
+                        this.place(exits.left.spritePos.x, exits.left.spritePos.y, Sprite.look[exits.left.spritePos.sx])
+                        this.screen.getNewsSpriteExited(LEFT);
                         return;
-                    } else if(this.xPos > 420 && Screen.currScreenIdx == 1 ) {
+                    } else if(this.xPos > 440 && this.screen.currScreenIdx == 4 ) {
                         
                         // - - - PRIŠEL SI DO KONCA  - - - -;
-                        if(!mobile) document.removeEventListener('keydown', keyDownHndlr);
-                        else {
-                            ctrlsCnvs.removeEventListener('touchstart', touchStartHndlr, {passive : false});
-                            ctrlsCnvs.removeEventListener('touchend', touchEndHndlr, {passive : false});
-                            ctrlsCnvs.removeEventListener('touchmove', touchMoveHndlr, {passive : false});
-                        }
-                        this.stopInterval(MAIN);
-                        this.latSpeed == 0;
+                        this.stopIntervalAndListnrs();
                         this.render(true);
-                        // začnemo animacijo;
-                        endAnimPics.src = 'sprites2.jpg';
-                        endAnimPics.onload = function() {
-                            setTimeout(() => {
-                                for(let i = 0; i <= 40; i++) {
-                                    setTimeout(() => { Screen.endAnimationPt1(i) }, 90 * i)
-                                }
-                            }, 800);
-                        }
+                        this.screen.gameFinished();
                         return;
                     } else {
                         // če nismo zapustili ekrana, preverimo, ali imamo na novem položaju oporo (tj. da nismo stopili v prazno);
@@ -542,19 +370,44 @@ class Sprite extends ScreenObj {
                             }
                         }  
                     }
+
                 }
             } // konec procesiranja lateralnega gibanja;
+
+            // special cases; (shark)
+            if(this.screen.currScreenIdx == 3) {
+                if(this.specialCase) {
+                    if(this.latSpeed != 0) this.latSpeed = 0; // če ni že od prej, damo zdaj;
+                    if(this.yPos <= 20) {
+                        this.stopInterval(MAIN);
+                        this.render(false);
+                    } else this.render(true);
+                    this.screen.getNewsSharkAction(this.xPos, this.yPos);
+                    return;
+                }
+                if(this.vertSpeed < 0) {
+                    if((this.xPos >= 200 && this.xPos <= 300 && this.yPos <= 220) || (this.xPos >= 380 && this.xPos <= 520 && this.yPos <= 240)) {
+                        this.stopListeners();
+                        this.sx = Sprite.look.straight;
+                        intrvlLen = 160; // upočasnimo čas;
+                        this.specialCase = true;
+                        this.screen.getNewsSharkAction(this.xPos, this.yPos);
+                        this.render(true);
+                        return;
+                    }
+                }
+            }
             
             // izbira sličice možička;
             // najprej je odvisna od smeri gibanja L/D;
             if(this.latSpeed > 0) {
-                this.sx = this.sxBase; 
+                this.sx = Sprite.look.right; 
             } else if(this.latSpeed < 0) {
-                this.sx = this.sxBase + 42;
+                this.sx = Sprite.look.left;
             } else { // če pa se ne giba L/D pa od pristka gumbov;
-                if(ctrlPressd.right && ctrlPressd.left) this.sx = this.sxBase + 84; // če držiš pritisnjena oba hkrati, te gleda naravnost;
-                else if(ctrlPressd.right) this.sx = this.sxBase;
-                else if(ctrlPressd.left) this.sx = this.sxBase + 42;
+                if(ctrlPressd.right && ctrlPressd.left) this.sx = Sprite.look.straight; // če držiš pritisnjena oba hkrati, te gleda naravnost;
+                else if(ctrlPressd.right) this.sx = Sprite.look.right;
+                else if(ctrlPressd.left) this.sx = Sprite.look.left;
             }
     
             // narišemo na novem/istem položaju;
@@ -583,7 +436,7 @@ class Sprite extends ScreenObj {
             // komplikacija z zakasnjenim obračanjem;
             if(intervalIDs.turn == 0) {
                 intervalIDs.turn = setTimeout(() => {
-                    this.sx = this.sxBase + 84;
+                    this.sx = Sprite.look.straight;
                     this.render(false);
                     this.render(true);
                     this.stopInterval(TURN);
@@ -592,305 +445,3 @@ class Sprite extends ScreenObj {
         }
     }   // konec processChanges;
 }       // konec klasa Sprajt;
-
-
-//  -  -  -   IZVAJANJE -- -- --
-
-bckgndcnvs.width = Screen.width;
-bckgndcnvs.height = Screen.height;
-canvas.width = Screen.width;
-canvas.height = Screen.height;
-ctrlsCnvs.width = 172;
-ctrlsCnvs.height = 131;
-
-const mobile = isMobile();
-const navigatorLang = getLang();
-let intrvlLen = 90;
-
-document.addEventListener("DOMContentLoaded", positionCanvs);
-if(!mobile) {
-    document.addEventListener('keydown', keyDownHndlr);
-    document.addEventListener('keyup', keyUpHndlr);
-} else {
-    bckgndcnvs.style.marginTop = '40px';
-    document.getElementById('controls_div').style.display = 'block';    // da postane viden, prej: none;
-    ctrlsCnvs.addEventListener('touchstart', touchStartHndlr, {passive : false});
-    ctrlsCnvs.addEventListener('touchend', touchEndHndlr, {passive : false});
-    ctrlsCnvs.addEventListener('touchmove', touchMoveHndlr, {passive : false});
-    ctrlsCnvs.addEventListener('touchcancel', touchCancelHndlr, {passive : false});
-    intrvlLen = 110;
-    for (const element of document.getElementsByClassName('hide-if-mobile')) {
-        element.style.display = 'none';
-    }
-}
-
-const intervalIDs = {   // mora bit pred bckgndAssets.onload, ker se tam rabi;
-    main: 0,
-    turn: 0,    // da se možiček obrne proti gledalcu, če ga X ms ne premikaš;
-};
-
-const bckgndAssets = new Image(); // tu je slika pokrajine in oblakov; prikazano je na canvasu ozadja;
-const assets = new Image(); // src se naloada v handlerju positionCanvs();
-const endAnimPics = new Image();
-
-const sprite = new Sprite(360, 10, 85); // pravilno: new Sprite(360, 10, 85)
-const ctrlPressd = {
-    left: false,
-    right: false,
-    up: false,
-};
-const tchIDs = {
-    left: -1,
-    right: -1,
-    up: -1
-}
-const tchPosOnCtrls = {
-    x: 0,
-    y: 0,
-};
-const contrlsCnvsRect = {
-    left: 0,
-    top: 0,
-    right: 0,
-    bottom: 0
-}
-
-function positionCanvs() {
-    
-    function helper(lesserWidth) {
-        let newCenterWidth = lesserWidth - 24;  // 12 px placa L/D;
-        if(newCenterWidth % 2 == 1) newCenterWidth--;   // da je sodo število;
-        document.getElementsByClassName('center')[0].style.width = `${newCenterWidth}px`;
-    
-        const ratio = (newCenterWidth - 2) / Screen.width;  // -2, ker je treba odsštet border od canvasa, ki mora priti v center;
-        const newWidth = ratio * Screen.width;
-        const newHeight = ratio * Screen.height;
-        bckgndcnvs.style.width = `${newWidth}px`;
-        bckgndcnvs.style.height = `${newHeight}px`;
-        // obenem nastavimo isto dimenzijo tudi kanvacu ospredja, čeprav je zdaj še skrit;
-        canvas.style.width = `${newWidth}px`;
-        canvas.style.height = `${newHeight}px`;
-    }
-
-    // preverjanje dimenzij, ali je morda treba zmanjšat canvas (pred tem pa centerwrapper);
-    const lesserWidth = document.documentElement.clientWidth <= screen.width ? document.documentElement.clientWidth : screen.width;
-    console.log('document.documentElement.clientWidth:', document.documentElement.clientWidth, 'screen.width:', screen.width, 'lesser', lesserWidth);
-    if(lesserWidth < 624) { helper(lesserWidth) }
-    
-    // ker se zadeve pri spreminjanju velikosti lahko spremenijo (pojavi se kak drsnik), znova odčitamo in preverimo še enkrat;
-    const newLesserWidth = document.documentElement.clientWidth <= screen.width ? document.documentElement.clientWidth : screen.width;
-    console.log('document.documentElement.clientWidth:', document.documentElement.clientWidth, 'screen.width:', screen.width, 'lesser', newLesserWidth);
-    if(newLesserWidth < lesserWidth) { helper(newLesserWidth) }
-    console.log('širina canvasa:', bckgndcnvs.getBoundingClientRect().width - 2); // -2 ker rect upošteva tudi border, nas pa zanima canvas;
-
-    // poravnamo delovni canvas s canvasom ozadja (da se prekrivata);
-    const centerRect = document.getElementsByClassName('center')[0].getBoundingClientRect();
-    const centerTop = centerRect.top;
-    const centerLeft = centerRect.left;
-    console.log('center top/left:', centerTop, centerLeft)
-    const bckgndTop = bckgndcnvs.getBoundingClientRect().top;
-    const bckgndLeft = bckgndcnvs.getBoundingClientRect().left;
-    console.log('bckgndCanvas top/left:', bckgndTop, bckgndLeft)
-    // ker je canvas absolute glede na center, moramo izračunat razliko (ne moremo mu določit top in left absolutno gledano, ampak relativno na center);
-    const canvasTop = bckgndTop - centerTop;
-    const canvasLeft = bckgndLeft - centerLeft; 
-    canvas.style.display = 'unset';    // prej mora bit skrit, sicer vpliva na postavitev ozadnega canvasa, ki se potem premakne po premiku tega;
-    canvas.style.top = `${canvasTop}px`;
-    canvas.style.left = `${canvasLeft}px`;
-    
-    // loadanje slike ozadja;
-    bckgndAssets.src = 'bckgnd_assets.png';
-    bckgndAssets.onload = function() {
-        
-        // loadanje slike ospredja;
-        assets.src = 'sprites3.png';
-        assets.onload = function() {
-
-            // ko vse naloženo, obdelava in izris;
-            Screen.bckgnd = new Background(ctxBckgnd, bckgndAssets);
-            Screen.load(); // naložimo cel zaslon (ospredje); po defaultu 0; za TESTIRANJE: TUKAJ DAŠ ŠTEVILKO ZASLONA; NA KATEREM ŽELIŠ ZAČETI test;
-            if(mobile) {
-                drawControlsIcons();    // narišemo gumbe, če mobile;
-                contrlsCnvsRect.left = ctrlsCnvs.getBoundingClientRect().left;
-                contrlsCnvsRect.top = ctrlsCnvs.getBoundingClientRect().top;
-                contrlsCnvsRect.right = ctrlsCnvs.getBoundingClientRect().right;
-                contrlsCnvsRect.bottom = ctrlsCnvs.getBoundingClientRect().bottom;
-            }
-        }
-    }
-}
-
-// -  -  -  -  -  HENDLERJI -  -  -  -  
-function keyDownHndlr(e) {
-    // console.log(e)
-    if(e.key == 'ArrowUp') {
-        e.preventDefault();
-        sprite.upPressed();
-    } else if(e.key == 'ArrowRight') {
-        e.preventDefault();
-        sprite.latPressed(RIGHT);
-    } else if(e.key == 'ArrowLeft') {
-        e.preventDefault();
-        sprite.latPressed(LEFT);
-    } else if(e.key == 'Escape') {
-        if(intervalIDs.main != 0) { sprite.stopInterval(MAIN); }
-    }
-}
-
-function keyUpHndlr(e) {
-    if(e.key == 'ArrowUp') {
-        sprite.upReleased();
-    } else if(e.key == 'ArrowRight') {
-        sprite.latReleased(RIGHT);
-    } else if (e.key == 'ArrowLeft') {
-        sprite.latReleased(LEFT);
-    }
-}
-
-function detrmnTchPosOnCtrlsCnvs(chgdTch) {
-    tchPosOnCtrls.x = chgdTch.clientX - contrlsCnvsRect.left;
-    tchPosOnCtrls.y = chgdTch.clientY - contrlsCnvsRect.top;
-    let reslt = INVALID;    // lahko pa se v nadaljevanju spremeni;
-    
-    // console.log(tchPosOnCtrls.x, tchPosOnCtrls.y);
-    if (tchPosOnCtrls.y < 62) {  // zgornja vrstica
-        whichBtnInRow(true);
-    } else if (tchPosOnCtrls.y > 70) {   // spodnja vrstica
-        whichBtnInRow(false);
-    }
-    // console.log(tchPosOnCtrls.x, tchPosOnCtrls.y, reslt);
-    return reslt;
-
-    function whichBtnInRow(isUpper) {   // če true, zgornja vrstica, sicer spodnja;
-        if (isUpper) {
-            if (tchPosOnCtrls.x > 55 && tchPosOnCtrls.x < 117) {
-                reslt = UP;
-            }
-        } else {    // spodnja vrstica, tj. L/D;
-            if (tchPosOnCtrls.x < 61) {
-                reslt = LEFT;
-            } else if (tchPosOnCtrls.x > 109) {
-                reslt = RIGHT;
-            }
-        }
-    }
-}
-
-function touchStartHndlr(e) {
-    e.preventDefault();
-    for (let i = 0; i < e.changedTouches.length; i++) {
-        const which = detrmnTchPosOnCtrlsCnvs(e.changedTouches[i]);
-        // console.log('chgdTchs[', i, ']:', which);
-        if(which != INVALID && ctrlPressd[which] == false) { // POMEMBNO: to pomeni, da je treba ctrlPressd[which] in tchIDs[which] hkrati nastavit, pozneje tudi hkrati nevtralizirati !!!
-            tchIDs[which] = e.changedTouches[i].identifier;
-            if(which == UP) sprite.upPressed(); // tu se tudi nastavi ctrlPressd[UP];
-            else sprite.latPressed(which); // tu se tudi nastavi ctrlPressd[which];
-            // console.log(tchIDs[which]);
-        }
-    }
-}
-
-function touchEndHndlr(e) {
-    e.preventDefault();
-    for (let i = 0; i < e.changedTouches.length; i++) {
-        const which = detrmnTchPosOnCtrlsCnvs(e.changedTouches[i]);
-        // console.log('chgdTchs[', i, ']:', which);
-        if(which != INVALID && ctrlPressd[which] == true) {
-            tchIDs[which] = -1;
-            if(which == UP) sprite.upReleased(); // tu se tudi nastavi ctrlPressd[UP];
-            else sprite.latReleased(which); // tu se tudi nastavi ctrlPressd[which];
-            // console.log(tchIDs[which])
-        }
-    }
-}
-
-function touchCancelHndlr(e) {
-    e.preventDefault();
-    console.log('tch -- C A N C E L -- , chgdTchs.len = ', e.changedTouches.length);
-    // kr skenslamo vse povprek;
-    if(tchIDs.up != -1) {
-        tchIDs.up = -1;
-        sprite.upReleased();
-    }
-    if(tchIDs.left != -1) {
-        tchIDs.left = -1;
-        sprite.latReleased(LEFT);
-    }
-    if(tchIDs.right != -1) {
-        tchIDs.right = -1;
-        sprite.latReleased(RIGHT);
-    }
-}
-
-function touchMoveHndlr(e) {    // ta je pomemben le, če se z gumba pomakneš na INVALID (če torej zapustiš nek gumb);
-    e.preventDefault();
-    for (let i = 0; i < e.changedTouches.length; i++) {
-        const which = detrmnTchPosOnCtrlsCnvs(e.changedTouches[i]);
-        // console.log('chgdTchs[', i, ']:', which);
-        if(which == INVALID) {
-            const id = e.changedTouches[i].identifier;
-            if(id == tchIDs.up) {
-                tchIDs.up = -1;
-                sprite.upReleased(); // tu se tudi nastavi ctrlPressd[UP];
-            } else if(id == tchIDs.right) {
-                tchIDs.right = -1;
-                sprite.latReleased(RIGHT);
-            } else if(id == tchIDs.left) {
-                tchIDs.left = -1;
-                sprite.latReleased(LEFT);
-            }
-        }
-    }
-}
-
-//  -  -  -  -  -   izris krmilja  -  -  -  -  ;
-function drawControlsIcons() {
-
-    // narisat kroge;
-    ctrlsCtx.strokeStyle = '#c0ffa7';
-    ctrlsCtx.fillStyle = '#c0ffa7';
-    for (let i = 1;i <= 3; i++) {
-        ctrlsCtx.beginPath();
-        const y = i % 2 == 0 ? 31 : 101; 
-        ctrlsCtx.arc((i - 1) * 56 + 30, y, 30, 0, 2 * Math.PI);
-        ctrlsCtx.fill();
-    }
-
-    // narisat krivulje v krogih;
-    ctrlsCtx.lineWidth = 2;
-    ctrlsCtx.strokeStyle = '#313131';
-    ctrlsCtx.beginPath();
-    
-    // spodnji levi gumb (ZA LEVO);
-    ctrlsCtx.moveTo(43, 100); // sredina: 25, 95
-    ctrlsCtx.lineTo(19, 100);
-    ctrlsCtx.lineTo(27, 92);
-    ctrlsCtx.moveTo(43, 101);
-    ctrlsCtx.lineTo(19, 101);
-    ctrlsCtx.lineTo(28, 109);
-    // izvirno:
-    //  ctrlsCtx.moveTo(37, 78); // sredina: 25, 103
-    // ctrlsCtx.lineTo(13, 78);
-    // ctrlsCtx.lineTo(21, 70);
-    // ctrlsCtx.moveTo(37, 79);
-    // ctrlsCtx.lineTo(13, 79);
-    // ctrlsCtx.lineTo(21, 87);
-    
-    // spodnji desni gumb (ZA DESNO);
-    ctrlsCtx.moveTo(129, 100); // sredina: 135
-    ctrlsCtx.lineTo(153, 100);
-    ctrlsCtx.lineTo(145, 92);
-    ctrlsCtx.moveTo(129, 101);
-    ctrlsCtx.lineTo(153, 101);
-    ctrlsCtx.lineTo(145, 109);
-    
-    // zgornji srednji (ZA GOR)
-    ctrlsCtx.moveTo(85, 42); // sredina 56 + 24, 25
-    ctrlsCtx.lineTo(85, 18);
-    ctrlsCtx.lineTo(78, 26);
-    ctrlsCtx.moveTo(86, 42);
-    ctrlsCtx.lineTo(86, 18);
-    ctrlsCtx.lineTo(94, 26);
-    
-    ctrlsCtx.stroke();
-}
