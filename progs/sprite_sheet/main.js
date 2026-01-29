@@ -3,9 +3,10 @@
 // da bi najprej naredilo cel gib, šele nato računalo izvedljivost premika na novih koordinatah..
 // .. ker morda skok diagonalno je možen tam, kjer skok navpično ni
 
-const ver = '8';
+const ver = '9';
 document.getElementById('ver').insertAdjacentText('beforeend', ver);
 
+// v9 flypad, popravki, premaknil intervalLen v sprite;
 // v8 dodal kliker za ver; klasi, shark
 // v7 odpravil bug touch
 
@@ -40,7 +41,6 @@ const INVALID = 'invld';
 
 const mobile = isMobile();
 const navigatorLang = getLang();
-let intrvlLen = 90;
 
 const bckgndAssets = new Image(); // tu je slika pokrajine in oblakov; prikazano je na canvasu ozadja;
 const assets = new Image(); // src se naloada v handlerju positionCanvs();
@@ -62,7 +62,6 @@ if(!mobile) {
     ctrlsCnvs.addEventListener('touchend', touchEndHndlr, {passive : false});
     ctrlsCnvs.addEventListener('touchmove', touchMoveHndlr, {passive : false});
     ctrlsCnvs.addEventListener('touchcancel', touchCancelHndlr, {passive : false});
-    intrvlLen = 110;
     for (const element of document.getElementsByClassName('hide-if-mobile')) {
         element.style.display = 'none';
     }
@@ -150,7 +149,13 @@ function positionCanvs() {
             // naložimo vse podatke v classe;
             GameScreen.bckgnd = new Background(ctxBckgnd, bckgndAssets);
             ScreenObj.meetData(ctx, assets, GameScreen.height);
-            sprite = new Sprite(360, 10, Sprite.look.left); // pravilno: new Sprite(360, 10, 85)
+            const intrvlLen = mobile ? 120 : 95;
+
+            sprite = new Sprite(360, 10, Sprite.look.left, intrvlLen);
+    // začetni:        Sprite(360, 10    - left
+    // 4 (idx 3, shark)  Sprite(0, 70        - right
+    // 5 pod               Sprite(0, 300 
+            
             GameScreen.meetData(ctx, sprite);
             // naložimo cel zaslon (ospredje); po defaultu 0;
             GameScreen.load(); //  <--  za TESTIRANJE: TU  DAŠ ŠTEVILKO ZASLONA; NA KATEREM ŽELIŠ ZAČETI test; 
@@ -177,8 +182,12 @@ function keyDownHndlr(e) {
     } else if(e.key == 'ArrowLeft') {
         e.preventDefault();
         sprite.latPressed(LEFT);
-    } else if(e.key == 'Escape') {
-        if(intervalIDs.main != 0) { sprite.stopInterval(MAIN); }
+    }
+    // ta je ločeno, ni v elsu, ker če ne je ne zazna;
+    if(e.key == 'Escape') {
+        sprite.stopIntervalAndListnrs();
+        GameScreen.gameAborted();
+        console.log('esc')
     }
 }
 

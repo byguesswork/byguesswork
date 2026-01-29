@@ -38,7 +38,7 @@ class ScreenObj {
 class Sprite extends ScreenObj {
 
     static maxVertSpeed = 20; // št. pikslov na frame;
-    static maxVertFrames = 6; // kolko framov deluje neprekinjen pritisk tipke navzgor;
+    static maxVertFrames = 5; // kolko framov deluje neprekinjen pritisk tipke navzgor;
     static minVertFrames = 3;    // kolikšen je skok, če samo na kratko pritisneš navzgor; 
     static latMovtSpeedDef = 20;    // def kot definition;
 
@@ -49,10 +49,11 @@ class Sprite extends ScreenObj {
         straight: 127,
     }
     
-    constructor(xPos, yPos, sx = Sprite.look.right) {
+    constructor(xPos, yPos, sx = Sprite.look.right, intrvlLen) {
         super(xPos, yPos, sx, 0, 40, 60, false);    // mora bit false, ker ko kličemo new Sprite (kot je trenutno) je to pred nalaganjem img-jev, ki so vir izrisa;
             // ima tudi this.sx, .sy, .width (40), .height (60), določeno s super zgoraj;
         // gibanje sprajta;
+        this.intrvlLen = intrvlLen  // dolžina intervala za setInterval;
         this.vertSpeed = 0; // v px; število pikslov, koliko se sprajt premakne navzgor (poz)/navzdol (neg) v enem turnu;
         this.vertFrames = 0; // koliko framov že poteka gibanje gor oz je že pritisnjen gumb za gor;
         this.upContinuslyPressd = false;    // če ne držiš gumba za gor, ampak ga samo na kratko pritisneš, je skok nižji;
@@ -71,24 +72,34 @@ class Sprite extends ScreenObj {
         this.sx = sx;   // x koordinata slike sprajta na source sliki; sx v pomenu, kot ga ima v drawImage();
     }
     
-    startInterval(/*who*/) {
-        // console.log(who); // koristno za debuganje
-        this.processChanges();
-        intervalIDs.main = setInterval(() => {this.processChanges()}, intrvlLen); // 90 je normalno za desktop;
-        if(intervalIDs.turn != 0) { this.stopInterval(TURN); }
+    #startMainInterval(runProcsChgsFirst, caller) { 
+        
+        // če kličeš iz izven processChanges, daš true, razen če kličeš od nekod, kjer se že ureja postavitev+risanje sprajta;
+        // če kličeš iz processChg, najbolje false;
+        if(runProcsChgsFirst) this.processChanges();
+
+        // treba preverjat še enkrat, prav tukaj, ker !=0 se lahko zgodi, če interval zažene nek dogodek znotraj gornjega processChg!!;
+        if(intervalIDs.main == 0) {
+            intervalIDs.main = setInterval(() => {this.processChanges()}, this.intrvlLen); // 90 je normalno za desktop;
+            // console.log(' -  -  -   interval MAIN postavljen: ', intervalIDs.main, 'caller:', caller);
+        } else console.log(' - - - -   SMO BLI v start interval, ampak ID ni bil 0 !! !! - - - - -; caller:', caller)
+        
+        if(intervalIDs.turn != 0) this.#stopInterval(TURN /*, 'znotraj start za main' */);  // tle je smiselno imet preverjanje, ker to kličemo na pamet;
     }
 
-    stopInterval(which) {
-        clearInterval(intervalIDs[which]);
-        intervalIDs[which] = 0;
+    #stopInterval(which, caller) {
+        if(intervalIDs[which] != 0) {
+            clearInterval(intervalIDs[which]);
+            intervalIDs[which] = 0;
+        } else console.log('klican stop interval, a ni bilo kaj ustaviti; caller:', caller, ',', which, intervalIDs[which]);
     }
 
-    stopMvmtAndInterval() { // se rabi pri prehodu na drug zaslon;
+    stopMvmtAndInterval( /* caller */) { // se rabi pri prehodu na drug zaslon;
         this.latSpeed = 0;
         this.vertSpeed = 0;
         this.vertFrames = 0;
         this.upContinuslyPressd = false;
-        if(intervalIDs.main != 0) this.stopInterval(MAIN);
+        this.#stopInterval(MAIN /*, `stopMvmtAndInterval, tega pa klical: ${caller}` */);
     }
 
     stopListeners() {
@@ -100,9 +111,10 @@ class Sprite extends ScreenObj {
         }
     }
 
-    stopIntervalAndListnrs(){ // se rabi pri game over (padec v luknjo ...) ali če prideš do konca;
+    stopIntervalAndListnrs( /*kdoPoslal*/ ){ // se rabi pri game over (padec v luknjo ...) ali če prideš do konca;
         this.stopListeners();
-        this.stopInterval(MAIN);
+        this.#stopInterval(MAIN /* , `stopIntervalAndListnrs, tega pa je klical: ${kdoPoslal}`*/);
+        if(intervalIDs.turn != 0) this.#stopInterval(TURN /*, `stopIntervalAndListnrs, tega pa je klical: ${kdoPoslal}` */);
     }
 
     upPressed() {
@@ -110,7 +122,7 @@ class Sprite extends ScreenObj {
         if(this.vertSpeed == 0) {
             this.vertSpeed = Sprite.maxVertSpeed;
             this.upContinuslyPressd = true;
-            if(intervalIDs.main == 0) this.startInterval(/*'up'*/);
+            if(intervalIDs.main == 0) this.#startMainInterval(true);
         }
     }
 
@@ -125,13 +137,34 @@ class Sprite extends ScreenObj {
         ctrlPressd[which] = true;
         if(this.latSpeed == 0) {    
             this.latSpeed = which == RIGHT ? Sprite.latMovtSpeedDef : -Sprite.latMovtSpeedDef;
-            if(intervalIDs.main == 0) this.startInterval(/* which */);
+            if(intervalIDs.main == 0) this.#startMainInterval(true);
         }
     }
 
     latReleased(which) {
         ctrlPressd[which] = false;
         this.latSpeed = 0;
+    }
+
+    extrnlLatPush(latSpeed) {
+        this.render(false);
+        const startXPos = this.xPos;
+        let fullMove = false;
+
+        if(!this.processLatChg(latSpeed, startXPos)) {
+            // če si tu noter, cel premik ni bil mogoč, probamo polovičen premik;
+            this.xPos = startXPos;
+            if(!this.processLatChg(latSpeed / 2, startXPos)) {
+                // torej tudi polovičnega premika ni mogoče izvest;
+                this.xPos = startXPos;  // povrnemo začetni položaj, ker ni mogoče nikakor sprmeniti lateralnega položaja;
+            }
+        } else fullMove = true; // če fullMove, ni treba preverjat chk4Support, ker si ostal na isti točki poda in torej imaš oporo;
+
+        if(!fullMove && !this.chk4Support()) {
+            this.vertSpeed = -Sprite.maxVertSpeed; // nismo našli opore, ostali smo v zraku, sprožimo padec;
+            this.#startMainInterval(true /*, 'padel s poda' */);
+        } else this.render(true);
+
     }
     
     processVertCgh(speed, startYPos) {  // vrne false, če na koncu ugotovi, da smo zadeli oviro (false kot premik ni mogoč);
@@ -181,14 +214,9 @@ class Sprite extends ScreenObj {
 
         // če prekoračena horizontala, preverimo še, al se sprite in ovira prekrivata v vertikalni dimenziji, kar bi dejansko pomenilo prekoračenje;
         if(potntlObstructns.length > 0) {
-            const rightEdgeX = this.xPos + this.width;
             for (const ovira of potntlObstructns) {
-                let x = this.xPos;
-                while (x < rightEdgeX) {
-                    if(x >= ovira.xPos && x < (ovira.xPos + ovira.width)) {   // pomembno, da < (in ne <=), ker če ne se zaletiš v kot, mimo katerega palahko greš;
-                        return false;  // zaznali smo oviro in javimo, da premik ni mogoč (false);
-                    }
-                    x += 10;
+                if((this.xPos + this.width) > ovira.xPos && this.xPos < (ovira.xPos + ovira.width)) {
+                    return false;  // zaznali smo oviro in javimo, da premik ni mogoč (false);
                 }
             }
         }
@@ -207,17 +235,9 @@ class Sprite extends ScreenObj {
 
         // preverimo kandidate, ali morda zares stojimo na katerem od njih in predstavlja oporo;
         if(potntlSupprt.length > 0) {
-            const rightSideSupport = this.xPos + this.width - 10; // da čekiraš 10px desno (ker spodaj x = this.xPos + 10) od levega spodnjega oglišča sprajta in 10px levo od desnega oglišča;
             for (const candidate of potntlSupprt) {
-                let x = this.xPos + 10;
-                while (x <= rightSideSupport) {
-                    if(x >= candidate.xPos && x <= (candidate.xPos + candidate.width)) {   // tuki pa mora bit <= (in ne <);
-                        // potrdiliu smo, da stojimo na opori in returnamo (vertSpeed je že 0,..
-                        // ..ker vertikalni del stranskega premika med skokom je urejen na začetku provcesiranja vertikalnega gibanja in gre na 0 že tam;
-                        return true;
-                    }
-                    x += 10;
-                }
+                // 10 da stojiš vsaj 10px znotraj ovire;
+                if(this.xPos + this.width >= candidate.xPos + 10 && this.xPos <= candidate.xPos + candidate.width - 10) return true;
             }
         }
         return false;
@@ -251,14 +271,9 @@ class Sprite extends ScreenObj {
 
         // če prekoračena vertikala, preverimo še, al se prekriva tudi v horizontalni dimenziji;
         if(potntlObstructns.length > 0) {
-            const upperY = this.yPos + this.height;
             for (const ovira of potntlObstructns) {
-                let y = this.yPos;
-                while (y < upperY) {
-                    if(y >= ovira.yPos && y < (ovira.yPos + ovira.height)) {   // pomembno, da < (in ne <=), ker če ne se zaletiš v kot, ki bi ga lahko preskočil;
-                        return false; // zaznali smo oviro in to javimo (false kot premika ni mogoče izvesti);
-                    }
-                    y += 10;
+                if((this.yPos + this.height) > ovira.yPos && this.yPos < (ovira.yPos + ovira.height)) {
+                    return false; // zaznali smo oviro in to javimo (false kot premika ni mogoče izvesti);
                 }
             }
         }
@@ -266,7 +281,6 @@ class Sprite extends ScreenObj {
     }
 
     processChanges() { // v smislu process the changes;
-
         // console.log('vFrms:', this.vertFrames, 'contPr', this.upContinuslyPressd, 'vSp', this.vertSpeed, 'lSp', this.latSpeed, /* 'x:', this.xPos, */ 'y:', this.yPos, 'ID', intervalIDs.main);
 
         if(this.vertSpeed != 0 || this.latSpeed != 0) { // to preverjanje je proxi za ugotovitev, da bo treba izbrisat sprajt; pred koncem te zanke ga je treba spet narisat;
@@ -309,6 +323,11 @@ class Sprite extends ScreenObj {
                             this.vertSpeed = 0;
                             this.vertFrames = 0;
                             this.upContinuslyPressd = false;
+                        } else if(this.yPos < -60) {
+
+                            //  -  -  -  PADEC V LUKNJO  -  -  -  ;
+                            this.stopIntervalAndListnrs(/* 'padec v luknjo' */ );
+                            this.screen.gameOverSign();
                         }
                     }
                 }
@@ -355,12 +374,12 @@ class Sprite extends ScreenObj {
                         this.place(exits.left.spritePos.x, exits.left.spritePos.y, Sprite.look[exits.left.spritePos.sx])
                         this.screen.getNewsSpriteExited(LEFT);
                         return;
-                    } else if(this.xPos > 440 && this.screen.currScreenIdx == 4 ) {
+                    } else if(this.xPos > 440 && this.screen.currScreenIdx == 5 ) {
                         
                         // - - - PRIŠEL SI DO KONCA  - - - -;
-                        this.stopIntervalAndListnrs();
+                        this.stopIntervalAndListnrs(/* 'končal igro' */);
                         this.render(true);
-                        this.screen.gameFinished();
+                        this.screen.gameCompleted();
                         return;
                     } else {
                         // če nismo zapustili ekrana, preverimo, ali imamo na novem položaju oporo (tj. da nismo stopili v prazno);
@@ -378,21 +397,26 @@ class Sprite extends ScreenObj {
             if(this.screen.currScreenIdx == 3) {
                 if(this.specialCase) {
                     if(this.latSpeed != 0) this.latSpeed = 0; // če ni že od prej, damo zdaj;
-                    if(this.yPos <= 20) {
-                        this.stopInterval(MAIN);
-                        this.render(false);
+                    if(this.yPos <= 40) {
+
+                        //  -  -  -  KONEC IGRE PRI SHARKU  -  -  -  - 
+                        this.stopMvmtAndInterval(/* 'konec igre pri sharku' */);
                     } else this.render(true);
                     this.screen.getNewsSharkAction(this.xPos, this.yPos);
                     return;
                 }
                 if(this.vertSpeed < 0) {
-                    if((this.xPos >= 200 && this.xPos <= 300 && this.yPos <= 220) || (this.xPos >= 380 && this.xPos <= 520 && this.yPos <= 240)) {
-                        this.stopListeners();
+
+                    if(this.xPos >= 200 && this.xPos <= 520 && ((this.xPos <= 220 && this.yPos < 200)) 
+                        || (this.xPos > 220 && this.xPos <= 320 && this.yPos < 220) || (this.xPos >= 400 && this.yPos < 220)) {
+                        this.stopIntervalAndListnrs(/* 'začetek padca proti sharku' */);  // kmalu znova zaženemo interval, da nadaljujemo padec, le počasneje;
                         this.sx = Sprite.look.straight;
-                        intrvlLen = 160; // upočasnimo čas;
+                        this.render(true);
                         this.specialCase = true;
                         this.screen.getNewsSharkAction(this.xPos, this.yPos);
-                        this.render(true);
+                        
+                        this.intrvlLen = 250; // upočasnimo čas;
+                        if(intervalIDs.main == 0) this.#startMainInterval(false /* , 'počasnejši interval, padec proti sharku' */ );   // znova zaženemo počasneje;
                         return;
                     }
                 }
@@ -432,14 +456,14 @@ class Sprite extends ScreenObj {
         // odločanje o ustavitvi intervala;
         // ta je zunaj delovne zanke, ker hitrosti lahko dosežejo 0 med gibanjem (ovira) ali pa zaradi izpustitve gumba za premikanje;
         if(this.latSpeed == 0 && this.vertSpeed == 0)  {
-            this.stopInterval(MAIN);
+            this.#stopInterval(MAIN, 'zadnji del od process');
             // komplikacija z zakasnjenim obračanjem;
             if(intervalIDs.turn == 0) {
                 intervalIDs.turn = setTimeout(() => {
                     this.sx = Sprite.look.straight;
                     this.render(false);
                     this.render(true);
-                    this.stopInterval(TURN);
+                    this.#stopInterval(TURN, 'izveden turn');
                 }, 300);
             }
         }

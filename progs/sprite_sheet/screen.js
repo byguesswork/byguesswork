@@ -4,6 +4,7 @@
 class GameScreen {
     // konstante
     static #SHARK = 'shark';
+    static #FLYPOD = 'flypod';
 
     static ctx;
     static endAnimPics = new Image();
@@ -40,18 +41,33 @@ class GameScreen {
     static itemsPresenceDefs = {    // seznam predmetov, ki so prisotni na posameznem zaslonu;
         0: {    // 1.zaslon (idx 0);
             static: [   // definicije statičnih ovir (predmetov na splošno); to niso operativni podatki, ampak definicije zanje;
+                {type: 'turfLevitating', x: -20, y: 40},
+                {type: 'turfLevitating', x: -20, y: 140},
+                {type: 'turfLevitating', x: -20, y: 240},
+
+                // za 6
+                // {type: 'turfLevitating', x: 50, y: 100},
+                // {type: 'turfLevitating', x: 100, y: 100},
+
+                // za 5
+                {type: 'turfLevitating', x: 40, y: 100},
+                {type: 'turfLevitating', x: 80, y: 100},
+                {type: 'turfLevitating', x: 120, y: 100},
+
                 {type: 'turfLevitating', x: 280, y: 30},
                 {type: 'turfLevitating', x: 300, y: 160},
-                {type: 'turfLevitating', x: 100, y: 100},
-                {type: 'turfLevitating', x: 500, y: 220},
+
+                // za 5
+                {type: 'turfLevitating', x: 460, y: 220},
+                {type: 'turfLevitating', x: 510, y: 220},
+
+                // za 6;
+                // {type: 'turfLevitating', x: 500, y: 220},
+
                 {type: 'turfLevitating', x: 560, y: 220},
                 {type: 'turfLevitating', x: 560, y: 20},
                 {type: 'turfLevitating', x: 560, y: 85},
                 {type: 'turfLevitating', x: 560, y: 150},
-                {type: 'turfLevitating', x: 50, y: 100},
-                {type: 'turfLevitating', x: -20, y: 40},
-                {type: 'turfLevitating', x: -20, y: 140},
-                {type: 'turfLevitating', x: -20, y: 240},
                 {type: 'turf10_160', x: 0, y: 0},
                 {type: 'turf10_160', x: 160, y: 0},
                 {type: 'turf10_160', x: 320, y: 0},
@@ -102,7 +118,7 @@ class GameScreen {
         //     ],
         // },
         2: {    // 3. zaslon (idx 2);
-            static: [
+            static: [   // shark zaprt;
                 {type: 'turf10_160', x: 0, y: 0},
                 {type: 'turf10_160', x: 0, y: 0},
                 {type: 'turfLevitating', x: 0, y: 10},
@@ -127,11 +143,11 @@ class GameScreen {
                 {type: 'turfLevitating', x: 580, y: 170},
             ],
             animtd: [
-                {type: GameScreen.#SHARK, x: 350, y: 0, boundryX: 200, boundryY: 570},
+                {type: GameScreen.#SHARK, addToStatics: false, x: 350, y: 0, boundryX: 200, boundryY: 570},
             ],
         },
         3: {    // 4. zaslon (idx 3);
-            static: [
+            static: [   // shark live;
                 {type: 'turf10_160', x: 0, y: 0},
                 {type: 'turfLevitating', x: 0, y: 10},
                 {type: 'turfLevitating', x: 80, y: 80},
@@ -139,7 +155,15 @@ class GameScreen {
                 {type: 'turfLevitating', x: 160, y: 20},
                 {type: 'turfLevitating', x: 160, y: 80},
                 {type: 'turfLevitating', x: 160, y: 140},
-                {type: 'turfLevitating', x: 340, y: 220},
+
+                // za 5;
+                {type: 'turfLevitating', x: 320, y: 200},
+                {type: 'turfLevitating', x: 360, y: 220},
+                // ! za 5;
+
+                // za 6
+                // {type: 'turfLevitating', x: 340, y: 220},
+                // ! za 6
                 {type: 'turfLevitating', x: 580, y: -40},
                 {type: 'turfLevitating', x: 580, y: 30},
                 {type: 'turfLevitating', x: 580, y: 100},
@@ -147,11 +171,38 @@ class GameScreen {
                 {type: 'turfLevitating', x: 560, y: 240},
             ],
             animtd: [
-                {type: GameScreen.#SHARK, x: 350, y: 0, boundryX: 200, boundryY: 580},
+                {type: GameScreen.#SHARK, addToStatics: false, x: 350, y: 0, boundryX: 200, boundryY: 580},
             ],
         },
         4: {    // 5. zaslon (idx 4);
-            static: [
+            static: [   // pod
+                {type: 'turf10_160', x: 0, y: 0},
+                {type: 'turf10_160', x: 160, y: 0},
+                {type: 'turf10_160', x: 320, y: 0},
+                {type: 'turf10_160', x: 480, y: 0},
+                {type: 'turfLevitating', x: 0, y: 240},
+                {type: 'turfLevitating', x: 0, y: -20},
+                {type: 'turfLevitating', x: -20, y: 45},
+                {type: 'turfLevitating', x: -20, y: 110},
+                {type: 'turfLevitating', x: -20, y: 175},
+                {type: 'turfLevitating', x: 60, y: 200},
+                {type: 'turfLevitating', x: 140, y: 120},
+                {type: 'turfLevitating', x: 80, y: 70},
+                {type: 'turfLevitating', x: 260, y: 280},
+                {type: 'turfLevitating', x: 420, y: 10},
+                {type: 'turfLevitating', x: 520, y: 110},
+                {type: 'turfLevitating', x: 560, y: 240},
+                {type: 'turfLevitating', x: 580, y: -20},
+                {type: 'turfLevitating', x: 580, y: 45},
+                {type: 'turfLevitating', x: 580, y: 110},
+                {type: 'turfLevitating', x: 580, y: 175},
+            ],
+            animtd: [
+                {type: GameScreen.#FLYPOD, addToStatics: true, x: 360, y: 241, boundryX: 140, boundryY: 460},
+            ],
+        },
+        5: {    // 6. zaslon
+            static: [   // na tem zaslonu je trenutno konec po stopnicah navzdol;
                 {type: 'turf10_160', x: 0, y: 0},
                 {type: 'turf10_160', x: 160, y: 0},
                 {type: 'turf10_160', x: 320, y: 0},
@@ -164,6 +215,21 @@ class GameScreen {
                 {type: 'turfLevitating', x: 300, y: 40},
             ],
             animtd: [],
+        },
+        6: {
+            static: [   // ta je za vajo za pod
+                {type: 'turf10_160', x: 0, y: 0},
+                {type: 'turf10_160', x: 160, y: 0},
+                {type: 'turf10_160', x: 320, y: 0},
+                {type: 'turf10_160', x: 480, y: 0},
+                {type: 'turfLevitating', x: 160, y: 70},
+                {type: 'turfLevitating', x: 200, y: 10},
+                {type: 'turfLevitating', x: 380, y: 130},
+                {type: 'turfLevitating', x: 580, y: 40},
+            ],
+            animtd: [
+                {type: GameScreen.#FLYPOD, addToStatics: true, x: 360, y: 101, boundryX: 200, boundryY: 580},
+            ],
         },
     }
 
@@ -186,7 +252,6 @@ class GameScreen {
             },
             bckgndIdx: 0,
         },
-
         {   // 2. zaslon;
             items_static: [],
             items_animtd: [],
@@ -210,7 +275,6 @@ class GameScreen {
             },
             bckgndIdx: 1,
         },
-
         {   // 3. zaslon (idx 2);
             items_static: [],
             items_animtd: [],
@@ -234,7 +298,6 @@ class GameScreen {
             },
             bckgndIdx: 0,
         },
-
         {   // 4. zaslon (idx 3);
             items_static: [],
             items_animtd: [],
@@ -258,8 +321,30 @@ class GameScreen {
             },
             bckgndIdx: 0,
         },
-
-         {   // 5. zaslon (idx 4);
+        {   // 5. zaslon (idx 4);
+            items_static: [],
+            items_animtd: [],
+            exits: {
+                left: {
+                    x: -40,
+                    spritePos: {
+                        x: 560,
+                        y: 300,
+                        sx: 'left'
+                    }
+                },
+                right: {
+                    x: 600,
+                    spritePos: {
+                        x: 0,
+                        y: 300,
+                        sx: 'right'
+                    }
+                },
+            },
+            bckgndIdx: 0,
+        },
+        {   // 6. zaslon (idx 5);
             items_static: [],
             items_animtd: [],
             exits: {
@@ -275,6 +360,16 @@ class GameScreen {
             },
             bckgndIdx: 0,
         },
+        {   // 6. zaslon (idx 5);
+            items_static: [],
+            items_animtd: [],
+            exits: {
+                right: undefined,
+                left: undefined,
+            },
+            bckgndIdx: 0,
+        },
+
     ]
 
     static meetData(ctx, sprite) {
@@ -310,20 +405,25 @@ class GameScreen {
             }
             
             if(ovireDef.animtd.length > 0) {
-                if(ovireDef.animtd[0].type == GameScreen.#SHARK) {
-                    this.currScreen.items_animtd.push(new Shark(ovireDef.animtd[0].x, ovireDef.animtd[0].y,
-                        ovireDef.animtd[0].boundryX, ovireDef.animtd[0].boundryY));
-                    }
+                let animatedElem;
+                const animatedDef = ovireDef.animtd[0];
+                if(animatedDef.type == GameScreen.#SHARK) {
+                    animatedElem = new Shark(animatedDef.x, animatedDef.y, animatedDef.boundryX, animatedDef.boundryY);
+                } else if(animatedDef.type == GameScreen.#FLYPOD) {
+                    animatedElem = new FlyPod(animatedDef.x, animatedDef.y, true, animatedDef.boundryX, animatedDef.boundryY, this.sprite);
                 }
-                
-            } else {    // sicer jih samo izrišemo;
-                for (const element of this.currScreen.items_static) {
-                    element.render(true);
-                }
-                if(this.currScreen.items_animtd.length > 0) {
-                    this.currScreen.items_animtd[0].processChanges();
-                }
+                this.currScreen.items_animtd.push(animatedElem);
+                if(animatedDef.addToStatics) this.currScreen.items_static.push(animatedElem);
             }
+                
+        } else {    // sicer jih samo izrišemo;
+            for (const element of this.currScreen.items_static) {
+                element.render(true);
+            }
+            if(this.currScreen.items_animtd.length > 0) {
+                this.currScreen.items_animtd[0].processChanges();
+            }
+        }
         
         // zagon premikanja zadev na zaslonu;
         this.intrvlID = setInterval(this.runScreenTicker.bind(this), 1000);
@@ -356,8 +456,16 @@ class GameScreen {
             this.currScreen.items_animtd[0].startEndGame(xPos);
         }
 
-        if(yPos <= 20) {
-            this.currScreen.items_animtd[0].showMenuSign(xPos);
+        if(yPos <= 120 && yPos > 40) {
+            if(yPos >= 100) {
+                this.currScreen.items_animtd[0].menuSign.xPos = xPos >= 520 ? 450 : xPos - 50;   // da se znak pravilno postavi;
+                this.currScreen.items_animtd[0].sharkPic.xPos = xPos;   // da se šark pravilno postavi;
+            }
+            this.currScreen.items_animtd[0].showSharkPic();
+        }
+
+        if(yPos <= 40) {
+            this.currScreen.items_animtd[0].showMenuSign();
             setTimeout(this.gameOverSign.bind(this), 1500);
         }
     }
@@ -367,10 +475,10 @@ class GameScreen {
         this.ctx.fillText('Game Over', 60, 90);
         this.ctx.font = "24px serif";
         this.ctx.fillText('Refresh page to try again', 70, 124);
-        console.log('-  -  - KONEC IGRE, daj F5 -  -  -  ')
+        console.log('-  -  - KONEC IGRE, daj F5 -  -  -  ', Date.now())
     }
 
-    static gameFinished() {
+    static gameCompleted() {
         this.endAnimPics.src = 'sprites2.jpg';
         this.endAnimPics.onload = function() {
             setTimeout(() => {
@@ -379,6 +487,17 @@ class GameScreen {
                 }
             }, 800);
         }
+    }
+
+    static gameAborted() {
+        this.ctx.font = "40px serif";
+        this.ctx.fillText('Game Aborted', 60, 90);
+        this.ctx.font = "20px serif";
+        this.ctx.fillText('(Escape key pressed)', 65, 110);
+        this.ctx.font = "24px serif";
+        this.ctx.fillText('Refresh page to restart', 65, 144);
+        console.log('-  -  - KONEC IGRE, daj F5 -  -  -  ', Date.now())
+
     }
 
     static endAnimationPt1(i) {

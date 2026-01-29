@@ -30,6 +30,7 @@ class Shark extends ScreenObj {
         // end game;
         this.endGame = false;   // true, ko možiček pada in ga bo pes pojedel;
         this.menuSign;  // slikca za obed;
+        this.sharkPic;  // slikca pred obedom;
         this.endGameXPos;
         this.gameEnded = false;
     }
@@ -39,6 +40,7 @@ class Shark extends ScreenObj {
         this.endGameXPos = xPos;
         this.endGame = true;
         this.menuSign = new ScreenObj(xPos - 50, 5, 0, 104, 143, 105, false); // -50 ker je širina slike 140, potem je 40 možiček in spet 50 slike;
+        this.sharkPic = new ScreenObj(xPos, 0, 165, 108, 50, 60, false);
         
         //morski pes;   se obrne proti modelu in gre na srednjo globino, potem kmalu izgine;
         this.render(false);
@@ -52,6 +54,11 @@ class Shark extends ScreenObj {
             this.render(false);
             this.water.render(true);
         }, 260);
+    }
+
+    showSharkPic() {
+        this.sharkPic.render(true);
+        this.water.render(true);
     }
 
     showMenuSign() {
@@ -131,5 +138,89 @@ class Shark extends ScreenObj {
         this.water.render(true);
 
         if(this.gameEnded) this.menuSign.render(true);
+    }
+}
+
+
+class FlyPod extends ScreenObj {
+
+    static #maxSpeed = 20;
+    static #assetsSX = {
+        1: 169,
+        2: 250,
+        3: 331,
+    }
+    static #spriteRef;
+
+    // boundary določa meje gibanja poda;
+
+    constructor(xPos, yPos, dirBool, boundryL, boundryR, spriteRef) {
+        super(xPos, yPos, 169, 41, 80, 19);
+            // ima tudi: 
+                // this.sx, this.sy, this.width in this.height, določeno s super zgoraj;
+        this.boundryL = boundryL;
+        this.boundryR = boundryR;
+        this.speed = dirBool == true ? FlyPod.#maxSpeed : - FlyPod.#maxSpeed;   // true za v desno;
+        this.sxCountr = 1;
+        FlyPod.#spriteRef = spriteRef;
+    }
+
+    didHitSprite() {    // preverja al bi platforma ob planiranem premiku zadela sprajt;
+        let potentlHit = false;
+        if(this.speed > 0) {
+            const selfREdge = this.xPos + this.width;
+            if((selfREdge - this.speed) <= FlyPod.#spriteRef.xPos && selfREdge > FlyPod.#spriteRef.xPos) {
+                potentlHit = true;  // potential, ker smo potrdili samo prekoračenje po osi x;
+            }
+        } else {
+            const spriteR = FlyPod.#spriteRef.xPos + FlyPod.#spriteRef.width;
+            if((this.xPos - this.speed) >= spriteR && this.xPos < spriteR) {
+                potentlHit = true;
+            }
+        }
+
+        if(potentlHit) {
+            if((this.yPos + this.height) > FlyPod.#spriteRef.yPos && this.yPos < (FlyPod.#spriteRef.yPos + FlyPod.#spriteRef.height)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    processChanges() {
+        
+        // najprej vse izbrišemo;
+        this.render(false);
+        let spriteOn = false;
+        const sprt = FlyPod.#spriteRef;
+
+        if(sprt.yPos == this.yPos + this.height) {
+            if(sprt.xPos + sprt.width >= this.xPos + 20 && sprt.xPos <= this.xPos + this.width - 20) spriteOn = true;
+        }
+
+        const startXPos = this.xPos;
+        this.xPos += this.speed;
+ 
+        // testiranje al smo morda prišli do meje in moramo obrniti;
+        if(this.xPos < this.boundryL || this.xPos + this.width > this.boundryR) {   // obrat = true;
+            this.xPos = startXPos;  // se vrnemo na izhodišče;
+            this.speed = -this.speed; // obrnemo smer gibanja,;
+            this.xPos += this.speed; // izvedemo premik v nasprotno smer;
+
+            // ker je bil izveden obrat, moramo preverit, da ne bi s premikom po obratu zadeli sprajta (če je sprajt zgoraj, ni treba);
+            if(!spriteOn && this.didHitSprite()) {
+                this.xPos = startXPos; // ostanemo na mestu, hitrost pa ohranimo novo (torej nasprotno kot pred nesojenim obratom);
+            }
+        } else if(!spriteOn && this.didHitSprite()) this.xPos = startXPos;  // ne izvedemo ne premika ne spremembe smeri (samo ostanemo na izhodišču);
+
+        if(spriteOn) sprt.extrnlLatPush(this.speed);    // če sprajt stoji gor, se premakne hkrati;
+
+        // slikca;
+        this.sx = FlyPod.#assetsSX[this.sxCountr];
+        this.sxCountr++;
+        if(this.sxCountr == 4) this.sxCountr = 1;
+   
+        this.render(true);
+        
     }
 }
