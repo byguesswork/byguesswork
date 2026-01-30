@@ -77,8 +77,8 @@ class Shark extends ScreenObj {
             this.xPos += this.speed;
             let obrat = false;
     
-            if(this.speed > 0 && this.xPos + 2 * this.width >= this.boundryR) obrat = true;
-                else if(this.speed < 0 && this.xPos - this.width <= this.boundryL) obrat = true;
+            if(this.speed > 0 && this.xPos + 3 * this.width >= this.boundryR) obrat = true;
+                else if(this.speed < 0 && this.xPos - 2 * this.width <= this.boundryL) obrat = true;
             if(obrat) {
                 this.xPos = startXPos;  // ostanemo na istem x-u
                 this.speed = -this.speed; // obrnemo smer gibanja, tj, se obrnemo v drugo smer na emstu;

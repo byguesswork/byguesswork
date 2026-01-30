@@ -36,6 +36,12 @@ class GameScreen {
             width: 40,
             height: 60
         },
+        sand: {
+            sx: 204,
+            sy: 61,
+            width: 40,
+            height: 10
+        },
     }
 
     static itemsPresenceDefs = {    // seznam predmetov, ki so prisotni na posameznem zaslonu;
@@ -118,13 +124,14 @@ class GameScreen {
         // },
         2: {    // 3. zaslon (idx 2);
             static: [   // shark zaprt;
-                {type: 'turf10_160', x: 0, y: 0},
-                {type: 'turf10_160', x: 0, y: 0},
+                {type: 'sand', x: 0, y: 0},
+                {type: 'sand', x: 40, y: 0},
+                {type: 'sand', x: 80, y: 0},
+                {type: 'sand', x: 120, y: 0},
                 {type: 'turfLevitating', x: 0, y: 10},
                 {type: 'turfLevitating', x: 80, y: 80},
-                {type: 'turfLevitating', x: 160, y: -40},
-                {type: 'turfLevitating', x: 160, y: 20},
-                {type: 'turfLevitating', x: 160, y: 80},
+                {type: 'sand', x: 160, y: 0},
+                {type: 'turfLevitating', x: 160, y: 50},
                 {type: 'turfLevitating', x: 160, y: 140},
                 {type: 'turfLevitating', x: 220, y: 170},
                 {type: 'turfLevitating', x: 280, y: 200},
@@ -133,26 +140,26 @@ class GameScreen {
                 {type: 'turfLevitating', x: 460, y: 240},
                 {type: 'turfLevitating', x: 460, y: 160},
                 {type: 'turfLevitating', x: 500, y: 80},
-                {type: 'turfLevitating', x: 580, y: 247},
-                {type: 'turfLevitating', x: 580, y: 324},
-                {type: 'turfLevitating', x: 580, y: 400},
-                {type: 'turfLevitating', x: 570, y: -40},
                 {type: 'turfLevitating', x: 540, y: 20},
-                {type: 'turfLevitating', x: 590, y: 20},
                 {type: 'turfLevitating', x: 580, y: 170},
+                {type: 'turfLevitating', x: 580, y: 250},
+                {type: 'turfLevitating', x: 580, y: 350},
+                {type: 'turfLevitating', x: 590, y: 20},
             ],
             animtd: [
-                {type: GameScreen.#SHARK, addToStatics: false, x: 350, y: 0, boundryX: 200, boundryY: 570},
+                {type: GameScreen.#SHARK, addToStatics: false, x: 350, y: 0, boundryX: 200, boundryY: 600},
             ],
         },
         3: {    // 4. zaslon (idx 3);
             static: [   // shark live;
-                {type: 'turf10_160', x: 0, y: 0},
+                {type: 'sand', x: 0, y: 0},
+                {type: 'sand', x: 40, y: 0},
+                {type: 'sand', x: 80, y: 0},
+                {type: 'sand', x: 120, y: 0},
                 {type: 'turfLevitating', x: 0, y: 10},
                 {type: 'turfLevitating', x: 80, y: 80},
-                {type: 'turfLevitating', x: 160, y: -40},
-                {type: 'turfLevitating', x: 160, y: 20},
-                {type: 'turfLevitating', x: 160, y: 80},
+                {type: 'sand', x: 160, y: 0},
+                {type: 'turfLevitating', x: 160, y: 50},
                 {type: 'turfLevitating', x: 160, y: 140},
 
                 // za 5;
@@ -163,14 +170,11 @@ class GameScreen {
                 // za 6
                 // {type: 'turfLevitating', x: 340, y: 220},
                 // ! za 6
-                {type: 'turfLevitating', x: 580, y: -40},
-                {type: 'turfLevitating', x: 580, y: 30},
-                {type: 'turfLevitating', x: 580, y: 100},
-                {type: 'turfLevitating', x: 580, y: 170},
+                // {type: 'turfLevitating', x: 580, y: 170},
                 {type: 'turfLevitating', x: 560, y: 240},
             ],
             animtd: [
-                {type: GameScreen.#SHARK, addToStatics: false, x: 350, y: 0, boundryX: 200, boundryY: 580},
+                {type: GameScreen.#SHARK, addToStatics: false, x: 350, y: 0, boundryX: 200, boundryY: 600},
             ],
         },
         4: {    // 5. zaslon (idx 4);
@@ -295,7 +299,7 @@ class GameScreen {
                     }
                 },
             },
-            bckgndIdx: 0,
+            bckgndIdx: 2,
         },
         {   // 4. zaslon (idx 3);
             items_static: [],
@@ -318,7 +322,7 @@ class GameScreen {
                     }
                 },
             },
-            bckgndIdx: 0,
+            bckgndIdx: 2,
         },
         {   // 5. zaslon (idx 4);
             items_static: [],
@@ -545,6 +549,10 @@ class Background {
         },
         1: {
             sx: 602,
+            sy: 0
+        },
+        2: {
+            sx: 1204,
             sy: 0
         },
     };
