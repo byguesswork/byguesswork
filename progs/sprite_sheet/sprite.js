@@ -374,7 +374,7 @@ class Sprite extends ScreenObj {
                         this.place(exits.left.spritePos.x, exits.left.spritePos.y, Sprite.look[exits.left.spritePos.sx])
                         this.screen.getNewsSpriteExited(LEFT);
                         return;
-                    } else if(this.xPos > 440 && this.screen.currScreenIdx == 5 ) {
+                    } else if(this.screen.currScreenIdx == 5 && this.xPos > 440) {
                         
                         // - - - PRIŠEL SI DO KONCA  - - - -;
                         this.stopIntervalAndListnrs(/* 'končal igro' */);
@@ -409,14 +409,14 @@ class Sprite extends ScreenObj {
 
                     if(this.xPos >= 200 && this.xPos <= 520 && ((this.xPos <= 220 && this.yPos < 200)) 
                         || (this.xPos > 220 && this.xPos <= 320 && this.yPos < 220) || (this.xPos >= 400 && this.yPos < 220)) {
-                        this.stopIntervalAndListnrs(/* 'začetek padca proti sharku' */);  // kmalu znova zaženemo interval, da nadaljujemo padec, le počasneje;
                         this.sx = Sprite.look.straight;
                         this.render(true);
                         this.specialCase = true;
                         this.screen.getNewsSharkAction(this.xPos, this.yPos);
                         
+                        this.stopIntervalAndListnrs(/* 'začetek padca proti sharku' */);  // ustavimo le, da podaljšamo interval;
                         this.intrvlLen = 250; // upočasnimo čas;
-                        if(intervalIDs.main == 0) this.#startMainInterval(false /* , 'počasnejši interval, padec proti sharku' */ );   // znova zaženemo počasneje;
+                        this.#startMainInterval(false);   // znova zaženemo počasneje;
                         return;
                     }
                 }

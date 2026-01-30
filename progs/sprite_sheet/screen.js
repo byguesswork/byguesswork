@@ -50,8 +50,7 @@ class GameScreen {
                 // {type: 'turfLevitating', x: 100, y: 100},
 
                 // za 5
-                {type: 'turfLevitating', x: 40, y: 100},
-                {type: 'turfLevitating', x: 80, y: 100},
+                {type: 'turfLevitating', x: 60, y: 100},
                 {type: 'turfLevitating', x: 120, y: 100},
 
                 {type: 'turfLevitating', x: 280, y: 30},
@@ -189,8 +188,8 @@ class GameScreen {
                 {type: 'turfLevitating', x: 140, y: 120},
                 {type: 'turfLevitating', x: 80, y: 70},
                 {type: 'turfLevitating', x: 260, y: 280},
-                {type: 'turfLevitating', x: 420, y: 10},
-                {type: 'turfLevitating', x: 520, y: 110},
+                {type: 'turfLevitating', x: 420, y: -10},
+                {type: 'turfLevitating', x: 520, y: 80},
                 {type: 'turfLevitating', x: 560, y: 240},
                 {type: 'turfLevitating', x: 580, y: -20},
                 {type: 'turfLevitating', x: 580, y: 45},
