@@ -151,14 +151,14 @@ function positionCanvs() {
             ScreenObj.meetData(ctx, assets, GameScreen.height);
             const intrvlLen = mobile ? 120 : 95;
 
-            sprite = new Sprite(0, 70, Sprite.look.left, intrvlLen);
+            sprite = new Sprite(360, 10, Sprite.look.left, intrvlLen);
     // začetni:        Sprite(360, 10    - left
     // 4 (idx 3, shark)  Sprite(0, 70        - right
     // 5 pod               Sprite(0, 300 
             
             GameScreen.meetData(ctx, sprite);
             // naložimo cel zaslon (ospredje); po defaultu 0;
-            GameScreen.load(2); //  <--  za TESTIRANJE: TU  DAŠ ŠTEVILKO ZASLONA; NA KATEREM ŽELIŠ ZAČETI test; 
+            GameScreen.load(); //  <--  za TESTIRANJE: TU  DAŠ ŠTEVILKO ZASLONA; NA KATEREM ŽELIŠ ZAČETI test; 
 
             if(mobile) {
                 drawControlsIcons();    // narišemo gumbe, če mobile;
