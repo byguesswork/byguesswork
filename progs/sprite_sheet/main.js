@@ -3,9 +3,10 @@
 // da bi najprej naredilo cel gib, šele nato računalo izvedljivost premika na novih koordinatah..
 // .. ker morda skok diagonalno je možen tam, kjer skok navpično ni
 
-const ver = '9';
+const ver = '10';
 document.getElementById('ver').insertAdjacentText('beforeend', ver);
 
+// v10 dva poda
 // v9 flypod, skok na 5 (prej 6 turnov), popravki startMainInterval, popravki izračuna ovira/support, razni popravki, premaknil intervalLen v sprite, ;
 // v8 dodal kliker za ver; klasi, shark
 // v7 odpravil bug touch
@@ -154,7 +155,7 @@ function positionCanvs() {
             sprite = new Sprite(360, 10, Sprite.look.left, intrvlLen);
     // začetni:        Sprite(360, 10    - left
     // 4 (idx 3, shark)  Sprite(0, 70        - right
-    // 5 pod               Sprite(0, 300 
+    // 5 pod               Sprite(0, 240 
             
             GameScreen.meetData(ctx, sprite);
             // naložimo cel zaslon (ospredje); po defaultu 0;

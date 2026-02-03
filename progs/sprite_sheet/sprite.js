@@ -374,7 +374,7 @@ class Sprite extends ScreenObj {
                         this.place(exits.left.spritePos.x, exits.left.spritePos.y, Sprite.look[exits.left.spritePos.sx])
                         this.screen.getNewsSpriteExited(LEFT);
                         return;
-                    } else if(this.screen.currScreenIdx == 5 && this.xPos > 440) {
+                    } else if(this.screen.currScreenIdx == 6 && this.xPos > 440) {
                         
                         // - - - PRIŠEL SI DO KONCA  - - - -;
                         this.stopIntervalAndListnrs(/* 'končal igro' */);

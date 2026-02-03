@@ -14,7 +14,15 @@ class GameScreen {
     static currScreenIdx;  // tu bo shranjen idx trenutnega zaslona;
     static currScreen;  // tu bo shranjen objekt trenutnega zaslona;
     static sprite;
-    static intrvlID = 0;    // interval za premikanje stvari na zalonu (sprajt ima svojega);
+    static intervals = {
+        bckgnd : {  // standarden interval za premikanje stvari na zalonu: oblaki in določeni animirani elementi ospredja (sprajt ima svojega);
+            ID : 0,
+        },
+        bespoke : {
+            ID : [],
+            delay : []    // samo preventivno nastavljena default vrednost;
+        },
+    }
     static endGame = false;
 
     static scrItemsCatlg = {    // catalagoue of screen items;
@@ -79,7 +87,7 @@ class GameScreen {
                 {type: 'turf10_160', x: 480, y: 0},
                 {type: 'turf10_40', x: 470, y: 10},
             ],
-            animtd: [], // sem pride recimo Shark;
+            animtd: [], // sem pridejo animirani elementi ospredja na zaslonu, recimo Shark;
         },
         1: {
             static: [
@@ -119,7 +127,7 @@ class GameScreen {
         //         {type: 'turfLevitating', x: 0, y: 240},
         //     ],
         //     animtd: [
-                // {type: GameScreen.#SHARK, x: 170, y: 0, boundryX: 50, boundryY: 350},
+                // {type: GameScreen.#SHARK, x: 170, y: 0, boundryL: 50, boundryR: 350},
         //     ],
         // },
         2: {    // 3. zaslon (idx 2);
@@ -147,7 +155,7 @@ class GameScreen {
                 {type: 'turfLevitating', x: 590, y: 20},
             ],
             animtd: [
-                {type: GameScreen.#SHARK, addToStatics: false, x: 350, y: 0, boundryX: 200, boundryY: 600},
+                {type: GameScreen.#SHARK, x: 350, y: 0, boundryL: 200, boundryR: 600, addToStatics: false, bespokeIntID: false},
             ],
         },
         3: {    // 4. zaslon (idx 3);
@@ -174,7 +182,7 @@ class GameScreen {
                 {type: 'turfLevitating', x: 560, y: 240},
             ],
             animtd: [
-                {type: GameScreen.#SHARK, addToStatics: false, x: 350, y: 0, boundryX: 200, boundryY: 600},
+                {type: GameScreen.#SHARK, x: 350, y: 0, boundryL: 200, boundryR: 600, addToStatics: false, bespokeIntID: false},
             ],
         },
         4: {    // 5. zaslon (idx 4);
@@ -201,10 +209,34 @@ class GameScreen {
                 {type: 'turfLevitating', x: 580, y: 175},
             ],
             animtd: [
-                {type: GameScreen.#FLYPOD, addToStatics: true, x: 360, y: 241, boundryX: 140, boundryY: 460},
+                {type: GameScreen.#FLYPOD, x: 360, y: 241, boundryL: 140, boundryR: 460, addToStatics: true, bespokeIntID: false},
             ],
         },
-        5: {    // 6. zaslon
+        5: {
+            static: [   // 3 podi
+                {type: 'turf10_160', x: 0, y: 0},
+                {type: 'turf10_160', x: 160, y: 0},
+                {type: 'turf10_160', x: 320, y: 0},
+                {type: 'turf10_160', x: 480, y: 0},
+                {type: 'turfLevitating', x: 0, y: 180},
+                {type: 'turfLevitating', x: 0, y: 40},
+                {type: 'turfLevitating', x: 40, y: 140},
+                {type: 'turfLevitating', x: 320, y: -20},
+                {type: 'turfLevitating', x: 560, y: 240},
+                {type: 'turfLevitating', x: 580, y: 20},
+                {type: 'turfLevitating', x: 580, y: 90},
+                {type: 'turfLevitating', x: 580, y: 160},
+                // {type: 'turfLevitating', x: 380, y: 130},
+                // {type: 'turfLevitating', x: 580, y: 40},
+            ],
+            animtd: [
+                {type: GameScreen.#FLYPOD, x: 360, y: 301, boundryL: 320, boundryR: 540, addToStatics: true, bespokeIntID: true, delay: 200},
+                {type: GameScreen.#FLYPOD, x: 100, y: 241, boundryL: 80, boundryR: 240, addToStatics: true, bespokeIntID: true, delay: 600},
+                {type: GameScreen.#FLYPOD, x: 200, y: 101, boundryL: -100, boundryR: 300, addToStatics: true, bespokeIntID: false},
+                // {type: GameScreen.#FLYPOD, x: 360, y: 301, boundryL: 100, boundryR: 580, addToStatics: true, bespokeIntID: true, delay: 600},
+            ],
+        },
+        6: {    // 7. zaslon
             static: [   // na tem zaslonu je trenutno konec po stopnicah navzdol;
                 {type: 'turf10_160', x: 0, y: 0},
                 {type: 'turf10_160', x: 160, y: 0},
@@ -219,160 +251,130 @@ class GameScreen {
             ],
             animtd: [],
         },
-        6: {
-            static: [   // ta je za vajo za pod
-                {type: 'turf10_160', x: 0, y: 0},
-                {type: 'turf10_160', x: 160, y: 0},
-                {type: 'turf10_160', x: 320, y: 0},
-                {type: 'turf10_160', x: 480, y: 0},
-                {type: 'turfLevitating', x: 160, y: 70},
-                {type: 'turfLevitating', x: 200, y: 10},
-                {type: 'turfLevitating', x: 380, y: 130},
-                {type: 'turfLevitating', x: 580, y: 40},
-            ],
-            animtd: [
-                {type: GameScreen.#FLYPOD, addToStatics: true, x: 360, y: 101, boundryX: 200, boundryY: 580},
-            ],
-        },
+        // 7: {
+        //     static: [   // samo za vajo za pod
+        //         {type: 'turf10_160', x: 0, y: 0},
+        //         {type: 'turf10_160', x: 160, y: 0},
+        //         {type: 'turf10_160', x: 320, y: 0},
+        //         {type: 'turf10_160', x: 480, y: 0},
+        //     ],
+        //     animtd: [
+        //         // {type: GameScreen.#FLYPOD, x: 360, y: 101, boundryL: 200, boundryR: 580, addToStatics: true, bespokeIntID: false},
+        //         // {type: GameScreen.#FLYPOD, x: 360, y: 241, boundryL: 100, boundryR: 580, addToStatics: true, bespokeIntID: true, delay: 600},
+        //     ],
+        // },
+        
+        
     }
 
     
     static screensCatalogue = [
         
         {   // 1. zaslon (idx 0);
-            items_static: [],  // popolnimo ko pride čas; to je seznam operativnih ovir;
-            items_animtd: [],
+            
+            // podatki;
             exits: {
                 right: {
-                    x: 600,
+                    x: 600, // položaj (xPos), ki ga mora doseči sprajt na aktualnem zaslonu, da se šteje, da ga je zapustil;
                     spritePos: {    // položaj, ki ga zavzame sprite na naslednjem ekranu, če uporabi ta izhod;
-                        x: 0,
-                        y: 280,
-                        sx: 'right'
+                        x: 0, y: 280, sx: 'right'
                     }
                 },
                 left: undefined,
             },
             bckgndIdx: 0,
+            
+            // obstajajo še drugi propertiji objekta, ampak se ustvarijo v load();
         },
         {   // 2. zaslon;
-            items_static: [],
-            items_animtd: [],
             exits: {
                 right: {
                     x: 600,
-                    spritePos: {
-                        x: 0,
-                        y: 70,
-                        sx: 'right'
-                    }
+                    spritePos: { x: 0, y: 70, sx: 'right' }
                 },
                 left: {
                     x: -40,
-                    spritePos: {
-                        x: 560,
-                        y: 280,
-                        sx: 'left'
-                    }
+                    spritePos: { x: 560, y: 280, sx: 'left' }
                 },
             },
             bckgndIdx: 1,
         },
         {   // 3. zaslon (idx 2);
-            items_static: [],
-            items_animtd: [],
             exits: {
                 right: {
                     x: 600,
-                    spritePos: {
-                        x: 0,
-                        y: 70,
-                        sx: 'right'
-                    }
+                    spritePos: { x: 0, y: 70, sx: 'right' }
                 },
                 left: {
                     x: -40,
-                    spritePos: {
-                        x: 560,
-                        y: 70,
-                        sx: 'left'
-                    }
+                    spritePos: { x: 560, y: 70, sx: 'left' }
                 },
             },
             bckgndIdx: 2,
         },
         {   // 4. zaslon (idx 3);
-            items_static: [],
-            items_animtd: [],
             exits: {
                 right: {
                     x: 600,
-                    spritePos: {
-                        x: 0,
-                        y: 300,
-                        sx: 'right'
-                    }
+                    spritePos: { x: 0, y: 300, sx: 'right' }
                 },
                 left: {
                     x: -40,
-                    spritePos: {
-                        x: 560,
-                        y: 80,
-                        sx: 'left'
-                    }
+                    spritePos: { x: 560, y: 80, sx: 'left' }
                 },
             },
             bckgndIdx: 2,
         },
         {   // 5. zaslon (idx 4);
-            items_static: [],
-            items_animtd: [],
             exits: {
                 left: {
                     x: -40,
-                    spritePos: {
-                        x: 560,
-                        y: 300,
-                        sx: 'left'
-                    }
+                    spritePos: { x: 560, y: 300, sx: 'left' }
                 },
                 right: {
                     x: 600,
-                    spritePos: {
-                        x: 0,
-                        y: 300,
-                        sx: 'right'
-                    }
+                    spritePos: { x: 0, y: 240, sx: 'right' }
                 },
             },
             bckgndIdx: 0,
         },
         {   // 6. zaslon (idx 5);
-            items_static: [],
-            items_animtd: [],
             exits: {
+                left: {
+                    x: -40,
+                    spritePos: { x: 560, y: 300, sx: 'left' }
+                },
+                right: {
+                    x: 600,
+                    spritePos: { x: 0, y: 300, sx: 'right' }
+                },
+            },
+            bckgndIdx: 0,
+        },
+        {   // 7. zaslon (idx 6);   
+            exits: {    // tle je konc po stopnicah navzdol
                 right: undefined,
                 left: {
                     x: -40,
-                    spritePos: {
-                        x: 560,
-                        y: 300,
-                        sx: 'left'
-                    }
+                    spritePos: { x: 560, y: 300, sx: 'left' }
                 },
-            },
-            bckgndIdx: 0,
-        },
-        {   // 6. zaslon (idx 5);
-            items_static: [],
-            items_animtd: [],
-            exits: {
-                right: undefined,
-                left: undefined,
             },
             bckgndIdx: 0,
         },
 
+        // samo za vajo ! !
+        {   // 7. zaslon (idx 6);   samo za vajo za pod
+            exits: {
+                right: {
+                    x: 600,
+                    spritePos: { x: 300, y: 10, sx: 'right' }
+                },
+                left: undefined,
+            },
+            bckgndIdx: 0,
+        },
+        
+        
     ]
 
     static meetData(ctx, sprite) {
@@ -394,8 +396,15 @@ class GameScreen {
         this.bckgnd.drawClouds();
         
         // če še niso, naložimo ovire iz definicij (obenem se tudi izrišejo);
-        if(this.currScreen.items_static.length == 0) {    // ta služi kot proxi za vse vrste ovir, ker zaslon brez statičnih ovir ne more bit;
-            
+        if(this.currScreen.items_static == undefined) {    // ta služi kot proxi za vse vrste ovir, ker zaslon brez statičnih ovir ne more bit;
+            // ustvarimo prazne propertije (nekateri se bodo pozneje popolnili, morda ne vsi za vsak objekt);
+            this.currScreen.items_static = [];  // operativni seznam statičnih ovir, ki so del ospredja;
+            this.currScreen.items_animtd = [];  // operativni seznam animiranih ovir, ki so del ospredja;
+            this.currScreen.intervals = {
+                bckgnd : [],    // animirani elementi (posamični items_animtd), katerih animacija je pripopana intervalu ozadja (za oblake);
+                bespoke: []     // animirani elementi (arrayi items_animtd), katerih animacija ima lasten interval (neodvisen od intervala animacije oblakov);
+            };
+
             const ovireDef = this.itemsPresenceDefs[this.currScreenIdx];
             for(let i = 0; i < ovireDef.static.length; i++) {
                 const type = ovireDef.static[i].type;
@@ -408,15 +417,38 @@ class GameScreen {
             }
             
             if(ovireDef.animtd.length > 0) {
-                let animatedElem;
-                const animatedDef = ovireDef.animtd[0];
-                if(animatedDef.type == GameScreen.#SHARK) {
-                    animatedElem = new Shark(animatedDef.x, animatedDef.y, animatedDef.boundryX, animatedDef.boundryY);
-                } else if(animatedDef.type == GameScreen.#FLYPOD) {
-                    animatedElem = new FlyPod(animatedDef.x, animatedDef.y, true, animatedDef.boundryX, animatedDef.boundryY, this.sprite);
+                for (const element of ovireDef.animtd) {
+                    let animatedElem;
+                    if(element.type == GameScreen.#SHARK) {
+                        animatedElem = new Shark(element.x, element.y, element.boundryL, element.boundryR);
+                    } else if(element.type == GameScreen.#FLYPOD) {
+                        animatedElem = new FlyPod(element.x, element.y, true, element.boundryL, element.boundryR, this.sprite);
+                    }
+                    this.currScreen.items_animtd.push(animatedElem);
+                    if(element.addToStatics) this.currScreen.items_static.push(animatedElem);
+                    if(element.bespokeIntID) {
+                        // najprej pogruntat, al že obstaja tak delay;
+                        let i = -1;
+                        const bespokeDelays = this.intervals.bespoke.delay;
+                        if(bespokeDelays.length > 0) {
+                            for (let j = 0; j < bespokeDelays.length; j++) {
+                                if(bespokeDelays[j] == element.delay) {
+                                    i = j; break;
+                                }
+                            }
+                        }
+                        // POMEMBNO: arraya this.intervals.bespoke.delay (vrednosti delayev) in this.currScreen.intervals.bespoke (objekti z istim delayem)..
+                        // ..morata imeti isto dolžino in vsak njihov član na istem indeksu (vsak član je array), mora tudi imet isto dolžino;
+                        if(i == -1) {   // takega arraya še ni;
+                            const thisDelay = [];   // sem not grejo objekti, ki imajo tak bespoke delay; pravo ime bi bilo membersWithThisDelayy;
+                            thisDelay.push(animatedElem); // da ga damo v array, pa četudi bo morda vedno imel le enega člana;
+                            this.currScreen.intervals.bespoke.push(thisDelay);  // array objektov s tem delayem damo v glavni array bespokov;
+                            bespokeDelays.push(element.delay);  // vrednost delaya damo v array vrednoti delayev;
+                        } else {    // dodamo ta nov element k obstoječi zbirki objektov s tem delayem;
+                            this.currScreen.intervals.bespoke[i].push(animatedElem); // delaya pa ni treba nikamor dodat, ker že obstaja zabeležen od prej;
+                        }
+                    } else this.currScreen.intervals.bckgnd.push(animatedElem);
                 }
-                this.currScreen.items_animtd.push(animatedElem);
-                if(animatedDef.addToStatics) this.currScreen.items_static.push(animatedElem);
             }
                 
         } else {    // sicer jih samo izrišemo;
@@ -424,31 +456,59 @@ class GameScreen {
                 element.render(true);
             }
             if(this.currScreen.items_animtd.length > 0) {
-                this.currScreen.items_animtd[0].processChanges();
+                for (const element of this.currScreen.items_animtd) {
+                    element.processChanges();
+                }
             }
         }
         
-        // zagon premikanja zadev na zaslonu;
-        this.intrvlID = setInterval(this.runScreenTicker.bind(this), 1000);
-            
+        // zagon premikanja zadev na zaslonu (setInterval oz tu imenovani tickerji);
+        // standarden interval, ki se obvezno izvaja (oblaki in morebitne animirane zadeve v ospredju);
+        this.intervals.bckgnd.ID = setInterval(this.runBckgndTicker.bind(this), 1000);
+
+        // morebitni intervali po meri;
+        const currScreenBespoke = this.currScreen.intervals.bespoke;
+        if(currScreenBespoke.length > 0) {
+            for (let i = 0; i < currScreenBespoke.length; i++) {
+                this.intervals.bespoke.ID[i] = setInterval(this.runBespokeTickers.bind(this), this.intervals.bespoke.delay[i], currScreenBespoke[i]);
+            }
+        }
+
         // narišemo možička (položaj mu je vselej določen že predhodno);
         this.sprite.render(true);
     }
 
-    static runScreenTicker() {
-        if(this.bckgnd.moveClouds()) this.stopScreenTicker();
-        if(this.currScreen.items_animtd.length > 0) {
-            this.currScreen.items_animtd[0].processChanges();
+    static runBckgndTicker() {
+        if(this.bckgnd.moveClouds()) this.stopAllTickers();
+        if(this.currScreen.intervals.bckgnd.length > 0) {
+            for (const element of this.currScreen.intervals.bckgnd) element.processChanges();
         }
     }
 
-    static stopScreenTicker() {
-        clearInterval(this.intrvlID);
-        this.intrvlID = 0;
+    static runBespokeTickers(passdArr) {
+        for (const element of passdArr) {
+            element.processChanges();
+        }
+    }
+
+    static stopAllTickers() {
+        // standardni interval (samo eden, ni v arrayu; zagotovo teče);
+        clearInterval(this.intervals.bckgnd.ID);
+        this.intervals.bckgnd.ID = 0;
+        
+        // morebitni posebni interval(i) (lahko jih je več, vedno so v arrayu);
+        if(this.intervals.bespoke.ID.length > 0) {
+            for (let i = 0; i < this.intervals.bespoke.ID.length; i++) {
+                if(this.intervals.bespoke.ID[i] != 0) {
+                    clearInterval(this.intervals.bespoke.ID[i]);
+                    this.intervals.bespoke.ID[i] = 0;
+                }
+            }
+        }
     }
 
     static getNewsSpriteExited(where) {
-        this.stopScreenTicker();
+        this.stopAllTickers();
         const idx = where == 'right' ? this.currScreenIdx + 1 : this.currScreenIdx - 1;
         this.load(idx);
     }
