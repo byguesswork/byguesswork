@@ -3,10 +3,11 @@
 // da bi najprej naredilo cel gib, šele nato računalo izvedljivost premika na novih koordinatah..
 // .. ker morda skok diagonalno je možen tam, kjer skok navpično ni
 
-const ver = '10';
+const ver = '11';
 document.getElementById('ver').insertAdjacentText('beforeend', ver);
 
-// v10 dva poda
+// v11 - lažji prvi skok
+// v10 dva poda z ločenimi intervali, preuredil screensCatalogue,  popravki sprajta (zdaj je v stiku s tlemi);
 // v9 flypod, skok na 5 (prej 6 turnov), popravki startMainInterval, popravki izračuna ovira/support, razni popravki, premaknil intervalLen v sprite, ;
 // v8 dodal kliker za ver; klasi, shark
 // v7 odpravil bug touch

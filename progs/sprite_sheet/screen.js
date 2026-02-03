@@ -64,8 +64,8 @@ class GameScreen {
                 // {type: 'turfLevitating', x: 100, y: 100},
 
                 // za 5
-                {type: 'turfLevitating', x: 60, y: 100},
-                {type: 'turfLevitating', x: 120, y: 100},
+                {type: 'turfLevitating', x: 80, y: 100},    // orig x: 60 in spodnji 120, ampak morda nekoliko pretežko za prvič
+                {type: 'turfLevitating', x: 140, y: 100},
 
                 {type: 'turfLevitating', x: 280, y: 30},
                 {type: 'turfLevitating', x: 300, y: 160},
