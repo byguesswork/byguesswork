@@ -178,7 +178,7 @@ class GameScreen {
                 // za 6
                 // {type: 'turfLevitating', x: 340, y: 220},
                 // ! za 6
-                // {type: 'turfLevitating', x: 580, y: 170},
+
                 {type: 'turfLevitating', x: 560, y: 240},
             ],
             animtd: [
@@ -226,8 +226,6 @@ class GameScreen {
                 {type: 'turfLevitating', x: 580, y: 20},
                 {type: 'turfLevitating', x: 580, y: 90},
                 {type: 'turfLevitating', x: 580, y: 160},
-                // {type: 'turfLevitating', x: 380, y: 130},
-                // {type: 'turfLevitating', x: 580, y: 40},
             ],
             animtd: [
                 {type: GameScreen.#FLYPOD, x: 360, y: 301, boundryL: 320, boundryR: 540, addToStatics: true, bespokeIntID: true, delay: 200},
@@ -535,9 +533,9 @@ class GameScreen {
 
     static gameOverSign() {
         this.ctx.font = "60px serif";
-        this.ctx.fillText('Game Over', 60, 90);
+        this.ctx.fillText('Game Over', 32, 130); // orig. 60, 90
         this.ctx.font = "24px serif";
-        this.ctx.fillText('Refresh page to try again', 70, 124);
+        this.ctx.fillText('Refresh page to try again', 42, 164);    // orig: 70, 124
         console.log('-  -  - KONEC IGRE, daj F5 -  -  -  ', Date.now())
     }
 
