@@ -357,20 +357,20 @@ class GameScreen {
                     spritePos: { x: 560, y: 300, sx: 'left' }
                 },
             },
-            bckgndIdx: 0,
+            bckgndIdx: 1,
         },
 
         // samo za vajo ! !
-        {   // 7. zaslon (idx 6);   samo za vajo za pod
-            exits: {
-                right: {
-                    x: 600,
-                    spritePos: { x: 300, y: 10, sx: 'right' }
-                },
-                left: undefined,
-            },
-            bckgndIdx: 0,
-        },
+        // {   // x. zaslon (idx x);   samo za vajo za pod
+        //     exits: {
+        //         right: {
+        //             x: 600,
+        //             spritePos: { x: 300, y: 10, sx: 'right' }
+        //         },
+        //         left: undefined,
+        //     },
+        //     bckgndIdx: 0,
+        // },
         
         
     ]
@@ -533,9 +533,17 @@ class GameScreen {
 
     static gameOverSign() {
         this.ctx.font = "60px serif";
-        this.ctx.fillText('Game Over', 32, 130); // orig. 60, 90
+        let text1, text2;
+        if(navigatorLang == 'sl') {
+            text1 = 'Dah ... konec igre.';
+            text2 = 'Znova? Osveži stran.';
+        } else {
+            text1 = 'Game Over';
+            text2 = 'Refresh page to try again';
+        }
+        this.ctx.fillText(text1, 32, 130); // orig. 60, 90
         this.ctx.font = "24px serif";
-        this.ctx.fillText('Refresh page to try again', 42, 164);    // orig: 70, 124
+        this.ctx.fillText(text2, 42, 164);    // orig: 70, 124
         console.log('-  -  - KONEC IGRE, daj F5 -  -  -  ', Date.now())
     }
 
@@ -569,7 +577,8 @@ class GameScreen {
             this.sprite.render(true);
             setTimeout(() => {
                 this.ctx.font = "8px serif"; // končna velikost fonta bo 48;
-                this.ctx.strokeText('The End', 400, 180 + 8);
+                const textt = navigatorLang == 'sl' ? 'Konec :)' : 'The End';
+                this.ctx.fillText(textt, 400, 140 + 8); // ko je ozadje 0, je y tu (in v pt2) bil 180;
                 for(let j = 12; j <= 48; j = j + 4) {   // 12, ker se font povečuje po 4, pred tem pa je bil 8;
                     setTimeout( () => { this.endAnimationPt2(j) }, 15 * j )   // setInterval bi bil 60ms, ampak ker je j po 4, moramo delit s 4;
                 }
@@ -578,10 +587,11 @@ class GameScreen {
     }
 
     static endAnimationPt2(i) {
-        this.ctx.clearRect(390,170,200,100);
+        const y = 140;
+        this.ctx.clearRect(390, y, 200, 100);
         this.ctx.font = `${i}px serif`;
-        if(!mobile) this.ctx.strokeText('The End', 400, 180 + i);
-            else this.ctx.fillText('The End', 400, 180 + i)  // će mobile je fill, ker se na majhnem zaslonu sicer slabo vidi;
+        const textt = navigatorLang == 'sl' ? 'Konec :)' : 'The End';
+        this.ctx.fillText(textt, 400, y + i);
         if(i >= 48) {
             this.sprite.render(true);
         }

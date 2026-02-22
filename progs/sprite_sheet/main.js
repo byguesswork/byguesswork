@@ -3,9 +3,10 @@
 // da bi najprej naredilo cel gib, šele nato računalo izvedljivost premika na novih koordinatah..
 // .. ker morda skok diagonalno je možen tam, kjer skok navpično ni
 
-const ver = '11';
+const ver = '12';
 document.getElementById('ver').insertAdjacentText('beforeend', ver);
 
+// v12 podpora za sl, korakanje
 // v11 - lažji prvi skok
 // v10 dva poda z ločenimi intervali, preuredil screensCatalogue,  popravki sprajta (zdaj je v stiku s tlemi);
 // v9 flypod, skok na 5 (prej 6 turnov), popravki startMainInterval, popravki izračuna ovira/support, razni popravki, premaknil intervalLen v sprite, ;
@@ -43,6 +44,11 @@ const INVALID = 'invld';
 
 const mobile = isMobile();
 const navigatorLang = getLang();
+
+if(navigatorLang == 'sl') {
+    document.getElementById('para1').innerHTML = 'Učni projekt za spoznavanje dela z animacijsko predlogo (sprite sheet) ter logike platformne arkadne igre.';
+    document.getElementById('para2').innerHTML = 'Možička premikaš s smernimi tipkami levo/desno/gor.';
+}
 
 const bckgndAssets = new Image(); // tu je slika pokrajine in oblakov; prikazano je na canvasu ozadja;
 const assets = new Image(); // src se naloada v handlerju positionCanvs();

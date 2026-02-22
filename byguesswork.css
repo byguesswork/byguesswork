@@ -160,6 +160,9 @@ p {
     background-color: inherit;
 }
 
+.half_para {
+    line-height: 0.5rem;
+}
 
 .smaller_text {
     font-size: small;

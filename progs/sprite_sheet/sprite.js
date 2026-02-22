@@ -44,8 +44,8 @@ class Sprite extends ScreenObj {
 
     // vrednosti za sx za spritesheet
     static look = {
-        left: 85,
-        right: 43,
+        right: 43,  // right2 je 413; tj +370;
+        left: 85,   // left2 je +370;
         straight: 127,
     }
     
@@ -59,6 +59,7 @@ class Sprite extends ScreenObj {
         this.upContinuslyPressd = false;    // če ne držiš gumba za gor, ampak ga samo na kratko pritisneš, je skok nižji;
         this.xAtStartJmp = 0;   // za odločanje o tem, al se je lik zaletel med skokom;
         this.latSpeed = 0; // poz v desno, neg v levo; št. pikslov (px), klikor se sprajt premakne L/D v enem turnu;
+        this.wCnt = 2; // walkCounter, števec, da vemo, katero slikico korakanja prikazat; 2, ker ob začetnem izrisu ekrana narišemo 1, 2 pa pomeni, da se bo pri naslednjem narisu (koraku vstran) narisal 2;
         this.specialCase = false;
     }
     
@@ -366,12 +367,14 @@ class Sprite extends ScreenObj {
                     const exits = this.screen.currScreen.exits;
                     if(exits.right != undefined && this.xPos >= exits.right.x) {
                         this.stopMvmtAndInterval();
-                        this.place(exits.right.spritePos.x, exits.right.spritePos.y, Sprite.look[exits.right.spritePos.sx])
+                        this.place(exits.right.spritePos.x, exits.right.spritePos.y, Sprite.look[exits.right.spritePos.sx]);
+                        this.wCnt = 2;
                         this.screen.getNewsSpriteExited(RIGHT);
                         return;
                     } else if(exits.left != undefined && this.xPos <= exits.left.x) {
                         this.stopMvmtAndInterval();
-                        this.place(exits.left.spritePos.x, exits.left.spritePos.y, Sprite.look[exits.left.spritePos.sx])
+                        this.place(exits.left.spritePos.x, exits.left.spritePos.y, Sprite.look[exits.left.spritePos.sx]);
+                        this.wCnt = 2;
                         this.screen.getNewsSpriteExited(LEFT);
                         return;
                     } else if(this.screen.currScreenIdx == 6 && this.xPos > 440) {
@@ -409,7 +412,8 @@ class Sprite extends ScreenObj {
 
                     if(this.xPos >= 200 && this.xPos <= 520 && ((this.xPos <= 220 && this.yPos < 200)) 
                         || (this.xPos > 220 && this.xPos <= 320 && this.yPos < 220) || (this.xPos >= 400 && this.yPos < 220)) {
-                        this.sx = Sprite.look.straight;
+                        this.sx = Sprite.look.straight; // pri vskem look.straight je treba tudi dat wCnt = 1, da bo naslednji korak vsatran začet z 1;
+                        this.wCnt = 1;
                         this.render(true);
                         this.specialCase = true;
                         this.screen.getNewsSharkAction(this.xPos, this.yPos);
@@ -429,9 +433,19 @@ class Sprite extends ScreenObj {
             } else if(this.latSpeed < 0) {
                 this.sx = Sprite.look.left;
             } else { // če pa se ne giba L/D pa od pristka gumbov;
-                if(ctrlPressd.right && ctrlPressd.left) this.sx = Sprite.look.straight; // če držiš pritisnjena oba hkrati, te gleda naravnost;
+                if((!ctrlPressd.right && !ctrlPressd.left) || (ctrlPressd.right && ctrlPressd.left)) {
+                    this.sx = Sprite.look.straight; // če ne držiš nobenega smernega ali če držiš pritisnjena oba hkrati, te gleda naravnost;
+                    this.wCnt = 1;
+                }
                 else if(ctrlPressd.right) this.sx = Sprite.look.right;
                 else if(ctrlPressd.left) this.sx = Sprite.look.left;
+            }
+            // samo pri hoji na zemlji tudi korakamo;
+            if((this.sx == Sprite.look.right || this.sx == Sprite.look.left) && this.vertSpeed == 0) {
+                if(this.wCnt == 2) {
+                    this.sx += 370; // določimo da se izriše alternativni korak;
+                    this.wCnt = 1;  // nastavimo števec za naslednji krog;
+                } else this.wCnt = 2;  // nastavimo števec za naslednji krog;
             }
     
             // narišemo na novem/istem položaju;
@@ -442,7 +456,7 @@ class Sprite extends ScreenObj {
         // to je zato, ker od prej, če si lateralno zaleten v neko oviro, imaš latSpeed == 0, čeprav imaš pritisnjen gumb za vstran, in če recimo skočiš, ne upošteva gumba za vstran;
         // zakaj to tukaj? ker če ne bi zdaj, bi se spodaj ustavil interval; tako ohranimo interval živ in tukaj nastavljene vrednosti so prečekeirajo v naslednjem krogu;
         // zakaj ne čekirat v keydown? ker če držiš gor in potem pritisneš še v desno, se sproža samo zadnji pritisnjen (morda odvisno od OS-a),..
-        // v tem primeru uni za v desno, kljub temu da je za gor še vedno pritisnjen (ni se še sprožil keyup za gumb gor);
+        // v tem primeru uni za v desno, kljub temu da je za gor še vedno pritisnjen (ni se še sprožil dogodek keyup za gumb gor);
         // zato moraš čekirat boolean, ki ga sam urejaš;
         if(this.latSpeed == 0) {
             if(ctrlPressd.right && !ctrlPressd.left) this.latSpeed = Sprite.latMovtSpeedDef; // nastavimo hitrost in če smo zaleteni, bo itak spodaj dalo na 0, če pa gremo v skok, bo lahok šlo tudi lateralno;
@@ -461,6 +475,7 @@ class Sprite extends ScreenObj {
             if(intervalIDs.turn == 0) {
                 intervalIDs.turn = setTimeout(() => {
                     this.sx = Sprite.look.straight;
+                    this.wCnt = 1;
                     this.render(false);
                     this.render(true);
                     this.#stopInterval(TURN, 'izveden turn');
