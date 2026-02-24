@@ -46,7 +46,7 @@ const mobile = isMobile();
 const navigatorLang = getLang();
 
 if(navigatorLang == 'sl') {
-    document.getElementById('para1').innerHTML = 'Učni projekt za spoznavanje dela z animacijsko predlogo (sprite sheet) ter logike platformne arkadne igre.';
+    document.getElementById('para1').innerHTML = 'Kratka platformna arkada, ki se je začela kot učni projekt za spoznavanje dela z animacijsko predlogo (sprite sheet).';
     document.getElementById('para2').innerHTML = 'Možička premikaš s smernimi tipkami levo/desno/gor.';
 }
 

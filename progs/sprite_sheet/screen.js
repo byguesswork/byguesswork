@@ -536,7 +536,7 @@ class GameScreen {
         let text1, text2;
         if(navigatorLang == 'sl') {
             text1 = 'Dah ... konec igre.';
-            text2 = 'Znova? Osveži stran.';
+            text2 = 'Bi znova? Osveži stran.';
         } else {
             text1 = 'Game Over';
             text2 = 'Refresh page to try again';
