@@ -15,12 +15,12 @@ class GameScreen {
     static currScreen;  // tu bo shranjen objekt trenutnega zaslona;
     static sprite;
     static intervals = {
-        bckgnd : {  // standarden interval za premikanje stvari na zalonu: oblaki in določeni animirani elementi ospredja (sprajt ima svojega);
+        bckgnd : {  // standarden interval za premikanje stvari na zaslonu: oblaki in določeni animirani elementi ospredja (sprajt ima svojega);
             ID : 0,
         },
         bespoke : {
             ID : [],
-            delay : []    // samo preventivno nastavljena default vrednost;
+            delay : []
         },
     }
     static endGame = false;
@@ -59,22 +59,22 @@ class GameScreen {
                 {type: 'turfLevitating', x: -20, y: 140},
                 {type: 'turfLevitating', x: -20, y: 240},
 
-                // za 6
+                // za skok višine 6;
                 // {type: 'turfLevitating', x: 50, y: 100},
                 // {type: 'turfLevitating', x: 100, y: 100},
 
-                // za 5
+                // za skok višine 5;
                 {type: 'turfLevitating', x: 80, y: 100},    // orig x: 60 in spodnji 120, ampak morda nekoliko pretežko za prvič
                 {type: 'turfLevitating', x: 140, y: 100},
 
                 {type: 'turfLevitating', x: 280, y: 30},
                 {type: 'turfLevitating', x: 300, y: 160},
 
-                // za 5
+                // za skok, visok 5;
                 {type: 'turfLevitating', x: 460, y: 220},
                 {type: 'turfLevitating', x: 510, y: 220},
 
-                // za 6;
+                // za skok visok 6;
                 // {type: 'turfLevitating', x: 500, y: 220},
 
                 {type: 'turfLevitating', x: 560, y: 220},
@@ -231,7 +231,6 @@ class GameScreen {
                 {type: GameScreen.#FLYPOD, x: 360, y: 301, boundryL: 320, boundryR: 540, addToStatics: true, bespokeIntID: true, delay: 200},
                 {type: GameScreen.#FLYPOD, x: 100, y: 241, boundryL: 80, boundryR: 240, addToStatics: true, bespokeIntID: true, delay: 600},
                 {type: GameScreen.#FLYPOD, x: 200, y: 101, boundryL: -100, boundryR: 300, addToStatics: true, bespokeIntID: false},
-                // {type: GameScreen.#FLYPOD, x: 360, y: 301, boundryL: 100, boundryR: 580, addToStatics: true, bespokeIntID: true, delay: 600},
             ],
         },
         6: {    // 7. zaslon
@@ -261,7 +260,6 @@ class GameScreen {
         //         // {type: GameScreen.#FLYPOD, x: 360, y: 241, boundryL: 100, boundryR: 580, addToStatics: true, bespokeIntID: true, delay: 600},
         //     ],
         // },
-        
         
     }
 
@@ -477,10 +475,11 @@ class GameScreen {
     }
 
     static runBckgndTicker() {
-        if(this.bckgnd.moveClouds()) this.stopAllTickers();
-        if(this.currScreen.intervals.bckgnd.length > 0) {
-            for (const element of this.currScreen.intervals.bckgnd) element.processChanges();
-        }
+        if(!this.bckgnd.moveClouds()) { // moveClouds vrne true po pribl 10 min, ko ugotovi, da so oblaki izginili z ekrana;
+            if(this.currScreen.intervals.bckgnd.length > 0) {
+                for (const element of this.currScreen.intervals.bckgnd) element.processChanges();
+            }
+        } else this.stopAllTickers();
     }
 
     static runBespokeTickers(passdArr) {
@@ -490,8 +489,8 @@ class GameScreen {
     }
 
     static stopAllTickers() {
-        // standardni interval (samo eden, ni v arrayu; zagotovo teče);
-        clearInterval(this.intervals.bckgnd.ID);
+        // standardni interval (samo eden, ni v arrayu; najverjetneje tečem ampak vseeno preverimo (kaj če si pred tem počakal, da se oblaki ustavijo));
+        if(this.intervals.bckgnd.ID > 0) clearInterval(this.intervals.bckgnd.ID);
         this.intervals.bckgnd.ID = 0;
         
         // morebitni posebni interval(i) (lahko jih je več, vedno so v arrayu);
@@ -533,17 +532,14 @@ class GameScreen {
 
     static gameOverSign() {
         this.ctx.font = "60px serif";
-        let text1, text2;
+        let text1;
         if(navigatorLang == 'sl') {
-            text1 = 'Dah ... konec igre.';
-            text2 = 'Bi znova? Osveži stran.';
+            text1 = 'Šment ... konec igre';
         } else {
-            text1 = 'Game Over';
-            text2 = 'Refresh page to try again';
+            text1 = 'Darn... Game Over';
         }
-        this.ctx.fillText(text1, 32, 130); // orig. 60, 90
-        this.ctx.font = "24px serif";
-        this.ctx.fillText(text2, 42, 164);    // orig: 70, 124
+        goAgainBtn.classList.remove('hidden');
+        this.ctx.fillText(text1, 32, 130);  // y koordinata pri fillText je spodnji rob pisanja;
         console.log('-  -  - KONEC IGRE, daj F5 -  -  -  ', Date.now())
     }
 
@@ -630,17 +626,31 @@ class Background {
         this.#assets = assets;
         this.skiesBhndClouds = {
             0: undefined,   // index je vezan na index ozadja, ne ekrana;
-            1: undefined,
+            1: undefined,   // zdaj je sicer vsaj ozadja, torej bi se tu rabil še recimo idx 2, ampak se ustvari at runtime;
         }
         this.#currBckgndIdx = undefined;
         this.#currSkyBhnd;   // tle se shrani nebo za oblaki;
         this.#clouds = {
             starts: {
-                farther: [-170, 220, 450],
-                closer: [-270, 20, 470]
+                farther: [],
+                closer: []
             },
             mvmtCountr: 0,
         }
+        this.init();
+    }
+    
+    init() {
+        this.#clouds.starts.farther = [-170, 220, 450];
+        this.#clouds.starts.closer = [-270, 20, 470];
+        this.#clouds.mvmtCountr = 0;
+        // this.#clouds = {
+        //     starts: {
+        //         farther: [-170, 220, 450],
+        //         closer: [-270, 20, 470]
+        //     },
+        //     mvmtCountr: 0,
+        // }
     }
 
     drawBckgnd(bckgndIdx) {

@@ -53,6 +53,10 @@ class Sprite extends ScreenObj {
         super(xPos, yPos, sx, 0, 40, 60, false);    // mora bit false, ker ko kličemo new Sprite (kot je trenutno) je to pred nalaganjem img-jev, ki so vir izrisa;
             // ima tudi this.sx, .sy, .width (40), .height (60), določeno s super zgoraj;
         // gibanje sprajta;
+        this.init(intrvlLen);
+    }
+    
+    init(intrvlLen) {
         this.intrvlLen = intrvlLen  // dolžina intervala za setInterval;
         this.vertSpeed = 0; // v px; število pikslov, koliko se sprajt premakne navzgor (poz)/navzdol (neg) v enem turnu;
         this.vertFrames = 0; // koliko framov že poteka gibanje gor oz je že pritisnjen gumb za gor;
@@ -110,6 +114,16 @@ class Sprite extends ScreenObj {
             ctrlsCnvs.removeEventListener('touchend', touchEndHndlr, {passive : false});
             ctrlsCnvs.removeEventListener('touchmove', touchMoveHndlr, {passive : false});
         }
+    }
+
+    restartListeners() { // ko je bil game over in klikneš za nov začetek;
+        if(!mobile) document.addEventListener('keydown', keyDownHndlr);
+        else {
+            ctrlsCnvs.addEventListener('touchstart', touchStartHndlr, {passive : false});
+            ctrlsCnvs.addEventListener('touchend', touchEndHndlr, {passive : false});
+            ctrlsCnvs.addEventListener('touchmove', touchMoveHndlr, {passive : false});
+        }
+
     }
 
     stopIntervalAndListnrs( /*kdoPoslal*/ ){ // se rabi pri game over (padec v luknjo ...) ali če prideš do konca;

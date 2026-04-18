@@ -3,9 +3,10 @@
 // da bi najprej naredilo cel gib, šele nato računalo izvedljivost premika na novih koordinatah..
 // .. ker morda skok diagonalno je možen tam, kjer skok navpično ni
 
-const ver = '12';
+const ver = '13';
 document.getElementById('ver').insertAdjacentText('beforeend', ver);
 
+// v13 gumb za znova
 // v12 podpora za sl, korakanje
 // v11 - lažji prvi skok
 // v10 dva poda z ločenimi intervali, preuredil screensCatalogue,  popravki sprajta (zdaj je v stiku s tlemi);
@@ -38,7 +39,9 @@ const UP = 'up';
 const INVALID = 'invld';
 
 // const test = document.getElementById('test');   // za morebitne testne namene;
+const goAgainBtn = document.getElementById('go_again_btn');
 
+let intrvlLen;
 
 //  -  -  -   IZVAJANJE -- -- --
 
@@ -46,8 +49,9 @@ const mobile = isMobile();
 const navigatorLang = getLang();
 
 if(navigatorLang == 'sl') {
-    document.getElementById('para1').innerHTML = 'Kratka platformna arkada, ki se je začela kot učni projekt za spoznavanje dela z animacijsko predlogo (sprite sheet).';
-    document.getElementById('para2').innerHTML = 'Možička premikaš s smernimi tipkami levo/desno/gor.';
+    document.getElementById('para1').innerHTML = 'Učni projekt za spoznavanje dela z animacijsko predlogo (sprite sheet), ki se je razvil v kratko platformno arkado';
+    document.getElementById('para2').innerHTML = 'Možička premikaš s smernimi tipkami levo/desno/gor';
+    goAgainBtn.innerHTML = 'Začni znova';
 }
 
 const bckgndAssets = new Image(); // tu je slika pokrajine in oblakov; prikazano je na canvasu ozadja;
@@ -55,11 +59,13 @@ const assets = new Image(); // src se naloada v handlerju positionCanvs();
 
 let sprite;
 
+// s tem se v bistvu začne zadeva
+document.addEventListener("DOMContentLoaded", positionCanvs);
 
 // -  -  -  POSLUŠALCI  -- -- --
 
-document.addEventListener("DOMContentLoaded", positionCanvs);
 document.getElementById('click_4_ver').addEventListener('click',() => {document.getElementById('ver').style.display = 'block'});
+goAgainBtn.addEventListener('click', goAgainBtnHndlr);
 if(!mobile) {
     document.addEventListener('keydown', keyDownHndlr);
     document.addEventListener('keyup', keyUpHndlr);
@@ -105,12 +111,14 @@ const contrlsCnvsRect = {
 
 function positionCanvs() {
     
+    let ratio = 1;
+
     function helper(lesserWidth) {
         let newCenterWidth = lesserWidth - 24;  // 12 px placa L/D;
         if(newCenterWidth % 2 == 1) newCenterWidth--;   // da je sodo število;
         document.getElementsByClassName('center')[0].style.width = `${newCenterWidth}px`;
     
-        const ratio = (newCenterWidth - 2) / GameScreen.width;  // -2, ker je treba odsštet border od canvasa, ki mora priti v center;
+        ratio = (newCenterWidth - 2) / GameScreen.width;  // -2, ker je treba odsštet border od canvasa, ki mora priti v center;
         const newWidth = ratio * GameScreen.width;
         const newHeight = ratio * GameScreen.height;
         bckgndcnvs.style.width = `${newWidth}px`;
@@ -145,6 +153,13 @@ function positionCanvs() {
     canvas.style.display = 'unset';    // prej mora bit skrit, sicer vpliva na postavitev ozadnega canvasa, ki se potem premakne po premiku tega;
     canvas.style.top = `${canvasTop}px`;
     canvas.style.left = `${canvasLeft}px`;
+    // izračunamo še, kam bo šel gumb "try again";
+    let sth = canvasTop + 150 * ratio;   // tudi gumb je absoluten glede na na "center", zato izhajamo iz canvasTop, ki je tudi absoluten na center;
+    goAgainBtn.style.top = `${sth}px`;
+    sth = 40 * ratio; // 40px od levega roba pri zaslonu namiznega računalnika; pri mobile se ustrezno zmanjša;
+    goAgainBtn.style.left = `${sth}px`;
+    sth = Math.round(30 * ratio);   // 30 je font-size pri namiznem;
+    goAgainBtn.style.fontSize = `${sth}px`;
     
     // loadanje sheet-a ozadja;
     bckgndAssets.src = 'bckgnd_assets.png';
@@ -154,18 +169,16 @@ function positionCanvs() {
         assets.src = 'assets.png';
         assets.onload = function() {
             
-            // naložimo vse podatke v classe;
-            GameScreen.bckgnd = new Background(ctxBckgnd, bckgndAssets);
-            ScreenObj.meetData(ctx, assets, GameScreen.height);
-            const intrvlLen = mobile ? 120 : 95;
-
+            intrvlLen = mobile ? 120 : 95;
             sprite = new Sprite(360, 10, Sprite.look.left, intrvlLen);
-        // začetni:             Sprite(360, 10 - left
-        // 4 (idx 3, shark)     Sprite(0, 70
-        // 5 pod                Sprite(0, 240 
+                // začetni:             Sprite(360, 10 - left
+                // 4 (idx 3, shark)     Sprite(0, 70
+                // 5 pod                Sprite(0, 240 
             
             GameScreen.meetData(ctx, sprite);
-            GameScreen.load(); //                <--  za TESTIRANJE: TU  DAŠ ŠTEVILKO ZASLONA; NA KATEREM ŽELIŠ ZAČETI test; 
+            GameScreen.bckgnd = new Background(ctxBckgnd, bckgndAssets);
+            ScreenObj.meetData(ctx, assets, GameScreen.height);
+            GameScreen.load(0); //                <--  za TESTIRANJE: TU  DAŠ ŠTEVILKO ZASLONA; NA KATEREM ŽELIŠ ZAČETI test; 
 
             if(mobile) {
                 drawControlsIcons();    // narišemo gumbe, če mobile;
@@ -206,6 +219,17 @@ function keyUpHndlr(e) {
     } else if (e.key == 'ArrowLeft') {
         sprite.latReleased(LEFT);
     }
+}
+
+function goAgainBtnHndlr() {
+    goAgainBtn.classList.add('hidden');
+    GameScreen.stopAllTickers();    // ker ko je gameover, oblaki še vedno tečejo, in če ne ustaviš, bojo tekli 2x (bo dodan no vtrenutek premikanja);
+    GameScreen.currScreen.intervals.bckgnd[0].init();  // sharka je trena initat;
+    sprite.init(intrvlLen);
+    sprite.place(360, 10, Sprite.look.left);
+    GameScreen.bckgnd.init();
+    GameScreen.load(0);
+    sprite.restartListeners();
 }
 
 function detrmnTchPosOnCtrlsCnvs(chgdTch) {

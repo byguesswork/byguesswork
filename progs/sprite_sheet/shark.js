@@ -28,19 +28,23 @@ class Shark extends ScreenObj {
         this.water = new ScreenObj(boundryL, 0, /*sx:*/ 0, /*sy:*/ 90, boundryR - boundryL, 12);
         this.waterCountr = 1;
         // end game;
-        this.endGame = false;   // true, ko možiček pada in ga bo pes pojedel;
         this.menuSign;  // slikca za obed;
         this.sharkPic;  // slikca pred obedom;
-        this.endGameXPos;
+        this.init();
+    }
+    
+    init() {
+        this.endGame = false;   // true, ko možiček pada in ga bo pes pojedel;
         this.gameEnded = false;
     }
 
     startEndGame(xPos) {
         // podatkovje;
-        this.endGameXPos = xPos;
         this.endGame = true;
-        this.menuSign = new ScreenObj(xPos - 50, 5, 0, 104, 143, 105, false); // -50 ker je širina slike 140, potem je 40 možiček in spet 50 slike;
-        this.sharkPic = new ScreenObj(xPos, 0, 165, 108, 50, 60, false);
+        if(this.menuSign == undefined) this.menuSign = new ScreenObj(xPos - 50, 5, 0, 104, 143, 105, false); // -50 ker je širina slike 140, potem je 40 možiček in spet 50 slike;
+            else this.menuSign.xPos = xPos;
+        if(this.sharkPic == undefined) this.sharkPic = new ScreenObj(xPos, 0, 165, 108, 50, 60, false);
+            else this.sharkPic.xPos = xPos;
         
         //morski pes;   se obrne proti modelu in gre na srednjo globino, potem kmalu izgine;
         this.render(false);
