@@ -1,12 +1,13 @@
 'use strict';
 
+// landscape;
 // da bi najprej naredilo cel gib, šele nato računalo izvedljivost premika na novih koordinatah..
 // .. ker morda skok diagonalno je možen tam, kjer skok navpično ni
 
-const ver = '14';
+const ver = '14.1';
 document.getElementById('ver').insertAdjacentText('beforeend', ver);
 
-// v14 ponastavit touch controle pri game over (mobile); no-select za besedilo pod kontrolniki (mobile)
+// v14 ponastavit touch controle pri game over (mobile); no-select za besedilo pod kontrolniki (mobile); 14.1: landscape;
 // v13 gumb za znova
 // v12 podpora za sl, korakanje
 // v11 - lažji prvi skok
@@ -47,10 +48,16 @@ let intrvlLen;
 //  -  -  -   IZVAJANJE -- -- --
 
 const mobile = isMobile();
-const navigatorLang = getLang();
+let mobileOrientation = 0;  // vrednost 0 tudi ko ni mobile naprava;
+if(mobile) {
+    mobileOrientation = screen.orientation.angle;
+    if(mobileOrientation == 180) mobileOrientation = 0;
+    console.log('mobile, orientation:', mobileOrientation);
+}
 
-if(navigatorLang == 'sl') {
-    document.getElementById('para1').innerHTML = 'Učni projekt za spoznavanje dela z animacijsko predlogo (sprite sheet), ki se je razvil v kratko platformno arkado';
+const navigatorLang = getLang();
+if(navigatorLang == 'sl' && mobileOrientation == 0) {   // če je mobilc nagnjen ležeče, se ne splača spreminjat besedil;
+    document.getElementById('para1').innerHTML = 'Učni projekt za spoznavanje dela z animacijsko predlogo (sprite sheet), ki se je razvil v kratko platformno arkado.';
     document.getElementById('para2').innerHTML = 'Možička premikaš s smernimi tipkami levo/desno/gor';
     goAgainBtn.innerHTML = 'Začni znova';
 }
@@ -61,7 +68,10 @@ const assets = new Image(); // src se naloada v handlerju positionCanvs();
 let sprite;
 
 // s tem se v bistvu začne zadeva
-document.addEventListener("DOMContentLoaded", positionCanvs);
+if(document.readyState == 'loading') {
+    document.addEventListener("DOMContentLoaded", positionCanvs);
+    console.log('document.readyState == »loading« ', Date.now());
+} else positionCanvs();
 
 // -  -  -  POSLUŠALCI  -- -- --
 
@@ -71,12 +81,17 @@ if(!mobile) {
     document.addEventListener('keydown', keyDownHndlr);
     document.addEventListener('keyup', keyUpHndlr);
 } else {
-    bckgndcnvs.style.marginTop = '40px';
-    document.getElementById('controls_div').style.display = 'block';    // da postane viden, prej: none;
-    ctrlsCnvs.addEventListener('touchstart', touchStartHndlr, {passive : false});
-    ctrlsCnvs.addEventListener('touchend', touchEndHndlr, {passive : false});
-    ctrlsCnvs.addEventListener('touchmove', touchMoveHndlr, {passive : false});
-    ctrlsCnvs.addEventListener('touchcancel', touchCancelHndlr, {passive : false});
+    if(mobileOrientation == 0) {    // samo če je mobilc pokončen (0 pokriva 0 in 180);
+        bckgndcnvs.style.marginTop = '40px';
+        document.getElementById('controls_div').style.display = 'block';    // da postane viden, prej: none;
+        ctrlsCnvs.addEventListener('touchstart', touchStartHndlr, {passive : false});
+        ctrlsCnvs.addEventListener('touchend', touchEndHndlr, {passive : false});
+        ctrlsCnvs.addEventListener('touchmove', touchMoveHndlr, {passive : false});
+        ctrlsCnvs.addEventListener('touchcancel', touchCancelHndlr, {passive : false});
+    } else bckgndcnvs.style.marginTop = '8px';  // oz. če je mobilc, ampak ležeč;
+
+    // vedno, ko je mobilc;
+    screen.orientation.addEventListener('change', () => {location.reload();});
     for (const element of document.getElementsByClassName('hide-if-mobile')) {
         element.style.display = 'none';
     }
@@ -97,6 +112,7 @@ const contrlsCnvsRect = {};
 // -  -  -  -  -  HENDLERJI -  -  -  -  
 
 function positionCanvs() {
+    console.log('positionCanvs: document.readyState ==', document.readyState, Date.now());
     
     let ratio = 1;
 
@@ -126,55 +142,76 @@ function positionCanvs() {
     if(newLesserWidth < lesserWidth) { helper(newLesserWidth) }
     console.log('širina canvasa:', bckgndcnvs.getBoundingClientRect().width - 2); // -2 ker rect upošteva tudi border, nas pa zanima canvas;
 
-    // poravnamo delovni canvas s canvasom ozadja (da se prekrivata);
-    const centerRect = document.getElementsByClassName('center')[0].getBoundingClientRect();
-    const centerTop = centerRect.top;
-    const centerLeft = centerRect.left;
-    console.log('center top/left:', centerTop, centerLeft)
-    const bckgndTop = bckgndcnvs.getBoundingClientRect().top;
-    const bckgndLeft = bckgndcnvs.getBoundingClientRect().left;
-    console.log('bckgndCanvas top/left:', bckgndTop, bckgndLeft)
-    // ker je canvas absolute glede na center, moramo izračunat razliko (ne moremo mu določit top in left absolutno gledano, ampak relativno na center);
-    const canvasTop = bckgndTop - centerTop;
-    const canvasLeft = bckgndLeft - centerLeft; 
-    canvas.style.display = 'unset';    // prej mora bit skrit, sicer vpliva na postavitev ozadnega canvasa, ki se potem premakne po premiku tega;
-    canvas.style.top = `${canvasTop}px`;
-    canvas.style.left = `${canvasLeft}px`;
-    // izračunamo še, kam bo šel gumb "try again";
-    let sth = canvasTop + 150 * ratio;   // tudi gumb je absoluten glede na na "center", zato izhajamo iz canvasTop, ki je tudi absoluten na center;
-    goAgainBtn.style.top = `${sth}px`;
-    sth = 40 * ratio; // 40px od levega roba pri zaslonu namiznega računalnika; pri mobile se ustrezno zmanjša;
-    goAgainBtn.style.left = `${sth}px`;
-    sth = Math.round(30 * ratio);   // 30 je font-size pri namiznem;
-    goAgainBtn.style.fontSize = `${sth}px`;
-    
-    // loadanje sheet-a ozadja;
-    bckgndAssets.src = 'bckgnd_assets.png';
-    bckgndAssets.onload = function() {
+    if(mobileOrientation == 0) {    // za primere, ko je ne-mobile ali mobile + pokončno (mobileOrientation je privzeto 0 tudi pri ne-mobile); 
+        // poravnamo delovni canvas s canvasom ozadja (da se prekrivata);
+        const centerRect = document.getElementsByClassName('center')[0].getBoundingClientRect();
+        const centerTop = centerRect.top;
+        const centerLeft = centerRect.left;
+        console.log('center top/left:', centerTop, centerLeft)
+        const bckgndTop = bckgndcnvs.getBoundingClientRect().top;
+        const bckgndLeft = bckgndcnvs.getBoundingClientRect().left;
+        console.log('bckgndCanvas top/left:', bckgndTop, bckgndLeft)
+        // ker je canvas absolute glede na center, moramo izračunat razliko (ne moremo mu določit top in left absolutno gledano, ampak relativno na center);
+        const canvasTop = bckgndTop - centerTop;
+        const canvasLeft = bckgndLeft - centerLeft; 
+        canvas.style.display = 'unset';    // prej mora bit skrit, sicer vpliva na postavitev ozadnega canvasa, ki se potem premakne po premiku tega;
+        canvas.style.top = `${canvasTop}px`;
+        canvas.style.left = `${canvasLeft}px`;
+        // izračunamo še, kam bo šel gumb "try again";
+        let sth = canvasTop + 150 * ratio;   // tudi gumb je absoluten glede na na "center", zato izhajamo iz canvasTop, ki je tudi absoluten na center;
+        goAgainBtn.style.top = `${sth}px`;
+        sth = 40 * ratio; // 40px od levega roba pri zaslonu namiznega računalnika; pri mobile se ustrezno zmanjša;
+        goAgainBtn.style.left = `${sth}px`;
+        sth = Math.round(30 * ratio);   // 30 je font-size pri namiznem;
+        goAgainBtn.style.fontSize = `${sth}px`;
         
-        // loadanje sheet-a ospredja;
-        assets.src = 'assets.png';
-        assets.onload = function() {
+        // loadanje sheet-a ozadja;
+        bckgndAssets.src = 'bckgnd_assets.png';
+        bckgndAssets.onload = function() {
             
-            intrvlLen = mobile ? 120 : 95;
-            sprite = new Sprite(360, 10, Sprite.look.left, intrvlLen);
-                // začetni:             Sprite(360, 10 - left
-                // 4 (idx 3, shark)     Sprite(0, 70
-                // 5 pod                Sprite(0, 240 
-            
+            // loadanje sheet-a ospredja;
+            assets.src = 'assets.png';
+            assets.onload = function() {
+                
+                intrvlLen = mobile ? 120 : 95;
+                sprite = new Sprite(360, 10, Sprite.look.left, intrvlLen);
+                    // začetni:             Sprite(360, 10 - left
+                    // 4 (idx 3, shark)     Sprite(0, 70
+                    // 5 pod                Sprite(0, 240 
+                
+                GameScreen.meetData(ctx, sprite);
+                GameScreen.bckgnd = new Background(ctxBckgnd, bckgndAssets);
+                ScreenObj.meetData(ctx, assets, GameScreen.height);
+                GameScreen.load(0); //                <--  za TESTIRANJE: TU  DAŠ ŠTEVILKO ZASLONA; NA KATEREM ŽELIŠ ZAČETI test; 
+    
+                if(mobile) {
+                    initMobile();
+                    drawControlsIcons();    // narišemo gumbe, če mobile;
+                    contrlsCnvsRect.left = ctrlsCnvs.getBoundingClientRect().left;
+                    contrlsCnvsRect.top = ctrlsCnvs.getBoundingClientRect().top;
+                    contrlsCnvsRect.right = ctrlsCnvs.getBoundingClientRect().right;
+                    contrlsCnvsRect.bottom = ctrlsCnvs.getBoundingClientRect().bottom;
+                }
+            }
+        }
+    } else {    // primer, ko je mobile + ležeče;
+        // loadanje sheet-a ozadja;
+        bckgndAssets.src = 'bckgnd_assets.png';
+        bckgndAssets.onload = function() {
+            sprite = new Sprite(360, 10, Sprite.look.left, 0);  // treba to, ker če ne vrže error v naslednji vrstici;
             GameScreen.meetData(ctx, sprite);
             GameScreen.bckgnd = new Background(ctxBckgnd, bckgndAssets);
-            ScreenObj.meetData(ctx, assets, GameScreen.height);
-            GameScreen.load(0); //                <--  za TESTIRANJE: TU  DAŠ ŠTEVILKO ZASLONA; NA KATEREM ŽELIŠ ZAČETI test; 
+            document.getElementById('para1').classList.add('hidden');
+            document.getElementById('para2').classList.add('hidden');
+            document.getElementById('change_if_mobile_landscape').innerHTML =
+                navigatorLang == 'sl' ? 'Obrni v navpično postavitev, v vodoravni ne deluje.' : 'Switch to portrait orientaion, in landscape you only get the above landscape';
 
-            if(mobile) {
-                drawControlsIcons();    // narišemo gumbe, če mobile;
-                initMobile();
-                contrlsCnvsRect.left = ctrlsCnvs.getBoundingClientRect().left;
-                contrlsCnvsRect.top = ctrlsCnvs.getBoundingClientRect().top;
-                contrlsCnvsRect.right = ctrlsCnvs.getBoundingClientRect().right;
-                contrlsCnvsRect.bottom = ctrlsCnvs.getBoundingClientRect().bottom;
-            }
+            // izris ozadja;
+            GameScreen.currScreenIdx = 3;
+            GameScreen.currScreen = GameScreen.screensCatalogue[GameScreen.currScreenIdx];
+            GameScreen.bckgnd.drawBckgnd(GameScreen.currScreen.bckgndIdx);
+            GameScreen.bckgnd.drawClouds();
+            GameScreen.intervals.bckgnd.ID = setInterval(() => { GameScreen.bckgnd.moveClouds() }, 1000);
         }
     }
 }
@@ -190,7 +227,6 @@ function initMobile() {
 }
 
 function keyDownHndlr(e) {
-    // console.log(e)
     if(e.key == 'ArrowUp') {
         e.preventDefault();
         sprite.upPressed();
