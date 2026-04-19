@@ -3,9 +3,10 @@
 // da bi najprej naredilo cel gib, šele nato računalo izvedljivost premika na novih koordinatah..
 // .. ker morda skok diagonalno je možen tam, kjer skok navpično ni
 
-const ver = '13';
+const ver = '14';
 document.getElementById('ver').insertAdjacentText('beforeend', ver);
 
+// v14 ponastavit touch controle pri game over (mobile); no-select za besedilo pod kontrolniki (mobile)
 // v13 gumb za znova
 // v12 podpora za sl, korakanje
 // v11 - lažji prvi skok
@@ -85,26 +86,12 @@ const intervalIDs = {   // mora bit pred bckgndAssets.onload, ker se tam rabi;
     main: 0,
     turn: 0,    // da se možiček obrne proti gledalcu, če ga X ms ne premikaš;
 };
-const ctrlPressd = {
-    left: false,
-    right: false,
-    up: false,
-};
-const tchIDs = {
-    left: -1,
-    right: -1,
-    up: -1
-}
-const tchPosOnCtrls = {
-    x: 0,
-    y: 0,
-};
-const contrlsCnvsRect = {
-    left: 0,
-    top: 0,
-    right: 0,
-    bottom: 0
-}
+// se rabi pri mobile, takrat TREBA initat;
+const ctrlPressd = {};
+const tchIDs = {};
+// se rabi samo pr mobile, ni treba initat;
+const tchPosOnCtrls = {};
+const contrlsCnvsRect = {};
 
 
 // -  -  -  -  -  HENDLERJI -  -  -  -  
@@ -182,6 +169,7 @@ function positionCanvs() {
 
             if(mobile) {
                 drawControlsIcons();    // narišemo gumbe, če mobile;
+                initMobile();
                 contrlsCnvsRect.left = ctrlsCnvs.getBoundingClientRect().left;
                 contrlsCnvsRect.top = ctrlsCnvs.getBoundingClientRect().top;
                 contrlsCnvsRect.right = ctrlsCnvs.getBoundingClientRect().right;
@@ -189,6 +177,16 @@ function positionCanvs() {
             }
         }
     }
+}
+
+function initMobile() {
+    ctrlPressd.left = false;
+    ctrlPressd.right = false;
+    ctrlPressd.up = false;
+
+    tchIDs.left = -1;
+    tchIDs.right = -1;
+    tchIDs.up = -1;
 }
 
 function keyDownHndlr(e) {
@@ -224,6 +222,7 @@ function keyUpHndlr(e) {
 function goAgainBtnHndlr() {
     goAgainBtn.classList.add('hidden');
     GameScreen.stopAllTickers();    // ker ko je gameover, oblaki še vedno tečejo, in če ne ustaviš, bojo tekli 2x (bo dodan no vtrenutek premikanja);
+    if(mobile) initMobile();    // ponastavit kontrolne vrednosti za touch;
     GameScreen.currScreen.intervals.bckgnd[0].init();  // sharka je trena initat;
     sprite.init(intrvlLen);
     sprite.place(360, 10, Sprite.look.left);

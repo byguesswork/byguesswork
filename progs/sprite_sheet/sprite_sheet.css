@@ -44,6 +44,17 @@
     padding: 5px 16px;
 }
 
+#para1 {
+    /* da ni mogoče izbrati besedila, view pa je še vedno clickable */
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+    cursor:default;
+}
+
 .mrg_top_36 {
     margin-top: 36px;
 }
