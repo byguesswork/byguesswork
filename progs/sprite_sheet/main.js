@@ -1,13 +1,13 @@
 'use strict';
 
-// landscape;
+// ko enkrat game over, pri naslednjem game over shark še naprej plava? zakaj? daj vedno tako
 // da bi najprej naredilo cel gib, šele nato računalo izvedljivost premika na novih koordinatah..
 // .. ker morda skok diagonalno je možen tam, kjer skok navpično ni
 
-const ver = '14.1';
+const ver = '14.2';
 document.getElementById('ver').insertAdjacentText('beforeend', ver);
 
-// v14 ponastavit touch controle pri game over (mobile); no-select za besedilo pod kontrolniki (mobile); 14.1: landscape;
+// v14 ponastavit touch controle pri game over (mobile); no-select za besedilo pod kontrolniki (mobile); 14.1: landscape; 14.2. voda v nasprotno smer
 // v13 gumb za znova
 // v12 podpora za sl, korakanje
 // v11 - lažji prvi skok
@@ -43,8 +43,6 @@ const INVALID = 'invld';
 // const test = document.getElementById('test');   // za morebitne testne namene;
 const goAgainBtn = document.getElementById('go_again_btn');
 
-let intrvlLen;
-
 //  -  -  -   IZVAJANJE -- -- --
 
 const mobile = isMobile();
@@ -65,12 +63,24 @@ if(navigatorLang == 'sl' && mobileOrientation == 0) {   // če je mobilc nagnjen
 const bckgndAssets = new Image(); // tu je slika pokrajine in oblakov; prikazano je na canvasu ozadja;
 const assets = new Image(); // src se naloada v handlerju positionCanvs();
 
-let sprite;
+const intrvlLen = mobile ? 120 : 95;
+const sprite = new Sprite(360, 10, Sprite.look.left, intrvlLen);
+
+const intervalIDs = {   // mora bit pred bckgndAssets.onload, ker se tam rabi;
+    main: 0,
+    turn: 0,    // da se možiček obrne proti gledalcu, če ga X ms ne premikaš;
+};
+// se rabi pri mobile, takrat TREBA initat;
+const ctrlPressd = {};
+const tchIDs = {};
+// se rabi samo pr mobile, ni treba initat;
+const tchPosOnCtrls = {};
+const contrlsCnvsRect = {};
 
 // s tem se v bistvu začne zadeva
 if(document.readyState == 'loading') {
     document.addEventListener("DOMContentLoaded", positionCanvs);
-    console.log('document.readyState == »loading« ', Date.now());
+    console.log('document.readyState == loading ', Date.now());
 } else positionCanvs();
 
 // -  -  -  POSLUŠALCI  -- -- --
@@ -96,18 +106,6 @@ if(!mobile) {
         element.style.display = 'none';
     }
 }
-
-const intervalIDs = {   // mora bit pred bckgndAssets.onload, ker se tam rabi;
-    main: 0,
-    turn: 0,    // da se možiček obrne proti gledalcu, če ga X ms ne premikaš;
-};
-// se rabi pri mobile, takrat TREBA initat;
-const ctrlPressd = {};
-const tchIDs = {};
-// se rabi samo pr mobile, ni treba initat;
-const tchPosOnCtrls = {};
-const contrlsCnvsRect = {};
-
 
 // -  -  -  -  -  HENDLERJI -  -  -  -  
 
@@ -173,15 +171,16 @@ function positionCanvs() {
             assets.src = 'assets.png';
             assets.onload = function() {
                 
-                intrvlLen = mobile ? 120 : 95;
-                sprite = new Sprite(360, 10, Sprite.look.left, intrvlLen);
-                    // začetni:             Sprite(360, 10 - left
-                    // 4 (idx 3, shark)     Sprite(0, 70
-                    // 5 pod                Sprite(0, 240 
-                
                 GameScreen.meetData(ctx, sprite);
                 GameScreen.bckgnd = new Background(ctxBckgnd, bckgndAssets);
                 ScreenObj.meetData(ctx, assets, GameScreen.height);
+
+                // rabiš samo za testiranje, da umestiš možička na želeno mesto, sicer zakomentiraj;
+                // sprite.place(0, 70);
+                        // začetni:             Sprite(360, 10 - left
+                        // 4 (idx 3, shark)     Sprite(0, 70
+                        // 5 pod                Sprite(0, 240 
+
                 GameScreen.load(0); //                <--  za TESTIRANJE: TU  DAŠ ŠTEVILKO ZASLONA; NA KATEREM ŽELIŠ ZAČETI test; 
     
                 if(mobile) {
@@ -198,7 +197,6 @@ function positionCanvs() {
         // loadanje sheet-a ozadja;
         bckgndAssets.src = 'bckgnd_assets.png';
         bckgndAssets.onload = function() {
-            sprite = new Sprite(360, 10, Sprite.look.left, 0);  // treba to, ker če ne vrže error v naslednji vrstici;
             GameScreen.meetData(ctx, sprite);
             GameScreen.bckgnd = new Background(ctxBckgnd, bckgndAssets);
             document.getElementById('para1').classList.add('hidden');

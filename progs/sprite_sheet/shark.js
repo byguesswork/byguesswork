@@ -130,12 +130,12 @@ class Shark extends ScreenObj {
         // this.water.sx = sX;
         // this.waterCountr++;
         // if(this.waterCountr == 4) this.waterCountr = 1;
-        let sX = 75;
-        if(this.waterCountr == 2) sX = 60;
-        else if(this.waterCountr == 3) sX = 45;
-        else if(this.waterCountr == 4) sX = 30;
-        else if(this.waterCountr == 5) sX = 15;
-        else if(this.waterCountr == 6) sX = 0;
+        let sX = 0;
+        if(this.waterCountr == 2) sX = 15;
+        else if(this.waterCountr == 3) sX = 30;
+        else if(this.waterCountr == 4) sX = 45;
+        else if(this.waterCountr == 5) sX = 60;
+        else if(this.waterCountr == 6) sX = 75;
         this.water.sx = sX;
         this.waterCountr++;
         if(this.waterCountr == 7) this.waterCountr = 1;
