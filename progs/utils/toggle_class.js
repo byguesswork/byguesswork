@@ -72,7 +72,7 @@ class Toggle{
 
             // uredimo drsalnico (ozadje, prostor) stikala;
             this.switchDiv = divNode;
-            this.switchDiv.classList = 'switch-holder switch-hldr-left';
+            this.switchDiv.classList = 'user-select-none switch-holder switch-hldr-left';
             const borderRds = this.switchDiv.getBoundingClientRect().height / 2;
             this.switchDiv.style.borderRadius = `${borderRds}px`;
     
