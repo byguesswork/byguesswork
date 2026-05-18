@@ -10,8 +10,7 @@ class Toggle{
                 // was conceived to allow to move the bulk of the code from a private instance method to a public method (whose execution behaves as if it were public due to this ticket);
     #isUnactionable;    // <boolean> - when true, the toggle is inactive or unactionable, i.e. it is not possible to change the position of its knob and the toggle is greyed out;
 
-    static #areBckgdClrsCmptd = false;  // state hold for computing CSV custom properties;
-    static #areInactveClrsCmptd = false;    // state hold for computing CSV custom properties;
+    static #areInactveClrsComputd = false;    // state hold for computing CSV custom properties;
 
     constructor(
         divNode, // <div html node> (HTMLDivElement): the html div element in which the toggle will be created; obligatorily a <div>; NOTE: any contents of passed div will be deleted;
@@ -67,9 +66,6 @@ class Toggle{
                 }
             }
 
-            // izračunamo barve ozadja;
-            if(!Toggle.#areBckgdClrsCmptd) { this.doBckgndClrs() }
-
             // uredimo drsalnico (ozadje, prostor) stikala;
             this.switchDiv = divNode;
             this.switchDiv.classList = 'user-select-none switch-holder switch-hldr-left';
@@ -87,7 +83,7 @@ class Toggle{
     
                 // šele zdaj, ker šele zdaj imamo položaj in barve in vse;
             if(this.#isUnactionable == true) {
-                if(!Toggle.#areInactveClrsCmptd) { this.doInactvClrs() } // v takem vrstnem redu, ker inactive izhajajo tudi iz ozadja;
+                if(!Toggle.#areInactveClrsComputd) { this.doInactvClrs() } // v takem vrstnem redu, ker inactive izhajajo tudi iz ozadja;
                 if(this.switchDiv.classList.contains('switch-hldr-right')) {
                     this.switchDiv.classList.remove('switch-hldr-right');
                     this.switchDiv.classList.add('inactive-switch-hldr-right');
@@ -190,20 +186,6 @@ class Toggle{
         }
     }
 
-    doBckgndClrs() {
-        // najprej medlo zeleno ozadje (ozadje na strani za stanje vklopljeno);
-        let neki = getComputedStyle(document.documentElement).getPropertyValue('--knob-on');
-        neki = neki.slice(1);
-        neki = '#' + avgHexCalc(neki, 'e0e0e0', 0.87);  // e0e0e0 je neka medla barva, h kateri težimo pri barvah ozadja;
-        document.documentElement.style.setProperty('--bckgnd-on-side', neki);
-        // še ozadje na strani za stanje izklopljeno;
-        neki = getComputedStyle(document.documentElement).getPropertyValue('--knob-off');
-        neki = neki.slice(1);
-        neki = '#' + avgHexCalc(neki, 'e0e0e0', 0.87);
-        document.documentElement.style.setProperty('--bckgnd-off-side', neki);
-        Toggle.#areBckgdClrsCmptd = true;
-    }
-
     doInactvClrs() {
         // gumb na desni
         let neki = getComputedStyle(document.documentElement).getPropertyValue('--knob-on');
@@ -215,17 +197,8 @@ class Toggle{
         neki = neki.slice(1);
         neki = '#' + avgHexCalc(neki, '818181', 0.87);
         document.documentElement.style.setProperty('--inactive-knob-off', neki);
-        // še barve ozadij;
-        neki = getComputedStyle(document.documentElement).getPropertyValue('--bckgnd-on-side');
-        neki = neki.slice(1);
-        neki = '#' + avgHexCalc(neki, '525252', 0.87);
-        document.documentElement.style.setProperty('--inactive-bckgnd-on-side', neki);
-        neki = getComputedStyle(document.documentElement).getPropertyValue('--bckgnd-off-side');
-        neki = neki.slice(1);
-        neki = '#' + avgHexCalc(neki, '525252', 0.87);
-        document.documentElement.style.setProperty('--inactive-bckgnd-off-side', neki);
 
-        Toggle.#areInactveClrsCmptd = true;
+        Toggle.#areInactveClrsComputd = true;
     }
 
     receiveSubHello(sub) {  // s tem se togglu nek drugi toggle (sub) javi, da mu je podrejen (da je "sub" pordejen temu, na katerem je klicana ta metoda); 

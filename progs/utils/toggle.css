@@ -2,12 +2,10 @@
     --knob-on: #199919;   /* ideje: #35ac35 199919; knob on: pomeni barvo štoflca, ko je štoflc (knob, tj. katero stanje stikala je izbrano) na strani on (on); */
     --knob-off: #e03939;    /* izvirno: #ff0000; ideje: df3e3e 	bf3f3f */
     /*  od tu dol so tle samo deklarirane, prave vrednosti se izračunajo v .js in izhajajo iz dveh vrednosti tu zgoraj; */ 
-    --bckgnd-on-side: #35ac35;
-    --bckgnd-off-side: #e03939;
     --inactive-knob-on: #35ac35;
     --inactive-knob-off: #e03939;
-    --inactive-bckgnd-on-side: #35ac35;
-    --inactive-bckgnd-off-side: #e03939;
+    --inactive-bckgnd-on-side: #616161;
+    --inactive-bckgnd-off-side: #616161;
 }
 
 * {
@@ -28,7 +26,10 @@
 }
 
 .switch-hldr-right {    /* ko je štoflc desno (vklopljeno stanje), se vidi ozadje na levi, ki je ta rdeča stran, stran za izklop */
-    background: var(--bckgnd-off-side);  /* nazadnje: #eccccc ; #aa000088 #f0b9b9 */
+     background: linear-gradient(to left,
+        #fff 0%,
+        #fff 72%,
+        #ff9e9e 100%);
     transition-property: background;
     transition-duration: 0.3s;
 }
@@ -37,10 +38,14 @@
 }
 
 .switch-hldr-left {    /* ko je štoflc levo (izklopljeno stanje), se vidi ozadje na desni, ki je ta zelene stran, stran za vklop */
-    background: var(--bckgnd-on-side); /* nazadnje: #c1ebc1; #00a30088 #b4eeb4 */
+    background: linear-gradient(to right,
+        #fff 0%,
+        #fff 72%,
+        #68d368 100%);
     transition-property: background;
     transition-duration: 0.3s;
 }
+
 .inactive-switch-hldr-left {    /* ko je štoflc levo (izklopljeno stanje), se vidi ozadje na desni, ki je ta zelene stran, stran za vklop */
     background: var(--inactive-bckgnd-on-side); /* nazadnje: #c1ebc1; #00a30088 #b4eeb4 */
 }
