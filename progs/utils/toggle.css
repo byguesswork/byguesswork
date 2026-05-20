@@ -4,8 +4,7 @@
     /*  od tu dol so tle samo deklarirane, prave vrednosti se izračunajo v .js in izhajajo iz dveh vrednosti tu zgoraj; */ 
     --inactive-knob-on: #35ac35;
     --inactive-knob-off: #e03939;
-    --inactive-bckgnd-on-side: #616161;
-    --inactive-bckgnd-off-side: #616161;
+    --inactive-bckgnd: #616161;
 }
 
 * {
@@ -16,38 +15,44 @@
     background-color: #888888;   /* orig: #888888*/
 }
 
+/* ta se uporablja tako za backgDiv (prejme tudi klas switch-holder-gradient-bckgnd) kot za switchDiv (prejme tudi klas switch-holder-main) */ 
 .switch-holder {
-    margin-left: 8px;
-    padding-top: 0.06rem;
-    padding-right: 0.06rem;
-    padding-left: 0.06rem;
     width: 2rem; 
-    height:1.12rem;
+    height:1rem;
 }
 
-.switch-hldr-right {    /* ko je štoflc desno (vklopljeno stanje), se vidi ozadje na levi, ki je ta rdeča stran, stran za izklop */
-     background: linear-gradient(to left,
-        #fff 0%,
-        #fff 72%,
-        #ff9e9e 100%);
-    transition-property: background;
-    transition-duration: 0.3s;
-}
-.inactive-switch-hldr-right {    /* ko je štoflc desno (vklopljeno stanje), se vidi ozadje na levi, ki je ta rdeča stran, stran za izklop */
-    background: var(--inactive-bckgnd-off-side);  /* nazadnje: #eccccc ; #aa000088 #f0b9b9 */
-}
-
-.switch-hldr-left {    /* ko je štoflc levo (izklopljeno stanje), se vidi ozadje na desni, ki je ta zelene stran, stran za vklop */
+.switch-holder-gradient-bckgnd {
+    margin-left: 8px;
+    border: 2px solid white;
     background: linear-gradient(to right,
-        #fff 0%,
-        #fff 72%,
-        #68d368 100%);
-    transition-property: background;
-    transition-duration: 0.3s;
+        #e66f6f 0%,
+        #fff 50%,
+        #62d462 100%);
 }
 
-.inactive-switch-hldr-left {    /* ko je štoflc levo (izklopljeno stanje), se vidi ozadje na desni, ki je ta zelene stran, stran za vklop */
-    background: var(--inactive-bckgnd-on-side); /* nazadnje: #c1ebc1; #00a30088 #b4eeb4 */
+.switch-holder-main {
+    background: transparent;    /* prozoren, da se vidi gradient diva pod njim*/
+}
+
+
+/* gradienti nekoč, morda lepi*/
+/* #e4b3b3 0%,
+        #fff 50%,
+        #9ad19a 100%); */
+/* background: linear-gradient(to right,
+    #fff 0%,
+    #fff 55%,
+    #9ad19a 100%); /* bilo: 85e585 #68d368*/
+
+
+.switch-hldr-regular {
+    background: white;
+    transition-property: background;
+    transition-duration: 2s;    /* traja več, kot pot štoflca (ki je 0,3s), ampak to ni težava */
+}
+
+.switch-hldr-regular-no-transition {
+    background: white;
 }
 
 .test_barv { 
@@ -65,10 +70,6 @@
     transform: translateX(0rem);   
     background-color: var(--knob-off);
 }
-.inactive-toggle-flush-left {
-    transform: translateX(0rem);   
-    background-color: var(--inactive-knob-off);
-}
 
 .toggle-transitioning-right {
     transform: translateX(1rem);
@@ -81,10 +82,6 @@
     transform: translateX(1rem);
     background-color: var(--knob-on);
 }
-.inactive-toggle-flush-right {
-    transform: translateX(1rem);
-    background-color: var(--inactive-knob-on);
-}
 
 .toggle-transitioning-left {
     transform: translateX(0rem);
@@ -92,6 +89,17 @@
     transition-property: all;
     transition-duration: 0.3s;
 }
+
+.inactive-toggle-flush-right {
+    transform: translateX(1rem);
+    background-color: var(--inactive-knob-on);
+}
+
+.inactive-toggle-flush-left {
+    transform: translateX(0rem);   
+    background-color: var(--inactive-knob-off);
+}
+
 
 td {
     padding: 4px 0px 2px 10px;

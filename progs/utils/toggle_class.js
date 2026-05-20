@@ -10,6 +10,11 @@ class Toggle{
                 // was conceived to allow to move the bulk of the code from a private instance method to a public method (whose execution behaves as if it were public due to this ticket);
     #isUnactionable;    // <boolean> - when true, the toggle is inactive or unactionable, i.e. it is not possible to change the position of its knob and the toggle is greyed out;
 
+    // v podanem nodu naredimo 3 div-e;
+    backgDiv;   // ta je samo za ozadje, ki je barvni gradient, ki se prikaže, ko podrejeni div (switchDiv) za trenutek postane prozoren;
+    switchDiv;  // glavni holder div;
+    toggleDiv;  // div, ki predstavlja štoflc;
+
     static #areInactveClrsComputd = false;    // state hold for computing CSV custom properties;
 
     constructor(
@@ -54,9 +59,9 @@ class Toggle{
             }
 
             if(master != undefined) {
-                this.#isOn = master.receiveSubHello(this);   // s tem se kao prijaviš masterju, da si njegov podrejeni toggle, hkrati pa prejmeš njegovo stanje;
+                this.#isOn = master.receiveHelloFrmSub(this);   // s tem se kao prijaviš masterju, da si njegov podrejeni toggle, hkrati pa prejmeš njegovo stanje;
             
-            // uredimo isUnactionable;
+            // nastavimo vrednost isUnactionable (videz urejamo pozneje);
             } else {
                 // zakaj v else? ker se medsebojno izključujeta;
                 if(typeof stateOnOrOff_string_optional == 'boolean') {
@@ -66,41 +71,37 @@ class Toggle{
                 }
             }
 
-            // uredimo drsalnico (ozadje, prostor) stikala;
-            this.switchDiv = divNode;
-            this.switchDiv.classList = 'user-select-none switch-holder switch-hldr-left';
-            const borderRds = this.switchDiv.getBoundingClientRect().height / 2;
+            // uredimo linear gradient ozadje;
+            this.backgDiv = divNode;
+            this.backgDiv.classList = 'user-select-none switch-holder switch-holder-gradient-bckgnd';
+            const borderRds = this.backgDiv.getBoundingClientRect().height / 2;
+            this.backgDiv.style.borderRadius = `${borderRds}px`;
+
+            // uredimo prednji del switch holderja
+            this.switchDiv = document.createElement('div');
+            this.switchDiv.classList = 'user-select-none switch-holder switch-holder-main switch-hldr-regular-no-transition';
             this.switchDiv.style.borderRadius = `${borderRds}px`;
+            this.backgDiv.appendChild(this.switchDiv);
     
             // uredimo štoflc (uni gumbek, ki ga premikaš) stikala;
             this.toggleDiv = document.createElement('div');
-            this.toggleDiv.classList = 'toggle toggle-flush-left';
-            this.switchDiv.innerHTML = '';
-            this.switchDiv.appendChild(this.toggleDiv);
-
-            if(this.#isOn) this.#toggleGranter(); // šele zdaj, ker prej niso bili nastavljeni klasi, ki se preverjajo v metodi toggle;
-                // tako pa je, ker po defaultu je stikalo na levi, izklopljeno, če pa smo podali, da je stikalo on, ga moramo zdaj togglat;
-    
-                // šele zdaj, ker šele zdaj imamo položaj in barve in vse;
-            if(this.#isUnactionable == true) {
-                if(!Toggle.#areInactveClrsComputd) { this.doInactvClrs() } // v takem vrstnem redu, ker inactive izhajajo tudi iz ozadja;
-                if(this.switchDiv.classList.contains('switch-hldr-right')) {
-                    this.switchDiv.classList.remove('switch-hldr-right');
-                    this.switchDiv.classList.add('inactive-switch-hldr-right');
-                }
-                if(this.switchDiv.classList.contains('switch-hldr-left')) {
-                    this.switchDiv.classList.remove('switch-hldr-left');
-                    this.switchDiv.classList.add('inactive-switch-hldr-left');
-                }
-                if(this.toggleDiv.classList.contains('toggle-flush-left')) {
-                    this.toggleDiv.classList.remove('toggle-flush-left');
+            this.toggleDiv.classList.add('toggle');
+            if(this.#isUnactionable == false) {
+                if(this.#isOn) this.toggleDiv.classList.add('toggle-flush-right');
+                    else this.toggleDiv.classList.add('toggle-flush-left');
+            } else {
+                if(!Toggle.#areInactveClrsComputd) { this.doInactvClrs() }
+                if(this.#isOn) {
+                    this.toggleDiv.classList.add('inactive-toggle-flush-right');
+                } else {
                     this.toggleDiv.classList.add('inactive-toggle-flush-left');
                 }
-                if(this.toggleDiv.classList.contains('toggle-flush-right')) {
-                    this.toggleDiv.classList.remove('toggle-flush-right');
-                    this.toggleDiv.classList.add('inactive-toggle-flush-right');
-                }
+                this.backgDiv.style.borderColor = getComputedStyle(document.documentElement).getPropertyValue('--inactive-bckgnd');
+                this.switchDiv.style.background = getComputedStyle(document.documentElement).getPropertyValue('--inactive-bckgnd');
             }
+            this.switchDiv.innerHTML = '';
+            this.switchDiv.appendChild(this.toggleDiv); 
+
             // zanimivo, spodnji ne dela, v toggle vrne undefined za this.switchDiv in this.toggleDiv ...;
             // verjetno zato, ker še ne obstaja this oz. objekt do konca izvedbe konstruktorja;
             // this.switchDiv.addEventListener('click', this.#toggleGranter);
@@ -125,7 +126,7 @@ class Toggle{
 
     toggle() {
         if(this.#toggleTickt) {
-            this.#toggleTickt = false;
+            this.#toggleTickt = false;  // povrnemo messenger/granter na privzeto stanje;
             let movedTowrdsOn = undefined;  // v nadaljevanju bomo SAMO ČE JE INSTANCA MASTER ob premiku zabeležili, v katero smer je premik,..
                                             // da bojo potem isto še subsi (true za ON/desno, false za OFF/levo);
     
@@ -135,20 +136,23 @@ class Toggle{
                 // ugotovili smo, da je bilo na levi (OFF) in da bomo gibali na desno (ON);
                 // že takoj spremenimo status;
                 this.#isOn = true;
-    
+
                 // togg začne potovat desno;
+                this.switchDiv.classList.remove('switch-hldr-regular-no-transition');   // ta vrstica je potrebna samo 1x, po začetni mastavitvi položaja štoflca, ki prejme ta klass;
                 this.toggleDiv.classList.remove('toggle-flush-left');
                 this.toggleDiv.classList.add('toggle-transitioning-right');
     
-                // ozadje stikala se spremeni;
-                this.switchDiv.classList.remove('switch-hldr-left');
-                this.switchDiv.classList.add('switch-hldr-right');
-    
+                // ozadje stikala postane prozorno, viden je gradient zadaj;
+                this.switchDiv.classList.remove('switch-hldr-regular');
+
+                setTimeout(() => { // potem pa spet vrnemo belo pzadje stikala:
+                    this.switchDiv.classList.add('switch-hldr-regular');
+                }, 100)
+                
                 // nastavimo kakšno bo statično stanje po koncu potovanja;
                 setTimeout(() => {
                     this.toggleDiv.classList.remove('toggle-transitioning-right');
-                    if(!this.#isUnactionable) this.toggleDiv.classList.add('toggle-flush-right');
-                        else this.toggleDiv.classList.add('inactive-toggle-flush-right'); // to je samo za primer postavitve strani, ker bi se sicer po timeoutu postavila aktivna varianta;
+                    this.toggleDiv.classList.add('toggle-flush-right');
                 }, 300)
     
                 if(this.#subordinates != undefined) { movedTowrdsOn = true; }
@@ -158,12 +162,16 @@ class Toggle{
                 this.#isOn = false;
     
                 // togg začne potovat levo;
+                this.switchDiv.classList.remove('switch-hldr-regular-no-transition');   // ta vrstica je potrebna samo 1x, po začetni mastavitvi položaja štoflca, ki prejme ta klass;
                 this.toggleDiv.classList.remove('toggle-flush-right');
                 this.toggleDiv.classList.add('toggle-transitioning-left');
     
-                // ozadje stikala se spremeni;
-                this.switchDiv.classList.remove('switch-hldr-right');
-                this.switchDiv.classList.add('switch-hldr-left');
+                // ozadje stikala postane prozorno, viden je gradient zadaj;
+                this.switchDiv.classList.remove('switch-hldr-regular');
+
+                setTimeout(() => { // potem pa spet vrnemo belo pzadje stikala:
+                    this.switchDiv.classList.add('switch-hldr-regular');
+                }, 100)
     
                 // nastavimo kakšno bo statično stanje po koncu potovanja;
                 setTimeout(() => {
@@ -201,7 +209,7 @@ class Toggle{
         Toggle.#areInactveClrsComputd = true;
     }
 
-    receiveSubHello(sub) {  // s tem se togglu nek drugi toggle (sub) javi, da mu je podrejen (da je "sub" pordejen temu, na katerem je klicana ta metoda); 
+    receiveHelloFrmSub(sub) {  // s tem se togglu nek drugi toggle (sub) javi, da mu je podrejen (da je "sub" pordejen temu, na katerem je klicana ta metoda); 
         if(this.#subordinates == undefined) {
             this.#subordinates = [];
         }
