@@ -79,7 +79,7 @@ class Toggle{
 
             // uredimo prednji del switch holderja
             this.switchDiv = document.createElement('div');
-            this.switchDiv.classList = 'user-select-none switch-holder switch-holder-foregnd switch-hldr-regular-no-transition';
+            this.switchDiv.classList = 'user-select-none switch-holder switch-holder-foregnd switch-hldr-initial';
             this.switchDiv.style.borderRadius = `${borderRds}px`;
             this.backgDiv.appendChild(this.switchDiv);
     
@@ -149,7 +149,7 @@ class Toggle{
                 }, 100)
 
                 // togg začne potovat desno;
-                this.switchDiv.classList.remove('switch-hldr-regular-no-transition');   // ta vrstica je potrebna samo 1x, po začetni mastavitvi položaja štoflca, ki prejme ta klass;
+                this.switchDiv.classList.remove('switch-hldr-initial');   // ta vrstica je potrebna samo 1x, po začetni mastavitvi položaja štoflca, ki prejme ta klass;
                 this.toggleDiv.classList.remove('toggle-flush-left');
                 this.toggleDiv.classList.add('toggle-transitioning-right');
                 
@@ -177,7 +177,7 @@ class Toggle{
                 }, 100)
 
                 // togg začne potovat levo;
-                this.switchDiv.classList.remove('switch-hldr-regular-no-transition');   // ta vrstica je potrebna samo 1x, po začetni mastavitvi položaja štoflca, ki prejme ta klass;
+                this.switchDiv.classList.remove('switch-hldr-initial');   // ta vrstica je potrebna samo 1x, po začetni mastavitvi položaja štoflca, ki prejme ta klass;
                 this.toggleDiv.classList.remove('toggle-flush-right');
                 this.toggleDiv.classList.add('toggle-transitioning-left');
     

@@ -4,7 +4,7 @@
     /*  od tu dol so tle samo deklarirane, prave vrednosti se izračunajo v .js in izhajajo iz dveh vrednosti tu zgoraj; */ 
     --inactive-knob-on: #35ac35;
     --inactive-knob-off: #e03939;
-    --inactive-bckgnd: #616161;
+    --inactive-bckgnd: #c3c3c3;
 }
 
 * {
@@ -12,7 +12,7 @@
     padding: 0;
     font-family: Helvetica, Arial, sans-serif;
     font-size: 16px;
-    background-color: #888888;   /* orig: #888888*/
+    background-color: #888888;
 }
 
 /* ta se uporablja tako za backgDiv (prejme tudi klas switch-holder-gradient-bckgnd) kot za switchDiv (prejme tudi klas switch-holder-main) */ 
@@ -60,7 +60,7 @@
     transition-duration: 1s;    /* traja več, kot pot štoflca (ki je 0,3s), ampak to ni težava */
 }
 
-.switch-hldr-regular-no-transition {
+.switch-hldr-initial {
     background: white;
 }
 
