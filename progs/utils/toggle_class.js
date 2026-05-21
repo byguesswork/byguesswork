@@ -11,8 +11,8 @@ class Toggle{
     #isUnactionable;    // <boolean> - when true, the toggle is inactive or unactionable, i.e. it is not possible to change the position of its knob and the toggle is greyed out;
 
     // v podanem nodu naredimo 3 div-e;
-    backgDiv;   // ta je samo za ozadje, ki je barvni gradient, ki se prikaže, ko podrejeni div (switchDiv) za trenutek postane prozoren;
-    switchDiv;  // glavni holder div;
+    backgDiv;   // prejme divNode; je samo za ozadje, ki je barvni gradient, ki se prikaže, ko podrejeni div (switchDiv) za trenutek postane prozoren;
+    switchDiv;  // glavni holder div, podrejen backgDiv-u, torej narisan nad njim;
     toggleDiv;  // div, ki predstavlja štoflc;
 
     static #areInactveClrsComputd = false;    // state hold for computing CSV custom properties;
@@ -59,7 +59,7 @@ class Toggle{
             }
 
             if(master != undefined) {
-                this.#isOn = master.receiveHelloFrmSub(this);   // s tem se kao prijaviš masterju, da si njegov podrejeni toggle, hkrati pa prejmeš njegovo stanje;
+                this.#isOn = master.receiveHelloFromSub(this);   // s tem se kao prijaviš masterju, da si njegov podrejeni toggle, hkrati pa prejmeš njegovo stanje;
             
             // nastavimo vrednost isUnactionable (videz urejamo pozneje);
             } else {
@@ -73,13 +73,13 @@ class Toggle{
 
             // uredimo linear gradient ozadje;
             this.backgDiv = divNode;
-            this.backgDiv.classList = 'user-select-none switch-holder switch-holder-gradient-bckgnd';
+            this.backgDiv.classList = 'user-select-none switch-holder switch-holder-bckgnd';
             const borderRds = this.backgDiv.getBoundingClientRect().height / 2;
             this.backgDiv.style.borderRadius = `${borderRds}px`;
 
             // uredimo prednji del switch holderja
             this.switchDiv = document.createElement('div');
-            this.switchDiv.classList = 'user-select-none switch-holder switch-holder-main switch-hldr-regular-no-transition';
+            this.switchDiv.classList = 'user-select-none switch-holder switch-holder-foregnd switch-hldr-regular-no-transition';
             this.switchDiv.style.borderRadius = `${borderRds}px`;
             this.backgDiv.appendChild(this.switchDiv);
     
@@ -137,17 +137,21 @@ class Toggle{
                 // že takoj spremenimo status;
                 this.#isOn = true;
 
+                // switch holder background dobi pravi gradient (sled iste barve za togglom na tistem mestu, kjer je toggle na začetku gibanja);
+                this.backgDiv.classList.remove('switch-holder-bckgnd-togg-moving-L');
+                this.backgDiv.classList.add('switch-holder-bckgnd-togg-moving-R');
+                
+                // switch hi9older foreground postane prozorno, viden je gradient zadaj;
+                this.switchDiv.classList.remove('switch-hldr-regular');
+                // potem pa spet vrnemo belo pzadje stikala:
+                setTimeout(() => {
+                    this.switchDiv.classList.add('switch-hldr-regular');
+                }, 100)
+
                 // togg začne potovat desno;
                 this.switchDiv.classList.remove('switch-hldr-regular-no-transition');   // ta vrstica je potrebna samo 1x, po začetni mastavitvi položaja štoflca, ki prejme ta klass;
                 this.toggleDiv.classList.remove('toggle-flush-left');
                 this.toggleDiv.classList.add('toggle-transitioning-right');
-    
-                // ozadje stikala postane prozorno, viden je gradient zadaj;
-                this.switchDiv.classList.remove('switch-hldr-regular');
-
-                setTimeout(() => { // potem pa spet vrnemo belo pzadje stikala:
-                    this.switchDiv.classList.add('switch-hldr-regular');
-                }, 100)
                 
                 // nastavimo kakšno bo statično stanje po koncu potovanja;
                 setTimeout(() => {
@@ -161,17 +165,21 @@ class Toggle{
                 // že takoj spremenimo status;
                 this.#isOn = false;
     
+                 // switch holder background dobi pravi gradient (sled iste barve za togglom na tistem mestu, kjer je toggle na začetku gibanja);
+                this.backgDiv.classList.remove('switch-holder-bckgnd-togg-moving-R');
+                this.backgDiv.classList.add('switch-holder-bckgnd-togg-moving-L');
+                
+                // switch hi9older foreground postane prozorno, viden je gradient zadaj;
+                this.switchDiv.classList.remove('switch-hldr-regular');
+                // potem pa spet vrnemo belo pzadje stikala:
+                setTimeout(() => {
+                    this.switchDiv.classList.add('switch-hldr-regular');
+                }, 100)
+
                 // togg začne potovat levo;
                 this.switchDiv.classList.remove('switch-hldr-regular-no-transition');   // ta vrstica je potrebna samo 1x, po začetni mastavitvi položaja štoflca, ki prejme ta klass;
                 this.toggleDiv.classList.remove('toggle-flush-right');
                 this.toggleDiv.classList.add('toggle-transitioning-left');
-    
-                // ozadje stikala postane prozorno, viden je gradient zadaj;
-                this.switchDiv.classList.remove('switch-hldr-regular');
-
-                setTimeout(() => { // potem pa spet vrnemo belo pzadje stikala:
-                    this.switchDiv.classList.add('switch-hldr-regular');
-                }, 100)
     
                 // nastavimo kakšno bo statično stanje po koncu potovanja;
                 setTimeout(() => {
@@ -209,7 +217,7 @@ class Toggle{
         Toggle.#areInactveClrsComputd = true;
     }
 
-    receiveHelloFrmSub(sub) {  // s tem se togglu nek drugi toggle (sub) javi, da mu je podrejen (da je "sub" pordejen temu, na katerem je klicana ta metoda); 
+    receiveHelloFromSub(sub) {  // s tem se togglu nek drugi toggle (sub) javi, da mu je podrejen (da je "sub" pordejen temu, na katerem je klicana ta metoda); 
         if(this.#subordinates == undefined) {
             this.#subordinates = [];
         }

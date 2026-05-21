@@ -21,21 +21,30 @@
     height:1rem;
 }
 
-.switch-holder-gradient-bckgnd {
+.switch-holder-bckgnd {
     margin-left: 8px;
     border: 2px solid white;
-    background: linear-gradient(to right,
-        #e66f6f 0%,
-        #fff 50%,
-        #62d462 100%);
 }
 
-.switch-holder-main {
+.switch-holder-foregnd {
     background: transparent;    /* prozoren, da se vidi gradient diva pod njim*/
 }
 
+.switch-holder-bckgnd-togg-moving-R {
+    background: linear-gradient(to right,
+        #e66f6f 0%,
+        #fff 55%)
+}
 
-/* gradienti nekoč, morda lepi*/
+.switch-holder-bckgnd-togg-moving-L {
+    background: linear-gradient(to left,
+        #45a045 0%,
+        #fff 55%)
+}
+
+
+
+/* gradienti nekoč uporabljeni, morda kakšen lep*/
 /* #e4b3b3 0%,
         #fff 50%,
         #9ad19a 100%); */
@@ -48,7 +57,7 @@
 .switch-hldr-regular {
     background: white;
     transition-property: background;
-    transition-duration: 2s;    /* traja več, kot pot štoflca (ki je 0,3s), ampak to ni težava */
+    transition-duration: 1s;    /* traja več, kot pot štoflca (ki je 0,3s), ampak to ni težava */
 }
 
 .switch-hldr-regular-no-transition {
